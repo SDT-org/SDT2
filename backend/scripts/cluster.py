@@ -94,7 +94,7 @@ def main():
 
     df = pd.read_csv(args.input_matrix, delimiter=",", index_col=0, header=None, names=column_names)
     # extract index
-    index = df.columns.tolist()
+    index = df.index.tolist()
     # convert df to np array
     data = df.to_numpy()
     # format values
