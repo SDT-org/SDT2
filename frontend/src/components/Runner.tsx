@@ -4,11 +4,12 @@ import {
   SetAppState,
   performanceProfiles,
   alignmentTypes,
+  clusterMethods
 } from "../appState";
 
 export type RunSDT2Args = Pick<
   AppState["client"],
-  "neighbor_joining" | "performance_profile" | "alignment_type"
+  "cluster_method" | "performance_profile" | "alignment_type" | "cluster_method"
 >;
 
 const RunnerSettings = ({
@@ -20,11 +21,11 @@ const RunnerSettings = ({
 }) => {
   const [runnerSettings, setRunnerSettings] = React.useState<RunSDT2Args>(
     (({
-      client: { neighbor_joining, performance_profile, alignment_type },
+      client: {performance_profile, alignment_type, cluster_method},
     }) => ({
-      neighbor_joining,
       performance_profile,
       alignment_type,
+      cluster_method,
     }))(appState),
   );
 
@@ -41,18 +42,14 @@ const RunnerSettings = ({
 
   const handleRun = () => {
     window.pywebview.api.run_sdt2({
-      neighbor_joining: runnerSettings.neighbor_joining,
+      cluster_method: runnerSettings.cluster_method,
       performance_profile: runnerSettings.performance_profile,
       alignment_type: runnerSettings.alignment_type,
       ...advancedSettingsState,
     });
   };
 
-  const toggleNeighborJoining = () =>
-    setRunnerSettings({
-      ...runnerSettings,
-      neighbor_joining: !runnerSettings.neighbor_joining,
-    });
+
 
   const handleChangePerformanceProfile = (
     value: (typeof performanceProfiles)[keyof typeof performanceProfiles],
@@ -68,6 +65,13 @@ const RunnerSettings = ({
     setRunnerSettings({
       ...runnerSettings,
       alignment_type: value,
+    });
+  const handleChangeClusterMethod = (
+    value: (typeof clusterMethods)[keyof typeof clusterMethods],
+  ) =>
+    setRunnerSettings({
+      ...runnerSettings,
+      cluster_method: value,
     });
 
   const fileName =
@@ -271,59 +275,74 @@ const RunnerSettings = ({
                   </div>
                 </details>
 
-                <div className="field">
-                  <label className="header">
-                    <input
-                      type="checkbox"
-                      checked={runnerSettings.neighbor_joining}
-                      defaultChecked={runnerSettings.neighbor_joining}
-                      onChange={toggleNeighborJoining}
-                    />
-                    <span>Cluster Sequences by Neighbor Joining</span>
-                  </label>
+                <div className="field runner-settings" style={{ textAlign: 'center', marginBottom: '40px' }}>
+                  <label className="header" style={{ display: 'block', marginBottom: '10px' }}>Clustering Method</label>
+                  <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: '70px' }}>
+                    {clusterMethods.map((value) => (
+                      <div key={value} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <input
+                          type="radio"
+                          id={value}
+                          name="cluster-method"
+                          value={value}
+                          checked={runnerSettings.cluster_method === value}
+                          onChange={() =>
+                            handleChangeClusterMethod(
+                              value as (typeof clusterMethods)[keyof typeof clusterMethods],
+                            )
+                          }
+                        />
+                        <label htmlFor={value} style={{ whiteSpace: 'nowrap' }}>{value}</label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-
-                <div className="field runner-settings">
+                <div className="field runner-settings" style={{ display: 'flex', flexDirection: 'row' }}>
+                <div style={{ flex: 1, marginRight: '20px' }}>
                   <label className="header">Alignment Type</label>
-                  {alignmentTypes.map((value) => (
-                    <div key={value}>
-                      <input
-                        type="radio"
-                        id={value}
-                        name="alignment-type"
-                        value={value}
-                        checked={runnerSettings.alignment_type === value}
-                        onChange={() =>
-                          handleChangeAlignmentType(
-                            value as (typeof alignmentTypes)[keyof typeof alignmentTypes],
-                          )
-                        }
-                      />
-                      <label htmlFor={value}>{value}</label>
-                    </div>
-                  ))}
+                  <div>
+                    {alignmentTypes.map((value) => (
+                      <div key={value} style={{ marginBottom: '10px' }}>
+                        <input
+                          type="radio"
+                          id={value}
+                          name="alignment-type"
+                          value={value}
+                          checked={runnerSettings.alignment_type === value}
+                          onChange={() =>
+                            handleChangeAlignmentType(
+                              value as (typeof alignmentTypes)[keyof typeof alignmentTypes],
+                            )
+                          }
+                        />
+                        <label htmlFor={value}>{value}</label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-
-                <div className="field runner-settings">
+                <div style={{ flex: 1 }}>
                   <label className="header">Performance</label>
-                  {performanceProfiles.map((value) => (
-                    <div key={value}>
-                      <input
-                        type="radio"
-                        id={value}
-                        name="performance-profile"
-                        value={value}
-                        checked={runnerSettings.performance_profile === value}
-                        onChange={() =>
-                          handleChangePerformanceProfile(
-                            value as (typeof performanceProfiles)[keyof typeof performanceProfiles],
-                          )
-                        }
-                      />
-                      <label htmlFor={value}>{value}</label>
-                    </div>
-                  ))}
+                  <div>
+                    {performanceProfiles.map((value) => (
+                      <div key={value} style={{ marginBottom: '10px' }}>
+                        <input
+                          type="radio"
+                          id={value}
+                          name="performance-profile"
+                          value={value}
+                          checked={runnerSettings.performance_profile === value}
+                          onChange={() =>
+                            handleChangePerformanceProfile(
+                              value as (typeof performanceProfiles)[keyof typeof performanceProfiles],
+                            )
+                          }
+                        />
+                        <label htmlFor={value}>{value}</label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
+              </div>
                 <div className="actions">
                   <button
                     type="button"

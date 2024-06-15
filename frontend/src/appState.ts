@@ -2,7 +2,7 @@ import React, { ErrorInfo } from "react";
 
 export const performanceProfiles = ["balanced", "best", "low"] as const;
 export const alignmentTypes = ["global", "local"] as const;
-
+export const clusterMethods = ["Neighbor-Joining", "UPGMA", "None"] as const;
 export type AppState = {
   view: "runner" | "loader" | "viewer";
   filename: string[];
@@ -15,7 +15,7 @@ export type AppState = {
   export_path: string;
   client: {
     dataView: "heatmap" | "plot";
-    neighbor_joining: boolean;
+    cluster_method: (typeof clusterMethods)[keyof typeof clusterMethods];
     performance_profile: (typeof performanceProfiles)[keyof typeof performanceProfiles];
     alignment_type: (typeof alignmentTypes)[keyof typeof alignmentTypes];
     error?: Error;
@@ -36,7 +36,7 @@ export const initialAppState: AppState = {
   export_path: "",
   client: {
     dataView: "heatmap",
-    neighbor_joining: true,
+    cluster_method: "Neighbor-Joining",
     performance_profile: "best",
     alignment_type: "global",
     saveFormat: "svg",

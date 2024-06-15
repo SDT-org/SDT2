@@ -32,10 +32,11 @@ useable_processes = cpu_count() - 1
 def parse_args():
     parser = argparse.ArgumentParser(description="Argument parser for SDT2")
     parser.add_argument(
-        "--neighbor_joining",
-        action=argparse.BooleanOptionalAction,
-        help="order output by neighbor-joining algorithm",
-        default=True,
+        "--cluster_method",
+        type=str,
+        choices=['nj', 'upgma', 'None'],
+        help="order output by clusting algorithm",
+        default="nj",
     )
     parser.add_argument(
         "--out_dir",
@@ -253,11 +254,13 @@ def get_alignment_scores(seq_dict, args):
 
 
 # Reorder the scores matrix based on the tree and save it to a new CSV
-def make_nj_tree(dm,filename):
+def tree_clustering(dm,filename):
+    args = parse_args()
     constructor = DistanceTreeConstructor()
+    clustering_method = getattr(constructor, args.cluster_method)    
     tree_file = filename+"_tree.nwk"
-    njtree = constructor.nj(dm)
-    Phylo.write(njtree, tree_file, "newick")
+    tree = clustering_method(dm)
+    Phylo.write(tree, tree_file, "newick")
     tree = Phylo.read(tree_file, "newick")
     new_order = [leaf.name for leaf in tree.get_terminals()]
     return tree_file, new_order  # Return the tree file name instead of the tree object
@@ -353,22 +356,22 @@ def main():
     order = list(order.keys())
 
     dm = create_distance_matrix(dist_scores, order)
-    _, new_order = make_nj_tree(dm,os.path.join(args.out_dir, f"{file_base}"))
-    reorder_index = [
-        order.index(id_) for id_ in new_order
-    ]  # create numerical index of order and  of new order IDs
-
     aln_scores= 100-dist_scores
-    #convert array to lower triangle and round to two deicmal
 
 
-    if parse_args().neighbor_joining == True:
+    if args.cluster_method == 'nj' or args.cluster_method == 'upgma':
+
+        _, new_order = tree_clustering(dm,os.path.join(args.out_dir, f"{file_base}"))
+        reorder_index = [
+            order.index(id_) for id_ in new_order
+        ]  # create numerical index of order and  of new order IDs
+
+        aln_scores= 100-dist_scores
         aln_reordered = aln_scores[reorder_index, :][:, reorder_index]
         aln_lowt = np.tril(np.around(aln_reordered, 2))
         aln_lowt[np.triu_indices(aln_lowt.shape[0], k=1)] = np.nan
     # Create a DataFrame from the lower triangular matrix
         df = pd.DataFrame(aln_lowt, index=new_order)
-        print(df)
         save_matrix_to_csv(df, os.path.join(args.out_dir, f"{file_base}_mat.csv"))
         # save_cols_to_csv(df, new_order, os.path.join(args.out_dir, f"{file_base}"))
     else:
