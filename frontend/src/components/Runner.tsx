@@ -9,7 +9,7 @@ import {
 
 export type RunSDT2Args = Pick<
   AppState["client"],
-  "cluster_method" | "performance_profile" | "alignment_type" | "cluster_method"
+  "performance_profile" | "alignment_type" | "cluster_method"
 >;
 
 const RunnerSettings = ({

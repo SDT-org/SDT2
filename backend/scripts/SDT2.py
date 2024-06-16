@@ -36,7 +36,6 @@ def parse_args():
         type=str,
         choices=['nj', 'upgma', 'None'],
         help="order output by clusting algorithm",
-        default="nj",
     )
     parser.add_argument(
         "--out_dir",
@@ -366,7 +365,6 @@ def main():
             order.index(id_) for id_ in new_order
         ]  # create numerical index of order and  of new order IDs
 
-        aln_scores= 100-dist_scores
         aln_reordered = aln_scores[reorder_index, :][:, reorder_index]
         aln_lowt = np.tril(np.around(aln_reordered, 2))
         aln_lowt[np.triu_indices(aln_lowt.shape[0], k=1)] = np.nan

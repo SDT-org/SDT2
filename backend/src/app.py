@@ -181,10 +181,10 @@ class Api:
         if args.get("alignment_type") == "global":
             command.append("--alignment_type")
             command.append("global")
-        if args.get("cluster_method") == "nj":
+        if args.get("cluster_method") == "Neighbor-Joining":
             command.append("--cluster_method")
             command.append("nj")
-        if args.get("cluster_method") == "upgma":
+        if args.get("cluster_method") == "UPGMA":
             command.append("--cluster_method")
             command.append("upgma")
         if args.get("cluster_method") == "None":
