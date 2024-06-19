@@ -70,7 +70,7 @@ export const ExportData = () => {
                       label="Threshold 1"
                       field="one"
                       value={thresholds.one}
-                      disabled={!outputCluster || exportState === "exporting"}
+                      isDisabled={!outputCluster || exportState === "exporting"}
                       updateValue={(newValue) =>
                         setThresholds({ ...thresholds, ...newValue })
                       }
@@ -83,7 +83,7 @@ export const ExportData = () => {
                       label="Threshold 2"
                       field="two"
                       value={thresholds.two}
-                      disabled={!outputCluster || exportState === "exporting"}
+                      isDisabled={!outputCluster || exportState === "exporting"}
                       updateValue={(newValue) =>
                         setThresholds({ ...thresholds, ...newValue })
                       }

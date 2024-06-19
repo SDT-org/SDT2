@@ -394,6 +394,7 @@ if __name__ == "__main__":
         debug=os.getenv("DEBUG", "false").lower() == "true",
         tempdir_path=temp_dir.name,
         on_update=lambda _: update_client_state(window),
+        performance_profiles=performance_profiles,
     )
 
     webview.start(debug=get_state().debug)

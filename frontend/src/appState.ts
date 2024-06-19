@@ -1,8 +1,9 @@
 import React, { ErrorInfo } from "react";
 
-export const performanceProfiles = ["balanced", "best", "low"] as const;
+export const performanceProfiles = ["best", "balanced", "low"] as const;
 export const alignmentTypes = ["global", "local"] as const;
 export const clusterMethods = ["Neighbor-Joining", "UPGMA", "None"] as const;
+
 export type AppState = {
   view: "runner" | "loader" | "viewer";
   filename: string[];
@@ -13,11 +14,12 @@ export type AppState = {
   sequences_count: number;
   alignment_output_path: string;
   export_path: string;
+  performance_profiles: { [_: string]: number };
   client: {
     dataView: "heatmap" | "plot";
-    cluster_method: (typeof clusterMethods)[keyof typeof clusterMethods];
-    performance_profile: (typeof performanceProfiles)[keyof typeof performanceProfiles];
-    alignment_type: (typeof alignmentTypes)[keyof typeof alignmentTypes];
+    cluster_method: (typeof clusterMethods)[number];
+    performance_profile: (typeof performanceProfiles)[number];
+    alignment_type: (typeof alignmentTypes)[number];
     error?: Error;
     errorInfo?: ErrorInfo;
     saveFormat: "png" | "jpeg" | "svg";
@@ -34,6 +36,8 @@ export const initialAppState: AppState = {
   sequences_count: 0,
   alignment_output_path: "",
   export_path: "",
+  // These are just to make frontend easier to test, they get overwritten during the initial syncAppState
+  performance_profiles: { best: 4, balanced: 2, low: 1 },
   client: {
     dataView: "heatmap",
     cluster_method: "Neighbor-Joining",
@@ -75,5 +79,6 @@ export const syncAppState = (setAppState: SetAppState) => {
       };
     });
   });
+};
 
 export default useAppState;

@@ -135,6 +135,10 @@ input, select {
   border-radius: 0.2rem;
 }
 
+select, select option {
+  text-transform:capitalize;
+}
+
 .form-wrapper {
   border: 1px solid #000;
   border-radius: 0.4rem;
@@ -194,7 +198,29 @@ input, select {
     }
 
     &.runner-settings {
-      font-size: 0.9rem;
+      font-size: 0.95rem;
+
+      &.performance {
+        border-top: 0.1rem solid #ddd;
+        padding-top: 0.8rem;
+      }
+
+      .performance-details {
+        display: flex;
+        align-items: center;
+
+        .cores {
+          display: flex;
+          font-size: 0.8rem;
+          font-weight: 600;
+          border-radius: 0.25rem;
+          padding: 0.1rem 0.3rem;
+          background: #333;
+          color: #fff;
+          margin-right: 0.25rem;
+          gap: 0.2rem;
+        }
+      }
     }
 
     &:last-child {
@@ -207,15 +233,26 @@ input, select {
       &.header {
         display: block;
         font-weight: 600;
-        font-size: 0.9rem;
+        margin-bottom: 0.2rem;
+        // font-size: 0.9rem;
+      }
+      &.radio {
+        display: block;
+        font-weight: normal;
+      }
+      &.header + label.radio {
+        // margin-top: 0.25rem;
       }
     }
 
     input + * {
       margin-left: 0.8rem;
     }
+    input[type="radio"] + span {
+      margin-left: 0.4rem;
+    }
 
-    input + label {
+    input + label, label input + span {
       text-transform: capitalize;
     }
 
@@ -463,5 +500,74 @@ input, select {
     border-radius: 0 0 3px 3px;
     top: 13px;
     font-size: 0.9rem;
+  }
+}
+
+.react-aria-Slider {
+  display: grid;
+  grid-template-areas: "label output"
+                       "track track";
+  grid-template-columns: 1fr auto;
+  max-width: calc(100% - (1.429rem / 2));
+  color: var(--text-color);
+
+  .react-aria-Label {
+    grid-area: label;
+  }
+
+  .react-aria-SliderOutput {
+    grid-area: output;
+  }
+
+  .react-aria-SliderTrack {
+    grid-area: track;
+    position: relative;
+
+    /* track line */
+    &:before {
+      content: '';
+      display: block;
+      position: absolute;
+      background: ButtonBorder;
+    }
+  }
+
+  .react-aria-SliderThumb {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid AccentColor;
+
+    &[data-dragging] {
+      // background: yellow;
+    }
+
+    &[data-focus-visible] {
+      outline: 1px auto -webkit-focus-ring-color;
+      outline: 1px auto Highlight;
+      border-color: HighlightText;
+    }
+  }
+
+  &[data-orientation=horizontal] {
+    flex-direction: column;
+
+
+    .react-aria-SliderTrack {
+      height: 30px;
+      width: 100%;
+
+      &:before {
+        height: 2px;
+        width: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+    }
+
+    .react-aria-SliderThumb {
+      top: 50%;
+    }
   }
 }

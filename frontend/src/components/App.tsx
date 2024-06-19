@@ -23,6 +23,7 @@ export const App = () => {
 
   if (typeof window.syncAppState !== "function") {
     window.syncAppState = () => syncAppState(setAppState);
+    window.syncAppState();
   }
 
   if (appState.debug) {

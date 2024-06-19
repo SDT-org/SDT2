@@ -22,7 +22,8 @@ AppState = namedtuple('AppState', [
     'tempdir_path', # TODO: rename tempdir_path, it's no longer an accurate name
     'sequences_count',
     'alignment_output_path',
-    'export_path'
+    'export_path',
+    'performance_profiles'
 ])
 
 def create_app_state(
@@ -36,8 +37,8 @@ def create_app_state(
     tempdir_path="",
     sequences_count=0,
     alignment_output_path='',
-    export_path=''
-
+    export_path='',
+    performance_profiles=dict(),
 ):
     default_state = AppState(
         view=view,
@@ -49,7 +50,8 @@ def create_app_state(
         tempdir_path=tempdir_path,
         sequences_count=sequences_count,
         alignment_output_path=alignment_output_path,
-        export_path=export_path
+        export_path=export_path,
+        performance_profiles=performance_profiles
     )
 
     state = default_state
