@@ -20,6 +20,39 @@ export const Heatmap = ({
   data: HeatmapData | undefined;
   tickText: string[];
 }) => {
+  // const [settings, setHeatmapSettings] = React.useState<HeatmapSettings>(
+  //   {
+  //     colorscale: "Portland",
+  //     reverse: false,
+  //     vmax: 100,
+  //     vmin: 65,
+  //     cellspace: 1,
+  //     annotation: false,
+  //     annotation_font_size: 10,
+  //     annotation_rounding: 0,
+  //     annotation_alpha: "0",
+  //     color: "white",
+  //     showscale: true,
+  //     cbar_shrink: 1,
+  //     cbar_aspect: "25",
+  //     cbar_pad: "10",
+  //     axis_labels: true,
+  //     axlabel_xrotation: 270,
+  //     axlabel_xfontsize: 12,
+  //     axlabel_yrotation: 0,
+  //     axlabel_yfontsize: 12,
+  //   },
+  // );
+
+  // const updateSettings = (newState: Partial<HeatmapSettings>) => {
+  //   setHeatmapSettings(previous => {
+  //     return {
+  //       ...previous,
+  //       ...newState,
+  //     };
+  //   });
+  // };
+  
   const plotAnnotations = React.useMemo(() => {
     const x: number[] = [];
     const y: number[] = [];
@@ -94,6 +127,8 @@ export const Heatmap = ({
       textColors,
     };
   }, [tickText, data, settings]);
+
+  console.log(settings);
 
   return (
     <>
@@ -195,7 +230,7 @@ export const Heatmap = ({
                   min={1}
                   max={20}
                   step={1}
-                  disabled={!settings.annotation}
+                  isDisabled={!settings.annotation}
                 />
               </div>
             </div>
@@ -330,7 +365,6 @@ export const Heatmap = ({
                   min={1}
                   max={100} // need to add vmax min as upper lim
                   step={1}
-                  type="float"
                 />
                 <NumberInput
                   label="Max"
@@ -338,9 +372,8 @@ export const Heatmap = ({
                   value={settings.vmax}
                   updateValue={updateSettings}
                   min={1}
-                  max={100} // need to add vmin- max as lower lim
-                  step={5}
-                  type="float"
+                  max={100} 
+                  step={1}
                 />
               </div>
             </div>

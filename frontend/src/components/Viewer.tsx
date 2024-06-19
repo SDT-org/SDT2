@@ -64,7 +64,7 @@ export const Viewer = ({
       showGrid: true,
       showLine: true,
       showZeroLine: true,
-      plotTitle: "Identity Distribution",
+      plotTitle: "Distribution of Percent Identities",
       showTickLabels: true,
       showAxisLabels: true,
     });
@@ -72,12 +72,18 @@ export const Viewer = ({
   const getData = () => {
     setLoading(true);
     Promise.all([
-      window.pywebview.api.get_heatmap_data().then((data) => {
-        const [tickText, ...parsedData] = JSON.parse(
-          data.replace(/\bNaN\b/g, "null"),
-        );
-        setHeatmapTickText(tickText);
+      window.pywebview.api.get_heatmap_data().then((rawData) => {
+        const { metadata, data }: {
+          metadata: {
+            minVal: number;
+            maxVal: number;
+          },
+          data: string[][];
+        } = JSON.parse(rawData.replace(/\bNaN\b/g, "null"));
+        const [tickText, ...parsedData] = data;
+        setHeatmapTickText(tickText as string[]);
         setHeatmapData(parsedData);
+        updatePlotState({ vmin: metadata.minVal });
       }),
       window.pywebview.api.get_line_histo_data().then((data) => {
         const histogramData = JSON.parse(data.replace(/\bNaN\b/g, "null"));
@@ -92,6 +98,7 @@ export const Viewer = ({
     getData();
   }, []);
 
+  
   const updatePlotState = (newState: Partial<HeatmapSettings>) => {
     setHeatmapSettings((previous) => {
       return {
@@ -108,6 +115,7 @@ export const Viewer = ({
       };
     });
   };
+
 
   const swapDataView = ({ target }: { target: HTMLSelectElement }) => {
     setAppState((previous) => {

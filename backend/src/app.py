@@ -294,7 +294,15 @@ class Api:
         data, tickText, min_val, max_val = self.load_data()
         heat_data = pd.DataFrame(data, index=tickText)
         parsedData = heat_data.values.tolist()
-        return json.dumps([tickText] + parsedData)
+        return json.dumps(
+            dict(
+                metadata=dict(
+                    minVal=min_val, 
+                    maxVal=max_val
+                ),
+                data=([tickText] + parsedData)
+             )
+        )   
 
     def get_line_histo_data(self):
         # caluclating hist data manually to allow for line and scatter
