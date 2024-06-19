@@ -14,14 +14,12 @@ export const NumberInput = ({
   label,
   min,
   max,
-  step,
   type = "int",
   ...props
 }: {
   label: string;
   min: number;
   max: number;
-  step?: number;
   type?: "int" | "float";
 } & (
   | { updateValue: ({}) => void; field: string }
