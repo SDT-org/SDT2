@@ -93,13 +93,15 @@ const RunnerSettings = ({
           <div className="form">
             <div className="field">
               <label className="header">FASTA or SDT Matrix File</label>
-              <input type="text" readOnly value={fileName} />
-              <button
-                type="button"
-                onClick={() => window.pywebview.api.open_file_dialog()}
-              >
-                Select file
-              </button>
+              <div className="input-with-button">
+                <input type="text" readOnly value={fileName} />
+                <button
+                  type="button"
+                  onClick={() => window.pywebview.api.open_file_dialog()}
+                >
+                  Select file
+                </button>
+              </div>
             </div>
             {isFastaType ? (
               <>
@@ -206,10 +208,11 @@ const RunnerSettings = ({
                       <label className="header">
                         Alignment Output Directory
                       </label>
-                      <div className="flex">
+                      <div className="input-with-button">
                         <input
                           type="text"
                           value={appState.alignment_output_path}
+                          readOnly
                         />
                         <button
                           type="button"

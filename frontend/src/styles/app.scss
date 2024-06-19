@@ -181,6 +181,18 @@ input, select {
       }
     }
 
+    .input-with-button {
+      display: flex;
+
+      input[type="text"] {
+        width: 100%;
+      }
+
+      button {
+        flex-shrink: 0;
+      }
+    }
+
     &.runner-settings {
       font-size: 0.9rem;
     }
