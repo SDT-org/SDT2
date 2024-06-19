@@ -99,7 +99,7 @@ const RunnerSettings = ({
                   type="button"
                   onClick={() => window.pywebview.api.open_file_dialog()}
                 >
-                  Select file
+                  Select file...
                 </button>
               </div>
             </div>
@@ -205,9 +205,7 @@ const RunnerSettings = ({
 
                   <div className="group">
                     <div className="field">
-                      <label className="header">
-                        Alignment Output Directory
-                      </label>
+                      <label className="header">Alignment Output Folder</label>
                       <div className="input-with-button">
                         <input
                           type="text"

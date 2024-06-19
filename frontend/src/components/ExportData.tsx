@@ -36,7 +36,7 @@ export const ExportData = () => {
                 <h1>Export Data</h1>
                 <div className="group">
                   <div className="field">
-                    <label className="header">Output Directory</label>
+                    <label className="header">Output Folder</label>
                     <input type="text" readOnly value={appState.export_path} />
                     <button
                       type="button"
@@ -75,7 +75,7 @@ export const ExportData = () => {
                         setThresholds({ ...thresholds, ...newValue })
                       }
                       type="int"
-                      min={0}                                                                                       
+                      min={0}
                       max={100}
                       step={1}
                     />
