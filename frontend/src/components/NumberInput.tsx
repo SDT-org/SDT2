@@ -1,81 +1,120 @@
-import React from 'react';
-
-const normalizeNumber = (
-  value: any,
-  type: "int" | "float",
-  validMin: number,
-  validMax: number,
-  step?: number,
-) => {
-  try {
-    value = type === "float" ? parseFloat(value) : parseInt(value, 10);
-    if (isNaN(value)) {
-      return undefined;
-    }
-  } catch {
-    return undefined;
-  }
-
-  if (step) {
-    value = Math.round(value / step) * step;
-  }
-
-  return Math.min(Math.max(value, validMin), validMax);
-};
+import React from "react";
+import {
+  Button,
+  Group,
+  Input,
+  Label,
+  NumberField,
+  NumberFieldProps,
+} from "react-aria-components";
 
 export const NumberInput = ({
   field,
-  value,
   updateValue,
   label,
   min,
   max,
   step,
   type = "int",
-  ...inputProps
+  ...props
 }: {
-  field: string;
-  value: number;
-  updateValue: ({}) => void;
   label: string;
   min: number;
   max: number;
   step?: number;
   type?: "int" | "float";
-} & React.InputHTMLAttributes<HTMLInputElement>) => {
-  const [displayValue, setDisplayValue] = React.useState(value?.toString());
-  const [invalidValue, setInvalidValue] = React.useState(false);
+} & (
+  | { updateValue: ({}) => void; field: string }
+  | { updateValue?: ({}) => void; field?: string }
+) &
+  NumberFieldProps) => {
   return (
-    <div className="field" data-invalid-value={invalidValue}>
-      <label htmlFor={field}>{label}</label>
-      <input
-        type="number"
-        name={field}
-        id={field}
-        min={min}
-        max={max}
-        step={step}
-        value={displayValue}
-        onChange={(e) => {
-          const newValue = normalizeNumber(e.target.value, type, min, max);
-
-          setDisplayValue(newValue?.toString() || "");
-
-          if (newValue !== undefined) {
-            setInvalidValue(false);
-            updateValue({
-              [field]: newValue,
-            });
-          } else {
-            setInvalidValue(true);
-          }
-        }}
-        onBlur={() => {
-          setDisplayValue(value.toString());
-          setInvalidValue(false);
-        }}
-        {...inputProps}
-      />
+    <div className="field">
+      <NumberField
+        minValue={min}
+        maxValue={max}
+        onChange={(value) => updateValue?.({ [field || ""]: value })}
+        formatOptions={
+          type === "float"
+            ? {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 2,
+              }
+            : {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              }
+        }
+        {...props}
+      >
+        <Label>{label}</Label>
+        <Group className="react-aria-Group number-input-group">
+          <Button slot="decrement">
+            <svg
+              height="8"
+              width="8"
+              viewBox="0 0 8 8"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M 1 3 L 4 6 L 7 3"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </Button>
+          <Input />
+          <Button slot="increment">
+            <svg
+              height="8"
+              width="8"
+              viewBox="0 0 8 8"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M 1 5 L 4 2 L 7 5"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </Button>
+        </Group>
+      </NumberField>
     </div>
   );
 };
+
+// <input
+//   type="number"
+//   name={field}
+//   id={field}
+//   min={min}
+//   max={max}
+//   step={step}
+//   value={displayValue}
+//   onChange={(e) => {
+//     const newValue = normalizeNumber(e.target.value, type, min, max);
+
+//     setDisplayValue(newValue?.toString() || "");
+
+//     if (newValue !== undefined) {
+//       setInvalidValue(false);
+//       updateValue({
+//         [field]: newValue,
+//       });
+//     } else {
+//       setInvalidValue(true);
+//     }
+//   }}
+//   onBlur={() => {
+//     setDisplayValue(value.toString());
+//     setInvalidValue(false);
+//   }}
+//   {...inputProps}
+// />

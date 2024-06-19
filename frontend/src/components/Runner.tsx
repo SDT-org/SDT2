@@ -4,8 +4,9 @@ import {
   SetAppState,
   performanceProfiles,
   alignmentTypes,
-  clusterMethods
+  clusterMethods,
 } from "../appState";
+import { NumberInput } from "./NumberInput";
 
 export type RunSDT2Args = Pick<
   AppState["client"],
@@ -20,9 +21,7 @@ const RunnerSettings = ({
   setAppState: SetAppState;
 }) => {
   const [runnerSettings, setRunnerSettings] = React.useState<RunSDT2Args>(
-    (({
-      client: {performance_profile, alignment_type, cluster_method},
-    }) => ({
+    (({ client: { performance_profile, alignment_type, cluster_method } }) => ({
       performance_profile,
       alignment_type,
       cluster_method,
@@ -48,8 +47,6 @@ const RunnerSettings = ({
       ...advancedSettingsState,
     });
   };
-
-
 
   const handleChangePerformanceProfile = (
     value: (typeof performanceProfiles)[keyof typeof performanceProfiles],
@@ -98,7 +95,7 @@ const RunnerSettings = ({
             </div>
             {isFastaType ? (
               <>
-                <details className="advanced-settings">
+                <details className="advanced-settings" open>
                   <summary>
                     <strong>Advanced</strong>
                   </summary>
@@ -159,22 +156,20 @@ const RunnerSettings = ({
                           step={1}
                         />
                       </div>
-                      <div className="field">
-                        <label>Extend Gap Score</label>
-                        <input
-                          type="number"
-                          onChange={(v) =>
-                            setAdvancedSettingsState({
-                              ...advancedSettingsState,
-                              ieg: parseFloat(v.target.value),
-                            })
-                          }
-                          value={advancedSettingsState.ieg}
-                          min={-50}
-                          max={50}
-                          step={1}
-                        />
-                      </div>
+                      <NumberInput
+                        type="int"
+                        label="Extend Gap Score"
+                        onChange={(value) =>
+                          setAdvancedSettingsState({
+                            ...advancedSettingsState,
+                            ieg: value,
+                          })
+                        }
+                        min={-50}
+                        max={50}
+                        step={1}
+                        value={advancedSettingsState.ieg}
+                      />
                     </div>
                   </div>
 
@@ -275,11 +270,33 @@ const RunnerSettings = ({
                   </div>
                 </details>
 
-                <div className="field runner-settings" style={{ textAlign: 'center', marginBottom: '40px' }}>
-                  <label className="header" style={{ display: 'block', marginBottom: '10px' }}>Clustering Method</label>
-                  <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', gap: '70px' }}>
+                <div
+                  className="field runner-settings"
+                  style={{ textAlign: "center", marginBottom: "40px" }}
+                >
+                  <label
+                    className="header"
+                    style={{ display: "block", marginBottom: "10px" }}
+                  >
+                    Clustering Method
+                  </label>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      gap: "70px",
+                    }}
+                  >
                     {clusterMethods.map((value) => (
-                      <div key={value} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                      <div
+                        key={value}
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                        }}
+                      >
                         <input
                           type="radio"
                           id={value}
@@ -292,57 +309,64 @@ const RunnerSettings = ({
                             )
                           }
                         />
-                        <label htmlFor={value} style={{ whiteSpace: 'nowrap' }}>{value}</label>
+                        <label htmlFor={value} style={{ whiteSpace: "nowrap" }}>
+                          {value}
+                        </label>
                       </div>
                     ))}
                   </div>
                 </div>
-                <div className="field runner-settings" style={{ display: 'flex', flexDirection: 'row' }}>
-                <div style={{ flex: 1, marginRight: '20px' }}>
-                  <label className="header">Alignment Type</label>
-                  <div>
-                    {alignmentTypes.map((value) => (
-                      <div key={value} style={{ marginBottom: '10px' }}>
-                        <input
-                          type="radio"
-                          id={value}
-                          name="alignment-type"
-                          value={value}
-                          checked={runnerSettings.alignment_type === value}
-                          onChange={() =>
-                            handleChangeAlignmentType(
-                              value as (typeof alignmentTypes)[keyof typeof alignmentTypes],
-                            )
-                          }
-                        />
-                        <label htmlFor={value}>{value}</label>
-                      </div>
-                    ))}
+                <div
+                  className="field runner-settings"
+                  style={{ display: "flex", flexDirection: "row" }}
+                >
+                  <div style={{ flex: 1, marginRight: "20px" }}>
+                    <label className="header">Alignment Type</label>
+                    <div>
+                      {alignmentTypes.map((value) => (
+                        <div key={value} style={{ marginBottom: "10px" }}>
+                          <input
+                            type="radio"
+                            id={value}
+                            name="alignment-type"
+                            value={value}
+                            checked={runnerSettings.alignment_type === value}
+                            onChange={() =>
+                              handleChangeAlignmentType(
+                                value as (typeof alignmentTypes)[keyof typeof alignmentTypes],
+                              )
+                            }
+                          />
+                          <label htmlFor={value}>{value}</label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label className="header">Performance</label>
+                    <div>
+                      {performanceProfiles.map((value) => (
+                        <div key={value} style={{ marginBottom: "10px" }}>
+                          <input
+                            type="radio"
+                            id={value}
+                            name="performance-profile"
+                            value={value}
+                            checked={
+                              runnerSettings.performance_profile === value
+                            }
+                            onChange={() =>
+                              handleChangePerformanceProfile(
+                                value as (typeof performanceProfiles)[keyof typeof performanceProfiles],
+                              )
+                            }
+                          />
+                          <label htmlFor={value}>{value}</label>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <label className="header">Performance</label>
-                  <div>
-                    {performanceProfiles.map((value) => (
-                      <div key={value} style={{ marginBottom: '10px' }}>
-                        <input
-                          type="radio"
-                          id={value}
-                          name="performance-profile"
-                          value={value}
-                          checked={runnerSettings.performance_profile === value}
-                          onChange={() =>
-                            handleChangePerformanceProfile(
-                              value as (typeof performanceProfiles)[keyof typeof performanceProfiles],
-                            )
-                          }
-                        />
-                        <label htmlFor={value}>{value}</label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
                 <div className="actions">
                   <button
                     type="button"

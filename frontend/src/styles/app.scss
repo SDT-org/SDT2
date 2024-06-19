@@ -396,3 +396,50 @@ input, select {
     }
   }
 }
+
+.field .react-aria-Group {
+  display: flex;
+
+  input + button {
+    margin: 0;
+  }
+}
+
+.number-input-group {
+  gap: 0.2rem;
+  position: relative;
+
+  [slot="increment"], [slot="decrement"] {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 3px 3px 0 0;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 0.6rem;
+    width: 0.8rem;
+    padding: 3px;
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    line-height: 0;
+
+    &:active, &:hover {
+      background: #ddd;
+    }
+  }
+
+  [slot="increment"] {
+    border-bottom: 0;
+  }
+
+  [slot="decrement"] {
+    border-top: 0;
+    border-radius: 0 0 3px 3px;
+    top: 13px;
+    font-size: 0.9rem;
+  }
+}
