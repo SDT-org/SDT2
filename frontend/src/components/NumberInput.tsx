@@ -58,9 +58,9 @@ export const NumberInput = ({
                 d="M 1 3 L 4 6 L 7 3"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
           </Button>
@@ -76,9 +76,9 @@ export const NumberInput = ({
                 d="M 1 5 L 4 2 L 7 5"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               />
             </svg>
           </Button>
