@@ -410,16 +410,17 @@ input, select {
   position: relative;
 
   [slot="increment"], [slot="decrement"] {
+    visibility: hidden;
     background: #fff;
-    border: 1px solid #ddd;
+    border: 0;
     border-radius: 3px 3px 0 0;
-    color: #333;
+    color: #777;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 0.6rem;
     width: 0.8rem;
-    padding: 3px;
+    padding: 0;
     position: absolute;
     right: 4px;
     top: 4px;
@@ -429,6 +430,12 @@ input, select {
 
     &:active, &:hover {
       background: #ddd;
+    }
+  }
+
+  &:hover {
+    [slot="increment"], [slot="decrement"] {
+      visibility: visible;
     }
   }
 
