@@ -48,6 +48,13 @@ const RunnerSettings = ({
     });
   };
 
+  const handleChangeAdvancedSetting =
+    (field: keyof typeof advancedSettingsState) => (value: number) =>
+      setAdvancedSettingsState({
+        ...advancedSettingsState,
+        [field]: value,
+      });
+
   const handleChangePerformanceProfile = (
     value: (typeof performanceProfiles)[keyof typeof performanceProfiles],
   ) =>
@@ -63,6 +70,7 @@ const RunnerSettings = ({
       ...runnerSettings,
       alignment_type: value,
     });
+
   const handleChangeClusterMethod = (
     value: (typeof clusterMethods)[keyof typeof clusterMethods],
   ) =>
@@ -102,69 +110,41 @@ const RunnerSettings = ({
                   <div className="group">
                     <h4>Aligner</h4>
                     <div className="col-2">
-                      <div className="field">
-                        <label>Match Score</label>
-                        <input
-                          type="number"
-                          onChange={(v) =>
-                            setAdvancedSettingsState({
-                              ...advancedSettingsState,
-                              match: parseFloat(v.target.value),
-                            })
-                          }
-                          value={advancedSettingsState.match}
-                          min={-50}
-                          max={50}
-                          step={0.5}
-                        />
-                      </div>
-                      <div className="field">
-                        <label>Mismatch Score</label>
-                        <input
-                          type="number"
-                          onChange={(v) =>
-                            setAdvancedSettingsState({
-                              ...advancedSettingsState,
-                              mismatch: parseFloat(v.target.value),
-                            })
-                          }
-                          value={advancedSettingsState.mismatch}
-                          min={-50}
-                          max={50}
-                          step={1}
-                        />
-                      </div>
+                      <NumberInput
+                        label="Match Score"
+                        type="float"
+                        onChange={handleChangeAdvancedSetting("match")}
+                        value={advancedSettingsState.match}
+                        min={-50}
+                        max={50}
+                        step={0.5}
+                      />
+                      <NumberInput
+                        label="Mismatch Score"
+                        onChange={handleChangeAdvancedSetting("mismatch")}
+                        value={advancedSettingsState.mismatch}
+                        min={-50}
+                        max={50}
+                        step={1}
+                      />
                     </div>
                   </div>
 
                   <div className="group">
                     <h4>Internal</h4>
                     <div className="col-2">
-                      <div className="field">
-                        <label>Open Gap Score</label>
-                        <input
-                          type="number"
-                          onChange={(v) =>
-                            setAdvancedSettingsState({
-                              ...advancedSettingsState,
-                              iog: parseFloat(v.target.value),
-                            })
-                          }
-                          value={advancedSettingsState.iog}
-                          min={-50}
-                          max={50}
-                          step={1}
-                        />
-                      </div>
+                      <NumberInput
+                        label="Open Gap Score"
+                        onChange={handleChangeAdvancedSetting("iog")}
+                        value={advancedSettingsState.iog}
+                        min={-50}
+                        max={50}
+                        step={1}
+                      />
                       <NumberInput
                         type="int"
                         label="Extend Gap Score"
-                        onChange={(value) =>
-                          setAdvancedSettingsState({
-                            ...advancedSettingsState,
-                            ieg: value,
-                          })
-                        }
+                        onChange={handleChangeAdvancedSetting("ieg")}
                         min={-50}
                         max={50}
                         step={1}
@@ -176,76 +156,48 @@ const RunnerSettings = ({
                   <div className="group">
                     <h4>Left</h4>
                     <div className="col-2">
-                      <div className="field">
-                        <label>Open Gap Score</label>
-                        <input
-                          type="number"
-                          onChange={(v) =>
-                            setAdvancedSettingsState({
-                              ...advancedSettingsState,
-                              log: parseFloat(v.target.value),
-                            })
-                          }
-                          value={advancedSettingsState.log}
-                          min={-50}
-                          max={50}
-                          step={1}
-                        />
-                      </div>
-                      <div className="field">
-                        <label>Extend Gap Score</label>
-                        <input
-                          type="number"
-                          onChange={(v) =>
-                            setAdvancedSettingsState({
-                              ...advancedSettingsState,
-                              leg: parseFloat(v.target.value),
-                            })
-                          }
-                          value={advancedSettingsState.leg}
-                          min={-50}
-                          max={50}
-                          step={1}
-                        />
-                      </div>
+                      <NumberInput
+                        type="int"
+                        label="Open Gap Score"
+                        onChange={handleChangeAdvancedSetting("log")}
+                        min={-50}
+                        max={50}
+                        step={1}
+                        value={advancedSettingsState.log}
+                      />
+                      <NumberInput
+                        type="int"
+                        label="Extend Gap Score"
+                        onChange={handleChangeAdvancedSetting("leg")}
+                        min={-50}
+                        max={50}
+                        step={1}
+                        value={advancedSettingsState.leg}
+                      />
                     </div>
                   </div>
 
                   <div className="group">
                     <h4>Right</h4>
                     <div className="col-2">
-                      <div className="field">
-                        <label>Open Gap Score</label>
-                        <input
-                          type="number"
-                          onChange={(v) =>
-                            setAdvancedSettingsState({
-                              ...advancedSettingsState,
-                              rog: parseFloat(v.target.value),
-                            })
-                          }
-                          value={advancedSettingsState.rog}
-                          min={-50}
-                          max={50}
-                          step={1}
-                        />
-                      </div>
-                      <div className="field">
-                        <label>Extend Gap Score</label>
-                        <input
-                          type="number"
-                          onChange={(v) =>
-                            setAdvancedSettingsState({
-                              ...advancedSettingsState,
-                              reg: parseFloat(v.target.value),
-                            })
-                          }
-                          value={advancedSettingsState.reg}
-                          min={-50}
-                          max={50}
-                          step={1}
-                        />
-                      </div>
+                      <NumberInput
+                        type="int"
+                        label="Open Gap Score"
+                        onChange={handleChangeAdvancedSetting("rog")}
+                        min={-50}
+                        max={50}
+                        step={1}
+                        value={advancedSettingsState.rog}
+                      />
+                      <NumberInput
+                        type="int"
+                        label="Extend Gap Score"
+                        onChange={handleChangeAdvancedSetting("reg")}
+                        min={-50}
+                        max={50}
+                        step={1}
+                        value={advancedSettingsState.reg}
+                      />
                     </div>
                   </div>
 
@@ -254,18 +206,20 @@ const RunnerSettings = ({
                       <label className="header">
                         Alignment Output Directory
                       </label>
-                      <input
-                        type="text"
-                        value={appState.alignment_output_path}
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          window.pywebview.api.select_alignment_output_path()
-                        }
-                      >
-                        Select Folder...
-                      </button>
+                      <div className="flex">
+                        <input
+                          type="text"
+                          value={appState.alignment_output_path}
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            window.pywebview.api.select_alignment_output_path()
+                          }
+                        >
+                          Select...
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </details>

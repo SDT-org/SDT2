@@ -126,6 +126,11 @@
   flex-direction: column;
 }
 
+.flex {
+  display: flex;
+}
+
+
 input, select {
   border: 0.1rem solid #ccc;
   border-radius: 0.2rem;
@@ -254,7 +259,6 @@ input, select {
       }
       input {
         width: 100%;
-        max-width: 20rem;
         height: 1.6rem;
       }
     }
