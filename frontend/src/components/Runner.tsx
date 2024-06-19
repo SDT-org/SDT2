@@ -103,7 +103,7 @@ const RunnerSettings = ({
             </div>
             {isFastaType ? (
               <>
-                <details className="advanced-settings" open>
+                <details className="advanced-settings">
                   <summary>
                     <strong>Advanced</strong>
                   </summary>
