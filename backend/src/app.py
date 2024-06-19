@@ -196,39 +196,13 @@ class Api:
             command.append(str(processes))
 
         alignment_output_path = get_state().alignment_output_path
-        match = args.get("match")
-        mismatch = args.get("mismatch")
-        iog = args.get("iog")
-        ieg = args.get("ieg")
-        log = args.get("log")
-        leg = args.get("leg")
-        rog = args.get("rog")
-        reg = args.get("reg")
 
-        if match:
-            command.append("--match")
-            command.append(str(match))
-        if mismatch:
-            command.append("--mismatch")
-            command.append(str(mismatch))
-        if iog:
-            command.append("--iog")
-            command.append(str(iog))
-        if ieg:
-            command.append("--ieg")
-            command.append(str(ieg))
-        if log:
-            command.append("--log")
-            command.append(str(log))
-        if leg:
-            command.append("--leg")
-            command.append(str(leg))
-        if rog:
-            command.append("--rog")
-            command.append(str(rog))
-        if reg:
-            command.append("--reg")
-            command.append(str(reg))
+        params = ["match", "mismatch", "iog", "ieg", "log", "leg", "rog", "reg"]
+        for param in params:
+            value = args.get(param)
+            if value is not None:
+                command.append(f"--{param}")
+                command.append(str(value))
 
         if alignment_output_path:
             command.append("--aln_out")
