@@ -61,8 +61,13 @@ export const useAppState = () => {
   return context;
 };
 
-export const syncAppState = (setAppState: SetAppState) =>
-  window.pywebview.api.get_state().then((data) => {
+export const syncAppState = (setAppState: SetAppState) => {
+  if (!window.pywebview) {
+    console.warn("Frontend-only mode detected, app state will not be synced.");
+    return;
+  }
+
+  return window.pywebview.api.get_state().then((data) => {
     setAppState((previous) => {
       return {
         ...previous,
