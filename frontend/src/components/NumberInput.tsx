@@ -89,32 +89,3 @@ export const NumberInput = ({
     </div>
   );
 };
-
-// <input
-//   type="number"
-//   name={field}
-//   id={field}
-//   min={min}
-//   max={max}
-//   step={step}
-//   value={displayValue}
-//   onChange={(e) => {
-//     const newValue = normalizeNumber(e.target.value, type, min, max);
-
-//     setDisplayValue(newValue?.toString() || "");
-
-//     if (newValue !== undefined) {
-//       setInvalidValue(false);
-//       updateValue({
-//         [field]: newValue,
-//       });
-//     } else {
-//       setInvalidValue(true);
-//     }
-//   }}
-//   onBlur={() => {
-//     setDisplayValue(value.toString());
-//     setInvalidValue(false);
-//   }}
-//   {...inputProps}
-// />
