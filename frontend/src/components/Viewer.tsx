@@ -10,6 +10,7 @@ import {
 import { Heatmap } from "./Heatmap";
 import { Histogram } from "./Histogram";
 import { ExportData } from "./ExportData";
+import { Tab, TabList, TabPanel, Tabs } from "react-aria-components";
 
 export const Viewer = ({
   appState,
@@ -73,11 +74,14 @@ export const Viewer = ({
     setLoading(true);
     Promise.all([
       window.pywebview.api.get_heatmap_data().then((rawData) => {
-        const { metadata, data }: {
+        const {
+          metadata,
+          data,
+        }: {
           metadata: {
             minVal: number;
             maxVal: number;
-          },
+          };
           data: string[][];
         } = JSON.parse(rawData.replace(/\bNaN\b/g, "null"));
         const [tickText, ...parsedData] = data;
@@ -98,7 +102,6 @@ export const Viewer = ({
     getData();
   }, []);
 
-  
   const updatePlotState = (newState: Partial<HeatmapSettings>) => {
     setHeatmapSettings((previous) => {
       return {
@@ -116,21 +119,8 @@ export const Viewer = ({
     });
   };
 
-
-  const swapDataView = ({ target }: { target: HTMLSelectElement }) => {
-    setAppState((previous) => {
-      return {
-        ...previous,
-        client: {
-          ...previous.client,
-          dataView: target.value as AppState["client"]["dataView"],
-        },
-      };
-    });
-  };
-
   return (
-    <div className="app-wrapper with-header-sidebar">
+    <Tabs className="app-wrapper with-header">
       <div className="app-header">
         <div className="left">
           <button
@@ -163,32 +153,28 @@ export const Viewer = ({
             <span className="filename">{appState.basename}</span>
           </div>
         </div>
-        <div className="data-view">
-          <label>
-            View
-            <select aria-label="Change data view" onChange={swapDataView}>
-              <option value="heatmap">Heatmap</option>
-              <option value="plot">Plot</option>
-            </select>
-          </label>
-        </div>
+        <TabList className="data-view">
+          <Tab id="heatmap">Heatmap</Tab>
+          <Tab id="plot">Plot</Tab>
+        </TabList>
       </div>
 
-      {appState.client.dataView === "heatmap" ? (
+      <TabPanel id="heatmap" className="app-panel">
         <Heatmap
           data={heatmapData}
           settings={heatmapSettings}
           updateSettings={updatePlotState}
           tickText={heatmapTickText}
         />
-      ) : (
+      </TabPanel>
+      <TabPanel id="plot" className="app-panel">
         <Histogram
           data={histogramData}
           settings={histogramSettings}
           updateSettings={updateHistogramSettings}
         />
-      )}
+      </TabPanel>
       {loading ? <div className="api-loader"></div> : null}
-    </div>
+    </Tabs>
   );
 };

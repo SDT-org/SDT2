@@ -6,34 +6,11 @@
   grid-template-areas: "main";
   background: #fbfbfb;
 
-  &.with-sidebar {
-    grid-template-columns: 25% 1fr;
-    grid-template-areas: "sidebar main";
-  }
-
   &.with-header {
-    grid-template-columns: 1fr;
-    grid-template-rows: 10% auto;
+    grid-template-rows: auto 1fr;
     grid-template-areas:
       "header"
       "main";
-  }
-
-  &.with-footer {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 10%;
-    grid-template-areas:
-      "main"
-      "footer";
-  }
-
-  &.with-header-sidebar {
-    grid-template-columns: 15.2rem 1fr;
-    grid-template-rows: auto 1fr;
-    grid-template-areas:
-      "header header"
-      "sidebar main";
-    height: 100vh;
   }
 }
 
@@ -71,15 +48,30 @@
   }
 
   .data-view {
-    select {
-      height: 1.6rem;
-      margin-left: 0.8rem;
+    border: 0.1rem solid #ddd;
+    border-radius: 0.3rem;
+    display: flex;
+
+    > * {
+      padding: 0.2rem 0.6rem;
+      font-weight: 500;
+
+      &[data-selected="true"] {
+        background: #ddd;
+      }
     }
   }
 
   button {
     min-width: 4.8rem;
   }
+}
+
+.app-panel {
+  display: grid;
+  grid-template-columns: 15.2rem 1fr;
+  grid-template-areas: "sidebar main";
+  overflow: hidden;
 }
 
 .app-sidebar {
@@ -102,10 +94,6 @@
   }
 }
 
-.app-header,
-.app-sidebar {
-}
-
 .app-main {
   grid-area: main;
   overflow: auto;
@@ -115,6 +103,7 @@
     margin: 0 auto;
   }
 }
+
 .app-footer {
   grid-area: footer;
 }
@@ -234,14 +223,10 @@ select, select option {
         display: block;
         font-weight: 600;
         margin-bottom: 0.2rem;
-        // font-size: 0.9rem;
       }
       &.radio {
         display: block;
         font-weight: normal;
-      }
-      &.header + label.radio {
-        // margin-top: 0.25rem;
       }
     }
 
