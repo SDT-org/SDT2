@@ -2,7 +2,7 @@ import React from "react";
 import Plotly from "../../vendor/plotly-custom.min.js";
 import useAppState, { AppState } from "../appState";
 
-export const SaveImage = () => {
+export const SaveImage = ({ plotType }: { plotType?: string }) => {
   const { appState, setAppState } = useAppState();
 
   const handleSave = async () => {
@@ -52,7 +52,7 @@ export const SaveImage = () => {
         aria-label="Save the plot as an image"
         onClick={handleSave}
       >
-        Export...
+        Export{plotType ? ` ${plotType}` : null}...
       </button>
     </div>
   );

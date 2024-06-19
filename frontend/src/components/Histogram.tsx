@@ -422,7 +422,7 @@ export const Histogram = ({
         </div>
         <div className="app-sidebar-footer">
           <div className="form">
-            <SaveImage />
+            <SaveImage plotType="Plot" />
           </div>
         </div>
       </div>

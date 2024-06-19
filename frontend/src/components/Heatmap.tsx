@@ -381,7 +381,7 @@ export const Heatmap = ({
         </div>
         <div className="app-sidebar-footer">
           <div className="form">
-            <SaveImage />
+            <SaveImage plotType="Heatmap" />
           </div>
         </div>
       </div>
