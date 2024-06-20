@@ -57,6 +57,8 @@ matrix_filetypes = (
     "text/plain"
 )
 
+cancel_current_run = False
+
 def get_matrix_path():
     state = get_state()
 
@@ -133,7 +135,7 @@ class Api:
                 view="viewer",
                 filename=result,
                 tempdir_path=os.path.dirname(result[0]),
-                basename=basename
+                basename=basename,
             )
         else:
             set_state(filename=result, filetype=filetype, basename=basename)
@@ -162,6 +164,8 @@ class Api:
         reset_state()
 
     def run_sdt2(self, args: dict):
+        global cancel_current_run
+
         set_state(view="loader")
 
         command = (
@@ -238,6 +242,12 @@ class Api:
                 if stage_match:
                     set_state(stage=stage_match.group(1))
 
+                if cancel_current_run:
+                    p.terminate()
+                    p.wait()
+                    cancel_current_run = False
+                    set_state(view="runner", progress=0)
+                    return
             p.wait()
 
             if p.returncode != 0:
@@ -246,6 +256,9 @@ class Api:
 
             set_state(view="viewer")
 
+    def cancel_run(self):
+        global cancel_current_run
+        cancel_current_run = True
     def load_data(self):
         matrix_path = get_matrix_path()
 

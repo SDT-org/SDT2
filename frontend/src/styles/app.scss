@@ -594,6 +594,19 @@ select, select option {
   }
 }
 
-.loader .react-aria-ProgressBar {
-  max-width: 25rem;
+.loader {
+  .react-aria-ProgressBar {
+    max-width: 25rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .number {
+    font-weight: 0.95rem;
+    font-weight: 500;
+  }
+
+  .cancel-run {
+    display: block;
+    margin-top: 1.6rem;
+  }
 }

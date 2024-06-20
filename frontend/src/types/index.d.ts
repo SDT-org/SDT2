@@ -20,6 +20,7 @@ declare global {
           format: AppState["client"]["saveFormat"];
         }) => Promise<void>;
         run_sdt2: (args: RunSDT2Args) => Promise<void>;
+        cancel_run: () => Promise<void>;
         get_heatmap_data: () => Promise<string>;
         get_line_histo_data: () => Promise<string>;
       };
