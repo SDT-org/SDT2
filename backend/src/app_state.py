@@ -25,6 +25,9 @@ AppState = namedtuple('AppState', [
     'alignment_output_path',
     'export_path',
     'performance_profiles',
+    'pair_progress',
+    'pair_count',
+    'estimated_time'
 ])
 
 def create_app_state(
@@ -41,6 +44,9 @@ def create_app_state(
     alignment_output_path='',
     export_path='',
     performance_profiles=dict(),
+    pair_progress=0,
+    pair_count=0,
+    estimated_time=None,
 ):
     default_state = AppState(
         view=view,
@@ -54,7 +60,10 @@ def create_app_state(
         sequences_count=sequences_count,
         alignment_output_path=alignment_output_path,
         export_path=export_path,
-        performance_profiles=performance_profiles
+        performance_profiles=performance_profiles,
+        pair_progress=pair_progress,
+        pair_count=pair_count,
+        estimated_time=estimated_time
     )
 
     state = default_state

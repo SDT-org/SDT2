@@ -16,6 +16,13 @@ export const Loader = ({ appState }: { appState: AppState }) => {
               <div className="bar">
                 <div className="fill" style={{ width: percentage + "%" }} />
               </div>
+              <div className="estimate">
+                {appState.estimated_time ? (
+                  `Estimated: ${Math.round(appState.estimated_time / 60)} min(s)`
+                ) : (
+                  <>&nbsp;</>
+                )}
+              </div>
             </>
           )}
         </ProgressBar>

@@ -597,7 +597,14 @@ select, select option {
 .loader {
   .react-aria-ProgressBar {
     max-width: 25rem;
-    font-variant-numeric: tabular-nums;
+    font-size: 0.9rem;
+    font-weight: 600;
+
+    .estimate {
+      font-variant-numeric: tabular-nums;
+      font-size: 0.8rem;
+      font-weight: normal;
+    }
   }
 
   .number {

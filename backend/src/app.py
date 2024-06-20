@@ -17,6 +17,7 @@ import base64
 import urllib.parse
 import shutil
 import mimetypes
+from datetime import datetime
 from app_state import create_app_state
 
 is_nuitka = "__compiled__" in globals()
@@ -215,6 +216,8 @@ class Api:
             print("\nAPI args:", args)
             print("\nRun args:", command)
 
+        start_time = datetime.now()
+
         with Popen(
             command,
             stdout=PIPE,
@@ -222,7 +225,9 @@ class Api:
             universal_newlines=True,
         ) as p:
             progress_pattern = re.compile(r"progress (\d+)%")
+            pair_progress_pattern = re.compile(r"pair (\d+)")
             sequences_pattern = re.compile(r"Number of sequences: (\d+)")
+            pairs_pattern = re.compile(r"Number of pairs:\s(\w+)")
             stage_pattern = re.compile(r"Stage:\s(\w+)")
 
             for line in p.stdout:
@@ -230,14 +235,27 @@ class Api:
                     print(line)
 
                 progress_match = progress_pattern.search(line)
+                pair_progress_match = pair_progress_pattern.search(line)
                 sequences_match = sequences_pattern.search(line)
                 stage_match = stage_pattern.search(line)
+                pairs_match = pairs_pattern.search(line)
 
                 if progress_match:
                     set_state(progress=int(progress_match.group(1)))
 
+                if pair_progress_match:
+                    pair_progress = int(pair_progress_match.group(1))
+                    if pair_progress > 0:
+                        current_time = datetime.now()
+                        time_taken = current_time - start_time
+                        estimated_time = get_state().pair_count / (pair_progress / time_taken.total_seconds())
+                        set_state(pair_progress=pair_progress, estimated_time=estimated_time)
+
                 if sequences_match:
                     set_state(sequences_count=int(sequences_match.group(1)))
+
+                if pairs_match:
+                    set_state(pair_count=int(pairs_match.group(1)))
 
                 if stage_match:
                     set_state(stage=stage_match.group(1))
@@ -246,8 +264,9 @@ class Api:
                     p.terminate()
                     p.wait()
                     cancel_current_run = False
-                    set_state(view="runner", progress=0)
+                    set_state(view="runner", progress=0, pair_progress=0, estimated_time=None)
                     return
+
             p.wait()
 
             if p.returncode != 0:
@@ -259,6 +278,7 @@ class Api:
     def cancel_run(self):
         global cancel_current_run
         cancel_current_run = True
+
     def load_data(self):
         matrix_path = get_matrix_path()
 

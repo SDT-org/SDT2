@@ -16,6 +16,9 @@ export type AppState = {
   export_path: string;
   performance_profiles: { [_: string]: number };
   stage: string;
+  pair_progress: number;
+  pair_count: number;
+  estimated_time?: number;
   client: {
     dataView: "heatmap" | "plot";
     cluster_method: (typeof clusterMethods)[number];
@@ -40,6 +43,8 @@ export const initialAppState: AppState = {
   // These are just to make frontend easier to test, they get overwritten during the initial syncAppState
   performance_profiles: { best: 4, balanced: 2, low: 1 },
   stage: "Preprocessing",
+  pair_progress: 0,
+  pair_count: 0,
   client: {
     dataView: "heatmap",
     cluster_method: "Neighbor-Joining",

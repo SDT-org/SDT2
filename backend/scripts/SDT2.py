@@ -203,7 +203,8 @@ def alignment_progress(ids, seq_dict, counter, total_pairs):
     print(
         "\rPerforming alignment: progress "
         + str(int((float(counter.value) / total_pairs) * 100))
-        + "%",
+        + "% - pair",
+        + counter.value,
         flush=True
     )
     return ids, score, aligner_params, aligner_alg
@@ -223,6 +224,7 @@ def get_alignment_scores(seq_dict, args):
     #calculate the total combinations witout self
     total_pairs = sum(1 for _ in cwr(seq_ids, 2))
     print(f"\rNumber of sequences: {len(seq_ids)}\r", flush=True)
+    print(f"\rNumber of pairs: {total_pairs}\r", flush=True)
 
     bound_align_and_score = partial(
         alignment_progress,
