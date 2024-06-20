@@ -580,3 +580,35 @@ select, select option {
     }
   }
 }
+
+.react-aria-ProgressBar {
+  display: grid;
+  grid-template-areas: "label value"
+                       "bar bar";
+  grid-template-columns: 1fr auto;
+  gap: 0.4rem;
+  width: 100%;
+
+  .value {
+    grid-area: value;
+  }
+
+  .bar {
+    grid-area: bar;
+    box-shadow: inset 0 0 0 1px #ddd;
+    height: 1rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    will-change: transform;
+  }
+
+  .fill {
+    background: black;
+    height: 100%;
+    transition: width 0.25s;
+  }
+}
+
+.loader .react-aria-ProgressBar {
+  max-width: 25rem;
+}

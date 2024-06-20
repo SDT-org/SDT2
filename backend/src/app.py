@@ -163,8 +163,7 @@ class Api:
 
     def run_sdt2(self, args: dict):
         set_state(view="loader")
-        progress_pattern = re.compile(r"progress (\d+)%")
-        sequences_pattern = re.compile(r"Number of sequences: (\d+)")
+
         command = (
             command_prefix["sdt2"]
             if isinstance(command_prefix["sdt2"], list)
@@ -218,20 +217,26 @@ class Api:
             bufsize=1,
             universal_newlines=True,
         ) as p:
+            progress_pattern = re.compile(r"progress (\d+)%")
+            sequences_pattern = re.compile(r"Number of sequences: (\d+)")
+            stage_pattern = re.compile(r"Stage:\s(\w+)")
+
             for line in p.stdout:
                 if get_state().debug:
                     print(line)
 
                 progress_match = progress_pattern.search(line)
                 sequences_match = sequences_pattern.search(line)
+                stage_match = stage_pattern.search(line)
 
                 if progress_match:
-                    percentage = int(progress_match.group(1))
-                    set_state(progress=percentage)
+                    set_state(progress=int(progress_match.group(1)))
 
                 if sequences_match:
-                    count = int(sequences_match.group(1))
-                    set_state(sequences_count=count)
+                    set_state(sequences_count=int(sequences_match.group(1)))
+
+                if stage_match:
+                    set_state(stage=stage_match.group(1))
 
             p.wait()
 
@@ -297,12 +302,12 @@ class Api:
         return json.dumps(
             dict(
                 metadata=dict(
-                    minVal=min_val, 
+                    minVal=min_val,
                     maxVal=max_val
                 ),
                 data=([tickText] + parsedData)
              )
-        )   
+        )
 
     def get_line_histo_data(self):
         # caluclating hist data manually to allow for line and scatter

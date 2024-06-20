@@ -114,7 +114,7 @@ def run_preprocessing(raw_seq_dict):
         sequence = re.sub(r'[^A-Z]', '', sequence)
         #TO DO -add exceptions for ambigious bases
         #add to new dict without seqrecord clutter
-        
+
         seq_dict[key] = str(sequence)
     return seq_dict
 
@@ -139,7 +139,6 @@ def get_similarity(seq1, seq2):
 
 def is_aa(seq):
     return bool(re.search(r"[EFILPQZ]", seq))
-
 
 # Performs sequence alignment using BioPython PairwiseAligner
 def biopython_align(ids, seq_dict, sample_size=3):
@@ -185,7 +184,7 @@ def biopython_align(ids, seq_dict, sample_size=3):
     aligner_alg = str(aligner.algorithm)
     aln = aligner.align(seq_dict[ids[0]], seq_dict[ids[1]])[0]
     score = get_similarity(aln[0], aln[1])
-    
+
     if args.aln_out:
         fname = os.path.join(args.aln_out, str(ids[0] + "__" + ids[1]) + "_aligned.fasta")
         aligned_sequences = list(aln)
@@ -201,23 +200,13 @@ def biopython_align(ids, seq_dict, sample_size=3):
 def alignment_progress(ids, seq_dict, counter, total_pairs):
     score, aligner_params, aligner_alg = biopython_align(ids, seq_dict)
     counter.value += 1
-    sys.stdout.write(
+    print(
         "\rPerforming alignment: progress "
         + str(int((float(counter.value) / total_pairs) * 100))
-        + "%"
+        + "%",
+        flush=True
     )
-    sys.stdout.flush()
     return ids, score, aligner_params, aligner_alg
-
-
-def print_number_of_sequences(count):
-    sys.stdout.write(
-        "\rNumber of sequences: "
-        + str(count)
-        + "\r"
-    )
-    sys.stdout.flush()
-
 
 ## Creates arrays for storing scores as matrix and set pool for multiprocessing.
 def get_alignment_scores(seq_dict, args):
@@ -233,7 +222,7 @@ def get_alignment_scores(seq_dict, args):
     combos = list(cwr(seq_ids, 2))
     #calculate the total combinations witout self
     total_pairs = sum(1 for _ in cwr(seq_ids, 2))
-    print_number_of_sequences(len(seq_ids))
+    print(f"\rNumber of sequences: {len(seq_ids)}\r", flush=True)
 
     bound_align_and_score = partial(
         alignment_progress,
@@ -251,12 +240,11 @@ def get_alignment_scores(seq_dict, args):
             dist_scores[seqid2, seqid1] = score
     return  dist_scores, order, aligner_params, aligner_alg
 
-
 # Reorder the scores matrix based on the tree and save it to a new CSV
 def tree_clustering(dm,filename):
     args = parse_args()
     constructor = DistanceTreeConstructor()
-    clustering_method = getattr(constructor, args.cluster_method)    
+    clustering_method = getattr(constructor, args.cluster_method)
     tree_file = filename+"_tree.nwk"
     tree = clustering_method(dm)
     Phylo.write(tree, tree_file, "newick")
@@ -264,13 +252,13 @@ def tree_clustering(dm,filename):
     new_order = [leaf.name for leaf in tree.get_terminals()]
     return tree_file, new_order  # Return the tree file name instead of the tree object
 
-
 # Format distance scores to triangle matrix for NJ tree creation
 def create_distance_matrix(dist_scores, order):
     lower_triangle = [dist_scores[i, : i + 1].tolist() for i in range(len(order))] ##this has to be list, cant use np
     # Create the DistanceMatrix object
     dm = DistanceMatrix(order, lower_triangle)
     return dm
+
 # Save similarity scores as 2d matrix csv
 def save_matrix_to_csv(df, filename):
     df.to_csv(filename, mode="w", header=False, index=True)
@@ -336,10 +324,10 @@ def main():
     INPUT_PATH = args.input_file
     #logging.basicConfig(level=logging.DEBUG)
 
-    # set variables
     file_name = os.path.basename(args.input_file)
-    file_base = os.path.splitext(file_name)[0]# check this
-    print(file_base, " plot loading")
+    file_base = os.path.splitext(file_name)[0]
+
+    print("Stage: Preparing")
 
     raw_seq_dict = SeqIO.to_dict(SeqIO.parse(open(INPUT_PATH, encoding="utf-8"), "fasta"))
     sequences = SeqIO.parse(open(INPUT_PATH, encoding="utf-8"), "fasta")
@@ -347,11 +335,14 @@ def main():
     # Create a dictionary with the full description as the key, replacing spaces with underscores
     processed_seq_dict = {record.description.replace(' ', ''): record for record in sequences}
 
-    seq_dict= run_preprocessing(processed_seq_dict)
+    seq_dict = run_preprocessing(processed_seq_dict)
+
+    print("Stage: Analyzing")
+
     dist_scores, order, aligner_params, aligner_alg = get_alignment_scores(
-    seq_dict, args
+        seq_dict, args
     )
-    
+
     order = list(order.keys())
 
     dm = create_distance_matrix(dist_scores, order)
@@ -359,7 +350,6 @@ def main():
 
 
     if args.cluster_method == 'nj' or args.cluster_method == 'upgma':
-
         _, new_order = tree_clustering(dm,os.path.join(args.out_dir, f"{file_base}"))
         reorder_index = [
             order.index(id_) for id_ in new_order
@@ -368,7 +358,7 @@ def main():
         aln_reordered = aln_scores[reorder_index, :][:, reorder_index]
         aln_lowt = np.tril(np.around(aln_reordered, 2))
         aln_lowt[np.triu_indices(aln_lowt.shape[0], k=1)] = np.nan
-    # Create a DataFrame from the lower triangular matrix
+        # Create a DataFrame from the lower triangular matrix
         df = pd.DataFrame(aln_lowt, index=new_order)
         save_matrix_to_csv(df, os.path.join(args.out_dir, f"{file_base}_mat.csv"))
         # save_cols_to_csv(df, new_order, os.path.join(args.out_dir, f"{file_base}"))
@@ -379,12 +369,13 @@ def main():
         save_matrix_to_csv(df, os.path.join(args.out_dir, f"{file_base}_mat.csv"))
         #save_cols_to_csv(df, new_order, os.path.join(args.out_dir, f"{file_base}"))
 
+    print("Stage: Finalizing")
+
     #Finalize run
     end_time = time.time()
     end_run = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    elapsed_time= (end_time - start_time)
+    elapsed_time = (end_time - start_time)
     run_summary= time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
-    #run_summary = str(datetime.timedelta(seconds = elapsed_time))
     save_output_summary = output_summary(aligner_params, aligner_alg, file_name,start_run , end_run,run_summary, INPUT_PATH)
     # Write to a text file
     with open(os.path.join(args.out_dir, f"{file_base}_summary.txt"), "w") as file:

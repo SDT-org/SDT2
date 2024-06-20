@@ -18,12 +18,13 @@ AppState = namedtuple('AppState', [
     'filetype',
     'basename',
     'progress',
+    'stage',
     'debug',
     'tempdir_path', # TODO: rename tempdir_path, it's no longer an accurate name
     'sequences_count',
     'alignment_output_path',
     'export_path',
-    'performance_profiles'
+    'performance_profiles',
 ])
 
 def create_app_state(
@@ -32,6 +33,7 @@ def create_app_state(
     filetype="",
     basename="",
     progress=0,
+    stage="",
     debug=False,
     on_update=None,
     tempdir_path="",
@@ -46,6 +48,7 @@ def create_app_state(
         filetype=filetype,
         basename=basename,
         progress=progress,
+        stage=stage,
         debug=debug,
         tempdir_path=tempdir_path,
         sequences_count=sequences_count,

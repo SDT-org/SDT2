@@ -15,6 +15,7 @@ export type AppState = {
   alignment_output_path: string;
   export_path: string;
   performance_profiles: { [_: string]: number };
+  stage: string;
   client: {
     dataView: "heatmap" | "plot";
     cluster_method: (typeof clusterMethods)[number];
@@ -38,6 +39,7 @@ export const initialAppState: AppState = {
   export_path: "",
   // These are just to make frontend easier to test, they get overwritten during the initial syncAppState
   performance_profiles: { best: 4, balanced: 2, low: 1 },
+  stage: "Preprocessing",
   client: {
     dataView: "heatmap",
     cluster_method: "Neighbor-Joining",
