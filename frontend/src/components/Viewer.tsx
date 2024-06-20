@@ -87,7 +87,13 @@ export const Viewer = ({
         const [tickText, ...parsedData] = data;
         setHeatmapTickText(tickText as string[]);
         setHeatmapData(parsedData);
-        updatePlotState({ vmin: metadata.minVal });
+        updatePlotState({
+          vmin: metadata.minVal,
+          ...(appState.sequences_count > 99 && {
+            axis_labels: false,
+            cellspace: 0,
+          }),
+        });
       }),
       window.pywebview.api.get_line_histo_data().then((data) => {
         const histogramData = JSON.parse(data.replace(/\bNaN\b/g, "null"));
