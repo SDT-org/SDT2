@@ -88,7 +88,7 @@ const RunnerSettings = ({
 
   return (
     <>
-      <div className="app-main centered">
+      <div className="app-main centered runner">
         <div className="form-wrapper runner-wrapper">
           <div className="form">
             <div className="field">

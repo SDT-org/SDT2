@@ -98,9 +98,14 @@
   grid-area: main;
   overflow: auto;
   background: #fff;
+  min-width: 20rem;
 
   img {
     margin: 0 auto;
+  }
+
+  &.runner, &.loader {
+    padding: 1.6rem;
   }
 }
 
@@ -613,7 +618,10 @@ select, select option {
   }
 
   .cancel-run {
+    position: absolute;
+    bottom: 2rem;
     display: block;
-    margin-top: 1.6rem;
+    width: 100%;
+    max-width: 25rem;
   }
 }

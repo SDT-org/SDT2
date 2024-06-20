@@ -40,7 +40,7 @@ export const Loader = ({ appState }: { appState: AppState }) => {
           }}
           isDisabled={canceling}
         >
-          {canceling ? "Canceling..." : "Cancel Run..."}
+          {canceling ? "Canceling..." : "Cancel Run"}
         </Button>
       </div>
     </div>
