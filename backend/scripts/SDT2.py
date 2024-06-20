@@ -143,7 +143,7 @@ def is_aa(seq):
 # Performs sequence alignment using BioPython PairwiseAligner
 def biopython_align(ids, seq_dict, sample_size=3):
     args = parse_args()
-    sample_size = 3 # Example value, set this to your actual sample size
+    sample_size = 3 
 
     # Sample sequences from the dictionary
     sampled_seqs = random.sample(list(seq_dict.values()), min(len(seq_dict), sample_size))

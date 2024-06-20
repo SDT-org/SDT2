@@ -257,6 +257,8 @@ class Api:
 
         df = pd.read_csv(matrix_path, delimiter=",", index_col=0, header=None, names=column_names)
         tickText = df.index.tolist()
+        count = len(tickText)
+        set_state(sequences_count = count)
         data = df.to_numpy()
         diag_mask = np.eye(data.shape[0], dtype=bool)
         data_no_diag = np.where(diag_mask, np.nan, data)
