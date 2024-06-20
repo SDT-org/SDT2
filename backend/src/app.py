@@ -435,6 +435,7 @@ if __name__ == "__main__":
         # TODO: store last window size and position
         width=1200,
         height=900,
+        min_size=(640,480),
         # maximized=True
     )
 
