@@ -155,7 +155,7 @@ export const Viewer = ({
         </div>
         <TabList className="data-view">
           <Tab id="heatmap">Heatmap</Tab>
-          <Tab id="plot">Plot</Tab>
+          <Tab id="plot">Distribution</Tab>
         </TabList>
       </div>
 
