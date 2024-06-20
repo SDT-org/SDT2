@@ -595,7 +595,10 @@ select, select option {
   .fill {
     background: black;
     height: 100%;
-    transition: width 0.25s;
+
+    &[data-animation=true] {
+      transition: width 0.25s;
+    }
   }
 }
 
