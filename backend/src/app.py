@@ -44,7 +44,7 @@ try:
 except:
     cpu_count = 2
 
-performance_profiles = dict(balanced=int(cpu_count / 2), best=cpu_count, low=1)
+performance_profiles = dict(balanced=int(cpu_count / 2), best=cpu_count, high=max(cpu_count - 1, 1), low=1)
 performance_profiles.setdefault("missing_key", cpu_count)
 
 mimetypes.add_type("text/fasta", ".fasta")

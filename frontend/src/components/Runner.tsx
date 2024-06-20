@@ -260,7 +260,7 @@ const RunnerSettings = ({
                   </div>
                 </div>
                 <div className="field runner-settings performance">
-                  <label className="header">Analysis Performance</label>
+                  <label className="header">Compute Mode</label>
                   <div className="col-2">
                     <select
                       className="="
@@ -271,8 +271,14 @@ const RunnerSettings = ({
                       }
                       value={runnerSettings.performance_profile as string}
                     >
-                      {performanceProfiles.map((value) => (
-                        <option key={value}>{value}</option>
+                      {Object.keys(performanceProfiles).map((key) => (
+                        <option key={key} value={key}>
+                          {
+                            performanceProfiles[
+                              key as keyof typeof performanceProfiles
+                            ]
+                          }
+                        </option>
                       ))}
                     </select>
                     <div className="field runner-settings performance-details">

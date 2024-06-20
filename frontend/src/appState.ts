@@ -1,6 +1,11 @@
 import React, { ErrorInfo } from "react";
 
-export const performanceProfiles = ["best", "balanced", "low"] as const;
+export const performanceProfiles = {
+  best: "Best",
+  high: "High Performance",
+  balanced: "Balanced",
+  low: "Energy Saver",
+} as const;
 export const alignmentTypes = ["global", "local"] as const;
 export const clusterMethods = ["Neighbor-Joining", "UPGMA", "None"] as const;
 
@@ -22,7 +27,7 @@ export type AppState = {
   client: {
     dataView: "heatmap" | "plot";
     cluster_method: (typeof clusterMethods)[number];
-    performance_profile: (typeof performanceProfiles)[number];
+    performance_profile: keyof typeof performanceProfiles;
     alignment_type: (typeof alignmentTypes)[number];
     error?: Error;
     errorInfo?: ErrorInfo;
@@ -41,7 +46,7 @@ export const initialAppState: AppState = {
   alignment_output_path: "",
   export_path: "",
   // These are just to make frontend easier to test, they get overwritten during the initial syncAppState
-  performance_profiles: { best: 4, balanced: 2, low: 1 },
+  performance_profiles: { best: 4, high: 3, balanced: 2, low: 1 },
   stage: "Preprocessing",
   pair_progress: 0,
   pair_count: 0,
