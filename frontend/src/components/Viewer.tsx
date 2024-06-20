@@ -87,7 +87,7 @@ export const Viewer = ({
         const [tickText, ...parsedData] = data;
         setHeatmapTickText(tickText as string[]);
         setHeatmapData(parsedData);
-        updatePlotState({
+        updateHeatmapState({
           vmin: metadata.minVal,
           ...(appState.sequences_count > 99 && {
             axis_labels: false,
@@ -108,7 +108,7 @@ export const Viewer = ({
     getData();
   }, []);
 
-  const updatePlotState = (newState: Partial<HeatmapSettings>) => {
+  const updateHeatmapState = (newState: Partial<HeatmapSettings>) => {
     setHeatmapSettings((previous) => {
       return {
         ...previous,
@@ -169,7 +169,7 @@ export const Viewer = ({
         <Heatmap
           data={heatmapData}
           settings={heatmapSettings}
-          updateSettings={updatePlotState}
+          updateSettings={updateHeatmapState}
           tickText={heatmapTickText}
         />
       </TabPanel>
