@@ -27,6 +27,8 @@ start_time = time.time()
 print("time start")
 start_run = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 useable_processes = cpu_count() - 1
+aligner_params = None
+aligner_alg = None
 
 
 # Arguments for run
@@ -110,7 +112,16 @@ def residue_check(seq):
 
 
 # Performs sequence alignment using BioPython PairwiseAligner
-def biopython_align(ids, seq_dict, is_aa):
+def biopython_align(id_sequence_pair, is_aa):
+    global aligner_params
+    global aligner_alg
+
+    ids = id_sequence_pair[0]
+    id1 = ids[0]
+    id2 = ids[1]
+    seq1 = id_sequence_pair[1][0]
+    seq2 = id_sequence_pair[1][1]
+
     args = parse_args()
     aligner = PairwiseAligner()
     aligner.match_score = getattr(args, "match", 1.5)
@@ -130,13 +141,11 @@ def biopython_align(ids, seq_dict, is_aa):
     aligner.mode = args.alignment_type
     aligner_params = aligner
     aligner_alg = str(aligner.algorithm)
-    aln = aligner.align(seq_dict[ids[0]], seq_dict[ids[1]])[0]
+    aln = aligner.align(seq1, seq2)[0]
     score = get_similarity(aln[0], aln[1])
 
     if args.aln_out:
-        fname = os.path.join(
-            args.aln_out, str(ids[0] + "__" + ids[1]) + "_aligned.fasta"
-        )
+        fname = os.path.join(args.aln_out, str(id1 + "__" + id2) + "_aligned.fasta")
         aligned_sequences = list(aln)
         seq_records = [
             SeqRecord(Seq(aligned_sequences[i]), id=ids[i], description="")
@@ -144,11 +153,11 @@ def biopython_align(ids, seq_dict, is_aa):
         ]  ## rewrite for multi
         SeqIO.write(seq_records, fname, "fasta")
 
-    return score, aligner_params, aligner_alg
+    return score
 
 
-def process_pair(ids, seq_dict, counter, total_pairs, is_aa):
-    score, aligner_params, aligner_alg = biopython_align(ids, seq_dict, is_aa)
+def process_pair(id_sequence_pair, counter, total_pairs, is_aa):
+    score = biopython_align(id_sequence_pair, is_aa)
     counter.value += 1
     print(
         "\rPerforming alignment: progress "
@@ -157,7 +166,7 @@ def process_pair(ids, seq_dict, counter, total_pairs, is_aa):
         +counter.value,
         flush=True,
     )
-    return ids, score, aligner_params, aligner_alg
+    return id_sequence_pair[0], score
 
 
 ## Creates arrays for storing scores as matrix and set pool for multiprocessing.
@@ -172,6 +181,11 @@ def get_alignment_scores(seq_dict, args):
     counter = manager.Value("i", 0)
     # create list  combinations including self v. self
     combos = list(cwr(seq_ids, 2))
+    id_sequence_pairs = []
+
+    for ids in combos:
+        id_sequence_pairs.append([ids, [seq_dict[ids[0]], seq_dict[ids[1]]]])
+
     # calculate the total combinations witout self
     total_pairs = sum(1 for _ in cwr(seq_ids, 2))
     print(f"\rNumber of sequences: {len(seq_ids)}\r", flush=True)
@@ -186,20 +200,19 @@ def get_alignment_scores(seq_dict, args):
 
     bound_process_pair = partial(
         process_pair,
-        seq_dict=seq_dict,
         counter=counter,
         total_pairs=total_pairs,
         is_aa=is_aa,
     )
 
     with Pool(processes=num_processes) as pool:
-        results = pool.map(bound_process_pair, combos)
+        results = pool.map(bound_process_pair, id_sequence_pairs)
         for result in results:
-            [seqid1, seqid2], score, aligner_params, aligner_alg = result
+            [seqid1, seqid2], score = result
             seqid1, seqid2 = order[seqid1], order[seqid2]
             dist_scores[seqid1, seqid2] = score
             dist_scores[seqid2, seqid1] = score
-    return dist_scores, order, aligner_params, aligner_alg
+    return dist_scores, order
 
 
 # Reorder the scores matrix based on the tree and save it to a new CSV
@@ -312,9 +325,7 @@ def main():
 
     print("Stage: Analyzing")
 
-    dist_scores, order, aligner_params, aligner_alg = get_alignment_scores(
-        seq_dict, args
-    )
+    dist_scores, order = get_alignment_scores(seq_dict, args)
 
     order = list(order.keys())
 
