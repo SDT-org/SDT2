@@ -71,6 +71,21 @@ def get_matrix_path():
         return state.filename[0]
 
 
+def find_source_files(prefix, suffixes):
+    state = get_state()
+    with os.scandir(state.tempdir_path) as entries:
+        for entry in entries:
+            if (
+                entry.is_file()
+                and entry.name.startswith(prefix)
+                and any(
+                    os.path.splitext(entry.name)[0].endswith(suffix)
+                    for suffix in suffixes
+                )
+            ):
+                yield entry
+
+
 class Api:
     def fullscreen(self):
         webview.windows[0].toggle_fullscreen()
@@ -339,15 +354,16 @@ class Api:
     def export_data(self, args: dict):
         state = get_state()
         matrix_path = get_matrix_path()
-        suffixes = ["_cols", "_mat", "_summary", "_tree"]
-
-        if args["output_cluster"] == True:
-            suffixes.append("_cluster")
 
         if state.filetype == "text/fasta":
             prefix = os.path.splitext(state.basename)[0]
+            suffixes = ["_cols", "_mat", "_summary", "_tree"]
         else:
             prefix = os.path.splitext(state.basename)[0].removesuffix("_mat")
+            suffixes = ["_mat"]
+
+        if args["output_cluster"] == True:
+            suffixes.append("_cluster")
 
         if args["output_cluster"] == True:
             command = (
@@ -363,37 +379,19 @@ class Api:
             ]
             subprocess.run(command, check=True)
 
-        destination_files = []
-        with os.scandir(state.tempdir_path) as entries:
-            for entry in entries:
-                if (
-                    entry.is_file()
-                    and entry.name.startswith(prefix)
-                    and any(
-                        os.path.splitext(entry.name)[0].endswith(suffix)
-                        for suffix in suffixes
-                    )
-                ):
-                    destination_path = os.path.join(state.export_path, entry.name)
-                    destination_files.append(destination_path)
+        destination_files = [
+            os.path.join(state.export_path, entry.name)
+            for entry in find_source_files(prefix, suffixes)
+        ]
 
         if not self.confirm_overwrite(destination_files):
             return False
 
-        with os.scandir(state.tempdir_path) as entries:
-            for entry in entries:
-                if (
-                    entry.is_file()
-                    and entry.name.startswith(prefix)
-                    and any(
-                        os.path.splitext(entry.name)[0].endswith(suffix)
-                        for suffix in suffixes
-                    )
-                ):
-                    destination_path = os.path.join(state.export_path, entry.name)
-                    temp_destination_path = destination_path + ".tmp"
-                    shutil.copy2(entry.path, temp_destination_path)
-                    os.replace(temp_destination_path, destination_path)
+        for entry in find_source_files(prefix, suffixes):
+            destination_path = os.path.join(state.export_path, entry.name)
+            temp_destination_path = destination_path + ".tmp"
+            shutil.copy2(entry.path, temp_destination_path)
+            os.replace(temp_destination_path, destination_path)
 
         return True
 
