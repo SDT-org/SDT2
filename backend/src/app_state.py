@@ -27,7 +27,8 @@ AppState = namedtuple('AppState', [
     'performance_profiles',
     'pair_progress',
     'pair_count',
-    'estimated_time'
+    'estimated_time',
+    'validation_error_id'
 ])
 
 def create_app_state(
@@ -47,6 +48,7 @@ def create_app_state(
     pair_progress=0,
     pair_count=0,
     estimated_time=None,
+    validation_error_id=None
 ):
     default_state = AppState(
         view=view,
@@ -63,7 +65,8 @@ def create_app_state(
         performance_profiles=performance_profiles,
         pair_progress=pair_progress,
         pair_count=pair_count,
-        estimated_time=estimated_time
+        estimated_time=estimated_time,
+        validation_error_id=validation_error_id
     )
 
     state = default_state

@@ -103,7 +103,7 @@ const RunnerSettings = ({
                 </button>
               </div>
             </div>
-            {isFastaType ? (
+            {isFastaType && !appState.validation_error_id ? (
               <>
                 <details className="advanced-settings">
                   <summary>
@@ -300,7 +300,11 @@ const RunnerSettings = ({
                   <button
                     type="button"
                     onClick={handleRun}
-                    disabled={!Boolean(fileName) ?? false}
+                    disabled={
+                      !Boolean(fileName) ??
+                      !appState.validation_error_id ??
+                      false
+                    }
                   >
                     Run
                   </button>
@@ -308,9 +312,16 @@ const RunnerSettings = ({
               </>
             ) : null}
             {fileName && !isFastaType ? (
-              <div className="incompatible-filetype">
+              <div className="validation-error">
                 This file is not compatible with SDT2. Please select a file with
                 an extension of .fasta or .csv.
+              </div>
+            ) : null}
+            {appState.validation_error_id === "SEQUENCE_TOO_LONG" ? (
+              <div className="validation-error">
+                This file contains one or more sequences that are too long (&gt;
+                50000 characters.) Attempting to process this file could cause
+                system instability.
               </div>
             ) : null}
           </div>

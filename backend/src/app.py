@@ -19,6 +19,7 @@ import shutil
 import mimetypes
 from datetime import datetime
 from app_state import create_app_state
+from validations import validate_fasta
 
 is_nuitka = "__compiled__" in globals()
 
@@ -139,7 +140,19 @@ class Api:
                 basename=basename,
             )
         else:
-            set_state(filename=result, filetype=filetype, basename=basename)
+            valid, message = validate_fasta(result[0])
+
+            if valid:
+                set_state(
+                    filename=result,
+                    filetype=filetype,
+                    basename=basename,
+                    validation_error_id=None,
+                )
+            else:
+                set_state(
+                    validation_error_id=message, filename="", basename="", filetype=""
+                )
 
     def select_alignment_output_path(self):
         result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG)

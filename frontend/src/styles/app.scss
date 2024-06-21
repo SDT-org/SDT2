@@ -628,3 +628,11 @@ select, select option {
     max-width: 25rem;
   }
 }
+
+.validation-error {
+  border: 0.1rem solid red;
+  border-radius: 0.4rem;
+  color: red;
+  font-weight: 500;
+  padding: 1rem;
+}
