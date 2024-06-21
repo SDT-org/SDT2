@@ -14,7 +14,7 @@ declare global {
           output_cluster: boolean,
           cluster_threshold_one: number,
           cluster_threshold_two: number,
-        }) => Promise<void>;
+        }) => Promise<boolean>;
         save_image: (args: {
           data: string;
           format: AppState["client"]["saveFormat"];

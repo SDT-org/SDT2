@@ -22,7 +22,9 @@ export const ExportData = () => {
         cluster_threshold_one: thresholds.one,
         cluster_threshold_two: thresholds.two,
       })
-      .then(() => setExportState("success"));
+      .then((result) =>
+        result ? setExportState("success") : setExportState("idle"),
+      );
   }, [exportState]);
 
   return (

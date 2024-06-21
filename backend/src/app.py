@@ -38,6 +38,7 @@ else:
         cluster=[sys.executable, os.path.join(scripts_path, "cluster.py")],
     )
 
+window = None
 temp_dir = tempfile.TemporaryDirectory()
 
 try:
@@ -318,10 +319,31 @@ class Api:
         max_val = int(np.nanmax(data_no_diag))
         return data, tickText, min_val, max_val
 
+    def confirm_overwrite(self, destination_files):
+        if not window:
+            return
+
+        files_to_overwrite = [f for f in destination_files if os.path.exists(f)]
+
+        if not files_to_overwrite:
+            return True
+
+        message = (
+            "The following files will be overwritten:\n\n"
+            + "\n".join(map(os.path.basename, files_to_overwrite))
+            + "\n\nAre you sure?"
+        )
+
+        return window.create_confirmation_dialog("Warning", message)
+
     def export_data(self, args: dict):
         state = get_state()
         matrix_path = get_matrix_path()
-        suffixes = ["_cols", "_cluster", "_mat", "_summary", "_tree"]
+        suffixes = ["_cols", "_mat", "_summary", "_tree"]
+
+        if args["output_cluster"] == True:
+            suffixes.append("_cluster")
+
         if state.filetype == "text/fasta":
             prefix = os.path.splitext(state.basename)[0]
         else:
@@ -341,6 +363,23 @@ class Api:
             ]
             subprocess.run(command, check=True)
 
+        destination_files = []
+        with os.scandir(state.tempdir_path) as entries:
+            for entry in entries:
+                if (
+                    entry.is_file()
+                    and entry.name.startswith(prefix)
+                    and any(
+                        os.path.splitext(entry.name)[0].endswith(suffix)
+                        for suffix in suffixes
+                    )
+                ):
+                    destination_path = os.path.join(state.export_path, entry.name)
+                    destination_files.append(destination_path)
+
+        if not self.confirm_overwrite(destination_files):
+            return False
+
         with os.scandir(state.tempdir_path) as entries:
             for entry in entries:
                 if (
@@ -355,6 +394,8 @@ class Api:
                     temp_destination_path = destination_path + ".tmp"
                     shutil.copy2(entry.path, temp_destination_path)
                     os.replace(temp_destination_path, destination_path)
+
+        return True
 
     def get_heatmap_data(self):
         data, tickText, min_val, max_val = self.load_data()
