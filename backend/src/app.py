@@ -45,7 +45,9 @@ try:
 except:
     cpu_count = 2
 
-performance_profiles = dict(balanced=int(cpu_count / 2), best=cpu_count, high=max(cpu_count - 1, 1), low=1)
+performance_profiles = dict(
+    balanced=int(cpu_count / 2), best=cpu_count, high=max(cpu_count - 1, 1), low=1
+)
 performance_profiles.setdefault("missing_key", cpu_count)
 
 mimetypes.add_type("text/fasta", ".fasta")
@@ -53,22 +55,19 @@ mimetypes.add_type("text/fasta", ".fas")
 mimetypes.add_type("text/fasta", ".faa")
 mimetypes.add_type("text/fasta", ".fnt")
 mimetypes.add_type("text/fasta", ".fa")
-matrix_filetypes = (
-    "text/csv",
-    "application/vnd.ms-excel",
-    "text/plain"
-)
+matrix_filetypes = ("text/csv", "application/vnd.ms-excel", "text/plain")
 
 cancel_current_run = False
+
 
 def get_matrix_path():
     state = get_state()
 
-    if state.filetype == 'text/fasta':
+    if state.filetype == "text/fasta":
         file_base = os.path.splitext(state.basename)[0]
         return os.path.join(state.tempdir_path, f"{file_base}_mat.csv")
     else:
-       return state.filename[0]
+        return state.filename[0]
 
 
 class Api:
@@ -120,7 +119,6 @@ class Api:
         except IOError as e:
             print(f"An error occurred while copying the file: {e}")
 
-
     def open_file_dialog(self):
         result = webview.windows[0].create_file_dialog(
             webview.OPEN_DIALOG, allow_multiple=False
@@ -132,7 +130,7 @@ class Api:
         filetype, _ = mimetypes.guess_type(basename)
         print(basename, filetype)
 
-        if (filetype in matrix_filetypes):
+        if filetype in matrix_filetypes:
             set_state(
                 view="viewer",
                 filename=result,
@@ -261,8 +259,12 @@ class Api:
                     if pair_progress > 0:
                         current_time = datetime.now()
                         time_taken = current_time - start_time
-                        estimated_time = get_state().pair_count / (pair_progress / time_taken.total_seconds())
-                        set_state(pair_progress=pair_progress, estimated_time=estimated_time)
+                        estimated_time = get_state().pair_count / (
+                            pair_progress / time_taken.total_seconds()
+                        )
+                        set_state(
+                            pair_progress=pair_progress, estimated_time=estimated_time
+                        )
 
                 if sequences_match:
                     set_state(sequences_count=int(sequences_match.group(1)))
@@ -277,7 +279,9 @@ class Api:
                     p.terminate()
                     p.wait()
                     cancel_current_run = False
-                    set_state(view="runner", progress=0, pair_progress=0, estimated_time=None)
+                    set_state(
+                        view="runner", progress=0, pair_progress=0, estimated_time=None
+                    )
                     return
 
             p.wait()
@@ -297,14 +301,16 @@ class Api:
 
         # https://stackoverflow.com/a/57824142
         # SDT1 matrix CSVs do not have padding for columns
-        with open(matrix_path, 'r') as temp_f:
-            col_count = [ len(l.split(",")) for l in temp_f.readlines() ]
+        with open(matrix_path, "r") as temp_f:
+            col_count = [len(l.split(",")) for l in temp_f.readlines()]
             column_names = [i for i in range(0, max(col_count))]
 
-        df = pd.read_csv(matrix_path, delimiter=",", index_col=0, header=None, names=column_names)
+        df = pd.read_csv(
+            matrix_path, delimiter=",", index_col=0, header=None, names=column_names
+        )
         tickText = df.index.tolist()
         count = len(tickText)
-        set_state(sequences_count = count)
+        set_state(sequences_count=count)
         data = df.to_numpy()
         diag_mask = np.eye(data.shape[0], dtype=bool)
         data_no_diag = np.where(diag_mask, np.nan, data)
@@ -337,11 +343,18 @@ class Api:
 
         with os.scandir(state.tempdir_path) as entries:
             for entry in entries:
-               if entry.is_file() and entry.name.startswith(prefix) and any(os.path.splitext(entry.name)[0].endswith(suffix) for suffix in suffixes):
-                   destination_path = os.path.join(state.export_path, entry.name)
-                   temp_destination_path = destination_path + ".tmp"
-                   shutil.copy2(entry.path, temp_destination_path)
-                   os.replace(temp_destination_path, destination_path)
+                if (
+                    entry.is_file()
+                    and entry.name.startswith(prefix)
+                    and any(
+                        os.path.splitext(entry.name)[0].endswith(suffix)
+                        for suffix in suffixes
+                    )
+                ):
+                    destination_path = os.path.join(state.export_path, entry.name)
+                    temp_destination_path = destination_path + ".tmp"
+                    shutil.copy2(entry.path, temp_destination_path)
+                    os.replace(temp_destination_path, destination_path)
 
     def get_heatmap_data(self):
         data, tickText, min_val, max_val = self.load_data()
@@ -349,12 +362,9 @@ class Api:
         parsedData = heat_data.values.tolist()
         return json.dumps(
             dict(
-                metadata=dict(
-                    minVal=min_val,
-                    maxVal=max_val
-                ),
-                data=([tickText] + parsedData)
-             )
+                metadata=dict(minVal=min_val, maxVal=max_val),
+                data=([tickText] + parsedData),
+            )
         )
 
     def get_line_histo_data(self):
@@ -448,7 +458,7 @@ if __name__ == "__main__":
         # TODO: store last window size and position
         width=1200,
         height=900,
-        min_size=(640,480),
+        min_size=(640, 480),
         # maximized=True
     )
 
