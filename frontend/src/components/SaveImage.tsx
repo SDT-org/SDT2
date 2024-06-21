@@ -35,16 +35,11 @@ export const SaveImage = ({ plotType }: { plotType?: string }) => {
               },
             }))
           }
+          value={appState.client.saveFormat}
         >
-          <option value="png" selected={appState.client.saveFormat === "png"}>
-            PNG
-          </option>
-          <option value="jpeg" selected={appState.client.saveFormat === "jpeg"}>
-            JPEG
-          </option>
-          <option value="svg" selected={appState.client.saveFormat === "svg"}>
-            SVG
-          </option>
+          <option value="png">PNG</option>
+          <option value="jpeg">JPEG</option>
+          <option value="svg">SVG</option>
         </select>
       </div>
       <button
