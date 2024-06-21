@@ -10,7 +10,7 @@
     "clean:default": "rm -rf dist 2>/dev/null; rm -rf gui 2>/dev/null; rm -rf build 2>/dev/null; ",
     "clean:windows": "if exist dist rd /S /Q dist & if exist build rd /S /Q build & if exist gui rd /S /Q gui",
     "dev": "parcel serve frontend/src/index.html",
-    "frontend:dev": "parcel build frontend/src/index.html --public-url . -d gui",
+    "frontend:dev": "NODE_ENV=development parcel build frontend/src/index.html --no-minify --public-url . -d gui",
     "frontend:dev:serve": "parcel serve frontend/src/index.html --public-url . -d gui",
     "frontend:prod": "parcel build frontend/src/index.html --public-url . --no-source-maps -d gui",
     "init": "npm install && run-script-os",
