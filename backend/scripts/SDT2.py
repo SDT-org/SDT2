@@ -22,26 +22,6 @@ from Bio.Phylo.TreeConstruction import (
     DistanceTreeConstructor,
     DistanceMatrix,
 )
-from line_profiler import LineProfiler
-from memory_profiler import profile
-
-
-def line_profile(func):
-    def wrapper(*args, **kwds):
-        profiler = LineProfiler()
-        profiler.add_function(func)
-        profiler.enable_by_count()
-        result = func(*args, **kwds)
-        profiler.disable_by_count()
-        # Write profiling results to a file
-        with open("profiling_results.txt", "w") as f:
-            profiler.print_stats(stream=f)
-
-        profiler.print_stats()
-        return result
-
-    return wrapper
-
 
 start_time = time.time()
 print("time start")
@@ -91,7 +71,6 @@ def parse_args():
     return parser.parse_args()
 
 
-@profile
 def run_preprocessing(raw_seq_dict):
     # convert seqrecord element in raw dict to key,vale of ids and seqs
     seq_dict = {}
@@ -131,7 +110,6 @@ def residue_check(seq):
 
 
 # Performs sequence alignment using BioPython PairwiseAligner
-@profile
 def biopython_align(ids, seq_dict, is_aa):
     args = parse_args()
     aligner = PairwiseAligner()
@@ -183,7 +161,6 @@ def process_pair(ids, seq_dict, counter, total_pairs, is_aa):
 
 
 ## Creates arrays for storing scores as matrix and set pool for multiprocessing.
-@profile
 def get_alignment_scores(seq_dict, args):
     num_processes = args.num_processes
     seq_ids = list(seq_dict.keys())
@@ -313,7 +290,6 @@ def fasta_alignments(seq_records, fname):
     SeqIO.write(seq_records, fname, "fasta")
 
 
-@profile
 def main():
     args = parse_args()
     INPUT_PATH = args.input_file
