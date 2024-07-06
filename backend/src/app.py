@@ -17,6 +17,7 @@ import base64
 import urllib.parse
 import shutil
 import mimetypes
+import math
 from datetime import datetime
 from app_state import create_app_state
 from validations import validate_fasta
@@ -44,10 +45,13 @@ temp_dir = tempfile.TemporaryDirectory()
 try:
     cpu_count = multiprocessing.cpu_count()
 except:
-    cpu_count = 2
+    cpu_count = 1
 
 performance_profiles = dict(
-    balanced=int(cpu_count / 2), best=cpu_count, high=max(cpu_count - 1, 1), low=1
+    balanced=int(math.floor(max([cpu_count / 2, 1]))),
+    best=cpu_count,
+    high=max(cpu_count - 1, 1),
+    low=1,
 )
 performance_profiles.setdefault("missing_key", cpu_count)
 
