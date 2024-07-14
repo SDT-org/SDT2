@@ -1,0 +1,36 @@
+.react-aria-ModalOverlay {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  display: grid;
+  place-content: center;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 10;
+}
+
+.react-aria-Modal {
+  z-index: 11;
+  background: white;
+  border-radius: 0.4rem;
+  box-shadow: 0 .2rem 1rem rgba(0, 0, 0, 0.1);
+  padding: 1.6rem;
+  font-size: 0.875rem;
+
+  .actions {
+    margin-top: 1.6rem;
+    display: flex;
+    gap: 1.6rem;
+    justify-content: flex-end;
+  }
+}
+
+.export-modal {
+  max-width: 30rem;
+
+  .form {
+    gap: 0.8rem;
+  }
+}
