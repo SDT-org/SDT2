@@ -1,7 +1,9 @@
 def validate_fasta(filepath):
     with open(filepath) as file:
         sequence = ""
+        sequence_name = ""
         sequence_count = 0
+        sequence_names = []
 
         for line in file:
             line = line.strip()
@@ -9,11 +11,18 @@ def validate_fasta(filepath):
             if not line:
                 continue
             if line.startswith(">"):
+                if line in sequence_names:
+                    return False, "DUPLICATE_SEQUENCE_NAME"
+                if sequence_name and line != sequence_name and len(sequence) == 0:
+                    return False, "ZERO_LENGTH_SEQUENCE"
                 sequence = ""
+                sequence_name = line
+                sequence_names.append(sequence_name)
                 sequence_count += 1
                 continue
-            sequence += line.strip()
 
+            sequence += line.strip()
+            print(len(sequence))
             if len(sequence) > 50000:
                 return False, "SEQUENCE_TOO_LONG"
 

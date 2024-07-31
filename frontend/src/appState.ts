@@ -1,4 +1,5 @@
 import React, { ErrorInfo } from "react";
+import messages from "./messages";
 
 export const performanceProfiles = {
   best: "Best",
@@ -24,7 +25,7 @@ export type AppState = {
   pair_progress: number;
   pair_count: number;
   estimated_time?: number;
-  validation_error_id?: "SEQUENCE_TOO_LONG" | "NOT_ENOUGH_SEQUENCES";
+  validation_error_id?: keyof typeof messages;
   client: {
     dataView: "heatmap" | "plot";
     cluster_method: (typeof clusterMethods)[number];

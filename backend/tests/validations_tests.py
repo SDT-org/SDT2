@@ -14,8 +14,8 @@ class TestValidateFasta(unittest.TestCase):
         self.assertTrue(result)
         self.assertEqual(message, "VALID")
 
-    def test_sequence_too_long(self):
-        result, message = validate_fasta(fasta_path('sequences_too_long.fasta'))
+    def test_sequence_too_long_fasta(self):
+        result, message = validate_fasta(fasta_path('too_long.fasta'))
         self.assertFalse(result)
         self.assertEqual(message, "SEQUENCE_TOO_LONG")
 
@@ -24,12 +24,22 @@ class TestValidateFasta(unittest.TestCase):
         self.assertFalse(result)
         self.assertEqual(message, "NOT_ENOUGH_SEQUENCES")
 
+    def test_zero_length_fasta(self):
+        result, message = validate_fasta(fasta_path('zero_length.fasta'))
+        self.assertFalse(result)
+        self.assertEqual(message, "ZERO_LENGTH_SEQUENCE")
+
     def test_one_sequence_fasta(self):
         result, message = validate_fasta(fasta_path('one.fasta'))
         self.assertFalse(result)
         self.assertEqual(message, "NOT_ENOUGH_SEQUENCES")
 
-    def test_spaces(self):
+    def test_duplicate_name_fasta(self):
+        result, message = validate_fasta(fasta_path('duplicate_name.fasta'))
+        self.assertFalse(result)
+        self.assertEqual(message, "DUPLICATE_SEQUENCE_NAME")
+
+    def test_spaces_fasta(self):
         result, message = validate_fasta(fasta_path('spaces.fasta'))
         self.assertTrue(result)
         self.assertEqual(message, "VALID")
