@@ -21,8 +21,13 @@ class TestValidateFasta(unittest.TestCase):
 
     def test_empty_fasta(self):
         result, message = validate_fasta(fasta_path('empty.fasta'))
-        self.assertTrue(result)
-        self.assertEqual(message, "VALID")
+        self.assertFalse(result)
+        self.assertEqual(message, "NOT_ENOUGH_SEQUENCES")
+
+    def test_one_sequence_fasta(self):
+        result, message = validate_fasta(fasta_path('one.fasta'))
+        self.assertFalse(result)
+        self.assertEqual(message, "NOT_ENOUGH_SEQUENCES")
 
     def test_spaces(self):
         result, message = validate_fasta(fasta_path('spaces.fasta'))

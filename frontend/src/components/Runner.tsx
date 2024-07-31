@@ -7,6 +7,7 @@ import {
   clusterMethods,
 } from "../appState";
 import { NumberInput } from "./NumberInput";
+import messages from "../messages";
 
 export type RunSDT2Args = Pick<
   AppState["client"],
@@ -313,15 +314,12 @@ const RunnerSettings = ({
             ) : null}
             {fileName && !isFastaType ? (
               <div className="validation-error">
-                This file is not compatible with SDT2. Please select a file with
-                an extension of .fasta or .csv.
+                {messages["INVALID_FILE_TYPE"]}
               </div>
             ) : null}
-            {appState.validation_error_id === "SEQUENCE_TOO_LONG" ? (
+            {appState.validation_error_id ? (
               <div className="validation-error">
-                This file contains one or more sequences that are too long (&gt;
-                50000 characters.) Attempting to process this file could cause
-                system instability.
+                {messages[appState.validation_error_id]}
               </div>
             ) : null}
           </div>
