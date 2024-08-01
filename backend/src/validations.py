@@ -22,7 +22,7 @@ def validate_fasta(filepath):
                 continue
 
             sequence += line.strip()
-            print(len(sequence))
+
             if len(sequence) > 50000:
                 return False, "SEQUENCE_TOO_LONG"
 
