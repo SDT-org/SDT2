@@ -322,6 +322,8 @@ def main():
 
     dist_scores, order = get_alignment_scores(seq_dict, args)
 
+    print("Stage: Postprocessing")
+
     order = list(order.keys())
 
     dm = create_distance_matrix(dist_scores, order)
