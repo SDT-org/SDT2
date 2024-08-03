@@ -1,11 +1,12 @@
 import time
-import datetime
 import platform
 import psutil
 import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+from config import app_version
 
 # import logging
-import sys
 import re
 import random
 import argparse
@@ -27,9 +28,6 @@ start_time = time.time()
 print("time start")
 start_run = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 useable_processes = cpu_count() - 1
-aligner_params = None
-aligner_alg = None
-
 
 # Arguments for run
 def parse_args():
@@ -271,7 +269,7 @@ def output_summary(file_name, start_time, end_time, run_summary):
     # Run Summary
 
     output_content = f"""
-    SDT v2.0.0-beta release for {platform.system()} built 14/06/2024
+    SDT {app_version} release for {platform.system()}
     Developed by Michael Lund, Josiah Ivey, Brejnev Muhire,
     Darren Martin, Simona Kraberger, Qiyun Zhu, Pierre Lefeuvre, Philippe Roumagnac, Arvind Varsani
 
@@ -289,6 +287,8 @@ def output_summary(file_name, start_time, end_time, run_summary):
     Total runtime: {run_summary}
     """
 
+    print(output_content)
+
     return output_content
 
 
@@ -301,7 +301,6 @@ def main():
     INPUT_PATH = args.input_file
     # logging.basicConfig(level=logging.DEBUG)
 
-    file_path = INPUT_PATH
     file_name = os.path.basename(args.input_file)
     file_base = os.path.splitext(file_name)[0]
 
