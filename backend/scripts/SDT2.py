@@ -72,6 +72,25 @@ def parse_args():
     parser.add_argument("--reg", type=int, help="right extend gap score")
     return parser.parse_args()
 
+def make_aligner(is_aa = False):
+    args = parse_args()
+    aligner = PairwiseAligner()
+    aligner.match_score = getattr(args, "match", 1.5)
+    aligner.mismatch_score = getattr(args, "mismatch", -1)
+    aligner.target_internal_open_gap_score = getattr(args, "iog", -2 if is_aa else -3)
+    aligner.target_internal_extend_gap_score = getattr(args, "ieg", -2)
+    aligner.target_left_open_gap_score = getattr(args, "log", -3 if is_aa else -4)
+    aligner.target_left_extend_gap_score = getattr(args, "leg", -2 if is_aa else -3)
+    aligner.target_right_open_gap_score = getattr(args, "rog", -3 if is_aa else -4)
+    aligner.target_right_extend_gap_score = getattr(args, "reg", -2 if is_aa else -3)
+    aligner.query_internal_open_gap_score = getattr(args, "iog", -2 if is_aa else -3)
+    aligner.query_internal_extend_gap_score = getattr(args, "ieg", -2)
+    aligner.query_left_open_gap_score = getattr(args, "log", -3 if is_aa else -4)
+    aligner.query_left_extend_gap_score = getattr(args, "leg", -2 if is_aa else -3)
+    aligner.query_right_open_gap_score = getattr(args, "rog", -3 if is_aa else -4)
+    aligner.query_right_extend_gap_score = getattr(args, "reg", -2 if is_aa else -3)
+    aligner.mode = args.alignment_type
+    return aligner
 
 def run_preprocessing(raw_seq_dict):
     # convert seqrecord element in raw dict to key,vale of ids and seqs
@@ -113,34 +132,14 @@ def residue_check(seq):
 
 # Performs sequence alignment using BioPython PairwiseAligner
 def biopython_align(id_sequence_pair, is_aa):
-    global aligner_params
-    global aligner_alg
-
+    args = parse_args()
     ids = id_sequence_pair[0]
     id1 = ids[0]
     id2 = ids[1]
     seq1 = id_sequence_pair[1][0]
     seq2 = id_sequence_pair[1][1]
+    aligner = make_aligner(is_aa)
 
-    args = parse_args()
-    aligner = PairwiseAligner()
-    aligner.match_score = getattr(args, "match", 1.5)
-    aligner.mismatch_score = getattr(args, "mismatch", -1)
-    aligner.target_internal_open_gap_score = getattr(args, "iog", -2 if is_aa else -3)
-    aligner.target_internal_extend_gap_score = getattr(args, "ieg", -2)
-    aligner.target_left_open_gap_score = getattr(args, "log", -3 if is_aa else -4)
-    aligner.target_left_extend_gap_score = getattr(args, "leg", -2 if is_aa else -3)
-    aligner.target_right_open_gap_score = getattr(args, "rog", -3 if is_aa else -4)
-    aligner.target_right_extend_gap_score = getattr(args, "reg", -2 if is_aa else -3)
-    aligner.query_internal_open_gap_score = getattr(args, "iog", -2 if is_aa else -3)
-    aligner.query_internal_extend_gap_score = getattr(args, "ieg", -2)
-    aligner.query_left_open_gap_score = getattr(args, "log", -3 if is_aa else -4)
-    aligner.query_left_extend_gap_score = getattr(args, "leg", -2 if is_aa else -3)
-    aligner.query_right_open_gap_score = getattr(args, "rog", -3 if is_aa else -4)
-    aligner.query_right_extend_gap_score = getattr(args, "reg", -2 if is_aa else -3)
-    aligner.mode = args.alignment_type
-    aligner_params = aligner
-    aligner_alg = str(aligner.algorithm)
     aln = aligner.align(seq1, seq2)[0]
     score = get_similarity(aln[0], aln[1])
 
@@ -259,22 +258,15 @@ def save_matrix_to_csv(df, filename):
 #     columnar_df.to_csv(filename + "_cols.csv", mode="w", header=True, index=False)
 
 
-def output_summary(
-    aligner_params, aligner_alg, file_name, start_run, end_run, run_summary, INPUT_PATH
-):
-    aligner_params_str = str(aligner_params).split("\n")
+def output_summary(file_name, start_time, end_time, run_summary):
+    aligner = make_aligner()
+    aligner_params_str = str(aligner).split("\n")
     # Adjust the indentation of each line
     formatted_aligner_params = "\n    ".join(aligner_params_str)
-    # System specs
     build_type = f"{platform.system()} {platform.release()} {platform.machine()}"
-    # Kernel information
     kernel_info = platform.processor()
-    # CPU cores
     cpu_cores = os.cpu_count()
-    # Total system RAM
     total_ram = psutil.virtual_memory().total / (1024**3)
-    # Current date and time
-    current_time = datetime.datetime.now().strftime("%a %b %d %H:%M:%S %Y")
 
     # Run Summary
 
@@ -288,14 +280,15 @@ def output_summary(
     Kernel:  {kernel_info} - auto-detect threads ({cpu_cores} CPU cores detected)
     OS - build: {build_type}
     Run info for {file_name}:
-    Start time:    {start_run}
+    Start time:    {start_time}
 
     BioPython {formatted_aligner_params}
-    Using the {aligner_alg}
+    Using the {str(aligner.algorithm)}
 
-    End time: {end_run}
+    End time: {end_time}
     Total runtime: {run_summary}
     """
+
     return output_content
 
 
@@ -360,13 +353,10 @@ def main():
     elapsed_time = end_time - start_time
     run_summary = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
     save_output_summary = output_summary(
-        aligner_params,
-        aligner_alg,
         file_name,
         start_run,
         end_run,
         run_summary,
-        file_path,
     )
     # Write to a text file
     with open(os.path.join(args.out_dir, f"{file_base}_summary.txt"), "w") as file:
