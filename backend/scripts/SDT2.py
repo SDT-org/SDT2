@@ -153,9 +153,10 @@ def biopython_align(id_sequence_pair, is_aa):
     return score
 
 
-def process_pair(id_sequence_pair, counter, total_pairs, is_aa):
+def process_pair(id_sequence_pair, counter, counter_lock, total_pairs, is_aa):
     score = biopython_align(id_sequence_pair, is_aa)
-    counter.value += 1
+    with counter_lock:
+        counter.value += 1
     print(
         "\rPerforming alignment: progress "
         + str(int((float(counter.value) / total_pairs) * 100))
@@ -176,6 +177,7 @@ def get_alignment_scores(seq_dict, args):
     order = {seq_id: i for i, seq_id in enumerate(seq_ids)}
     manager = Manager()
     counter = manager.Value("i", 0)
+    counter_lock = manager.Lock()
     # create list  combinations including self v. self
     combos = list(cwr(seq_ids, 2))
     id_sequence_pairs = []
@@ -198,6 +200,7 @@ def get_alignment_scores(seq_dict, args):
     bound_process_pair = partial(
         process_pair,
         counter=counter,
+        counter_lock=counter_lock,
         total_pairs=total_pairs,
         is_aa=is_aa,
     )
