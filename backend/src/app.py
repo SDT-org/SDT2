@@ -18,7 +18,7 @@ import urllib.parse
 import shutil
 import mimetypes
 import math
-from datetime import datetime
+from time import perf_counter
 from app_state import create_app_state
 from validations import validate_fasta
 
@@ -247,8 +247,6 @@ class Api:
             print("\nAPI args:", args)
             print("\nRun args:", command)
 
-        start_time = datetime.now()
-
         with Popen(
             command,
             stdout=PIPE,
@@ -260,6 +258,7 @@ class Api:
             sequences_pattern = re.compile(r"Number of sequences: (\d+)")
             pairs_pattern = re.compile(r"Number of pairs:\s(\w+)")
             stage_pattern = re.compile(r"Stage:\s(\w+)")
+            start_time = perf_counter()
 
             for line in p.stdout:
                 if get_state().debug:
@@ -277,14 +276,13 @@ class Api:
                 if pair_progress_match:
                     pair_progress = int(pair_progress_match.group(1))
                     if pair_progress > 0:
-                        current_time = datetime.now()
-                        time_taken = current_time - start_time
-                        estimated_time = get_state().pair_count / (
-                            pair_progress / time_taken.total_seconds()
+                        stop_time = perf_counter()
+                        estimated = round(
+                            (stop_time - start_time)
+                            * (get_state().pair_count / pair_progress - 1)
                         )
-                        set_state(
-                            pair_progress=pair_progress, estimated_time=estimated_time
-                        )
+
+                        set_state(pair_progress=pair_progress, estimated_time=estimated)
 
                 if sequences_match:
                     set_state(sequences_count=int(sequences_match.group(1)))
