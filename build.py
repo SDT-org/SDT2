@@ -117,7 +117,10 @@ def main():
             os.path.join("backend", "src", "app.py"),
             [
                 "--standalone",
+                "--onefile",
                 "--include-data-dir=gui=gui",
+                "--nofollow-import-to=matplotlib",
+                "--nofollow-import-to=doctest",
                 "--output-filename=SDT2",
                 "--windows-disable-console",
                 f"--output-dir={build_path}",
@@ -138,14 +141,15 @@ def main():
             "Specify what to build: 'sdt' or 'cluster' scripts, or 'app' to build everything."
         )
     else:
-        results = [
-            run_command(commands["sdt"]),
-            run_command(commands["cluster"]),
-            run_command(commands["app"]),
-        ]
+        run_command(commands["app"]),
+        # results = [
+        #     run_command(commands["sdt"]),
+        #     run_command(commands["cluster"]),
+        #     run_command(commands["app"]),
+        # ]
 
-        if all(result == True for result in results):
-            copy_script_binaries()
+        # if all(result == True for result in results):
+        #     copy_script_binaries()
 
 
 if __name__ == "__main__":
