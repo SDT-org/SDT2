@@ -26,18 +26,8 @@ from Bio.Phylo.TreeConstruction import (
 )
 
 start_time = time.time()
-print("time start")
 start_run = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 useable_processes = cpu_count() - 1
-
-
-class dotdict(dict):
-    """dot.notation access to dictionary attributes"""
-
-    __getattr__ = dict.get
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
-
 
 # Arguments for run
 def parse_args():
@@ -97,7 +87,7 @@ def make_aligner(args, is_aa=False):
     aligner.query_left_extend_gap_score = args["leg"]
     aligner.query_right_open_gap_score = args["rog"]
     aligner.query_right_extend_gap_score = args["reg"]
-    aligner.mode = args.alignment_type
+    aligner.mode = args["alignment_type"]
     return aligner
 
 
@@ -140,19 +130,19 @@ def residue_check(seq):
 
 
 # Performs sequence alignment using BioPython PairwiseAligner
-def biopython_align(args, id_sequence_pair, is_aa):
+def biopython_align(settings, id_sequence_pair, is_aa):
     ids = id_sequence_pair[0]
     id1 = ids[0]
     id2 = ids[1]
     seq1 = id_sequence_pair[1][0]
     seq2 = id_sequence_pair[1][1]
-    aligner = make_aligner(args, is_aa)
+    aligner = make_aligner(settings, is_aa)
 
     aln = aligner.align(seq1, seq2)[0]
     score = get_similarity(aln[0], aln[1])
 
-    if args.aln_out:
-        fname = os.path.join(args.aln_out, str(id1 + "__" + id2) + "_aligned.fasta")
+    if settings.get("aln_out"):
+        fname = os.path.join(settings["aln_out"], str(id1 + "__" + id2) + "_aligned.fasta")
         aligned_sequences = list(aln)
         seq_records = [
             SeqRecord(Seq(aligned_sequences[i]), id=ids[i], description="")
@@ -163,8 +153,8 @@ def biopython_align(args, id_sequence_pair, is_aa):
     return score
 
 
-def process_pair(id_sequence_pair, args, counter, counter_lock, total_pairs, is_aa):
-    score = biopython_align(args, id_sequence_pair, is_aa)
+def process_pair(id_sequence_pair, settings, counter, counter_lock, total_pairs, is_aa):
+    score = biopython_align(settings, id_sequence_pair, is_aa)
     with counter_lock:
         counter.value += 1
     print(
@@ -178,8 +168,7 @@ def process_pair(id_sequence_pair, args, counter, counter_lock, total_pairs, is_
 
 
 ## Creates arrays for storing scores as matrix and set pool for multiprocessing.
-def get_alignment_scores(seq_dict, args):
-    num_processes = args.num_processes
+def get_alignment_scores(seq_dict, settings):
     seq_ids = list(seq_dict.keys())
     n = len(seq_ids)
     dist_scores = np.zeros((n, n))
@@ -209,14 +198,14 @@ def get_alignment_scores(seq_dict, args):
 
     bound_process_pair = partial(
         process_pair,
-        args=args,
+        settings=settings,
         counter=counter,
         counter_lock=counter_lock,
         total_pairs=total_pairs,
         is_aa=is_aa,
     )
 
-    with Pool(processes=num_processes) as pool:
+    with Pool(processes=settings["num_processes"]) as pool:
         results = pool.map(bound_process_pair, id_sequence_pairs)
         for result in results:
             [seqid1, seqid2], score = result
@@ -300,8 +289,6 @@ def output_summary(args, file_name, start_time, end_time, run_summary):
     Total runtime: {run_summary}
     """
 
-    print(output_content)
-
     return output_content
 
 
@@ -310,38 +297,9 @@ def fasta_alignments(seq_records, fname):
 
 
 def process_data(
-    input_file,
-    out_dir,
-    cluster_method,
-    alignment_type,
-    num_processes,
-    aln_out,
-    match,
-    mismatch,
-    iog,
-    ieg,
-    log,
-    leg,
-    rog,
-    reg,
+  settings
 ):
-    args = dotdict(
-        dict(
-            cluster_method=cluster_method,
-            out_dir=out_dir,
-            alignment_type=alignment_type,
-            num_processes=num_processes,
-            aln_out=aln_out,
-            match=match,
-            mismatch=mismatch,
-            iog=iog,
-            ieg=ieg,
-            log=log,
-            leg=leg,
-            rog=rog,
-            reg=reg,
-        )
-    )
+    input_file = settings["input_file"]
     INPUT_PATH = input_file
     # logging.basicConfig(level=logging.DEBUG)
 
@@ -361,7 +319,7 @@ def process_data(
 
     print("Stage: Analyzing")
 
-    dist_scores, order = get_alignment_scores(seq_dict, args)
+    dist_scores, order = get_alignment_scores(seq_dict, settings)
 
     print("Stage: Postprocessing")
 
@@ -370,8 +328,11 @@ def process_data(
     dm = create_distance_matrix(dist_scores, order)
     aln_scores = 100 - dist_scores
 
+    out_dir = settings["out_dir"]
+    cluster_method = settings["cluster_method"]
+
     if cluster_method == "nj" or cluster_method == "upgma":
-        _, new_order = tree_clustering(args, dm, os.path.join(out_dir, f"{file_base}"))
+        _, new_order = tree_clustering(settings, dm, os.path.join(out_dir, f"{file_base}"))
         reorder_index = [
             order.index(id_) for id_ in new_order
         ]  # create numerical index of order and  of new order IDs
@@ -398,7 +359,7 @@ def process_data(
     elapsed_time = end_time - start_time
     run_summary = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
     save_output_summary = output_summary(
-        args,
+        settings,
         file_name,
         start_run,
         end_run,

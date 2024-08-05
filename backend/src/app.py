@@ -201,35 +201,24 @@ class Api:
 
         set_state(view="loader")
 
-        command = (
-            command_prefix["sdt2"]
-            if isinstance(command_prefix["sdt2"], list)
-            else [command_prefix["sdt2"]]
-        ) + [
-            get_state().filename[0],
-            "--out_dir",
-            temp_dir.name,
-        ]
+        settings = dict()
+        settings["input_file"] = get_state().filename[0]
+        settings["out_dir"] = temp_dir.name
 
         if args.get("alignment_type") == "local":
-            command.append("--alignment_type")
-            command.append("local")
+            settings["alignment_type"] = "local"
         if args.get("alignment_type") == "global":
-            command.append("--alignment_type")
-            command.append("global")
+            settings["alignment_type"] = "global"
         if args.get("cluster_method") == "Neighbor-Joining":
-            command.append("--cluster_method")
-            command.append("nj")
+            settings["cluster_method"] = "nj"
         if args.get("cluster_method") == "UPGMA":
-            command.append("--cluster_method")
-            command.append("upgma")
+            settings["cluster_method"] = "upgma"
         if args.get("cluster_method") == "None":
-            command.append("--cluster_method")
-            command.append("None")
+            settings["cluster_method"] = "none"
         if args.get("performance_profile"):
-            processes = performance_profiles[str(args.get("performance_profile"))]
-            command.append("--num_processes")
-            command.append(str(processes))
+            settings["num_processes"] = performance_profiles[
+                str(args.get("performance_profile"))
+            ]
 
         alignment_output_path = get_state().alignment_output_path
 
@@ -237,33 +226,16 @@ class Api:
         for param in params:
             value = args.get(param)
             if value is not None:
-                command.append(f"--{param}")
-                command.append(str(value))
+                settings[param] = int(value)
 
         if alignment_output_path:
-            command.append("--aln_out")
-            command.append(str(alignment_output_path))
+            settings["aln_out"] = str(alignment_output_path)
 
         if get_state().debug:
             print("\nAPI args:", args)
-            print("\nRun args:", command)
+            print("\nRun settings:", settings)
 
-        process_data(
-            get_state().filename[0],
-            temp_dir.name,
-            "nj",
-            "global",
-            performance_profiles[str(args.get("performance_profile"))],
-            temp_dir.name,
-            1.5,
-            -1,
-            -2,
-            -2,
-            -3,
-            -2,
-            -2,
-            -2,
-        )
+        process_data(settings)
 
         # with Popen(
         #     command,
