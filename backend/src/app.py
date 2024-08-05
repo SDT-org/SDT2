@@ -21,7 +21,7 @@ import math
 from time import perf_counter
 from app_state import create_app_state
 from validations import validate_fasta
-from process_data import main as process_data
+from process_data import process_data
 
 is_nuitka = "__compiled__" in globals()
 

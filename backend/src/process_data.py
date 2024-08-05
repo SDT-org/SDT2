@@ -309,7 +309,7 @@ def fasta_alignments(seq_records, fname):
     SeqIO.write(seq_records, fname, "fasta")
 
 
-def main(
+def process_data(
     input_file,
     out_dir,
     cluster_method,
