@@ -60,96 +60,22 @@ def run_command(command):
     return result.returncode == 0
 
 
-def copy_script_binaries():
-    if sys.platform == "darwin":
-        sdt_path = os.path.join(build_path, "SDT2.app", "Contents", "MacOS", "SDT2")
-        cluster_path = os.path.join(
-            build_path, "cluster.app", "Contents", "MacOS", "cluster"
-        )
-    elif sys.platform == "linux":
-        sdt_path = os.path.join(build_path, "SDT2.bin")
-        cluster_path = os.path.join(build_path, "cluster.bin")
-    elif os.name == "nt":
-        sdt_path = os.path.join(build_path, "SDT2.exe")
-        cluster_path = os.path.join(build_path, "cluster.exe")
-        print(sdt_path)
-
-    app_bin_path = os.path.join(
-        build_path,
-        (
-            os.path.join("app.app", "Contents", "MacOS")
-            if sys.platform == "darwin"
-            else "app.dist"
-        ),
-        "bin",
+def main():
+    command = create_command(
+        os.path.join("backend", "src", "app.py"),
+        [
+            "--standalone",
+            "--onefile",
+            "--include-data-dir=gui=gui",
+            "--nofollow-import-to=matplotlib",
+            "--nofollow-import-to=doctest",
+            "--output-filename=SDT2",
+            "--windows-disable-console",
+            f"--output-dir={build_path}",
+        ],
     )
 
-    if not os.path.exists(app_bin_path):
-        os.makedirs(app_bin_path)
-    shutil.copy2(sdt_path, app_bin_path)
-    shutil.copy2(cluster_path, app_bin_path)
-    print(f"Moved SDT and Cluster binaries into {app_bin_path}")
-
-
-def main():
-    commands = {
-        "sdt": create_command(
-            os.path.join("backend", "scripts", "SDT2.py"),
-            [
-                "--onefile",
-                "--standalone",
-                "--nofollow-import-to=matplotlib",
-                "--nofollow-import-to=doctest",
-                "--nofollow-import-to=pywebview",
-                f"--output-dir={build_path}",
-            ],
-        ),
-        "cluster": create_command(
-            os.path.join("backend", "scripts", "cluster.py"),
-            [
-                "--onefile",
-                "--standalone",
-                "--nofollow-import-to=matplotlib",
-                f"--output-dir={build_path}",
-            ],
-        ),
-        "app": create_command(
-            os.path.join("backend", "src", "app.py"),
-            [
-                "--standalone",
-                "--onefile",
-                "--include-data-dir=gui=gui",
-                "--nofollow-import-to=matplotlib",
-                "--nofollow-import-to=doctest",
-                "--output-filename=SDT2",
-                "--windows-disable-console",
-                f"--output-dir={build_path}",
-            ],
-        ),
-    }
-
-    build_thing = None
-    if len(sys.argv) > 1:
-        build_thing = sys.argv[1]
-
-    if build_thing in commands:
-        run_command(commands[build_thing])
-        if build_thing == "app":
-            copy_script_binaries()
-    elif build_thing != None and len(build_thing):
-        print(
-            "Specify what to build: 'sdt' or 'cluster' scripts, or 'app' to build everything."
-        )
-    else:
-        run_command(commands["app"]),
-        # results = [
-        #     run_command(commands["sdt"]),
-        #     run_command(commands["cluster"]),
-        #     run_command(commands["app"]),
-        # ]
-
-        # if all(result == True for result in results):
-        #     copy_script_binaries()
+    run_command(command)
 
 
 if __name__ == "__main__":
