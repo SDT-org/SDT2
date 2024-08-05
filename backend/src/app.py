@@ -22,6 +22,9 @@ from time import perf_counter
 from app_state import create_app_state
 from validations import validate_fasta
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../scripts")))
+from SDT2 import main as run_sdt2_script
+
 is_nuitka = "__compiled__" in globals()
 
 if is_nuitka:
@@ -247,68 +250,85 @@ class Api:
             print("\nAPI args:", args)
             print("\nRun args:", command)
 
-        with Popen(
-            command,
-            stdout=PIPE,
-            bufsize=1,
-            universal_newlines=True,
-        ) as p:
-            progress_pattern = re.compile(r"progress (\d+)%")
-            pair_progress_pattern = re.compile(r"pair (\d+)")
-            sequences_pattern = re.compile(r"Number of sequences: (\d+)")
-            pairs_pattern = re.compile(r"Number of pairs:\s(\w+)")
-            stage_pattern = re.compile(r"Stage:\s(\w+)")
-            start_time = perf_counter()
+        run_sdt2_script(
+            get_state().filename[0],
+            temp_dir.name,
+            "nj",
+            "global",
+            performance_profiles[str(args.get("performance_profile"))],
+            temp_dir.name,
+            1.5,
+            -1,
+            -2,
+            -2,
+            -3,
+            -2,
+            -2,
+            -2,
+        )
 
-            for line in p.stdout:
-                if get_state().debug:
-                    print(line)
+        # with Popen(
+        #     command,
+        #     stdout=PIPE,
+        #     bufsize=1,
+        #     universal_newlines=True,
+        # ) as p:
+        #     progress_pattern = re.compile(r"progress (\d+)%")
+        #     pair_progress_pattern = re.compile(r"pair (\d+)")
+        #     sequences_pattern = re.compile(r"Number of sequences: (\d+)")
+        #     pairs_pattern = re.compile(r"Number of pairs:\s(\w+)")
+        #     stage_pattern = re.compile(r"Stage:\s(\w+)")
+        #     start_time = perf_counter()
 
-                progress_match = progress_pattern.search(line)
-                pair_progress_match = pair_progress_pattern.search(line)
-                sequences_match = sequences_pattern.search(line)
-                stage_match = stage_pattern.search(line)
-                pairs_match = pairs_pattern.search(line)
+        #     for line in p.stdout:
+        #         if get_state().debug:
+        #             print(line)
 
-                if progress_match:
-                    set_state(progress=int(progress_match.group(1)))
+        #         progress_match = progress_pattern.search(line)
+        #         pair_progress_match = pair_progress_pattern.search(line)
+        #         sequences_match = sequences_pattern.search(line)
+        #         stage_match = stage_pattern.search(line)
+        #         pairs_match = pairs_pattern.search(line)
 
-                if pair_progress_match:
-                    pair_progress = int(pair_progress_match.group(1))
-                    if pair_progress > 0:
-                        stop_time = perf_counter()
-                        estimated = round(
-                            (stop_time - start_time)
-                            * (get_state().pair_count / pair_progress - 1)
-                        )
+        #         if progress_match:
+        #             set_state(progress=int(progress_match.group(1)))
 
-                        set_state(pair_progress=pair_progress, estimated_time=estimated)
+        #         if pair_progress_match:
+        #             pair_progress = int(pair_progress_match.group(1))
+        #             if pair_progress > 0:
+        #                 stop_time = perf_counter()
+        #                 estimated = round(
+        #                     (stop_time - start_time)
+        #                     * (get_state().pair_count / pair_progress - 1)
+        #                 )
 
-                if sequences_match:
-                    set_state(sequences_count=int(sequences_match.group(1)))
+        #                 set_state(pair_progress=pair_progress, estimated_time=estimated)
 
-                if pairs_match:
-                    set_state(pair_count=int(pairs_match.group(1)))
+        #         if sequences_match:
+        #             set_state(sequences_count=int(sequences_match.group(1)))
 
-                if stage_match:
-                    set_state(stage=stage_match.group(1))
+        #         if pairs_match:
+        #             set_state(pair_count=int(pairs_match.group(1)))
 
-                if cancel_current_run:
-                    p.terminate()
-                    p.wait()
-                    cancel_current_run = False
-                    set_state(
-                        view="runner", progress=0, pair_progress=0, estimated_time=None
-                    )
-                    return
+        #         if stage_match:
+        #             set_state(stage=stage_match.group(1))
 
-            p.wait()
+        #         if cancel_current_run:
+        #             p.terminate()
+        #             p.wait()
+        #             cancel_current_run = False
+        #             set_state(
+        #                 view="runner", progress=0, pair_progress=0, estimated_time=None
+        #             )
+        #             return
 
-            if p.returncode != 0:
-                raise RuntimeError(f"Subprocess exited with return code {p.returncode}")
-            # TODO: return error object
+        #     p.wait()
 
-            set_state(view="viewer")
+        #     if p.returncode != 0:
+        #         raise RuntimeError(f"Subprocess exited with return code {p.returncode}")
+        #     # TODO: return error object
+
+        set_state(view="viewer")
 
     def cancel_run(self):
         global cancel_current_run

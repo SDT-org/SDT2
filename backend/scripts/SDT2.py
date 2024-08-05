@@ -3,7 +3,8 @@ import platform
 import psutil
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
 
 # import logging
@@ -28,6 +29,15 @@ start_time = time.time()
 print("time start")
 start_run = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 useable_processes = cpu_count() - 1
+
+
+class dotdict(dict):
+    """dot.notation access to dictionary attributes"""
+
+    __getattr__ = dict.get
+    __setattr__ = dict.__setitem__
+    __delattr__ = dict.__delitem__
+
 
 # Arguments for run
 def parse_args():
@@ -70,25 +80,26 @@ def parse_args():
     parser.add_argument("--reg", type=int, help="right extend gap score")
     return parser.parse_args()
 
-def make_aligner(is_aa = False):
-    args = parse_args()
+
+def make_aligner(args, is_aa=False):
     aligner = PairwiseAligner()
-    aligner.match_score = getattr(args, "match", 1.5)
-    aligner.mismatch_score = getattr(args, "mismatch", -1)
-    aligner.target_internal_open_gap_score = getattr(args, "iog", -2 if is_aa else -3)
-    aligner.target_internal_extend_gap_score = getattr(args, "ieg", -2)
-    aligner.target_left_open_gap_score = getattr(args, "log", -3 if is_aa else -4)
-    aligner.target_left_extend_gap_score = getattr(args, "leg", -2 if is_aa else -3)
-    aligner.target_right_open_gap_score = getattr(args, "rog", -3 if is_aa else -4)
-    aligner.target_right_extend_gap_score = getattr(args, "reg", -2 if is_aa else -3)
-    aligner.query_internal_open_gap_score = getattr(args, "iog", -2 if is_aa else -3)
-    aligner.query_internal_extend_gap_score = getattr(args, "ieg", -2)
-    aligner.query_left_open_gap_score = getattr(args, "log", -3 if is_aa else -4)
-    aligner.query_left_extend_gap_score = getattr(args, "leg", -2 if is_aa else -3)
-    aligner.query_right_open_gap_score = getattr(args, "rog", -3 if is_aa else -4)
-    aligner.query_right_extend_gap_score = getattr(args, "reg", -2 if is_aa else -3)
+    aligner.match_score = args["match"]
+    aligner.mismatch_score = args["mismatch"]
+    aligner.target_internal_open_gap_score = args["iog"]
+    aligner.target_internal_extend_gap_score = args["ieg"]
+    aligner.target_left_open_gap_score = args["log"]
+    aligner.target_left_extend_gap_score = args["leg"]
+    aligner.target_right_open_gap_score = args["rog"]
+    aligner.target_right_extend_gap_score = args["reg"]
+    aligner.query_internal_open_gap_score = args["iog"]
+    aligner.query_internal_extend_gap_score = args["ieg"]
+    aligner.query_left_open_gap_score = args["log"]
+    aligner.query_left_extend_gap_score = args["leg"]
+    aligner.query_right_open_gap_score = args["rog"]
+    aligner.query_right_extend_gap_score = args["reg"]
     aligner.mode = args.alignment_type
     return aligner
+
 
 def run_preprocessing(raw_seq_dict):
     # convert seqrecord element in raw dict to key,vale of ids and seqs
@@ -129,14 +140,13 @@ def residue_check(seq):
 
 
 # Performs sequence alignment using BioPython PairwiseAligner
-def biopython_align(id_sequence_pair, is_aa):
-    args = parse_args()
+def biopython_align(args, id_sequence_pair, is_aa):
     ids = id_sequence_pair[0]
     id1 = ids[0]
     id2 = ids[1]
     seq1 = id_sequence_pair[1][0]
     seq2 = id_sequence_pair[1][1]
-    aligner = make_aligner(is_aa)
+    aligner = make_aligner(args, is_aa)
 
     aln = aligner.align(seq1, seq2)[0]
     score = get_similarity(aln[0], aln[1])
@@ -153,8 +163,8 @@ def biopython_align(id_sequence_pair, is_aa):
     return score
 
 
-def process_pair(id_sequence_pair, counter, counter_lock, total_pairs, is_aa):
-    score = biopython_align(id_sequence_pair, is_aa)
+def process_pair(id_sequence_pair, args, counter, counter_lock, total_pairs, is_aa):
+    score = biopython_align(args, id_sequence_pair, is_aa)
     with counter_lock:
         counter.value += 1
     print(
@@ -199,6 +209,7 @@ def get_alignment_scores(seq_dict, args):
 
     bound_process_pair = partial(
         process_pair,
+        args=args,
         counter=counter,
         counter_lock=counter_lock,
         total_pairs=total_pairs,
@@ -216,8 +227,7 @@ def get_alignment_scores(seq_dict, args):
 
 
 # Reorder the scores matrix based on the tree and save it to a new CSV
-def tree_clustering(dm, filename):
-    args = parse_args()
+def tree_clustering(args, dm, filename):
     constructor = DistanceTreeConstructor()
     clustering_method = getattr(constructor, args.cluster_method)
     tree_file = filename + "_tree.nwk"
@@ -259,8 +269,8 @@ def save_matrix_to_csv(df, filename):
 #     columnar_df.to_csv(filename + "_cols.csv", mode="w", header=True, index=False)
 
 
-def output_summary(file_name, start_time, end_time, run_summary):
-    aligner = make_aligner()
+def output_summary(args, file_name, start_time, end_time, run_summary):
+    aligner = make_aligner(args)
     aligner_params_str = str(aligner).split("\n")
     # Adjust the indentation of each line
     formatted_aligner_params = "\n    ".join(aligner_params_str)
@@ -299,12 +309,43 @@ def fasta_alignments(seq_records, fname):
     SeqIO.write(seq_records, fname, "fasta")
 
 
-def main():
-    args = parse_args()
-    INPUT_PATH = args.input_file
+def main(
+    input_file,
+    out_dir,
+    cluster_method,
+    alignment_type,
+    num_processes,
+    aln_out,
+    match,
+    mismatch,
+    iog,
+    ieg,
+    log,
+    leg,
+    rog,
+    reg,
+):
+    args = dotdict(
+        dict(
+            cluster_method=cluster_method,
+            out_dir=out_dir,
+            alignment_type=alignment_type,
+            num_processes=num_processes,
+            aln_out=aln_out,
+            match=match,
+            mismatch=mismatch,
+            iog=iog,
+            ieg=ieg,
+            log=log,
+            leg=leg,
+            rog=rog,
+            reg=reg,
+        )
+    )
+    INPUT_PATH = input_file
     # logging.basicConfig(level=logging.DEBUG)
 
-    file_name = os.path.basename(args.input_file)
+    file_name = os.path.basename(input_file)
     file_base = os.path.splitext(file_name)[0]
 
     print("Stage: Preparing")
@@ -329,8 +370,8 @@ def main():
     dm = create_distance_matrix(dist_scores, order)
     aln_scores = 100 - dist_scores
 
-    if args.cluster_method == "nj" or args.cluster_method == "upgma":
-        _, new_order = tree_clustering(dm, os.path.join(args.out_dir, f"{file_base}"))
+    if cluster_method == "nj" or cluster_method == "upgma":
+        _, new_order = tree_clustering(args, dm, os.path.join(out_dir, f"{file_base}"))
         reorder_index = [
             order.index(id_) for id_ in new_order
         ]  # create numerical index of order and  of new order IDs
@@ -340,13 +381,13 @@ def main():
         aln_lowt[np.triu_indices(aln_lowt.shape[0], k=1)] = np.nan
         # Create a DataFrame from the lower triangular matrix
         df = pd.DataFrame(aln_lowt, index=new_order)
-        save_matrix_to_csv(df, os.path.join(args.out_dir, f"{file_base}_mat.csv"))
+        save_matrix_to_csv(df, os.path.join(out_dir, f"{file_base}_mat.csv"))
         # save_cols_to_csv(df, new_order, os.path.join(args.out_dir, f"{file_base}"))
     else:
         aln_lowt = np.tril(np.around(aln_scores, 2))
         aln_lowt[np.triu_indices(aln_lowt.shape[0], k=1)] = np.nan
         df = pd.DataFrame(aln_lowt, index=order)
-        save_matrix_to_csv(df, os.path.join(args.out_dir, f"{file_base}_mat.csv"))
+        save_matrix_to_csv(df, os.path.join(out_dir, f"{file_base}_mat.csv"))
         # save_cols_to_csv(df, new_order, os.path.join(args.out_dir, f"{file_base}"))
 
     print("Stage: Finalizing")
@@ -357,16 +398,17 @@ def main():
     elapsed_time = end_time - start_time
     run_summary = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
     save_output_summary = output_summary(
+        args,
         file_name,
         start_run,
         end_run,
         run_summary,
     )
     # Write to a text file
-    with open(os.path.join(args.out_dir, f"{file_base}_summary.txt"), "w") as file:
+    with open(os.path.join(out_dir, f"{file_base}_summary.txt"), "w") as file:
         file.write(save_output_summary)
     print(f"Elapsed time: {elapsed_time} seconds")
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main(parse_args())
