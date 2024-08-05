@@ -21,9 +21,7 @@ import math
 from time import perf_counter
 from app_state import create_app_state
 from validations import validate_fasta
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../scripts")))
-from SDT2 import main as run_sdt2_script
+from process_data import main as process_data
 
 is_nuitka = "__compiled__" in globals()
 
@@ -250,7 +248,7 @@ class Api:
             print("\nAPI args:", args)
             print("\nRun args:", command)
 
-        run_sdt2_script(
+        process_data(
             get_state().filename[0],
             temp_dir.name,
             "nj",
