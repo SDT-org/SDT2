@@ -5,11 +5,10 @@ import os
 import sys
 import re
 import random
-import argparse
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from itertools import combinations_with_replacement as cwr
-from multiprocessing import Pool, Manager, cpu_count
+from multiprocessing import Pool, Manager
 from functools import partial
 import numpy as np
 import pandas as pd
