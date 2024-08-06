@@ -3,11 +3,6 @@ import platform
 import psutil
 import os
 import sys
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
-from config import app_version
-
-# import logging
 import re
 import random
 import argparse
@@ -24,69 +19,27 @@ from Bio.Phylo.TreeConstruction import (
     DistanceTreeConstructor,
     DistanceMatrix,
 )
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+from config import app_version
 
 start_time = time.time()
 start_run = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-useable_processes = cpu_count() - 1
-
-# Arguments for run
-def parse_args():
-    parser = argparse.ArgumentParser(description="Argument parser for SDT2")
-    parser.add_argument(
-        "--cluster_method",
-        type=str,
-        choices=["nj", "upgma", "None"],
-        help="order output by clusting algorithm",
-    )
-    parser.add_argument(
-        "--out_dir",
-        type=str,
-        default=os.path.dirname(os.path.abspath(__file__)),
-        help="the output directory",
-    )
-    parser.add_argument(
-        "--alignment_type",
-        type=str,
-        default="global",
-        help="alignment type global/local",
-    )
-    parser.add_argument("input_file", type=str, help="The input fasta file")
-    parser.add_argument(
-        "--num_processes",
-        type=int,
-        default=useable_processes,
-        help="number of processes to run",
-    )
-    parser.add_argument(
-        "--aln_out", type=str, default=None, help="Output directory for"
-    )
-    parser.add_argument("--match", type=float, help="aligner match score")
-    parser.add_argument("--mismatch", type=int, help="aligner mismatch score")
-    parser.add_argument("--iog", type=int, help="internal open gap score")
-    parser.add_argument("--ieg", type=int, help="internal left extend gap score")
-    parser.add_argument("--log", type=int, help="left open gap score")
-    parser.add_argument("--leg", type=int, help="left extend gap score")
-    parser.add_argument("--rog", type=int, help="right open gap score")
-    parser.add_argument("--reg", type=int, help="right extend gap score")
-    return parser.parse_args()
-
 
 def make_aligner(args, is_aa=False):
     aligner = PairwiseAligner()
-    aligner.match_score = args["match"]
-    aligner.mismatch_score = args["mismatch"]
-    aligner.target_internal_open_gap_score = args["iog"]
-    aligner.target_internal_extend_gap_score = args["ieg"]
-    aligner.target_left_open_gap_score = args["log"]
-    aligner.target_left_extend_gap_score = args["leg"]
-    aligner.target_right_open_gap_score = args["rog"]
-    aligner.target_right_extend_gap_score = args["reg"]
-    aligner.query_internal_open_gap_score = args["iog"]
-    aligner.query_internal_extend_gap_score = args["ieg"]
-    aligner.query_left_open_gap_score = args["log"]
-    aligner.query_left_extend_gap_score = args["leg"]
-    aligner.query_right_open_gap_score = args["rog"]
-    aligner.query_right_extend_gap_score = args["reg"]
+    aligner.match_score = getattr(args, "match", 1.5)
+    aligner.mismatch_score = getattr(args, "mismatch", -1)
+    aligner.target_internal_open_gap_score = getattr(args, "iog", -2 if is_aa else -3)
+    aligner.target_internal_extend_gap_score = getattr(args, "ieg", -2)
+    aligner.target_left_open_gap_score = getattr(args, "log", -3 if is_aa else -4)
+    aligner.target_left_extend_gap_score = getattr(args, "leg", -2 if is_aa else -3)
+    aligner.target_right_open_gap_score = getattr(args, "rog", -3 if is_aa else -4)
+    aligner.target_right_extend_gap_score = getattr(args, "reg", -2 if is_aa else -3)
+    aligner.query_internal_open_gap_score = getattr(args, "iog", -2 if is_aa else -3)
+    aligner.query_internal_extend_gap_score = getattr(args, "ieg", -2)
+    aligner.query_left_open_gap_score = getattr(args, "log", -3 if is_aa else -4)
+    aligner.query_left_extend_gap_score = getattr(args, "leg", -2 if is_aa else -3)
+    aligner.query_right_open_gap_score = getattr(args, "rog", -3 if is_aa else -4)
     aligner.mode = args["alignment_type"]
     return aligner
 
@@ -301,7 +254,6 @@ def process_data(
 ):
     input_file = settings["input_file"]
     INPUT_PATH = input_file
-    # logging.basicConfig(level=logging.DEBUG)
 
     file_name = os.path.basename(input_file)
     file_base = os.path.splitext(file_name)[0]
@@ -369,7 +321,3 @@ def process_data(
     with open(os.path.join(out_dir, f"{file_base}_summary.txt"), "w") as file:
         file.write(save_output_summary)
     print(f"Elapsed time: {elapsed_time} seconds")
-
-
-# if __name__ == "__main__":
-#     main(parse_args())
