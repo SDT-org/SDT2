@@ -171,7 +171,7 @@ def get_alignment_scores(seq_dict, settings):
 # Reorder the scores matrix based on the tree and save it to a new CSV
 def tree_clustering(args, dm, filename):
     constructor = DistanceTreeConstructor()
-    clustering_method = getattr(constructor, args.cluster_method)
+    clustering_method = getattr(constructor, args["cluster_method"])
     tree_file = filename + "_tree.nwk"
     tree = clustering_method(dm)
     Phylo.write(tree, tree_file, "newick")
