@@ -436,7 +436,6 @@ def get_entrypoint():
     raise Exception("No index.html found")
 
 
-
 def update_client_state(window: webview.Window):
     window.evaluate_js("syncAppState()")
 

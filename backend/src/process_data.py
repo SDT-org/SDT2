@@ -8,7 +8,6 @@ import random
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from itertools import combinations_with_replacement as cwr
-from multiprocessing import Manager, Pool
 from functools import partial
 import numpy as np
 import pandas as pd
