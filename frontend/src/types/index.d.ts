@@ -1,4 +1,4 @@
-import { RunSDT2Args } from "../components/Runner";
+import { RunProcessDataArgs } from "../components/Runner";
 import { AppState } from "../src/appState";
 
 declare global {
@@ -19,7 +19,7 @@ declare global {
           data: string;
           format: AppState["client"]["saveFormat"];
         }) => Promise<void>;
-        run_sdt2: (args: RunSDT2Args) => Promise<void>;
+        run_process_data: (args: RunProcessDataArgs) => Promise<void>;
         cancel_run: () => Promise<void>;
         get_heatmap_data: () => Promise<string>;
         get_line_histo_data: () => Promise<string>;

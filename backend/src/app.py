@@ -1,18 +1,14 @@
 import os
 import sys
 import platform
-import threading
 import webview
 import subprocess
-from subprocess import Popen, PIPE
 from pathlib import Path
-import re
 import tempfile
 import shutil
 import json
 import pandas as pd
 import numpy as np
-import multiprocessing
 import base64
 import urllib.parse
 import shutil
@@ -22,6 +18,8 @@ from time import perf_counter
 from app_state import create_app_state
 from validations import validate_fasta
 from process_data import process_data
+from multiprocessing import Lock, Manager, Pool, cpu_count
+
 
 is_nuitka = "__compiled__" in globals()
 
@@ -44,7 +42,7 @@ window = None
 temp_dir = tempfile.TemporaryDirectory()
 
 try:
-    cpu_count = multiprocessing.cpu_count()
+    cpu_count = cpu_count()
 except:
     cpu_count = 1
 
@@ -63,7 +61,9 @@ mimetypes.add_type("text/fasta", ".fnt")
 mimetypes.add_type("text/fasta", ".fa")
 matrix_filetypes = ("text/csv", "application/vnd.ms-excel", "text/plain")
 
-cancel_current_run = False
+pool = None
+cancelled = None
+start_time = None
 
 
 def get_matrix_path():
@@ -89,6 +89,25 @@ def find_source_files(prefix, suffixes):
                 )
             ):
                 yield entry
+
+
+def do_cancel_run():
+    global pool, cancelled
+    if cancelled:
+        # It's ok if the manager has already released the resource
+        try:
+            cancelled.value = True
+        except:
+            pass
+    if pool:
+        pool.terminate()
+        pool.join()
+    else:
+        raise Exception("Expected pool instance to terminate")
+
+    set_state(
+        view="runner", progress=0, pair_progress=0, pair_count=0, estimated_time=None
+    )
 
 
 class Api:
@@ -127,7 +146,7 @@ class Api:
             directory=state.filename[0],
             save_filename=save_filename,
         )
-        print(save_path)
+
         if not save_path:
             return
 
@@ -144,12 +163,11 @@ class Api:
         result = webview.windows[0].create_file_dialog(
             webview.OPEN_DIALOG, allow_multiple=False
         )
-        print(result)
+
         if not result:
             raise Exception("filename result was None")
         basename = os.path.basename(result[0])
         filetype, _ = mimetypes.guess_type(basename)
-        print(basename, filetype)
 
         if filetype in matrix_filetypes:
             set_state(
@@ -190,15 +208,11 @@ class Api:
     def get_state(self):
         return get_state()._asdict()
 
-    def ls(self):
-        return os.listdir(".")
-
     def reset_state(self):
         reset_state()
 
-    def run_sdt2(self, args: dict):
-        global cancel_current_run
-
+    def run_process_data(self, args: dict):
+        global pool, cancelled, start_time
         set_state(view="loader")
 
         settings = dict()
@@ -235,74 +249,45 @@ class Api:
             print("\nAPI args:", args)
             print("\nRun settings:", settings)
 
-        process_data(settings)
+        with Pool(settings["num_processes"]) as pool:
+            with Manager() as manager:
+                counter = manager.Value("i", 0)
+                cancelled = manager.Value("b", False)
+                lock = Lock()
+                start_time = perf_counter()
 
-        # with Popen(
-        #     command,
-        #     stdout=PIPE,
-        #     bufsize=1,
-        #     universal_newlines=True,
-        # ) as p:
-        #     progress_pattern = re.compile(r"progress (\d+)%")
-        #     pair_progress_pattern = re.compile(r"pair (\d+)")
-        #     sequences_pattern = re.compile(r"Number of sequences: (\d+)")
-        #     pairs_pattern = re.compile(r"Number of pairs:\s(\w+)")
-        #     stage_pattern = re.compile(r"Stage:\s(\w+)")
-        #     start_time = perf_counter()
+                def increment_pair_progress(counter, lock, start_time):
+                    with lock:
+                        counter.value += 1
+                    pair_count = get_state().pair_count
+                    if pair_count and pair_count > 0:
+                        progress = (counter.value / pair_count) * 100
+                        stop_time = perf_counter()
+                        estimated = round(
+                            (stop_time - start_time) * (pair_count / counter.value)
+                        )
+                        set_state(
+                            progress=progress,
+                            pair_progress=counter.value,
+                            estimated_time=estimated,
+                        )
 
-        #     for line in p.stdout:
-        #         if get_state().debug:
-        #             print(line)
+                process_data(
+                    settings=settings,
+                    pool=pool,
+                    cancelled=cancelled,
+                    increment_pair_progress=lambda: increment_pair_progress(
+                        counter, lock, start_time
+                    ),
+                    set_stage=lambda stage: set_state(stage=stage),
+                    set_pair_count=lambda pair_count: set_state(pair_count=pair_count),
+                )
 
-        #         progress_match = progress_pattern.search(line)
-        #         pair_progress_match = pair_progress_pattern.search(line)
-        #         sequences_match = sequences_pattern.search(line)
-        #         stage_match = stage_pattern.search(line)
-        #         pairs_match = pairs_pattern.search(line)
-
-        #         if progress_match:
-        #             set_state(progress=int(progress_match.group(1)))
-
-        #         if pair_progress_match:
-        #             pair_progress = int(pair_progress_match.group(1))
-        #             if pair_progress > 0:
-        #                 stop_time = perf_counter()
-        #                 estimated = round(
-        #                     (stop_time - start_time)
-        #                     * (get_state().pair_count / pair_progress - 1)
-        #                 )
-
-        #                 set_state(pair_progress=pair_progress, estimated_time=estimated)
-
-        #         if sequences_match:
-        #             set_state(sequences_count=int(sequences_match.group(1)))
-
-        #         if pairs_match:
-        #             set_state(pair_count=int(pairs_match.group(1)))
-
-        #         if stage_match:
-        #             set_state(stage=stage_match.group(1))
-
-        #         if cancel_current_run:
-        #             p.terminate()
-        #             p.wait()
-        #             cancel_current_run = False
-        #             set_state(
-        #                 view="runner", progress=0, pair_progress=0, estimated_time=None
-        #             )
-        #             return
-
-        #     p.wait()
-
-        #     if p.returncode != 0:
-        #         raise RuntimeError(f"Subprocess exited with return code {p.returncode}")
-        #     # TODO: return error object
-
-        set_state(view="viewer")
+                if cancelled.value == False:
+                    set_state(view="viewer")
 
     def cancel_run(self):
-        global cancel_current_run
-        cancel_current_run = True
+        do_cancel_run()
 
     def load_data(self):
         matrix_path = get_matrix_path()
@@ -450,24 +435,6 @@ def get_entrypoint():
 
     raise Exception("No index.html found")
 
-
-def set_interval(interval):
-    def decorator(function):
-        def wrapper(*args, **kwargs):
-            stopped = threading.Event()
-
-            def loop():  # executed in another thread
-                while not stopped.wait(interval):  # until stopped
-                    function(*args, **kwargs)
-
-            t = threading.Thread(target=loop)
-            t.daemon = True  # stop if the program exits
-            t.start()
-            return stopped
-
-        return wrapper
-
-    return decorator
 
 
 def update_client_state(window: webview.Window):

@@ -9,7 +9,7 @@ import {
 import { NumberInput } from "./NumberInput";
 import messages from "../messages";
 
-export type RunSDT2Args = Pick<
+export type RunProcessDataArgs = Pick<
   AppState["client"],
   "performance_profile" | "alignment_type" | "cluster_method"
 >;
@@ -21,13 +21,16 @@ const RunnerSettings = ({
 
   setAppState: SetAppState;
 }) => {
-  const [runnerSettings, setRunnerSettings] = React.useState<RunSDT2Args>(
-    (({ client: { performance_profile, alignment_type, cluster_method } }) => ({
-      performance_profile,
-      alignment_type,
-      cluster_method,
-    }))(appState),
-  );
+  const [runnerSettings, setRunnerSettings] =
+    React.useState<RunProcessDataArgs>(
+      (({
+        client: { performance_profile, alignment_type, cluster_method },
+      }) => ({
+        performance_profile,
+        alignment_type,
+        cluster_method,
+      }))(appState),
+    );
 
   const [advancedSettingsState, setAdvancedSettingsState] = React.useState({
     match: 1.5,
@@ -41,7 +44,7 @@ const RunnerSettings = ({
   });
 
   const handleRun = () => {
-    window.pywebview.api.run_sdt2({
+    window.pywebview.api.run_process_data({
       cluster_method: runnerSettings.cluster_method,
       performance_profile: runnerSettings.performance_profile,
       alignment_type: runnerSettings.alignment_type,

@@ -8,7 +8,7 @@ import random
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from itertools import combinations_with_replacement as cwr
-from multiprocessing import Pool, Manager
+from multiprocessing import Manager, Pool
 from functools import partial
 import numpy as np
 import pandas as pd
@@ -18,28 +18,37 @@ from Bio.Phylo.TreeConstruction import (
     DistanceTreeConstructor,
     DistanceMatrix,
 )
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
 
 start_time = time.time()
 start_run = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
-def make_aligner(args, is_aa=False):
+
+def make_aligner(settings):
+    is_aa = settings["is_aa"]
     aligner = PairwiseAligner()
-    aligner.match_score = getattr(args, "match", 1.5)
-    aligner.mismatch_score = getattr(args, "mismatch", -1)
-    aligner.target_internal_open_gap_score = getattr(args, "iog", -2 if is_aa else -3)
-    aligner.target_internal_extend_gap_score = getattr(args, "ieg", -2)
-    aligner.target_left_open_gap_score = getattr(args, "log", -3 if is_aa else -4)
-    aligner.target_left_extend_gap_score = getattr(args, "leg", -2 if is_aa else -3)
-    aligner.target_right_open_gap_score = getattr(args, "rog", -3 if is_aa else -4)
-    aligner.target_right_extend_gap_score = getattr(args, "reg", -2 if is_aa else -3)
-    aligner.query_internal_open_gap_score = getattr(args, "iog", -2 if is_aa else -3)
-    aligner.query_internal_extend_gap_score = getattr(args, "ieg", -2)
-    aligner.query_left_open_gap_score = getattr(args, "log", -3 if is_aa else -4)
-    aligner.query_left_extend_gap_score = getattr(args, "leg", -2 if is_aa else -3)
-    aligner.query_right_open_gap_score = getattr(args, "rog", -3 if is_aa else -4)
-    aligner.mode = args["alignment_type"]
+    aligner.match_score = getattr(settings, "match", 1.5)
+    aligner.mismatch_score = getattr(settings, "mismatch", -1)
+    aligner.target_internal_open_gap_score = getattr(
+        settings, "iog", -2 if is_aa else -3
+    )
+    aligner.target_internal_extend_gap_score = getattr(settings, "ieg", -2)
+    aligner.target_left_open_gap_score = getattr(settings, "log", -3 if is_aa else -4)
+    aligner.target_left_extend_gap_score = getattr(settings, "leg", -2 if is_aa else -3)
+    aligner.target_right_open_gap_score = getattr(settings, "rog", -3 if is_aa else -4)
+    aligner.target_right_extend_gap_score = getattr(
+        settings, "reg", -2 if is_aa else -3
+    )
+    aligner.query_internal_open_gap_score = getattr(
+        settings, "iog", -2 if is_aa else -3
+    )
+    aligner.query_internal_extend_gap_score = getattr(settings, "ieg", -2)
+    aligner.query_left_open_gap_score = getattr(settings, "log", -3 if is_aa else -4)
+    aligner.query_left_extend_gap_score = getattr(settings, "leg", -2 if is_aa else -3)
+    aligner.query_right_open_gap_score = getattr(settings, "rog", -3 if is_aa else -4)
+    aligner.mode = settings["alignment_type"]
     return aligner
 
 
@@ -81,54 +90,40 @@ def residue_check(seq):
     return bool(re.search(r"[EFILPQZ]", seq))
 
 
-# Performs sequence alignment using BioPython PairwiseAligner
-def biopython_align(settings, id_sequence_pair, is_aa):
+def process_pair(id_sequence_pair, settings):
     ids = id_sequence_pair[0]
     id1 = ids[0]
     id2 = ids[1]
     seq1 = id_sequence_pair[1][0]
     seq2 = id_sequence_pair[1][1]
-    aligner = make_aligner(settings, is_aa)
+    aligner = make_aligner(settings)
 
     aln = aligner.align(seq1, seq2)[0]
     score = get_similarity(aln[0], aln[1])
 
     if settings.get("aln_out"):
-        fname = os.path.join(settings["aln_out"], str(id1 + "__" + id2) + "_aligned.fasta")
+        fname = os.path.join(
+            settings["aln_out"], str(id1 + "__" + id2) + "_aligned.fasta"
+        )
         aligned_sequences = list(aln)
         seq_records = [
             SeqRecord(Seq(aligned_sequences[i]), id=ids[i], description="")
             for i in range(len(aligned_sequences))
-        ]  ## rewrite for multi
+        ]
         SeqIO.write(seq_records, fname, "fasta")
 
-    return score
-
-
-def process_pair(id_sequence_pair, settings, counter, counter_lock, total_pairs, is_aa):
-    score = biopython_align(settings, id_sequence_pair, is_aa)
-    with counter_lock:
-        counter.value += 1
-    print(
-        "\rPerforming alignment: progress "
-        + str(int((float(counter.value) / total_pairs) * 100))
-        + "% - pair",
-        +counter.value,
-        flush=True,
-    )
     return id_sequence_pair[0], score
 
 
 ## Creates arrays for storing scores as matrix and set pool for multiprocessing.
-def get_alignment_scores(seq_dict, settings):
+def get_alignment_scores(
+    seq_dict, settings, pool, cancelled, increment_pair_progress, set_pair_count
+):
     seq_ids = list(seq_dict.keys())
     n = len(seq_ids)
     dist_scores = np.zeros((n, n))
     # for each sequence id in seq_id add to new dict as key and the index position is enumerated and stored as value for later reference
     order = {seq_id: i for i, seq_id in enumerate(seq_ids)}
-    manager = Manager()
-    counter = manager.Value("i", 0)
-    counter_lock = manager.Lock()
     # create list  combinations including self v. self
     combos = list(cwr(seq_ids, 2))
     id_sequence_pairs = []
@@ -138,6 +133,8 @@ def get_alignment_scores(seq_dict, settings):
 
     # calculate the total combinations witout self
     total_pairs = sum(1 for _ in cwr(seq_ids, 2))
+    set_pair_count(total_pairs)
+
     print(f"\rNumber of sequences: {len(seq_ids)}\r", flush=True)
     print(f"\rNumber of pairs: {total_pairs}\r", flush=True)
 
@@ -147,23 +144,24 @@ def get_alignment_scores(seq_dict, settings):
         list(seq_dict.values()), min(len(seq_dict), sample_size)
     )
     is_aa = any(residue_check(seq) for seq in sampled_seqs)
+    settings["is_aa"] = is_aa
 
     bound_process_pair = partial(
         process_pair,
         settings=settings,
-        counter=counter,
-        counter_lock=counter_lock,
-        total_pairs=total_pairs,
-        is_aa=is_aa,
     )
 
-    with Pool(processes=settings["num_processes"]) as pool:
-        results = pool.map(bound_process_pair, id_sequence_pairs)
-        for result in results:
+    with pool:
+        results = pool.imap(bound_process_pair, id_sequence_pairs)
+        for _, result in enumerate(results, 1):
+            if cancelled.value:
+                return dist_scores, order
             [seqid1, seqid2], score = result
             seqid1, seqid2 = order[seqid1], order[seqid2]
             dist_scores[seqid1, seqid2] = score
             dist_scores[seqid2, seqid1] = score
+            increment_pair_progress()
+
     return dist_scores, order
 
 
@@ -249,7 +247,12 @@ def fasta_alignments(seq_records, fname):
 
 
 def process_data(
-  settings
+    settings,
+    pool,
+    cancelled,
+    increment_pair_progress=lambda: None,
+    set_stage=lambda stage: print(f"Stage: {stage}"),
+    set_pair_count=lambda count: print(f"Pair count: {count}"),
 ):
     input_file = settings["input_file"]
     INPUT_PATH = input_file
@@ -257,6 +260,7 @@ def process_data(
     file_name = os.path.basename(input_file)
     file_base = os.path.splitext(file_name)[0]
 
+    set_stage("Preparing")
     print("Stage: Preparing")
 
     sequences = SeqIO.parse(open(INPUT_PATH, encoding="utf-8"), "fasta")
@@ -266,12 +270,20 @@ def process_data(
         record.description.replace(" ", ""): record for record in sequences
     }
 
+    set_stage("Preprocessing")
     seq_dict = run_preprocessing(processed_seq_dict)
 
+    set_stage("Analyzing")
     print("Stage: Analyzing")
 
-    dist_scores, order = get_alignment_scores(seq_dict, settings)
+    dist_scores, order = get_alignment_scores(
+        seq_dict, settings, pool, cancelled, increment_pair_progress, set_pair_count
+    )
 
+    if cancelled.value:
+        return
+
+    set_stage("Postprocessing")
     print("Stage: Postprocessing")
 
     order = list(order.keys())
@@ -283,7 +295,9 @@ def process_data(
     cluster_method = settings["cluster_method"]
 
     if cluster_method == "nj" or cluster_method == "upgma":
-        _, new_order = tree_clustering(settings, dm, os.path.join(out_dir, f"{file_base}"))
+        _, new_order = tree_clustering(
+            settings, dm, os.path.join(out_dir, f"{file_base}")
+        )
         reorder_index = [
             order.index(id_) for id_ in new_order
         ]  # create numerical index of order and  of new order IDs
@@ -302,6 +316,7 @@ def process_data(
         save_matrix_to_csv(df, os.path.join(out_dir, f"{file_base}_mat.csv"))
         # save_cols_to_csv(df, new_order, os.path.join(args.out_dir, f"{file_base}"))
 
+    set_stage("Finalizing")
     print("Stage: Finalizing")
 
     # Finalize run
