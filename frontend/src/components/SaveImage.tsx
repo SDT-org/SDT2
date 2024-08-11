@@ -1,5 +1,5 @@
 import React from "react";
-import Plotly from "../../vendor/plotly-custom.min.js";
+import Plotly from "plotly.js-dist-min";
 import useAppState, { AppState } from "../appState";
 
 export const SaveImage = ({ plotType }: { plotType?: string }) => {

@@ -1,5 +1,5 @@
 import React from "react";
-import Plotly from "../../vendor/plotly-custom.min.js";
+import Plotly from "plotly.js-dist-min";
 import createPlotlyComponent from "react-plotly.js/factory";
 import { Colorscale, HeatmapData, HeatmapSettings } from "../plotTypes";
 import { NumberInput } from "./NumberInput";
@@ -52,7 +52,7 @@ export const Heatmap = ({
   //     };
   //   });
   // };
-  
+
   const plotAnnotations = React.useMemo(() => {
     const x: number[] = [];
     const y: number[] = [];
@@ -372,7 +372,7 @@ export const Heatmap = ({
                   value={settings.vmax}
                   updateValue={updateSettings}
                   min={1}
-                  max={100} 
+                  max={100}
                   step={1}
                 />
               </div>

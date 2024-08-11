@@ -1,5 +1,5 @@
 import React from "react";
-import Plotly from "../../vendor/plotly-custom.min.js";
+import Plotly from "plotly.js-dist-min";
 import createPlotlyComponent from "react-plotly.js/factory";
 import { NumberInput } from "./NumberInput";
 import { HistogramData, HistogramSettings } from "../plotTypes";
