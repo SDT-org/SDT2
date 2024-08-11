@@ -326,8 +326,6 @@ class Api:
 
         if args["output_cluster"] == True:
             suffixes.append("_cluster")
-
-        if args["output_cluster"] == True:
             cluster.export(
                 matrix_path,
                 args["cluster_threshold_one"],
