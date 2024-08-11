@@ -103,7 +103,7 @@ def do_cancel_run():
         pool.terminate()
         pool.join()
     else:
-        raise Exception("Expected pool instance to terminate")
+        warn("Expected pool instance")
 
     set_state(
         view="runner", progress=0, pair_progress=0, pair_count=0, estimated_time=None
@@ -249,7 +249,9 @@ class Api:
             print("\nAPI args:", args)
             print("\nRun settings:", settings)
 
-        with Pool(settings["num_processes"]) as pool:
+        with Pool(
+            settings["num_processes"],
+        ) as pool:
             with Manager() as manager:
                 counter = manager.Value("i", 0)
                 cancelled = manager.Value("b", False)
@@ -262,10 +264,9 @@ class Api:
                     pair_count = get_state().pair_count
                     if pair_count and pair_count > 0:
                         progress = (counter.value / pair_count) * 100
-                        stop_time = perf_counter()
-                        estimated = round(
-                            (stop_time - start_time) * (pair_count / counter.value)
-                        )
+                        elapsed = perf_counter() - start_time
+                        estimated_total = elapsed * (pair_count / counter.value)
+                        estimated = round(estimated_total - elapsed)
                         set_state(
                             progress=progress,
                             pair_progress=counter.value,
