@@ -1,9 +1,6 @@
 import os
-import sys
-import platform
 import webview
 import subprocess
-from pathlib import Path
 import tempfile
 import shutil
 import json
@@ -14,6 +11,7 @@ import urllib.parse
 import shutil
 import mimetypes
 import math
+import cluster
 from warnings import warn
 from time import perf_counter
 from app_state import create_app_state
@@ -21,24 +19,7 @@ from validations import validate_fasta
 from process_data import process_data
 from multiprocessing import Lock, Manager, Pool, cpu_count
 
-
 is_nuitka = "__compiled__" in globals()
-
-if is_nuitka:
-    ext = ".exe" if platform.system() == "Windows" else ""
-    bin_path = os.path.join(Path(os.path.dirname(sys.argv[0])), "bin")
-    command_prefix = dict(
-        sdt2=os.path.join(bin_path, "SDT2" + ext),
-        cluster=os.path.join(bin_path, "cluster" + ext),
-    )
-else:
-    python_path = sys.executable
-    scripts_path = os.path.join(Path(os.path.dirname(__file__)).parents[0], "scripts")
-    command_prefix = dict(
-        sdt2=[sys.executable, os.path.join(scripts_path, "SDT2.py")],
-        cluster=[sys.executable, os.path.join(scripts_path, "cluster.py")],
-    )
-
 window = None
 temp_dir = tempfile.TemporaryDirectory()
 
@@ -347,18 +328,7 @@ class Api:
             suffixes.append("_cluster")
 
         if args["output_cluster"] == True:
-            command = (
-                command_prefix["cluster"]
-                if isinstance(command_prefix["cluster"], list)
-                else [command_prefix["cluster"]]
-            ) + [
-                matrix_path,
-                "--threshold_1",
-                str(args["cluster_threshold_one"]),
-                "--threshold_2",
-                str(args["cluster_threshold_two"]),
-            ]
-            subprocess.run(command, check=True)
+            cluster.export(matrix_path, args["cluster_threshold_one"], args["cluster_threshold_two"])
 
         destination_files = [
             os.path.join(state.export_path, entry.name)

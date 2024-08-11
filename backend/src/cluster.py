@@ -4,30 +4,6 @@ from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import connected_components
 import pandas as pd
 from collections import defaultdict
-import argparse
-
-
-def parse_args():
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument("input_matrix", type=str, help="Path to the input matrix file")
-
-    parser.add_argument(
-        "--threshold_1",
-        type=float,
-        default=79,
-        help="Threshold 1 value (default: 79)"
-    )
-
-    parser.add_argument(
-        "--threshold_2",
-        type=float,
-        default=0,
-        help="Threshold 2 value (default: 0)",
-    )
-
-    return parser.parse_args()
-
 
 def process_groups(threshold, data, index):
     # create adjacensy matrix to id which cells are related by the threshold marking as binary with (1) for related or (0) for not meeting the threshold
@@ -75,24 +51,20 @@ def cluster_by_identity(clusters, nodes):
 
 
 
-def main():
-    args = parse_args()
-    input_path = args.input_matrix
-    output_dir = os.path.dirname(input_path)
-    file_name = os.path.basename(input_path)
+def export(matrix_path, threshold_1=79, threshold_2=0):
+    output_dir = os.path.dirname(matrix_path)
+    file_name = os.path.basename(matrix_path)
     file_base, _ = os.path.splitext(file_name)
     file_name = file_base.replace("_mat", "")
     output_file = os.path.join(output_dir, file_name + "_cluster.csv")
-    threshold_1 = args.threshold_1
-    threshold_2 = args.threshold_2
 
     # https://stackoverflow.com/a/57824142
     # SDT1 matrix CSVs do not have padding for columns
-    with open(args.input_matrix, 'r') as temp_f:
+    with open(matrix_path, 'r') as temp_f:
         col_count = [ len(l.split(",")) for l in temp_f.readlines() ]
         column_names = [i for i in range(0, max(col_count))]
 
-    df = pd.read_csv(args.input_matrix, delimiter=",", index_col=0, header=None, names=column_names)
+    df = pd.read_csv(matrix_path, delimiter=",", index_col=0, header=None, names=column_names)
     # extract index
     index = df.index.tolist()
     # convert df to np array
@@ -104,7 +76,7 @@ def main():
         threshold_1, threshold_2 = threshold_2, threshold_1
     # handle instances of no threshold_2
     if threshold_2 is None or threshold_2 == 0:
-        output = process_groups(args.threshold_1, data, index)
+        output = process_groups(threshold_1, data, index)
         flattened_output = [
             (item, key + 1) for key, sublist in output.items() for item in sublist
         ]
@@ -112,8 +84,8 @@ def main():
         df.columns = ["ID", "Group 1 - Theshold: " + str(threshold_1)]
 
     else:
-        clusters = process_groups(args.threshold_1, data, index)
-        nodes = process_groups(args.threshold_2, data, index)
+        clusters = process_groups(threshold_1, data, index)
+        nodes = process_groups(threshold_2, data, index)
         output = cluster_by_identity(clusters, nodes)
         df = pd.DataFrame(output)
         df.columns = [
@@ -121,9 +93,4 @@ def main():
             "Group 1 - Theshold: " + str(threshold_1),
             "Group 2 - Theshold: " + str(threshold_2),
         ]
-    # output_path = os.path.join(output_dir, "_cluster.csv")
     df.to_csv(output_file, index=False)
-
-
-if __name__ == "__main__":
-    main()
