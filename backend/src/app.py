@@ -328,7 +328,11 @@ class Api:
             suffixes.append("_cluster")
 
         if args["output_cluster"] == True:
-            cluster.export(matrix_path, args["cluster_threshold_one"], args["cluster_threshold_two"])
+            cluster.export(
+                matrix_path,
+                args["cluster_threshold_one"],
+                args["cluster_threshold_two"],
+            )
 
         destination_files = [
             os.path.join(state.export_path, entry.name)
