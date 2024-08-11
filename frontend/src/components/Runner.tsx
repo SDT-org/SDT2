@@ -305,7 +305,8 @@ const RunnerSettings = ({
                     type="button"
                     onClick={handleRun}
                     disabled={
-                      (!Boolean(fileName) || !appState.validation_error_id) ??
+                      !Boolean(fileName) ??
+                      !appState.validation_error_id ??
                       false
                     }
                   >
