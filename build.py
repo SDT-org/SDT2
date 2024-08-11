@@ -1,6 +1,5 @@
 import os
 import sys
-import shutil
 import subprocess
 import platform
 
@@ -25,13 +24,6 @@ python_executable = (
     else os.path.join(venv_path, "bin", "python")
 )
 
-if platform.system() == "Windows":
-    icon_option = f"--windows-icon-from-ico={os.path.join(assets_path, 'app.ico')}"
-elif platform.system() == "Darwin":
-    icon_option = f"--macos-app-icon={os.path.join(assets_path, 'app.icns')}"
-else:
-    icon_option = ""
-
 
 def create_command(path, args):
     file_without_extension = os.path.splitext(os.path.basename(path))[0]
@@ -45,10 +37,32 @@ def create_command(path, args):
         bio_data_option,
         f"--report={report_path}",
     ] + args
-    if os.name == "posix" and sys.platform == "darwin":
-        command.append("--macos-create-app-bundle")
-    command.append(icon_option)
+    print(command)
+    match platform.system():
+        case "Windows":
+            command.extend(
+                [
+                    f"--windows-icon-from-ico={os.path.join(assets_path, 'app.ico')}",
+                    "--windows-disable-console",
+                ]
+            )
+        case "Darwin":
+            command.extend(
+                [
+                    "--macos-create-app-bundle",
+                    f"--macos-app-icon={os.path.join(assets_path, 'app.icns')}",
+                ]
+            )
+        case _:
+            pass
+
+    if not platform.system() == "Darwin":
+        command.append("--onefile")
+
     command.append(path)
+
+    print(command)
+
     return command
 
 
@@ -65,17 +79,19 @@ def main():
         os.path.join("backend", "src", "app.py"),
         [
             "--standalone",
-            "--onefile",
             "--include-data-dir=gui=gui",
             "--nofollow-import-to=matplotlib",
             "--nofollow-import-to=doctest",
             "--output-filename=SDT2",
-            "--windows-disable-console",
             f"--output-dir={build_path}",
         ],
     )
 
-    run_command(command)
+    if run_command(command) and platform.system() == "Darwin":
+        os.rename(
+            os.path.join(".", "build", "app.app"),
+            os.path.join(".", "build", "SDT2.app"),
+        )
 
 
 if __name__ == "__main__":
