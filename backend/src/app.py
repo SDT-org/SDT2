@@ -100,6 +100,7 @@ def do_cancel_run():
         except:
             pass
     if pool:
+        pool.close()
         pool.terminate()
         pool.join()
     else:
@@ -441,8 +442,9 @@ def update_client_state(window: webview.Window):
     window.evaluate_js("syncAppState()")
 
 
-def on_closing():
+def on_closed():
     temp_dir.cleanup()
+    do_cancel_run()
 
 
 entry = get_entrypoint()
@@ -457,8 +459,11 @@ if __name__ == "__main__":
         width=1200,
         height=900,
         min_size=(640, 480),
+        confirm_close=True,
         # maximized=True
     )
+
+    window.events.closed += on_closed
 
     get_state, set_state, reset_state = create_app_state(
         debug=os.getenv("DEBUG", "false").lower() == "true",
