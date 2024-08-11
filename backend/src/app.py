@@ -14,6 +14,7 @@ import urllib.parse
 import shutil
 import mimetypes
 import math
+from warnings import warn
 from time import perf_counter
 from app_state import create_app_state
 from validations import validate_fasta
@@ -93,6 +94,7 @@ def find_source_files(prefix, suffixes):
 
 def do_cancel_run():
     global pool, cancelled
+
     if cancelled:
         # It's ok if the manager has already released the resource
         try:
