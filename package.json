@@ -6,9 +6,7 @@
   "scripts": {
     "build": "bun run clean && bun run frontend:build && python build.py",
     "build:noclean": "bun run frontend:build && python build.py",
-    "clean": "run-script-os",
-    "clean:default": "rm -rf dist 2>/dev/null; rm -rf gui 2>/dev/null; rm -rf build 2>/dev/null; ",
-    "clean:windows": "if exist dist rd /S /Q dist & if exist build rd /S /Q build & if exist gui rd /S /Q gui",
+    "clean": "node -e \"['build', 'gui'].forEach(d => require('fs').rmSync(d, { recursive: true, force: true }));\"",
     "frontend:dev": "vite build frontend/src/ --mode development --outDir ../../gui --emptyOutDir",
     "frontend:build": "vite build frontend/src/ --mode production --outDir ../../gui --minify --emptyOutDir",
     "init": "npm install && run-script-os",
