@@ -1,6 +1,5 @@
 import os
 import webview
-import subprocess
 import tempfile
 import shutil
 import json
@@ -86,8 +85,6 @@ def do_cancel_run():
         pool.close()
         pool.terminate()
         pool.join()
-    else:
-        warn("Expected pool instance")
 
     set_state(
         view="runner", progress=0, pair_progress=0, pair_count=0, estimated_time=None
@@ -400,14 +397,10 @@ def get_entrypoint():
     def exists(path):
         return os.path.exists(os.path.join(os.path.dirname(__file__), path))
 
-    if exists("../../gui/index.html"):  # unfrozen development
-        return "../../gui/index.html"
-
-    if exists("../../Resources/gui/index.html"):  # frozen py2app
-        return "../../Resources/gui/index.html"
-
     if exists("./gui/index.html"):
         return "./gui/index.html"
+    elif exists("../../gui/index.html"):
+        return "../../gui/index.html"
 
     raise Exception("No index.html found")
 
