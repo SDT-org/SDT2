@@ -43,7 +43,7 @@ export const Viewer = ({
       axis_labels: false,
       axlabel_xrotation: 360  ,
       axlabel_xfontsize: 12,
-      axlabel_yrotation:90,
+      axlabel_yrotation:270,
       axlabel_yfontsize: 12,
     },
   );
