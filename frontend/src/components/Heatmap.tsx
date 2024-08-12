@@ -52,7 +52,11 @@ export const Heatmap = ({
   //     };
   //   });
   // };
-
+  const n_len = tickText.length;
+  const xLimMin = -2;
+  const xLimMax = n_len +2;
+  const yLimMin = -2;
+  const yLimMax = n_len + 2;
   const plotAnnotations = React.useMemo(() => {
     const x: number[] = [];
     const y: number[] = [];
@@ -438,15 +442,17 @@ export const Heatmap = ({
             }}
             layout={{
               margin: {
-                l: 150,
-                r: 100,
-                b: 150,
-                t: 100,
-                pad: 5,
+                l: 50,
+                r: 50,
+                b: 50,
+                t: 50,
+                pad: 0,
               },
               dragmode: "pan",
               hovermode: "closest",
               xaxis: {
+                minallowed: xLimMin,
+                maxallowed: xLimMax,
                 tickfont: {
                   family: "Arial, sans-serif",
                   size: settings.axlabel_xfontsize,
@@ -464,6 +470,8 @@ export const Heatmap = ({
                 showgrid: false,
               },
               yaxis: {
+                minallowed: yLimMin,
+                maxallowed: yLimMax,
                 tickfont: {
                   family: "Arial, sans-serif",
                   size: settings.axlabel_yfontsize,
