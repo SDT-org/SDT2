@@ -442,17 +442,20 @@ export const Heatmap = ({
             }}
             layout={{
               margin: {
-                l: 50,
-                r: 50,
-                b: 50,
-                t: 50,
-                pad: 0,
+                l: 25,
+                r: 25,
+                b: 25,
+                t: 25,
+                pad: 5,
               },
+              autosize: true,
+              scaleanchor: true,
               dragmode: "pan",
               hovermode: "closest",
               xaxis: {
                 minallowed: xLimMin,
                 maxallowed: xLimMax,
+                automargin: true,
                 tickfont: {
                   family: "Arial, sans-serif",
                   size: settings.axlabel_xfontsize,
@@ -472,6 +475,7 @@ export const Heatmap = ({
               yaxis: {
                 minallowed: yLimMin,
                 maxallowed: yLimMax,
+                automargin: true,
                 tickfont: {
                   family: "Arial, sans-serif",
                   size: settings.axlabel_yfontsize,
