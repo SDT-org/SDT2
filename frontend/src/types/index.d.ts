@@ -5,6 +5,7 @@ declare global {
   interface Window {
     pywebview: {
       api: {
+        app_config: () => Promise<string>;
         get_state: () => Promise<AppState>;
         reset_state: () => Promise<void>;
         open_file_dialog: () => Promise<void>;
