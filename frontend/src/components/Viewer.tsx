@@ -11,6 +11,7 @@ import { Heatmap } from "./Heatmap";
 import { Histogram } from "./Histogram";
 import { ExportData } from "./ExportData";
 import { Tab, TabList, TabPanel, Tabs } from "react-aria-components";
+import messages from "../messages";
 
 export const Viewer = ({
   appState,
@@ -99,14 +100,20 @@ export const Viewer = ({
         const histogramData = JSON.parse(data.replace(/\bNaN\b/g, "null"));
         setHisogramData(histogramData);
       }),
-    ]).then(() => {
-      setLoading(false);
-    });
+    ])
+      .catch(() => {
+        setLoading(false);
+        alert("An error occured while processing this file.");
+        window.pywebview.api.reset_state();
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   React.useEffect(() => {
     getData();
-  }, []);
+  }, [appState.basename]);
 
   const updateHeatmapState = (newState: Partial<HeatmapSettings>) => {
     setHeatmapSettings((previous) => {

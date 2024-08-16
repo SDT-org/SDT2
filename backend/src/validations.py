@@ -1,4 +1,6 @@
-def validate_fasta(filepath):
+def validate_fasta(filepath, filetype=None):
+    if filetype and filetype != "text/fasta":
+        return False, "INVALID_FILE_TYPE"
     with open(filepath) as file:
         sequence = ""
         sequence_name = ""

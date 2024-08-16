@@ -80,6 +80,7 @@ def main():
         [
             "--standalone",
             "--include-data-dir=gui=gui",
+            "--include-data-dir=docs=docs",
             "--nofollow-import-to=matplotlib",
             "--nofollow-import-to=doctest",
             "--output-filename=SDT2",

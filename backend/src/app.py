@@ -1,5 +1,7 @@
 import os
+import sys
 import webview
+import webview.menu as webview_menu
 import tempfile
 import shutil
 import json
@@ -11,16 +13,19 @@ import shutil
 import mimetypes
 import math
 import cluster
-from warnings import warn
-from time import perf_counter
+from time import perf_counter, sleep
 from app_state import create_app_state
 from validations import validate_fasta
 from process_data import process_data
 from multiprocessing import Lock, Manager, Pool, cpu_count
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+from config import app_version
+
 is_nuitka = "__compiled__" in globals()
-window = None
 temp_dir = tempfile.TemporaryDirectory()
+
+default_window_title = "Sequence Demarcation Tool 2 Beta"
 
 try:
     cpu_count = cpu_count()
@@ -42,6 +47,7 @@ mimetypes.add_type("text/fasta", ".fnt")
 mimetypes.add_type("text/fasta", ".fa")
 matrix_filetypes = ("text/csv", "application/vnd.ms-excel", "text/plain")
 
+window = None
 pool = None
 cancelled = None
 start_time = None
@@ -91,9 +97,14 @@ def do_cancel_run():
     )
 
 
+def assert_window():
+    assert window is not None
+    return window
+
+
 class Api:
-    def fullscreen(self):
-        webview.windows[0].toggle_fullscreen()
+    def app_config(self):
+        return json.dumps({"appVersion": app_version})
 
     def save_image(self, args: dict):
         state = get_state()
@@ -142,7 +153,14 @@ class Api:
 
     def open_file_dialog(self):
         result = webview.windows[0].create_file_dialog(
-            webview.OPEN_DIALOG, allow_multiple=False
+            webview.OPEN_DIALOG,
+            allow_multiple=False,
+            file_types=(
+                "Compatible file (*.fasta;*.fas;*.faa;*.fnt;*.fa;*.csv;*.txt)",
+                "FASTA file (*.fasta;*.fas;*.faa;*.fnt;*.fa)",
+                "SDT2 Matrix file (*.csv)",
+                "SDT1 Matrix file (*.txt)",
+            ),
         )
 
         if not result:
@@ -156,20 +174,33 @@ class Api:
                 filename=result,
                 tempdir_path=os.path.dirname(result[0]),
                 basename=basename,
+                pair_progress=0,
+                pair_count=0,
+                filetype=filetype,
             )
         else:
-            valid, message = validate_fasta(result[0])
+            valid, message = validate_fasta(result[0], filetype)
 
             if valid:
                 set_state(
+                    view="runner",
                     filename=result,
                     filetype=filetype,
                     basename=basename,
                     validation_error_id=None,
+                    pair_progress=0,
+                    pair_count=0,
+                    stage="",
+                    progress=0,
+                    tempdir_path=temp_dir.name,
                 )
             else:
                 set_state(
-                    validation_error_id=message, filename="", basename="", filetype=""
+                    view="runner",
+                    validation_error_id=message,
+                    filename="",
+                    basename="",
+                    filetype="",
                 )
 
     def select_alignment_output_path(self):
@@ -191,6 +222,7 @@ class Api:
 
     def reset_state(self):
         reset_state()
+        assert_window().title = default_window_title
 
     def run_process_data(self, args: dict):
         global pool, cancelled, start_time
@@ -267,6 +299,7 @@ class Api:
 
                 if cancelled.value == False:
                     set_state(view="viewer")
+                    assert_window().title = f"SDT2 - {get_state().basename}"
 
     def cancel_run(self):
         do_cancel_run()
@@ -294,9 +327,6 @@ class Api:
         return data, tickText, min_val, max_val
 
     def confirm_overwrite(self, destination_files):
-        if not window:
-            return
-
         files_to_overwrite = [f for f in destination_files if os.path.exists(f)]
 
         if not files_to_overwrite:
@@ -308,7 +338,7 @@ class Api:
             + "\n\nAre you sure?"
         )
 
-        return window.create_confirmation_dialog("Warning", message)
+        return assert_window().create_confirmation_dialog("Warning", message)
 
     def export_data(self, args: dict):
         state = get_state()
@@ -414,12 +444,25 @@ def on_closed():
     do_cancel_run()
 
 
+def about_window():
+    with open(os.path.join("docs", "about.html"), "r") as f:
+        html = f.read()
+    webview.create_window("About", html=html)
+
+
+def manual_window():
+    with open(os.path.join("docs", "manual.html"), "r") as f:
+        html = f.read()
+    webview.create_window("SDT2 Manual", html=html)
+
+
 entry = get_entrypoint()
 
 if __name__ == "__main__":
     api = Api()
+
     window = webview.create_window(
-        "Sequence Demarcation Tool 2 Beta",
+        default_window_title,
         entry,
         js_api=api,
         # TODO: store last window size and position
@@ -439,4 +482,20 @@ if __name__ == "__main__":
         performance_profiles=performance_profiles,
     )
 
-    webview.start(debug=get_state().debug)
+    menu_items = [
+        webview_menu.Menu(
+            "File",
+            [
+                webview_menu.MenuAction("Select file...", api.open_file_dialog),
+            ],
+        ),
+        webview_menu.Menu(
+            "Help",
+            [
+                webview_menu.MenuAction("About SDT2", about_window),
+                webview_menu.MenuAction("Manual", manual_window),
+            ],
+        ),
+    ]
+
+    webview.start(debug=get_state().debug, menu=menu_items)

@@ -27,12 +27,26 @@ export const App = () => {
   }
 
   if (appState.debug) {
-    window.addEventListener("keydown", (event) => {
+    document.addEventListener("keydown", (event) => {
       if (event.key === "d") {
         setShowDebugState(!showDebugState);
       }
     });
   }
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "o") {
+        event.preventDefault();
+        window.pywebview.api.open_file_dialog();
+      }
+    };
+    document.addEventListener("keydown", handleKeydown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeydown);
+    };
+  }, []);
 
   return (
     <ErrorBoundary appState={appState} setAppState={setAppState}>
