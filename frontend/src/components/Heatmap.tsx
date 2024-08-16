@@ -54,7 +54,7 @@ export const Heatmap = ({
   // };
   const n_len = tickText.length;
   const xLimMin = -2;
-  const xLimMax = n_len +2;
+  const xLimMax = n_len + 2;
   const yLimMin = -2;
   const yLimMax = n_len + 2;
   const plotAnnotations = React.useMemo(() => {
@@ -313,7 +313,7 @@ export const Heatmap = ({
               </div>
               <div className="range-group">
                 <div className="field">
-                  <label htmlFor="cbar-shrink">Size</label>
+                  <label htmlFor="cbar-shrink">Height</label>
                   <input
                     type="range"
                     name="cbar-shrink"
@@ -330,7 +330,7 @@ export const Heatmap = ({
                   />
                 </div>
                 <div className="field">
-                  <label htmlFor="cbar-aspect">Aspect</label>
+                  <label htmlFor="cbar-aspect">Width</label>
                   <input
                     type="range"
                     name="cbar-aspect"
