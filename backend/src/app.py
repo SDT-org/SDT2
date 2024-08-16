@@ -178,7 +178,9 @@ class Api:
                 pair_count=0,
                 filetype=filetype,
             )
+            assert_window().title = f"SDT2 - {get_state().basename}"
         else:
+            assert_window().title = default_window_title
             valid, message = validate_fasta(result[0], filetype)
 
             if valid:
@@ -286,6 +288,7 @@ class Api:
                             estimated_time=estimated,
                         )
 
+                assert_window().title = f"SDT2 - Analyzing {get_state().basename}"
                 process_data(
                     settings=settings,
                     pool=pool,
@@ -457,7 +460,6 @@ def manual_window():
 
 
 entry = get_entrypoint()
-
 if __name__ == "__main__":
     api = Api()
 
