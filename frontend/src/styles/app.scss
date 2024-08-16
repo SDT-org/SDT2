@@ -1,10 +1,37 @@
+:root {
+  --background-color: #fff;
+  --foreground-color: #000;
+  --border-color: #ddd;
+  --shadow-color: #ccc;
+  --secondary-background-color: #f8f8f8;
+  --secondary-foreground-color: #666;
+  --secondary-border-color: #eaeaea;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background-color: #000;
+    --foreground-color: #fff;
+    --border-color: #222;
+    --shadow-color: #444;
+    --secondary-background-color: #282828;
+    --secondary-foreground-color: #666;
+    --secondary-border-color: #3a3a3a;
+  }
+}
+
+html, body {
+  background: var(--background-color);
+}
+
 .app-wrapper {
   display: grid;
   height: 100vh;
   grid-template-columns: 1fr;
   grid-template-rows: 1fr;
   grid-template-areas: "main";
-  background: #fbfbfb;
+  background: var(--background-color);
+  color: var(--foreground-color);
 
   &.with-header {
     grid-template-rows: auto 1fr;
@@ -12,19 +39,33 @@
       "header"
       "main";
   }
+
+  &.with-footer {
+    grid-template-rows: 1fr auto;
+    grid-template-areas:
+      "main"
+      "footer";
+  }
+
+  &.with-header.with-footer {
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas:
+      "header"
+      "main"
+      "footer";
+  }
 }
 
 .app-header {
   grid-area: header;
-  border-bottom: 0.1rem solid #ddd;
+  border-bottom: 0.1rem solid var(--border-color);
   padding: 0.8rem;
   z-index: 1;
   display: flex;
   align-content: center;
   justify-content: space-between;
   font-size: 0.875rem;
-  box-shadow: 0 0 0.2rem #ccc;
-  background: #fff;
+  box-shadow: 0 0 0.2rem var(--shadow-color);
 
   .left,
   .right {
@@ -48,7 +89,7 @@
   }
 
   .data-view {
-    border: 0.1rem solid #ddd;
+    border: 0.1rem solid var(--border-color);
     border-radius: 0.3rem;
     display: flex;
 
@@ -57,7 +98,7 @@
       font-weight: 500;
 
       &[data-selected="true"] {
-        background: #ddd;
+        background: var(--border-color);
       }
     }
   }
@@ -79,12 +120,11 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-right: 0.1rem solid #ddd;
+  border-right: 0.1rem solid var(--border-color);
   font-size: 0.875rem;
-  background: #f9f9f9;
 
   .group {
-    border-bottom: 0.1rem solid #ddd;
+    border-bottom: 0.1rem solid var(--border-color);
     padding: 0.8rem;
 
     &:last-child {
@@ -97,7 +137,6 @@
 .app-main {
   grid-area: main;
   overflow: auto;
-  background: #fff;
   min-width: 20rem;
 
   img {
@@ -111,6 +150,12 @@
 
 .app-footer {
   grid-area: footer;
+  padding: 1rem;
+  text-align: center;
+  color: var(--secondary-foreground-color);
+  font-size: 0.9rem;
+  display: flex;
+  justify-content: space-between;
 }
 
 .centered {
@@ -125,7 +170,7 @@
 }
 
 input, select {
-  border: 0.1rem solid #ccc;
+  border: 0.1rem solid var(--border-color);
   border-radius: 0.2rem;
 }
 
@@ -134,7 +179,7 @@ select, select option {
 }
 
 .form-wrapper {
-  border: 1px solid #000;
+  border: 1px solid var(--foreground-color);
   border-radius: 0.4rem;
   padding: 2.4rem;
   justify-content: left;
@@ -195,7 +240,7 @@ select, select option {
       font-size: 0.95rem;
 
       &.performance {
-        border-top: 0.1rem solid #ddd;
+        border-top: 0.1rem solid var(--border-color);
         padding-top: 0.8rem;
       }
 
@@ -210,7 +255,7 @@ select, select option {
           border-radius: 0.25rem;
           padding: 0.1rem 0.3rem;
           background: #333;
-          color: #fff;
+          color: var(--background-color);
           margin-right: 0.25rem;
           gap: 0.2rem;
         }
@@ -265,8 +310,8 @@ select, select option {
 
   .advanced-settings {
     font-size: 0.875rem;
-    background: #f8f8f8;
-    border: 0.1rem solid #eaeaea;
+    background: var(--secondary-background-color);
+    border: 0.1rem solid var(--secondary-border-color);
     border-radius: 0.4rem;
     padding: 0.6rem;
     margin-bottom: 1.6rem;
@@ -362,7 +407,7 @@ select, select option {
 }
 
 .app-sidebar-footer {
-  border-top: 1px solid #ddd;
+  border-top: 1px solid var(--border-color);
 
   select {
     width: 100%;
@@ -419,7 +464,7 @@ select, select option {
 
   details {
     width: 100%;
-    border: 0.1rem solid #000;
+    border: 0.1rem solid var(--foreground-color);
     border-radius: 0.4rem;
     padding: 1rem;
     margin-top: 4rem;
@@ -462,7 +507,7 @@ select, select option {
 
   [slot="increment"], [slot="decrement"] {
     visibility: hidden;
-    background: #fff;
+    background: var(--background-color);
     border: 0;
     border-radius: 3px 3px 0 0;
     color: #777;
@@ -608,8 +653,11 @@ select, select option {
     font-size: 0.9rem;
     font-weight: 600;
 
-    .estimate {
+    .estimate, .value {
       font-variant-numeric: tabular-nums;
+    }
+
+    .estimate {
       font-size: 0.8rem;
       font-weight: normal;
     }
