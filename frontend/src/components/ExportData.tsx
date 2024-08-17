@@ -1,36 +1,79 @@
 import React from "react";
 import { Modal, Button, Dialog, DialogTrigger } from "react-aria-components";
-import useAppState from "../appState";
+import Plotly from "plotly.js-dist-min";
+import useAppState, { AppState, SetAppState } from "../appState";
 import { NumberInput } from "./NumberInput";
 
 export const ExportData = () => {
   const [exportState, setExportState] = React.useState<
     "idle" | "exporting" | "success"
   >("idle");
-  const { appState } = useAppState();
+  const { appState, setAppState } = useAppState();
   const [outputCluster, setOutputCluster] = React.useState(false);
   const [thresholds, setThresholds] = React.useState({ one: 79, two: 0 });
+
+  const swapDataView = (view: AppState["client"]["dataView"]) =>
+    setAppState((previous) => {
+      return {
+        ...previous,
+        client: {
+          ...previous.client,
+          dataView: view,
+        },
+      };
+    });
+
+  const getImages = async () => {
+    const previousDataView = appState.client.dataView;
+    swapDataView("heatmap");
+
+    let element = document.getElementsByClassName("js-plotly-plot")[0];
+    const config = {
+      format: "svg",
+      width: 1000,
+      height: 800,
+    };
+
+    await Plotly.toImage(element, config);
+    const heatmapImage = await Plotly.toImage(element, config);
+
+    swapDataView("plot");
+    await new Promise((r) => setTimeout(r, 100));
+    element = document.getElementsByClassName("js-plotly-plot")[0];
+
+    await Plotly.toImage(element, config);
+    const distributionImage = await Plotly.toImage(element, config);
+    swapDataView(previousDataView);
+    return [heatmapImage, distributionImage];
+  };
 
   React.useEffect(() => {
     if (exportState !== "exporting") {
       return;
     }
 
-    window.pywebview.api
-      .export_data({
-        output_cluster: outputCluster,
-        cluster_threshold_one: thresholds.one,
-        cluster_threshold_two: thresholds.two,
-      })
-      .then((result) =>
-        result ? setExportState("success") : setExportState("idle"),
-      );
+    getImages().then((images) => {
+      window.pywebview.api
+        .export_data({
+          output_cluster: outputCluster,
+          cluster_threshold_one: thresholds.one,
+          cluster_threshold_two: thresholds.two,
+          heatmap_image_data: images[0],
+          distribution_image_data: images[1],
+        })
+        .then((result) =>
+          result ? setExportState("success") : setExportState("idle"),
+        );
+    });
   }, [exportState]);
 
   return (
     <DialogTrigger>
       <Button>Export Data</Button>
-      <Modal isDismissable className="react-aria-Modal export-modal">
+      <Modal
+        isDismissable={exportState != "exporting"}
+        className={`react-aria-Modal export-modal ${exportState}`}
+      >
         <Dialog>
           {({ close }) => (
             <>

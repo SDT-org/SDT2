@@ -10,7 +10,7 @@ import {
 import { Heatmap } from "./Heatmap";
 import { Histogram } from "./Histogram";
 import { ExportData } from "./ExportData";
-import { Tab, TabList, TabPanel, Tabs } from "react-aria-components";
+import { Key, Tab, TabList, TabPanel, Tabs } from "react-aria-components";
 import messages from "../messages";
 
 export const Viewer = ({
@@ -132,8 +132,23 @@ export const Viewer = ({
     });
   };
 
+  const setDataView = (newValue: Key) =>
+    setAppState((previous) => {
+      return {
+        ...previous,
+        client: {
+          ...previous.client,
+          dataView: newValue as AppState["client"]["dataView"],
+        },
+      };
+    });
+
   return (
-    <Tabs className="app-wrapper with-header">
+    <Tabs
+      className="app-wrapper with-header"
+      selectedKey={appState.client.dataView}
+      onSelectionChange={setDataView}
+    >
       <div className="app-header">
         <div className="left">
           <button

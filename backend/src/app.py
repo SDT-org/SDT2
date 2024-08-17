@@ -102,6 +102,20 @@ def assert_window():
     return window
 
 
+def save_image_from_api(data, format, destination):
+
+    encoded = data.split(",")[1]
+
+    if format == "svg":
+        data = urllib.parse.unquote(encoded)
+        with open(destination, "w") as file:
+            file.write(data)
+    else:
+        data = base64.b64decode(encoded)
+        with open(destination, "wb") as file:
+            file.write(data)
+
+
 class Api:
     def app_config(self):
         return json.dumps({"appVersion": app_version})
@@ -119,48 +133,22 @@ class Api:
         if not save_path:
             return
 
-        encoded = args["data"].split(",")[1]
-
-        if args["format"] == "svg":
-            data = urllib.parse.unquote(encoded)
-            with open(save_path, "w") as file:
-                file.write(data)
-        else:
-            data = base64.b64decode(encoded)
-            with open(save_path, "wb") as file:
-                file.write(data)
-
-    def save_file_dialog(self):
-        state = get_state()
-        save_filename = f"{os.path.splitext(state.basename)[0]}.svg"
-        save_path = webview.windows[0].create_file_dialog(
-            dialog_type=webview.SAVE_DIALOG,
-            directory=state.filename[0],
-            save_filename=save_filename,
+        save_image_from_api(
+            data=args["data"],
+            format=args["format"],
+            destination=save_path,
         )
-
-        if not save_path:
-            return
-
-        basename = state.basename
-        image_path = os.path.join(state.tempdir_path, f"{basename}.svg")
-
-        try:
-            shutil.copy2(image_path, save_path)
-            print(f"File successfully copied to {save_path}")
-        except IOError as e:
-            print(f"An error occurred while copying the file: {e}")
 
     def open_file_dialog(self):
         result = webview.windows[0].create_file_dialog(
             webview.OPEN_DIALOG,
             allow_multiple=False,
-            file_types=(
-                "Compatible file (*.fasta;*.fas;*.faa;*.fnt;*.fa;*.csv;*.txt)",
-                "FASTA file (*.fasta;*.fas;*.faa;*.fnt;*.fa)",
-                "SDT2 Matrix file (*.csv)",
-                "SDT1 Matrix file (*.txt)",
-            ),
+            # file_types=(
+            #     "Compatible file (*.fasta;*.fas;*.faa;*.fnt;*.fa;*.csv;*.txt)",
+            #     "FASTA file (*.fasta;*.fas;*.faa;*.fnt;*.fa)",
+            #     "SDT2 Matrix file (*.csv)",
+            #     "SDT1 Matrix file (*.txt)",
+            # ),
         )
 
         if not result:
@@ -362,10 +350,27 @@ class Api:
                 args["cluster_threshold_two"],
             )
 
+        heatmap_image_filename = (
+            os.path.basename(state.basename).removesuffix("_fasta") + "_heatmap.svg"
+        )
+        distribution_image_filename = (
+            os.path.basename(state.basename).removesuffix("_fasta")
+            + "_distribution.svg"
+        )
+        heatmap_image_destination = os.path.join(
+            state.export_path, heatmap_image_filename
+        )
+        distribution_image_destination = os.path.join(
+            state.export_path, distribution_image_filename
+        )
+
         destination_files = [
             os.path.join(state.export_path, entry.name)
             for entry in find_source_files(prefix, suffixes)
         ]
+        destination_files.extend(
+            [heatmap_image_destination, distribution_image_destination]
+        )
 
         if not self.confirm_overwrite(destination_files):
             return False
@@ -375,6 +380,17 @@ class Api:
             temp_destination_path = destination_path + ".tmp"
             shutil.copy2(entry.path, temp_destination_path)
             os.replace(temp_destination_path, destination_path)
+
+        save_image_from_api(
+            data=args["heatmap_image_data"],
+            format="svg",
+            destination=heatmap_image_destination,
+        )
+        save_image_from_api(
+            data=args["distribution_image_data"],
+            format="svg",
+            destination=distribution_image_destination,
+        )
 
         return True
 
