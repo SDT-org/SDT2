@@ -28,6 +28,11 @@ class TestValidateFasta(unittest.TestCase):
         self.assertFalse(result)
         self.assertEqual(message, "ZERO_LENGTH_SEQUENCE")
 
+    def test_gap_only_fasta(self):
+        result, message = validate_fasta(fasta_path('gap_only.fasta'))
+        self.assertFalse(result)
+        self.assertEqual(message, "ZERO_LENGTH_SEQUENCE")
+
     def test_one_sequence_fasta(self):
         result, message = validate_fasta(fasta_path('one.fasta'))
         self.assertFalse(result)

@@ -15,7 +15,11 @@ def validate_fasta(filepath, filetype=None):
             if line.startswith(">"):
                 if line in sequence_names:
                     return False, "DUPLICATE_SEQUENCE_NAME"
-                if sequence_name and line != sequence_name and len(sequence) == 0:
+                if (
+                    sequence_name
+                    and line != sequence_name
+                    and not any(char.isalpha() for char in sequence)
+                ):
                     return False, "ZERO_LENGTH_SEQUENCE"
                 sequence = ""
                 sequence_name = line
