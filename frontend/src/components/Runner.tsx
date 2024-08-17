@@ -345,11 +345,18 @@ export const Runner = ({
   setAppState: SetAppState;
 }) => {
   const [appConfig, setAppConfig] = React.useState<{ appVersion: string }>();
+  const fetchAppConfig = () => {
+    window.pywebview.api
+    .app_config()
+    .then((result) => setAppConfig(JSON.parse(result)));
+  };
 
   React.useEffect(() => {
-    window.pywebview.api
-      .app_config()
-      .then((result) => setAppConfig(JSON.parse(result)));
+    if (!window.pywebview) {
+      setTimeout(fetchAppConfig, 500);
+      return;
+    }
+    fetchAppConfig();
   }, []);
 
   return (
