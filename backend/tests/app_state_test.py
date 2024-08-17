@@ -6,7 +6,7 @@ from app_state import create_app_state
 
 class TestAppState(unittest.TestCase):
     def test_state_updates(self):
-        get_state, set_state = create_app_state()
+        get_state, set_state, _ = create_app_state()
 
         state = get_state()
         self.assertEqual(state.filename, "")

@@ -1,5 +1,5 @@
 # Usage
-# get_state, set_state = create_app_state()
+# get_state, set_state, reset_state = create_app_state()
 
 # Update state
 # set_state(filename="example.txt")
