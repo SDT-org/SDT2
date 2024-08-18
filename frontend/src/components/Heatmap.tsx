@@ -454,8 +454,8 @@ export const Heatmap = ({
               dragmode: "pan",
               hovermode: "closest",
               xaxis: {
-                minallowed: xLimMin,
-                maxallowed: xLimMax,
+                minallowed: -2,
+                maxallowed: tickText.length + 2,
                 automargin: true,
                 tickfont: {
                   family: "Arial, sans-serif",
@@ -474,8 +474,8 @@ export const Heatmap = ({
                 showgrid: false,
               },
               yaxis: {
-                minallowed: yLimMin,
-                maxallowed: yLimMax,
+                minallowed: -2,
+                maxallowed: tickText.length + 2,
                 automargin: true,
                 tickfont: {
                   family: "Arial, sans-serif",
