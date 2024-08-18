@@ -31,7 +31,7 @@ export const Viewer = ({
       reverse: false,
       vmax: 100,
       vmin: 65,
-      cellspace: 0,
+      cellspace: 1,
       annotation: false,
       annotation_font_size: 10,
       annotation_rounding: 0,
