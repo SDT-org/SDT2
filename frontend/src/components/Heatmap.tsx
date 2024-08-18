@@ -17,55 +17,14 @@ export const Heatmap = ({
 }: {
   settings: HeatmapSettings;
   updateSettings: (_: Partial<HeatmapSettings>) => void;
-  data: HeatmapData | undefined;
+  data: HeatmapData;
   tickText: string[];
 }) => {
-  // const [settings, setHeatmapSettings] = React.useState<HeatmapSettings>(
-  //   {
-  //     colorscale: "Portland",
-  //     reverse: false,
-  //     vmax: 100,
-  //     vmin: 65,
-  //     cellspace: 1,
-  //     annotation: false,
-  //     annotation_font_size: 10,
-  //     annotation_rounding: 0,
-  //     annotation_alpha: "0",
-  //     color: "white",
-  //     showscale: true,
-  //     cbar_shrink: 1,
-  //     cbar_aspect: "25",
-  //     cbar_pad: "10",
-  //     axis_labels: true,
-  //     axlabel_xrotation: 270,
-  //     axlabel_xfontsize: 12,
-  //     axlabel_yrotation: 0,
-  //     axlabel_yfontsize: 12,
-  //   },
-  // );
-
-  // const updateSettings = (newState: Partial<HeatmapSettings>) => {
-  //   setHeatmapSettings(previous => {
-  //     return {
-  //       ...previous,
-  //       ...newState,
-  //     };
-  //   });
-  // };
-  const n_len = tickText.length;
-  const xLimMin = -2;
-  const xLimMax = n_len + 2;
-  const yLimMin = -2;
-  const yLimMax = n_len + 2;
-  const plotAnnotations = React.useMemo(() => {
+  const annotations = React.useMemo(() => {
     const x: number[] = [];
     const y: number[] = [];
     const text: string[] = [];
     const textColors: (string | null)[] = [];
-
-    if (!data) {
-      return;
-    }
 
     const normalizedData = data
       .flat()
@@ -86,7 +45,7 @@ export const Heatmap = ({
         y.push(rowIndex);
 
         if (datum === null) {
-          text.push(datum);
+          text.push("");
         } else {
           text.push(parseFloat(datum).toFixed(settings.annotation_rounding));
         }
@@ -130,7 +89,7 @@ export const Heatmap = ({
       text,
       textColors,
     };
-  }, [tickText, data, settings]);
+  }, [tickText, settings]);
 
   console.log(settings);
 
@@ -428,10 +387,16 @@ export const Heatmap = ({
                 textfont: {
                   family: "Arial",
                   size: settings.annotation_font_size,
-                  color: plotAnnotations?.textColors ?? "white",
+                  color: annotations?.textColors ?? "white",
                 },
                 hoverinfo: "skip",
-                ...(settings.annotation ? plotAnnotations : {}),
+                ...(settings.annotation
+                  ? {
+                      x: annotations.x,
+                      y: annotations.y,
+                      text: annotations.text,
+                    }
+                  : {}),
               },
             ]}
             config={{

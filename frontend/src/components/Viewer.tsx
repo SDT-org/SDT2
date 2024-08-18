@@ -188,19 +188,23 @@ export const Viewer = ({
       </div>
 
       <TabPanel id="heatmap" className="app-panel">
-        <Heatmap
-          data={heatmapData}
-          settings={heatmapSettings}
-          updateSettings={updateHeatmapState}
-          tickText={heatmapTickText}
-        />
+        {heatmapData ? (
+          <Heatmap
+            data={heatmapData}
+            settings={heatmapSettings}
+            updateSettings={updateHeatmapState}
+            tickText={heatmapTickText}
+          />
+        ) : null}
       </TabPanel>
       <TabPanel id="plot" className="app-panel">
-        <Histogram
-          data={histogramData}
-          settings={histogramSettings}
-          updateSettings={updateHistogramSettings}
-        />
+        {histogramData ? (
+          <Histogram
+            data={histogramData}
+            settings={histogramSettings}
+            updateSettings={updateHistogramSettings}
+          />
+        ) : null}
       </TabPanel>
       {loading ? <div className="api-loader"></div> : null}
     </Tabs>
