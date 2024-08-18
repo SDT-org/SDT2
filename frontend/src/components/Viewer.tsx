@@ -42,9 +42,9 @@ export const Viewer = ({
       cbar_aspect: "25",
       cbar_pad: "10",
       axis_labels: false,
-      axlabel_xrotation: 270  ,
+      axlabel_xrotation: 270,
       axlabel_xfontsize: 12,
-      axlabel_yrotation:360,
+      axlabel_yrotation: 360,
       axlabel_yfontsize: 12,
     },
   );

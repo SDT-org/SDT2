@@ -410,8 +410,8 @@ export const Heatmap = ({
                 showscale: settings.showscale,
                 zmin: settings.vmin,
                 zmax: settings.vmax,
-                xgap: settings.cellspace, // Gap between columns of cells
-                ygap: settings.cellspace,
+                xgap: settings.cellspace ? settings.cellspace : 0.001, // Gap between columns of cells
+                ygap: settings.cellspace ? settings.cellspace : 0.001,
                 colorbar: {
                   len: settings.cbar_shrink,
                   thickness: parseInt(settings.cbar_aspect, 10),
