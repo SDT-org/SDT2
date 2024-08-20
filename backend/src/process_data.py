@@ -11,6 +11,7 @@ from itertools import combinations_with_replacement as cwr
 from functools import partial
 import numpy as np
 import pandas as pd
+import parasail
 from Bio import SeqIO, Phylo
 from Bio.Align import PairwiseAligner
 from Bio.Phylo.TreeConstruction import (
@@ -97,8 +98,8 @@ def process_pair(id_sequence_pair, settings):
     seq2 = id_sequence_pair[1][1]
     aligner = make_aligner(settings)
 
-    aln = aligner.align(seq1, seq2)[0]
-    score = get_similarity(aln[0], aln[1])
+    aln = parasail.nw_trace(seq1, seq2, 10, 1, parasail.blosum62)
+    score = get_similarity(aln.traceback.query, aln.traceback.ref)
 
     if settings.get("aln_out"):
         fname = os.path.join(
