@@ -222,7 +222,7 @@ def output_summary(args, file_name, start_time, end_time, run_summary):
 
     output_content = f"""
     SDT {app_version} release for {platform.system()}
-    Developed by Michael Lund, Josiah Ivey, Brejnev Muhire,
+    Developed by Michael Lund and Josiah Ivey; Brejnev Muhire,
     Darren Martin, Simona Kraberger, Qiyun Zhu, Pierre Lefeuvre, Philippe Roumagnac, Arvind Varsani
 
     System info:
