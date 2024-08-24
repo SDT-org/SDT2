@@ -16,7 +16,6 @@ bio_data_src_path = os.path.join(
     *bio_data_path,
 )
 bio_data_dest_path = os.path.join(*bio_data_path)
-bio_data_option = f"--include-data-dir={bio_data_src_path}={bio_data_dest_path}"
 
 python_executable = (
     os.path.join(venv_path, "Scripts", "python")
@@ -25,19 +24,46 @@ python_executable = (
 )
 
 
+def get_parasail_library_name():
+    if sys.platform == "win32":
+        return "libparasail.dll"
+    elif sys.platform == "darwin":
+        return "libparasail.dylib"
+    elif sys.platform.startswith("linux"):
+        return "libparasail.so"
+    else:
+        raise RuntimeError("Unsupported platform")
+
+
+def get_parasail_library_path(library_name):
+    venv_path = os.environ.get("VIRTUAL_ENV")
+    if not venv_path:
+        raise RuntimeError("VIRTUAL_ENV not set. Activate your virtual environment.")
+
+    for root, _, files in os.walk(venv_path):
+        if library_name in files:
+            return os.path.join(root, library_name)
+
+    raise RuntimeError(f"{library_name} not found in the virtual environment.")
+
+
 def create_command(path, args):
     file_without_extension = os.path.splitext(os.path.basename(path))[0]
     report_path = os.path.join(
         "build", f"{file_without_extension}-compilation-report.xml"
     )
+    parasail_library_name = get_parasail_library_name()
+    parasail_library_path = get_parasail_library_path(parasail_library_name)
+
     command = [
         python_executable,
         "-m",
         "nuitka",
-        bio_data_option,
+        f"--include-data-dir={bio_data_src_path}={bio_data_dest_path}"
+        f"--include-data-file={parasail_library_path}={os.path.join('parasail', parasail_library_name)}"
         f"--report={report_path}",
     ] + args
-    print(command)
+
     match platform.system():
         case "Windows":
             command.extend(
