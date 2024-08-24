@@ -26,7 +26,7 @@ python_executable = (
 
 def get_parasail_library_name():
     if sys.platform == "win32":
-        return "libparasail.dll"
+        return "parasail.dll"
     elif sys.platform == "darwin":
         return "libparasail.dylib"
     elif sys.platform.startswith("linux"):
