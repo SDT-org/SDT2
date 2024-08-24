@@ -91,8 +91,6 @@ export const Heatmap = ({
     };
   }, [tickText, settings]);
 
-  console.log(settings);
-
   return (
     <>
       <div className="app-sidebar">
