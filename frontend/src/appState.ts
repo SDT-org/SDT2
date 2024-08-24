@@ -10,6 +10,8 @@ export const performanceProfiles = {
 export const alignmentTypes = ["global", "local"] as const;
 export const clusterMethods = ["Neighbor-Joining", "UPGMA", "None"] as const;
 
+export type SaveableImageFormat = "png" | "jpeg" | "svg";
+
 export type AppState = {
   view: "runner" | "loader" | "viewer";
   filename: string[];
@@ -33,7 +35,7 @@ export type AppState = {
     alignment_type: (typeof alignmentTypes)[number];
     error?: Error;
     errorInfo?: ErrorInfo;
-    saveFormat: "png" | "jpeg" | "svg";
+    saveFormat: SaveableImageFormat;
   };
 };
 

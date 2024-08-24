@@ -1,8 +1,13 @@
 import React from "react";
 import { Modal, Button, Dialog, DialogTrigger } from "react-aria-components";
 import Plotly from "plotly.js-dist-min";
-import useAppState, { AppState, SetAppState } from "../appState";
+import useAppState, {
+  AppState,
+  SaveableImageFormat,
+  SetAppState,
+} from "../appState";
 import { NumberInput } from "./NumberInput";
+import { assertDefined } from "../helpers";
 
 export const ExportData = () => {
   const [exportState, setExportState] = React.useState<
@@ -23,13 +28,23 @@ export const ExportData = () => {
       };
     });
 
+  const getPlotlyElement = () =>
+    assertDefined(
+      (
+        document.getElementsByClassName(
+          "js-plotly-plot",
+        ) as HTMLCollectionOf<HTMLElement>
+      )[0],
+    );
+
   const getImages = async () => {
     const previousDataView = appState.client.dataView;
     swapDataView("heatmap");
 
-    let element = document.getElementsByClassName("js-plotly-plot")[0];
+    let element = getPlotlyElement();
+
     const config = {
-      format: "svg",
+      format: appState.client.saveFormat,
       width: 1000,
       height: 800,
     };
@@ -39,12 +54,13 @@ export const ExportData = () => {
 
     swapDataView("plot");
     await new Promise((r) => setTimeout(r, 100));
-    element = document.getElementsByClassName("js-plotly-plot")[0];
+    element = getPlotlyElement();
 
     await Plotly.toImage(element, config);
     const distributionImage = await Plotly.toImage(element, config);
+
     swapDataView(previousDataView);
-    return [heatmapImage, distributionImage];
+    return { heatmapImage, distributionImage };
   };
 
   React.useEffect(() => {
@@ -58,8 +74,9 @@ export const ExportData = () => {
           output_cluster: outputCluster,
           cluster_threshold_one: thresholds.one,
           cluster_threshold_two: thresholds.two,
-          heatmap_image_data: images[0],
-          distribution_image_data: images[1],
+          heatmap_image_data: images.heatmapImage,
+          distribution_image_data: images.distributionImage,
+          image_format: appState.client.saveFormat,
         })
         .then((result) =>
           result ? setExportState("success") : setExportState("idle"),
@@ -69,7 +86,7 @@ export const ExportData = () => {
 
   return (
     <DialogTrigger>
-      <Button>Export Data</Button>
+      <Button>Export</Button>
       <Modal
         isDismissable={exportState != "exporting"}
         className={`react-aria-Modal export-modal ${exportState}`}
@@ -78,7 +95,7 @@ export const ExportData = () => {
           {({ close }) => (
             <>
               <form className="form export-form">
-                <h1>Export Data</h1>
+                <h1>Export Images & Data</h1>
                 <div className="group">
                   <div className="field">
                     <label className="header">Output Folder</label>
@@ -94,6 +111,27 @@ export const ExportData = () => {
                       Select Folder...
                     </button>
                   </div>
+                </div>
+                <div className="field">
+                  <label htmlFor="save-format" className="header">
+                    Image Format
+                  </label>
+                  <select
+                    onChange={(e) =>
+                      setAppState((previous) => ({
+                        ...previous,
+                        client: {
+                          ...previous.client,
+                          saveFormat: e.target.value as SaveableImageFormat,
+                        },
+                      }))
+                    }
+                    value={appState.client.saveFormat}
+                  >
+                    <option value="png">PNG</option>
+                    <option value="jpeg">JPEG</option>
+                    <option value="svg">SVG</option>
+                  </select>
                 </div>
                 <div className="group">
                   <div className="field">

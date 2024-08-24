@@ -350,12 +350,21 @@ class Api:
                 args["cluster_threshold_two"],
             )
 
+        image_format = str(args["image_format"]).lower()
+        saveable_formats = ["jpg", "svg", "png"]
+
+        if image_format not in saveable_formats:
+            raise Exception(f"Expected image_format to be one of {saveable_formats}")
+
         heatmap_image_filename = (
-            os.path.basename(state.basename).removesuffix("_fasta") + "_heatmap.svg"
+            os.path.basename(os.path.splitext(state.basename)[0]).removesuffix("_fasta")
+            + "_heatmap."
+            + image_format
         )
         distribution_image_filename = (
-            os.path.basename(state.basename).removesuffix("_fasta")
-            + "_distribution.svg"
+            os.path.basename(os.path.splitext(state.basename)[0]).removesuffix("_fasta")
+            + "_distribution."
+            + image_format
         )
         heatmap_image_destination = os.path.join(
             state.export_path, heatmap_image_filename
@@ -383,12 +392,12 @@ class Api:
 
         save_image_from_api(
             data=args["heatmap_image_data"],
-            format="svg",
+            format=image_format,
             destination=heatmap_image_destination,
         )
         save_image_from_api(
             data=args["distribution_image_data"],
-            format="svg",
+            format=image_format,
             destination=distribution_image_destination,
         )
 

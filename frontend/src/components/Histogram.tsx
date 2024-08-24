@@ -42,10 +42,12 @@ export const Histogram = ({
   data,
   settings,
   updateSettings,
+  footer,
 }: {
   data: HistogramData | undefined;
   settings: HistogramSettings;
   updateSettings: (_: Partial<HistogramSettings>) => void;
+  footer?: React.ReactNode;
 }) => {
   if (!data) {
     return (
@@ -348,7 +350,7 @@ export const Histogram = ({
                   label="Width"
                   field="lineWidth"
                   value={settings.lineWidth}
-                  disabled={!settings.showLinePlot}
+                  isDisabled={!settings.showLinePlot}
                   updateValue={updateSettings}
                   min={0}
                   max={10}
@@ -409,7 +411,7 @@ export const Histogram = ({
                     label="Size"
                     field="markerSize"
                     value={settings.markerSize}
-                    disabled={!settings.showScatterPlot}
+                    isDisabled={!settings.showScatterPlot}
                     updateValue={updateSettings}
                     min={0}
                     max={20}
@@ -420,11 +422,7 @@ export const Histogram = ({
             </div>
           </div>
         </div>
-        <div className="app-sidebar-footer">
-          <div className="form">
-            <SaveImage plotType="Plot" />
-          </div>
-        </div>
+        <div className="app-sidebar-footer">{footer}</div>
       </div>
       <div className="app-main">
         <Plot

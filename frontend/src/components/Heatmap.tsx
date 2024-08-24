@@ -5,7 +5,6 @@ import { Colorscale, HeatmapData, HeatmapSettings } from "../plotTypes";
 import { NumberInput } from "./NumberInput";
 import { colorScales } from "../colorScales";
 import tinycolor from "tinycolor2";
-import { SaveImage } from "./SaveImage";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -14,11 +13,13 @@ export const Heatmap = ({
   updateSettings,
   data,
   tickText,
+  footer,
 }: {
   settings: HeatmapSettings;
   updateSettings: (_: Partial<HeatmapSettings>) => void;
   data: HeatmapData;
   tickText: string[];
+  footer?: React.ReactNode;
 }) => {
   const annotations = React.useMemo(() => {
     const x: number[] = [];
@@ -340,11 +341,7 @@ export const Heatmap = ({
             </div>
           </div>
         </div>
-        <div className="app-sidebar-footer">
-          <div className="form">
-            <SaveImage plotType="Heatmap" />
-          </div>
-        </div>
+        <div className="app-sidebar-footer">{footer}</div>
       </div>
       <div className="app-main">
         {data ? (

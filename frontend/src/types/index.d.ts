@@ -1,3 +1,4 @@
+import { SaveableImageFormat } from "../appState";
 import { RunProcessDataArgs } from "../components/Runner";
 import { AppState } from "../src/appState";
 
@@ -11,12 +12,13 @@ declare global {
         open_file_dialog: () => Promise<void>;
         select_alignment_output_path: () => Promise<void>;
         select_export_path: () => Promise<void>;
-        export_data: ({
-          output_cluster: boolean,
-          cluster_threshold_one: number,
-          cluster_threshold_two: number,
-          heatmap_image_data: string,
-          distribution_image_data: string,
+        export_data: (args: {
+          output_cluster: boolean;
+          cluster_threshold_one: number;
+          cluster_threshold_two: number;
+          heatmap_image_data: string;
+          distribution_image_data: string;
+          image_format: SaveableImageFormat;
         }) => Promise<boolean>;
         save_image: (args: {
           data: string;
@@ -31,3 +33,5 @@ declare global {
     syncAppState: () => Promise<void>;
   }
 }
+
+export type {};
