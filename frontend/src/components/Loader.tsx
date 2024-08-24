@@ -36,7 +36,9 @@ export const Loader = ({
           {({ percentage, valueText }) => (
             <>
               <Label>{stage ? `${stage}...` : null}</Label>
-              <span className="value">{valueText}</span>
+              <span className="value">
+                {stage === "Analyzing" && valueText}
+              </span>
               <div className="bar">
                 <div
                   className="fill"
@@ -44,7 +46,9 @@ export const Loader = ({
                   data-animation={estimated_time && estimated_time > 10}
                 />
               </div>
-              <div className="estimate">{estimatedDisplay || <>&nbsp;</>}</div>
+              <div className="estimate">
+                {(stage === "Analyzing" && estimatedDisplay) || <>&nbsp;</>}
+              </div>
             </>
           )}
         </ProgressBar>
