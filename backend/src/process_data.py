@@ -13,7 +13,6 @@ import numpy as np
 import pandas as pd
 import parasail
 from Bio import SeqIO, Phylo
-from Bio.Align import PairwiseAligner
 from Bio.Phylo.TreeConstruction import (
     DistanceTreeConstructor,
     DistanceMatrix,
@@ -24,32 +23,6 @@ from config import app_version
 
 start_time = time.time()
 start_run = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-
-
-def make_aligner(settings):
-    is_aa = settings["is_aa"]
-    aligner = PairwiseAligner()
-    aligner.match_score = getattr(settings, "match", 1.5)
-    aligner.mismatch_score = getattr(settings, "mismatch", -1)
-    aligner.target_internal_open_gap_score = getattr(
-        settings, "iog", -2 if is_aa else -3
-    )
-    aligner.target_internal_extend_gap_score = getattr(settings, "ieg", -2)
-    aligner.target_left_open_gap_score = getattr(settings, "log", -3 if is_aa else -4)
-    aligner.target_left_extend_gap_score = getattr(settings, "leg", -2 if is_aa else -3)
-    aligner.target_right_open_gap_score = getattr(settings, "rog", -3 if is_aa else -4)
-    aligner.target_right_extend_gap_score = getattr(
-        settings, "reg", -2 if is_aa else -3
-    )
-    aligner.query_internal_open_gap_score = getattr(
-        settings, "iog", -2 if is_aa else -3
-    )
-    aligner.query_internal_extend_gap_score = getattr(settings, "ieg", -2)
-    aligner.query_left_open_gap_score = getattr(settings, "log", -3 if is_aa else -4)
-    aligner.query_left_extend_gap_score = getattr(settings, "leg", -2 if is_aa else -3)
-    aligner.query_right_open_gap_score = getattr(settings, "rog", -3 if is_aa else -4)
-    aligner.mode = settings["alignment_type"]
-    return aligner
 
 
 def run_preprocessing(raw_seq_dict):
@@ -96,7 +69,6 @@ def process_pair(id_sequence_pair, settings):
     id2 = ids[1]
     seq1 = id_sequence_pair[1][0]
     seq2 = id_sequence_pair[1][1]
-    aligner = make_aligner(settings)
 
     aln = parasail.nw_trace(seq1, seq2, 10, 1, parasail.blosum62)
     score = get_similarity(aln.traceback.query, aln.traceback.ref)
@@ -207,11 +179,8 @@ def save_matrix_to_csv(df, filename):
 #     columnar_df.to_csv(filename + "_cols.csv", mode="w", header=True, index=False)
 
 
-def output_summary(args, file_name, start_time, end_time, run_summary):
-    aligner = make_aligner(args)
-    aligner_params_str = str(aligner).split("\n")
+def output_summary(file_name, start_time, end_time, run_summary):
     # Adjust the indentation of each line
-    formatted_aligner_params = "\n    ".join(aligner_params_str)
     build_type = f"{platform.system()} {platform.release()} {platform.machine()}"
     kernel_info = platform.processor()
     cpu_cores = os.cpu_count()
@@ -231,8 +200,8 @@ def output_summary(args, file_name, start_time, end_time, run_summary):
     Run info for {file_name}:
     Start time:    {start_time}
 
-    BioPython {formatted_aligner_params}
-    Using the {str(aligner.algorithm)}
+    Parasail
+    Using the Needleman-Wunsch algorithm
 
     End time: {end_time}
     Total runtime: {run_summary}
@@ -324,7 +293,6 @@ def process_data(
     elapsed_time = end_time - start_time
     run_summary = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
     save_output_summary = output_summary(
-        settings,
         file_name,
         start_run,
         end_run,
