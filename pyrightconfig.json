@@ -1,0 +1,13 @@
+{
+  "venvPath": "./",
+  "venv": "venv-pywebview",
+  "pythonVersion": "3.11",
+  "extraPaths": [
+    "./backend/src"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__"
+  ],
+  "reportMissingImports": true
+}
