@@ -105,10 +105,9 @@ def process_pair(id_sequence_pair, settings):
         fname = os.path.join(
             settings["aln_out"], str(id1 + "__" + id2) + "_aligned.fasta"
         )
-        aligned_sequences = list(aln)
         seq_records = [
-            SeqRecord(Seq(aligned_sequences[i]), id=ids[i], description="")
-            for i in range(len(aligned_sequences))
+            SeqRecord(Seq(aln.traceback.query), id=ids[0], description=""),
+            SeqRecord(Seq(aln.traceback.ref), id=ids[1], description=""),
         ]
         SeqIO.write(seq_records, fname, "fasta")
 
