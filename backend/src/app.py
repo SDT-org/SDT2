@@ -143,12 +143,12 @@ class Api:
         result = webview.windows[0].create_file_dialog(
             webview.OPEN_DIALOG,
             allow_multiple=False,
-            # file_types=(
-            #     "Compatible file (*.fasta;*.fas;*.faa;*.fnt;*.fa;*.csv;*.txt)",
-            #     "FASTA file (*.fasta;*.fas;*.faa;*.fnt;*.fa)",
-            #     "SDT2 Matrix file (*.csv)",
-            #     "SDT1 Matrix file (*.txt)",
-            # ),
+            file_types=(
+                "Compatible file (*.fasta;*.fas;*.faa;*.fnt;*.fa;*.csv;*.txt)",
+                "FASTA file (*.fasta;*.fas;*.faa;*.fnt;*.fa)",
+                "SDT2 Matrix file (*.csv)",
+                "SDT1 Matrix file (*.txt)",
+            ),
         )
 
         if not result:
