@@ -4,7 +4,6 @@ import psutil
 import os
 import sys
 import re
-import random
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from itertools import combinations_with_replacement as cwr
@@ -108,14 +107,6 @@ def get_alignment_scores(
 
     print(f"\rNumber of sequences: {len(seq_ids)}\r", flush=True)
     print(f"\rNumber of pairs: {total_pairs}\r", flush=True)
-
-    # Randomly sample if sequence contains amino acid residues
-    sample_size = 3
-    sampled_seqs = random.sample(
-        list(seq_dict.values()), min(len(seq_dict), sample_size)
-    )
-    is_aa = any(residue_check(seq) for seq in sampled_seqs)
-    settings["is_aa"] = is_aa
 
     bound_process_pair = partial(
         process_pair,

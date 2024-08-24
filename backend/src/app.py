@@ -13,7 +13,7 @@ import shutil
 import mimetypes
 import math
 import cluster
-from time import perf_counter, sleep
+from time import perf_counter
 from app_state import create_app_state
 from validations import validate_fasta
 from process_data import process_data
@@ -238,12 +238,6 @@ class Api:
             ]
 
         alignment_output_path = get_state().alignment_output_path
-
-        params = ["match", "mismatch", "iog", "ieg", "log", "leg", "rog", "reg"]
-        for param in params:
-            value = args.get(param)
-            if value is not None:
-                settings[param] = int(value)
 
         if alignment_output_path:
             settings["aln_out"] = str(alignment_output_path)

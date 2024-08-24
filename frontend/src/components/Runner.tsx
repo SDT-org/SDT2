@@ -32,32 +32,13 @@ const RunnerSettings = ({
       }))(appState),
     );
 
-  const [advancedSettingsState, setAdvancedSettingsState] = React.useState({
-    match: 1.5,
-    mismatch: -1,
-    iog: -2,
-    ieg: -2,
-    log: -3,
-    leg: -2,
-    rog: -3,
-    reg: -2,
-  });
-
   const handleRun = () => {
     window.pywebview.api.run_process_data({
       cluster_method: runnerSettings.cluster_method,
       performance_profile: runnerSettings.performance_profile,
       alignment_type: runnerSettings.alignment_type,
-      ...advancedSettingsState,
     });
   };
-
-  const handleChangeAdvancedSetting =
-    (field: keyof typeof advancedSettingsState) => (value: number) =>
-      setAdvancedSettingsState({
-        ...advancedSettingsState,
-        [field]: value,
-      });
 
   const handleChangePerformanceProfile = (
     value: typeof appState.client.performance_profile,
@@ -114,7 +95,11 @@ const RunnerSettings = ({
         <div className="field">
           <label className="header">FASTA or SDT Matrix File</label>
           <div className="input-with-button">
-            <input type="text" readOnly value={fileName} />
+            <input
+              type="text"
+              readOnly
+              value={appState.validation_error_id ? "" : fileName}
+            />
             <button
               type="button"
               onClick={() => window.pywebview.api.open_file_dialog()}
@@ -129,99 +114,6 @@ const RunnerSettings = ({
               <summary>
                 <strong>Advanced</strong>
               </summary>
-              <div className="group">
-                <h4>Aligner</h4>
-                <div className="col-2">
-                  <NumberInput
-                    label="Match Score"
-                    type="float"
-                    onChange={handleChangeAdvancedSetting("match")}
-                    value={advancedSettingsState.match}
-                    min={-50}
-                    max={50}
-                    step={0.5}
-                  />
-                  <NumberInput
-                    label="Mismatch Score"
-                    onChange={handleChangeAdvancedSetting("mismatch")}
-                    value={advancedSettingsState.mismatch}
-                    min={-50}
-                    max={50}
-                    step={1}
-                  />
-                </div>
-              </div>
-
-              <div className="group">
-                <h4>Internal</h4>
-                <div className="col-2">
-                  <NumberInput
-                    label="Open Gap Score"
-                    onChange={handleChangeAdvancedSetting("iog")}
-                    value={advancedSettingsState.iog}
-                    min={-50}
-                    max={50}
-                    step={1}
-                  />
-                  <NumberInput
-                    type="int"
-                    label="Extend Gap Score"
-                    onChange={handleChangeAdvancedSetting("ieg")}
-                    min={-50}
-                    max={50}
-                    step={1}
-                    value={advancedSettingsState.ieg}
-                  />
-                </div>
-              </div>
-
-              <div className="group">
-                <h4>Left</h4>
-                <div className="col-2">
-                  <NumberInput
-                    type="int"
-                    label="Open Gap Score"
-                    onChange={handleChangeAdvancedSetting("log")}
-                    min={-50}
-                    max={50}
-                    step={1}
-                    value={advancedSettingsState.log}
-                  />
-                  <NumberInput
-                    type="int"
-                    label="Extend Gap Score"
-                    onChange={handleChangeAdvancedSetting("leg")}
-                    min={-50}
-                    max={50}
-                    step={1}
-                    value={advancedSettingsState.leg}
-                  />
-                </div>
-              </div>
-
-              <div className="group">
-                <h4>Right</h4>
-                <div className="col-2">
-                  <NumberInput
-                    type="int"
-                    label="Open Gap Score"
-                    onChange={handleChangeAdvancedSetting("rog")}
-                    min={-50}
-                    max={50}
-                    step={1}
-                    value={advancedSettingsState.rog}
-                  />
-                  <NumberInput
-                    type="int"
-                    label="Extend Gap Score"
-                    onChange={handleChangeAdvancedSetting("reg")}
-                    min={-50}
-                    max={50}
-                    step={1}
-                    value={advancedSettingsState.reg}
-                  />
-                </div>
-              </div>
 
               <div className="group">
                 <div className="field">
@@ -318,9 +210,7 @@ const RunnerSettings = ({
               <button
                 type="button"
                 onClick={handleRun}
-                disabled={
-                  !Boolean(fileName) ?? !appState.validation_error_id ?? false
-                }
+                disabled={!fileName || appState.validation_error_id}
               >
                 Run
               </button>
@@ -347,8 +237,8 @@ export const Runner = ({
   const [appConfig, setAppConfig] = React.useState<{ appVersion: string }>();
   const fetchAppConfig = () => {
     window.pywebview.api
-    .app_config()
-    .then((result) => setAppConfig(JSON.parse(result)));
+      .app_config()
+      .then((result) => setAppConfig(JSON.parse(result)));
   };
 
   React.useEffect(() => {
