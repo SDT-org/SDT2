@@ -15,4 +15,4 @@ This project uses several open-source libraries:
 7. **nuitka** - [Apache License 2.0](https://github.com/Nuitka/Nuitka/blob/main/LICENSE.txt)
 8. **react** - [MIT License](https://github.com/facebook/react/blob/main/LICENSE)
 
-Please see the respective repositories for more information on their licensing.m
+Please see the respective repositories for more information on their licensing.
