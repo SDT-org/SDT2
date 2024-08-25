@@ -3,7 +3,6 @@
     "lib": ["es2022", "dom", "dom.iterable"],
     "jsx": "react",
     "esModuleInterop": true,
-    "skipLibCheck": true,
     "target": "es2022",
     "allowJs": true,
     "resolveJsonModule": true,
@@ -21,9 +20,7 @@
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "isolatedModules": true,
     "checkJs": true,
-    "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },

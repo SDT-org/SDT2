@@ -463,13 +463,13 @@ def on_closed():
 
 
 def about_window():
-    with open(os.path.join("docs", "about.html"), "r") as f:
+    with open(os.path.join("gui", "about.html"), "r") as f:
         html = f.read()
     webview.create_window("About", html=html)
 
 
 def manual_window():
-    with open(os.path.join("docs", "manual.html"), "r") as f:
+    with open(os.path.join("gui", "manual.html"), "r") as f:
         html = f.read()
     webview.create_window("SDT2 Manual", html=html)
 
