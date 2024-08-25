@@ -60,7 +60,7 @@ def create_command(path, args):
         "-m",
         "nuitka",
         f"--include-data-dir={bio_data_src_path}={bio_data_dest_path}",
-        f"--include-data-file={parasail_library_path}={os.path.join('parasail', parasail_library_name)}"
+        f"--include-data-file={parasail_library_path}={os.path.join('parasail', parasail_library_name)}",
         f"--report={report_path}",
     ] + args
 
