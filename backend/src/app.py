@@ -441,16 +441,17 @@ class Api:
         return json.dumps(data_to_dump)
 
 
-def get_entrypoint():
-    def exists(path):
-        return os.path.exists(os.path.join(os.path.dirname(__file__), path))
+def file_exists(path):
+    return os.path.exists(os.path.join(os.path.dirname(__file__), path))
 
-    if exists("./gui/index.html"):
-        return "./gui/index.html"
-    elif exists("../../gui/index.html"):
-        return "../../gui/index.html"
 
-    raise Exception("No index.html found")
+def get_entrypoint(filename="index.html"):
+    if file_exists(f"./gui/{filename}"):
+        return f"./gui/{filename}"
+    elif file_exists(f"../../gui/{filename}"):
+        return f"../../gui/{filename}"
+
+    raise Exception(f"{filename} not found")
 
 
 def update_client_state(window: webview.Window):
@@ -463,15 +464,11 @@ def on_closed():
 
 
 def about_window():
-    with open(os.path.join("gui", "about.html"), "r") as f:
-        html = f.read()
-    webview.create_window("About", html=html)
+    webview.create_window("About", get_entrypoint("about.html"))
 
 
 def manual_window():
-    with open(os.path.join("gui", "manual.html"), "r") as f:
-        html = f.read()
-    webview.create_window("SDT2 Manual", html=html)
+    webview.create_window("SDT2 Manual", get_entrypoint("manual.html"))
 
 
 entry = get_entrypoint()
