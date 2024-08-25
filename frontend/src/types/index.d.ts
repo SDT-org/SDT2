@@ -28,6 +28,9 @@ declare global {
         cancel_run: () => Promise<void>;
         get_heatmap_data: () => Promise<string>;
         get_line_histo_data: () => Promise<string>;
+        show_about: () => Promise<void>;
+        show_manual: () => Promise<void>;
+        close_app: () => Promise<void>;
       };
     };
     syncAppState: () => Promise<void>;

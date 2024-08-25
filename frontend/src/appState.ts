@@ -34,6 +34,7 @@ export type AppState = {
     error?: Error;
     errorInfo?: ErrorInfo;
     saveFormat: SaveableImageFormat;
+    showExportModal: boolean;
   };
 };
 
@@ -57,6 +58,7 @@ export const initialAppState: AppState = {
     cluster_method: "Neighbor-Joining",
     performance_profile: "best",
     saveFormat: "svg",
+    showExportModal: false,
   },
 };
 

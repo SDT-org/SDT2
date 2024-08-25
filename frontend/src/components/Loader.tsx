@@ -4,8 +4,10 @@ import { Button, Label, ProgressBar } from "react-aria-components";
 
 export const Loader = ({
   appState: { stage, progress, estimated_time },
+  mainMenu,
 }: {
   appState: AppState;
+  mainMenu: React.ReactNode;
 }) => {
   const [canceling, setCanceling] = React.useState(false);
   const [estimatedDisplay, setEstimatedDisplay] = React.useState("");
@@ -30,7 +32,10 @@ export const Loader = ({
   }, [estimated_time]);
 
   return (
-    <div className="app-wrapper">
+    <div className="app-wrapper with-header loader">
+      <div className="app-header loader">
+        <div>{mainMenu}</div>
+      </div>
       <div className="app-main centered loader">
         <ProgressBar value={progress}>
           {({ percentage, valueText }) => (

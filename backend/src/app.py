@@ -117,6 +117,15 @@ def save_image_from_api(data, format, destination):
 
 
 class Api:
+    def close_app(self):
+        os._exit(0)
+
+    def show_about(self):
+        about_window()
+
+    def show_manual(self):
+        manual_window()
+
     def app_config(self):
         return json.dumps({"appVersion": app_version})
 
@@ -461,6 +470,7 @@ def update_client_state(window: webview.Window):
 def on_closed():
     temp_dir.cleanup()
     do_cancel_run()
+    os._exit(0)
 
 
 def about_window():
@@ -496,20 +506,20 @@ if __name__ == "__main__":
         performance_profiles=performance_profiles,
     )
 
-    menu_items = [
-        webview_menu.Menu(
-            "File",
-            [
-                webview_menu.MenuAction("Select file...", api.open_file_dialog),
-            ],
-        ),
-        webview_menu.Menu(
-            "Help",
-            [
-                webview_menu.MenuAction("About SDT2", about_window),
-                webview_menu.MenuAction("Manual", manual_window),
-            ],
-        ),
-    ]
+    # menu_items = [
+    #     webview_menu.Menu(
+    #         "File",
+    #         [
+    #             webview_menu.MenuAction("Select file...", api.open_file_dialog),
+    #         ],
+    #     ),
+    #     webview_menu.Menu(
+    #         "Help",
+    #         [
+    #             webview_menu.MenuAction("About SDT2", about_window),
+    #             webview_menu.MenuAction("Manual", manual_window),
+    #         ],
+    #     ),
+    # ]
 
-    webview.start(debug=get_state().debug, menu=menu_items)
+    webview.start(debug=get_state().debug)

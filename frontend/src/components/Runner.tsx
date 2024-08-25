@@ -201,9 +201,11 @@ const RunnerSettings = ({
 export const Runner = ({
   appState,
   setAppState,
+  mainMenu,
 }: {
   appState: AppState;
   setAppState: SetAppState;
+  mainMenu: React.ReactNode;
 }) => {
   const [appConfig, setAppConfig] = React.useState<{ appVersion: string }>();
   const fetchAppConfig = () => {
@@ -213,15 +215,21 @@ export const Runner = ({
   };
 
   React.useEffect(() => {
-    if (!window.pywebview) {
-      setTimeout(fetchAppConfig, 500);
-      return;
-    }
-    fetchAppConfig();
+    const waitForPywebview = () =>
+      new Promise((resolve) => {
+        if (!window.pywebview) {
+          setTimeout(waitForPywebview, 10);
+        } else {
+          resolve(true);
+        }
+      });
+
+    waitForPywebview().then(() => fetchAppConfig());
   }, []);
 
   return (
-    <div className="app-wrapper with-footer">
+    <div className="app-wrapper with-header with-footer">
+      <div className="app-header runner">{mainMenu}</div>
       <div className="app-main centered runner">
         <RunnerSettings appState={appState} setAppState={setAppState} />
       </div>

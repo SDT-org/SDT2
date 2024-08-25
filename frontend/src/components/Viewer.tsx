@@ -9,16 +9,23 @@ import {
 } from "../plotTypes";
 import { Heatmap } from "./Heatmap";
 import { Histogram } from "./Histogram";
-import { ExportData } from "./ExportData";
-import { Key, Tab, TabList, TabPanel, Tabs } from "react-aria-components";
-import messages from "../messages";
+import {
+  Button,
+  Key,
+  Tab,
+  TabList,
+  TabPanel,
+  Tabs,
+} from "react-aria-components";
 
 export const Viewer = ({
   appState,
   setAppState,
+  mainMenu,
 }: {
   appState: AppState;
   setAppState: SetAppState;
+  mainMenu: React.ReactNode;
 }) => {
   const [loading, setLoading] = React.useState(false);
   const [heatmapTickText, setHeatmapTickText] = React.useState<string[]>([""]);
@@ -151,24 +158,7 @@ export const Viewer = ({
     >
       <div className="app-header">
         <div className="left">
-          <button
-            type="button"
-            aria-label="Start a new sequence run"
-            onClick={() => {
-              window.pywebview.api.reset_state().then(() => {
-                // Reset client state as well
-                setAppState((previous) => {
-                  return {
-                    ...initialAppState,
-                    client: { ...previous.client },
-                  };
-                });
-              });
-            }}
-          >
-            New
-          </button>
-          <ExportData />
+          {mainMenu}
           <div className="run-info">
             <strong>
               {appState.sequences_count > 0 ? (
@@ -181,10 +171,26 @@ export const Viewer = ({
             <span className="filename">{appState.basename}</span>
           </div>
         </div>
-        <TabList className="data-view">
-          <Tab id="heatmap">Heatmap</Tab>
-          <Tab id="plot">Distribution</Tab>
-        </TabList>
+        <div>
+          <TabList className="data-view">
+            <Tab id="heatmap">Heatmap</Tab>
+            <Tab id="plot">Distribution</Tab>
+          </TabList>
+        </div>
+        <div className="right">
+          <Button
+            onPress={() =>
+              setAppState((previous) => {
+                return {
+                  ...previous,
+                  client: { ...previous.client, showExportModal: true },
+                };
+              })
+            }
+          >
+            Export
+          </Button>
+        </div>
       </div>
 
       <TabPanel id="heatmap" className="app-panel">
