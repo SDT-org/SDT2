@@ -222,10 +222,6 @@ class Api:
         settings["input_file"] = get_state().filename[0]
         settings["out_dir"] = temp_dir.name
 
-        if args.get("alignment_type") == "local":
-            settings["alignment_type"] = "local"
-        if args.get("alignment_type") == "global":
-            settings["alignment_type"] = "global"
         if args.get("cluster_method") == "Neighbor-Joining":
             settings["cluster_method"] = "nj"
         if args.get("cluster_method") == "UPGMA":

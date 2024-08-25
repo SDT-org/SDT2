@@ -3,7 +3,6 @@ import {
   AppState,
   SetAppState,
   performanceProfiles,
-  alignmentTypes,
   clusterMethods,
 } from "../appState";
 import { NumberInput } from "./NumberInput";
@@ -11,7 +10,7 @@ import messages from "../messages";
 
 export type RunProcessDataArgs = Pick<
   AppState["client"],
-  "performance_profile" | "alignment_type" | "cluster_method"
+  "performance_profile" | "cluster_method"
 >;
 
 const RunnerSettings = ({
@@ -23,11 +22,8 @@ const RunnerSettings = ({
 }) => {
   const [runnerSettings, setRunnerSettings] =
     React.useState<RunProcessDataArgs>(
-      (({
-        client: { performance_profile, alignment_type, cluster_method },
-      }) => ({
+      (({ client: { performance_profile, cluster_method } }) => ({
         performance_profile,
-        alignment_type,
         cluster_method,
       }))(appState),
     );
@@ -36,7 +32,6 @@ const RunnerSettings = ({
     window.pywebview.api.run_process_data({
       cluster_method: runnerSettings.cluster_method,
       performance_profile: runnerSettings.performance_profile,
-      alignment_type: runnerSettings.alignment_type,
     });
   };
 
@@ -46,14 +41,6 @@ const RunnerSettings = ({
     setRunnerSettings({
       ...runnerSettings,
       performance_profile: value,
-    });
-
-  const handleChangeAlignmentType = (
-    value: typeof appState.client.alignment_type,
-  ) =>
-    setRunnerSettings({
-      ...runnerSettings,
-      alignment_type: value,
     });
 
   const handleChangeClusterMethod = (
@@ -149,22 +136,6 @@ const RunnerSettings = ({
                       value={value}
                       checked={runnerSettings.cluster_method === value}
                       onChange={() => handleChangeClusterMethod(value)}
-                    />
-                    <span>{value}</span>
-                  </label>
-                ))}
-              </div>
-              <div className="field runner-settings">
-                <label className="header">Alignment Type</label>
-                {alignmentTypes.map((value) => (
-                  <label className="radio" key={value}>
-                    <input
-                      type="radio"
-                      id={value}
-                      name="alignment-type"
-                      value={value}
-                      checked={runnerSettings.alignment_type === value}
-                      onChange={() => handleChangeAlignmentType(value)}
                     />
                     <span>{value}</span>
                   </label>

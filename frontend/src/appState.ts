@@ -7,7 +7,6 @@ export const performanceProfiles = {
   balanced: "Balanced",
   low: "Energy Saver",
 } as const;
-export const alignmentTypes = ["global", "local"] as const;
 export const clusterMethods = ["Neighbor-Joining", "UPGMA", "None"] as const;
 
 export type SaveableImageFormat = "png" | "jpeg" | "svg";
@@ -32,7 +31,6 @@ export type AppState = {
     dataView: "heatmap" | "plot";
     cluster_method: (typeof clusterMethods)[number];
     performance_profile: keyof typeof performanceProfiles;
-    alignment_type: (typeof alignmentTypes)[number];
     error?: Error;
     errorInfo?: ErrorInfo;
     saveFormat: SaveableImageFormat;
@@ -58,7 +56,6 @@ export const initialAppState: AppState = {
     dataView: "heatmap",
     cluster_method: "Neighbor-Joining",
     performance_profile: "best",
-    alignment_type: "global",
     saveFormat: "svg",
   },
 };
