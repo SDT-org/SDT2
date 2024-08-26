@@ -40,8 +40,8 @@ export const App = () => {
         };
       }),
     onSettings: () => {},
-    onAbout: window.pywebview.api.show_about,
-    onManual: window.pywebview.api.show_manual,
+    onAbout: () => window.pywebview.api.show_about(),
+    onManual: () => window.pywebview.api.show_manual(),
     onExit: () => {
       if (confirm("Are you sure you want to exit?")) {
         window.pywebview.api.close_app();
