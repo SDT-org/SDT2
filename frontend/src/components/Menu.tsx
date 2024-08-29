@@ -60,27 +60,11 @@ const AppMenuItem = (props: MenuItemProps) => {
   );
 };
 
-const Hamburger = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    xmlSpace="preserve"
-    viewBox="0 0 122.88 95.95"
-  >
-    <path
-      d="M8.94 0h105c4.92 0 8.94 4.02 8.94 8.94s-4.02 8.94-8.94 8.94h-105C4.02 17.88 0 13.86 0 8.94S4.02 0 8.94 0zm0 78.07h105c4.92 0 8.94 4.02 8.94 8.94s-4.02 8.94-8.94 8.94h-105C4.02 95.95 0 91.93 0 87.01s4.02-8.94 8.94-8.94zm0-39.04h105c4.92 0 8.94 4.02 8.94 8.94s-4.02 8.94-8.94 8.94h-105C4.02 56.91 0 52.89 0 47.97c0-4.91 4.02-8.94 8.94-8.94z"
-      style={{
-        fillRule: "evenodd",
-        clipRule: "evenodd",
-      }}
-    />
-  </svg>
-);
-
 export type MainMenuProps = {
   appState: AppState;
   onNew: () => void;
+  onOpen: () => void;
   onExport: () => void;
-  onSettings: () => void;
   onManual: () => void;
   onAbout: () => void;
   onExit: () => void;
@@ -89,19 +73,19 @@ export type MainMenuProps = {
 export const MainMenu = ({
   appState,
   onNew,
+  onOpen,
   onExport,
-  onSettings,
   onManual,
   onAbout,
   onExit,
 }: MainMenuProps) => (
   <AppMenuButton label="☰ Menu">
-    <AppMenuItem onAction={onNew}>New...</AppMenuItem>
+    <AppMenuItem onAction={onNew}>New</AppMenuItem>
+    <AppMenuItem onAction={onOpen}>Open...</AppMenuItem>
     {appState.view === "viewer" ? (
       <AppMenuItem onAction={onExport}>Export images and data...</AppMenuItem>
     ) : null}
     <Separator />
-    <AppMenuItem onAction={onSettings}>Settings</AppMenuItem>
     <AppMenuItem onAction={onManual}>Manual</AppMenuItem>
     <AppMenuItem onAction={onAbout}>About</AppMenuItem>
     <Separator />

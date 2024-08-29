@@ -32,6 +32,16 @@ export const App = () => {
         });
       }
     },
+    onOpen: () => {
+      if (
+        appState.view !== "runner" &&
+        !confirm("Are you sure? Current results will be cleared.")
+      ) {
+        return;
+      }
+
+      window.pywebview.api.open_file_dialog();
+    },
     onExport: () =>
       setAppState((previous) => {
         return {
@@ -39,7 +49,6 @@ export const App = () => {
           client: { ...previous.client, showExportModal: true },
         };
       }),
-    onSettings: () => {},
     onAbout: () => window.pywebview.api.show_about(),
     onManual: () => window.pywebview.api.show_manual(),
     onExit: () => {

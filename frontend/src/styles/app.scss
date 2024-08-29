@@ -3,22 +3,26 @@
   --foreground-color: #000;
   --border-color: #ddd;
   --shadow-color: #ccc;
+  --drop-shadow-color: #aaa;
   --secondary-background-color: #f8f8f8;
   --secondary-foreground-color: #666;
   --secondary-border-color: #eaeaea;
+  --pressed-color: #ececec;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background-color: #000;
-    --foreground-color: #fff;
-    --border-color: #222;
-    --shadow-color: #444;
-    --secondary-background-color: #282828;
-    --secondary-foreground-color: #666;
-    --secondary-border-color: #3a3a3a;
-  }
-}
+// @media (prefers-color-scheme: dark) {
+//   :root {
+//     --background-color: #000;
+//     --foreground-color: #fff;
+//     --border-color: #222;
+//     --shadow-color: #444;
+//     --drop-shadow-color: #666;
+//     --secondary-background-color: #282828;
+//     --secondary-foreground-color: #666;
+//     --secondary-border-color: #3a3a3a;
+//     --pressed-color: #444;
+//   }
+// }
 
 html, body {
   background: var(--background-color);
@@ -119,13 +123,15 @@ html, body {
 
   button {
     min-width: 4.8rem;
-  }
+    min-height: 30px;
+    // background: #fff;
+    // border: 0.1rem solid var(--border-color);
+    // border-radius: 0.3rem;
 
-  // @media (max-width: 620px) {
-  //   .run-info {
-  //     display: none;
-  //   }
-  // }
+    // &[data-pressed] {
+    //   background: var(--pressed-color);
+    // }
+  }
 }
 
 .app-panel {
@@ -709,8 +715,8 @@ select, select option {
   background: var(--background-color);
   color: var(--foreground-color);
   overflow: auto;
-  padding: 2px;
-  box-shadow: 0 0 1rem var(--shadow-color);
+  padding: 4px;
+  box-shadow: 1px 3px 9px 0px var(--drop-shadow-color);
   border: 1pxsolid var(--border-color);
   border-radius: 4px;
   min-width: 16rem;
@@ -725,7 +731,7 @@ select, select option {
     cursor: default;
     outline: none;
     color: var(--foreground-color);
-    padding: 2px 6px;
+    padding: 4px 8px;
     border-radius: 4px;
 
     &[data-focused] {
