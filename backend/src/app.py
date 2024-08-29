@@ -159,7 +159,7 @@ class Api:
                 "SDT1 Matrix file (*.txt)",
             ),
         )
-
+        print(result)
         if not result:
             raise Exception("filename result was None")
         basename = os.path.basename(result[0])
@@ -204,15 +204,22 @@ class Api:
 
     def select_alignment_output_path(self):
         result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG)
+        print(result)
         if result:
-            set_state(alignment_output_path=result[0])
+            if isinstance(result, str):
+                set_state(alignment_output_path=result)
+            else:
+                set_state(alignment_output_path=result[0])
         else:
             raise Exception("path result was None")
 
     def select_export_path(self):
         result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG)
         if result:
-            set_state(export_path=result[0])
+            if isinstance(result, str):
+                set_state(alignment_output_path=result)
+            else:
+                set_state(alignment_output_path=result[0])
         else:
             raise Exception("path result was None")
 
