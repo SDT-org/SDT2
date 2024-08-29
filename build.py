@@ -69,7 +69,7 @@ def create_command(path, args):
             command.extend(
                 [
                     f"--windows-icon-from-ico={os.path.join(assets_path, 'app.ico')}",
-                    "--windows-disable-console",
+                    "--windows-console-mode=disable",
                 ]
             )
         case "Darwin":
