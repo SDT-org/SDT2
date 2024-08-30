@@ -5,3 +5,4 @@ scipy
 psutil
 pandas
 nuitka
+parasail-python
