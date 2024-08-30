@@ -1,15 +1,17 @@
 import React, { ErrorInfo } from "react";
 import messages from "./messages";
 
-export const performanceProfiles = {
-  best: "Best",
-  high: "High Performance",
-  balanced: "Balanced",
-  low: "Energy Saver",
-} as const;
 export const clusterMethods = ["Neighbor-Joining", "UPGMA", "None"] as const;
 
 export type SaveableImageFormat = "png" | "jpeg" | "svg";
+
+export type PerformanceProfile =
+  | "recommended"
+  | "best"
+  | "high"
+  | "balanced"
+  | "low"
+  | "custom";
 
 export type AppState = {
   view: "runner" | "loader" | "viewer";
@@ -21,16 +23,23 @@ export type AppState = {
   sequences_count: number;
   alignment_output_path: string;
   export_path: string;
-  performance_profiles: { [_: string]: number };
   stage: string;
   pair_progress: number;
   pair_count: number;
   estimated_time?: number;
   validation_error_id?: keyof typeof messages;
+  compute_stats?: {
+    total_cores: number;
+    recommended_cores: number;
+    total_memory: number;
+    required_memory: number;
+    available_memory: number;
+  };
   client: {
     dataView: "heatmap" | "plot";
+    performanceProfile: PerformanceProfile;
     cluster_method: (typeof clusterMethods)[number];
-    performance_profile: keyof typeof performanceProfiles;
+    compute_cores: number;
     error?: Error;
     errorInfo?: ErrorInfo;
     saveFormat: SaveableImageFormat;
@@ -48,17 +57,16 @@ export const initialAppState: AppState = {
   sequences_count: 0,
   alignment_output_path: "",
   export_path: "",
-  // These are just to make frontend easier to test, they get overwritten during the initial syncAppState
-  performance_profiles: { best: 4, high: 3, balanced: 2, low: 1 },
   stage: "Preprocessing",
   pair_progress: 0,
   pair_count: 0,
   client: {
     dataView: "heatmap",
     cluster_method: "Neighbor-Joining",
-    performance_profile: "best",
     saveFormat: "svg",
     showExportModal: false,
+    compute_cores: 1,
+    performanceProfile: "recommended",
   },
 };
 

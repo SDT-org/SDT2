@@ -2,53 +2,83 @@ import React from "react";
 import {
   AppState,
   SetAppState,
-  performanceProfiles,
   clusterMethods,
+  PerformanceProfile,
 } from "../appState";
-import { NumberInput } from "./NumberInput";
 import messages from "../messages";
+import {
+  Label,
+  Select,
+  Slider,
+  SliderOutput,
+  SliderThumb,
+  SliderTrack,
+} from "react-aria-components";
+import { formatBytes } from "../helpers";
 
 export type RunProcessDataArgs = Pick<
   AppState["client"],
-  "performance_profile" | "cluster_method"
+  "cluster_method" | "compute_cores"
 >;
 
 const RunnerSettings = ({
   appState,
+  setAppState,
 }: {
   appState: AppState;
-
   setAppState: SetAppState;
 }) => {
-  const [runnerSettings, setRunnerSettings] =
-    React.useState<RunProcessDataArgs>(
-      (({ client: { performance_profile, cluster_method } }) => ({
-        performance_profile,
-        cluster_method,
-      }))(appState),
-    );
+  const [computeModes, setComputeModes] = React.useState<
+    Record<Exclude<PerformanceProfile, "custom">, number>
+  >({
+    recommended: 1,
+    best: 1,
+    high: 1,
+    balanced: 1,
+    low: 1,
+  });
 
   const handleRun = () => {
     window.pywebview.api.run_process_data({
-      cluster_method: runnerSettings.cluster_method,
-      performance_profile: runnerSettings.performance_profile,
+      cluster_method: appState.client.cluster_method,
+      compute_cores: appState.client.compute_cores,
     });
   };
 
-  const handleChangePerformanceProfile = (
-    value: typeof appState.client.performance_profile,
-  ) =>
-    setRunnerSettings({
-      ...runnerSettings,
-      performance_profile: value,
-    });
+  const handleChangePerformanceProfile = (value: PerformanceProfile) =>
+    setAppState((previous) => ({
+      ...previous,
+      client: {
+        ...previous.client,
+        performanceProfile: value,
+        ...(value !== "custom" && { compute_cores: computeModes[value] }),
+      },
+    }));
 
   const handleChangeClusterMethod = (
     value: typeof appState.client.cluster_method,
   ) =>
-    setRunnerSettings({
-      ...runnerSettings,
-      cluster_method: value,
+    setAppState((previous) => {
+      return {
+        ...previous,
+        client: {
+          ...previous.client,
+          cluster_method: value,
+        },
+      };
+    });
+
+  const handleChangeComputeCores = (
+    value: typeof appState.client.compute_cores,
+  ) =>
+    setAppState((previous) => {
+      return {
+        ...previous,
+        client: {
+          ...previous.client,
+          compute_cores: value,
+        },
+      };
     });
 
   const fileName =
@@ -75,6 +105,31 @@ const RunnerSettings = ({
       document.removeEventListener("keydown", handleEnter);
     };
   }, []);
+
+  React.useEffect(() => {
+    if (appState.client.performanceProfile !== "custom") {
+      handleChangeComputeCores(
+        computeModes[appState.client.performanceProfile],
+      );
+    }
+  }, [appState.filename, appState.client.performanceProfile]);
+
+  React.useEffect(() => {
+    if (appState.compute_stats) {
+      const stats = appState.compute_stats;
+      setAppState((previous) => ({
+        ...previous,
+        client: { ...previous.client, compute_cores: stats.recommended_cores },
+      }));
+      setComputeModes({
+        recommended: stats.recommended_cores,
+        best: stats.total_cores,
+        high: Math.max(stats.total_cores - 1, 1),
+        balanced: Math.floor(Math.max(stats.total_cores / 2, 1)),
+        low: 1,
+      });
+    }
+  }, [appState.compute_stats]);
 
   return (
     <div className="form-wrapper runner-wrapper">
@@ -123,6 +178,7 @@ const RunnerSettings = ({
                 </div>
               </div>
             </details>
+
             <div className="col-2">
               <div className="field runner-settings">
                 <label className="header">Clustering Method</label>
@@ -134,48 +190,94 @@ const RunnerSettings = ({
                       id={value}
                       name="cluster-method"
                       value={value}
-                      checked={runnerSettings.cluster_method === value}
+                      checked={appState.client.cluster_method === value}
                       onChange={() => handleChangeClusterMethod(value)}
                     />
                     <span>{value}</span>
                   </label>
                 ))}
               </div>
-            </div>
-            <div className="field runner-settings performance">
-              <label className="header">Compute Mode</label>
-              <div className="col-2">
+
+              <div className="field runner-settings performance">
+                <label className="header">Compute Mode</label>
                 <select
-                  className="="
                   onChange={(event) =>
-                    handleChangePerformanceProfile(event.target.value as any)
+                    handleChangePerformanceProfile(
+                      event.target.value as PerformanceProfile,
+                    )
                   }
-                  value={runnerSettings.performance_profile as string}
+                  value={appState.client.performanceProfile}
                 >
-                  {Object.keys(performanceProfiles).map((key) => (
+                  {Object.keys(computeModes).map((key) => (
                     <option key={key} value={key}>
-                      {
-                        performanceProfiles[
-                          key as keyof typeof performanceProfiles
-                        ]
-                      }
+                      {key}
                     </option>
                   ))}
+                  <option key="custom" value="custom">
+                    Custom
+                  </option>
                 </select>
-                <div className="field runner-settings performance-details">
-                  <span className="cores">
-                    {
-                      appState.performance_profiles[
-                        runnerSettings.performance_profile
-                      ]
-                    }
-                    <span>/</span>
-                    {appState.performance_profiles["best"]}
-                  </span>
-                  cores
+                <div className="performance-details">
+                  {appState.client.performanceProfile === "custom" &&
+                  appState.compute_stats ? (
+                    <>
+                      <Slider
+                        onChange={handleChangeComputeCores}
+                        minValue={1}
+                        maxValue={appState.compute_stats.total_cores}
+                        defaultValue={appState.client.compute_cores}
+                      >
+                        <Label>Cores</Label>
+                        <SliderOutput />
+                        <SliderTrack>
+                          <SliderThumb />
+                        </SliderTrack>
+                      </Slider>
+                    </>
+                  ) : (
+                    <>
+                      <span className="cores">
+                        {appState.client.performanceProfile === "custom"
+                          ? appState.client.compute_cores
+                          : computeModes[appState.client.performanceProfile]}
+                        <span>/</span>
+                        {appState.compute_stats?.total_cores}
+                      </span>
+                      cores
+                    </>
+                  )}
                 </div>
               </div>
             </div>
+
+            {appState.compute_stats &&
+            appState.compute_stats.recommended_cores <
+              appState.compute_stats.total_cores ? (
+              <div className="compute-forecast">
+                <p>
+                  <b>Warning:</b> Analysing these sequences may cause system
+                  instability if you select more than the recommended amout of
+                  cores.
+                </p>
+                <p>
+                  <b>Recommended cores:</b>{" "}
+                  {appState.compute_stats.recommended_cores}
+                </p>
+                <p>
+                  <b>Required memory:</b>
+                  <br />
+                  {formatBytes(
+                    appState.compute_stats.required_memory *
+                      appState.client.compute_cores,
+                  )}{" "}
+                  / {formatBytes(appState.compute_stats.total_memory)}{" "}
+                  <small>
+                    ({formatBytes(appState.compute_stats.required_memory)} per
+                    core)
+                  </small>
+                </p>
+              </div>
+            ) : null}
 
             <div className="actions">
               <button

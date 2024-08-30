@@ -14,6 +14,7 @@ import { ExportModal } from "./ExportModal";
 
 export const App = () => {
   const [appState, setAppState] = React.useState<AppState>(initialAppState);
+  const [debugState, setDebugState] = React.useState("");
   const mainMenuCallbacks: MainMenuProps = {
     appState,
     onNew: () => {
@@ -97,14 +98,16 @@ export const App = () => {
     };
   }, []);
 
+  React.useEffect(() => {
+    setDebugState(JSON.stringify(appState, null, 2));
+  }, [appState]);
+
   return (
     <ErrorBoundary appState={appState} setAppState={setAppState}>
       <AppStateContext.Provider value={{ appState, setAppState }}>
         {APP_VIEWS[appState?.view || "viewer"]}
         <ExportModal />
-        {showDebugState ? (
-          <pre>AppState{JSON.stringify(appState, null, 2)}</pre>
-        ) : null}
+        {showDebugState ? <pre>AppState {debugState}</pre> : null}
       </AppStateContext.Provider>
     </ErrorBoundary>
   );

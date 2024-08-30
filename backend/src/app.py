@@ -1,7 +1,9 @@
+import multiprocessing
 import os
 import sys
+from Bio import SeqIO
+import psutil
 import webview
-import webview.menu as webview_menu
 import tempfile
 import shutil
 import json
@@ -11,7 +13,6 @@ import base64
 import urllib.parse
 import shutil
 import mimetypes
-import math
 import cluster
 from time import perf_counter
 from app_state import create_app_state
@@ -31,14 +32,6 @@ try:
     cpu_count = cpu_count()
 except:
     cpu_count = 1
-
-performance_profiles = dict(
-    balanced=int(math.floor(max([cpu_count / 2, 1]))),
-    best=cpu_count,
-    high=max(cpu_count - 1, 1),
-    low=1,
-)
-performance_profiles.setdefault("missing_key", cpu_count)
 
 mimetypes.add_type("text/fasta", ".fasta")
 mimetypes.add_type("text/fasta", ".fas")
@@ -116,6 +109,24 @@ def save_image_from_api(data, format, destination):
             file.write(data)
 
 
+def get_compute_stats(filename):
+    max_len = 0
+    for record in SeqIO.parse(filename, "fasta"):
+        max_len = max(max_len, len(record.seq))
+
+    required_memory = max_len * max_len
+    total_memory = psutil.virtual_memory().total
+
+    total_cores = multiprocessing.cpu_count()
+    return {
+        "total_cores": total_cores,
+        "recommended_cores": min(total_cores, total_memory // required_memory),
+        "total_memory": total_memory,
+        "required_memory": required_memory,
+        "available_memory": psutil.virtual_memory().available,
+    }
+
+
 class Api:
     def close_app(self):
         os._exit(0)
@@ -181,6 +192,7 @@ class Api:
             valid, message = validate_fasta(result[0], filetype)
 
             if valid:
+                compute_stats = get_compute_stats(result[0])
                 set_state(
                     view="runner",
                     filename=result,
@@ -192,6 +204,7 @@ class Api:
                     stage="",
                     progress=0,
                     tempdir_path=temp_dir.name,
+                    compute_stats=compute_stats,
                 )
             else:
                 set_state(
@@ -200,6 +213,7 @@ class Api:
                     filename="",
                     basename="",
                     filetype="",
+                    compute_stats=None,
                 )
 
     def select_alignment_output_path(self):
@@ -234,6 +248,9 @@ class Api:
         global pool, cancelled, start_time
         set_state(view="loader")
 
+        if get_state().debug:
+            print("\nAPI args:", args)
+
         settings = dict()
         settings["input_file"] = get_state().filename[0]
         settings["out_dir"] = temp_dir.name
@@ -244,10 +261,12 @@ class Api:
             settings["cluster_method"] = "upgma"
         if args.get("cluster_method") == "None":
             settings["cluster_method"] = "none"
-        if args.get("performance_profile"):
-            settings["num_processes"] = performance_profiles[
-                str(args.get("performance_profile"))
-            ]
+
+        compute_cores = args.get("compute_cores")
+        assert isinstance(compute_cores, int)
+        settings["num_processes"] = max(
+            min(compute_cores, multiprocessing.cpu_count()), 1
+        )
 
         alignment_output_path = get_state().alignment_output_path
 
@@ -255,8 +274,8 @@ class Api:
             settings["aln_out"] = str(alignment_output_path)
 
         if get_state().debug:
-            print("\nAPI args:", args)
             print("\nRun settings:", settings)
+            print(f"Number of processes: {settings['num_processes']}")
 
         with Pool(
             settings["num_processes"],
@@ -510,7 +529,6 @@ if __name__ == "__main__":
         debug=os.getenv("DEBUG", "false").lower() == "true",
         tempdir_path=temp_dir.name,
         on_update=lambda _: update_client_state(window),
-        performance_profiles=performance_profiles,
     )
 
     # menu_items = [

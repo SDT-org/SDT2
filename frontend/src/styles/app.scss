@@ -8,6 +8,7 @@
   --secondary-foreground-color: #666;
   --secondary-border-color: #eaeaea;
   --pressed-color: #ececec;
+  --focus-ring-color: Highlight;
 }
 
 // @media (prefers-color-scheme: dark) {
@@ -266,13 +267,15 @@ select, select option {
       font-size: 0.95rem;
 
       &.performance {
-        border-top: 0.1rem solid var(--border-color);
-        padding-top: 0.8rem;
+        select {
+          width: 100%;
+        }
       }
 
       .performance-details {
         display: flex;
         align-items: center;
+        padding-top: 0.4rem;
 
         .cores {
           display: flex;
@@ -396,10 +399,6 @@ select, select option {
 .export-form {
   label {
     display: block;
-  }
-
-  .react-aria-NumberField input {
-    width: 100%;
   }
 }
 
@@ -640,6 +639,9 @@ select, select option {
       top: 50%;
     }
   }
+
+.react-aria-NumberField input {
+  width: 100%;
 }
 
 .react-aria-ProgressBar {
@@ -711,6 +713,21 @@ select, select option {
   padding: 1rem;
 }
 
+.compute-forecast {
+  font-size: 0.9rem;
+  border: 1px solid orange;
+  background: lighten(orange, 40%);
+  padding: 0.6rem;
+  border-radius: 4px;
+
+  p {
+    margin: 0 0 1rem;
+    &:last-child {
+      margin: 0;
+    }
+  }
+}
+
 .react-aria-Menu {
   background: var(--background-color);
   color: var(--foreground-color);
@@ -744,5 +761,70 @@ select, select option {
     height: 0.1rem;
     background: var(--border-color);
     margin: 0.4rem 0;
+  }
+}
+
+.react-aria-Slider {
+  display: grid;
+  grid-template-areas: "label output"
+                       "track track";
+  grid-template-columns: 1fr auto;
+  max-width: 100%;
+
+  .react-aria-Label {
+    grid-area: label;
+    font-size: 0.9rem;
+  }
+
+  .react-aria-SliderOutput {
+    grid-area: output;
+    font-size: 0.9rem;
+  }
+
+  .react-aria-SliderTrack {
+    grid-area: track;
+    position: relative;
+
+    /* track line */
+    &:before {
+      content: '';
+      display: block;
+      position: absolute;
+      background: var(--border-color);
+    }
+  }
+
+  .react-aria-SliderThumb {
+    width: 1.4rem;
+    height: 1.4rem;
+    border-radius: 50%;
+    background: var(--foreground-color);
+    border: 2px solid var(--border-color);
+    forced-color-adjust: none;
+
+    &[data-focus-visible] {
+      outline: 2px solid var(--focus-ring-color);
+    }
+  }
+
+  &[data-orientation=horizontal] {
+    flex-direction: column;
+    width: 100%;
+
+    .react-aria-SliderTrack {
+      height: 30px;
+      width: 100%;
+
+      &:before {
+        height: 3px;
+        width: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+    }
+
+    .react-aria-SliderThumb {
+      top: 50%;
+    }
   }
 }
