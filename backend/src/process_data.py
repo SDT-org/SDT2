@@ -4,6 +4,7 @@ import psutil
 import os
 import sys
 import re
+import random
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from itertools import combinations_with_replacement as cwr
@@ -112,7 +113,17 @@ def get_alignment_scores(
         process_pair,
         settings=settings,
     )
+    sample_size = 3
+    sampled_seqs = random.sample(
+        list(seq_dict.values()), min(len(seq_dict), sample_size)
+    )
+    is_aa = any(residue_check(seq) for seq in sampled_seqs)
+    settings["is_aa"] = is_aa
 
+    bound_process_pair = partial(
+        process_pair,
+        settings=settings,
+    )
     with pool:
         results = pool.imap(bound_process_pair, id_sequence_pairs)
         for _, result in enumerate(results, 1):
@@ -154,20 +165,21 @@ def save_matrix_to_csv(df, filename):
     df.to_csv(filename, mode="w", header=False, index=True)
 
 
-# Save similarity scores as 3 column csv
-# def save_cols_to_csv(df, order, filename):
-#     columnar_output = []
-#     for i, row in enumerate(order):
-#         for j, col in enumerate(order):
-#             if i > j:  # lower triangular part (excluding diagonal)
-#                 columnar_output.append([row, col, df.loc[row, col]])
-
-#     # Convert to a DataFrame
-#     columnar_df = pd.DataFrame(
-#         columnar_output,
-#         columns=["First Sequence", "Second Sequence", "Identity Score"],
-#     )
-#     columnar_df.to_csv(filename + "_cols.csv", mode="w", header=True, index=False)
+ #Save similarity scores as 3 column csv
+def save_cols_to_csv(df, filename):
+    order = df.index
+    df.columns = df.index
+    columnar_output = []
+    for i, row in enumerate(order):
+        for j, col in enumerate(order):
+            if i > j:  # lower triangular part (excluding diagonal)
+                columnar_output.append([row, col, df.loc[row, col]])
+    # Convert to a DataFrame
+    columnar_df = pd.DataFrame(
+        columnar_output,
+        columns=["First Sequence", "Second Sequence", "Identity Score"],
+    )
+    columnar_df.to_csv(filename + "_cols.csv", mode="w", header=True, index=False)
 
 
 def output_summary(file_name, start_time, end_time, run_summary):
@@ -192,8 +204,9 @@ def output_summary(file_name, start_time, end_time, run_summary):
     Start time:    {start_time}
 
     Parasail
-    Using the Needleman-Wunsch algorithm
-
+    Using the Needleman-Wunsch algorithm with affine gap scoring:
+    Nucleotide: Open gap penalty:13 Extend gap: 1
+    Amino acid: Open gap penalty:10 Extend gap: 1
     End time: {end_time}
     Total runtime: {run_summary}
     """
@@ -267,13 +280,13 @@ def process_data(
         # Create a DataFrame from the lower triangular matrix
         df = pd.DataFrame(aln_lowt, index=new_order)
         save_matrix_to_csv(df, os.path.join(out_dir, f"{file_base}_mat.csv"))
-        # save_cols_to_csv(df, new_order, os.path.join(args.out_dir, f"{file_base}"))
+        save_cols_to_csv(df,os.path.join(out_dir, f"{file_base}"))
     else:
         aln_lowt = np.tril(np.around(aln_scores, 2))
         aln_lowt[np.triu_indices(aln_lowt.shape[0], k=1)] = np.nan
         df = pd.DataFrame(aln_lowt, index=order)
         save_matrix_to_csv(df, os.path.join(out_dir, f"{file_base}_mat.csv"))
-        # save_cols_to_csv(df, new_order, os.path.join(args.out_dir, f"{file_base}"))
+        save_cols_to_csv(df, os.path.join(out_dir, f"{file_base}"))
 
     set_stage("Finalizing")
     print("Stage: Finalizing")
