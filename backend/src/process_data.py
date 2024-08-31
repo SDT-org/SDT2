@@ -70,7 +70,11 @@ def process_pair(id_sequence_pair, settings):
     seq1 = id_sequence_pair[1][0]
     seq2 = id_sequence_pair[1][1]
 
-    aln = parasail.nw_trace(seq1, seq2, 10, 1, parasail.blosum62)
+    if settings["is_aa"]:
+        aln = parasail.nw_trace(seq1, seq2, 10, 1, parasail.blosum62)
+    else:
+        aln = parasail.nw_trace(seq1, seq2, 13, 1, parasail.blosum62)
+
     score = get_similarity(aln.traceback.query, aln.traceback.ref)
 
     if settings.get("aln_out"):
@@ -165,7 +169,7 @@ def save_matrix_to_csv(df, filename):
     df.to_csv(filename, mode="w", header=False, index=True)
 
 
- #Save similarity scores as 3 column csv
+# Save similarity scores as 3 column csv
 def save_cols_to_csv(df, filename):
     order = df.index
     df.columns = df.index
@@ -280,7 +284,7 @@ def process_data(
         # Create a DataFrame from the lower triangular matrix
         df = pd.DataFrame(aln_lowt, index=new_order)
         save_matrix_to_csv(df, os.path.join(out_dir, f"{file_base}_mat.csv"))
-        save_cols_to_csv(df,os.path.join(out_dir, f"{file_base}"))
+        save_cols_to_csv(df, os.path.join(out_dir, f"{file_base}"))
     else:
         aln_lowt = np.tril(np.around(aln_scores, 2))
         aln_lowt[np.triu_indices(aln_lowt.shape[0], k=1)] = np.nan
