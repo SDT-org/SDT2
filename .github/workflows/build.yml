@@ -15,8 +15,6 @@ jobs:
         include:
           - os: ubuntu-latest
             arch: x64
-          - os: ubuntu-22.04
-            arch: arm64
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -31,11 +29,30 @@ jobs:
 
       - uses: oven-sh/setup-bun@v2
 
+      - name: macOS - Install dependencies
+        if: runner.os == 'macOS'
+        run: brew install autoconf automake libtool
+
       - name: Run init
         run: bun run init
 
-      - name: Run build
-        run: bun run build
+      - name: macOS - Build
+        if: matrix.os == 'macos-latest'
+        run: |
+          source venv-pywebview/bin/activate
+          bun run build
+
+      - name: Linux - Build
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          source venv-pywebview/bin/activate
+          bun run build
+
+      - name: Windows - Build
+        if: matrix.os == 'windows-latest'
+        run: |
+          venv-pywebview\\Scripts\\activate
+          bun run build
 
       - name: macOS - Prepare artifact
         if: matrix.os == 'macos-latest'

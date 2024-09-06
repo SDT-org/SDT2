@@ -111,6 +111,7 @@ def main():
             "--nofollow-import-to=doctest",
             "--output-filename=SDT2",
             f"--output-dir={build_path}",
+            "--assume-yes-for-downloads",
         ],
     )
 
