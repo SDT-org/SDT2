@@ -2,6 +2,7 @@ import os
 import sys
 import subprocess
 import platform
+import argparse
 
 venv_path = os.path.join(".", "venv-pywebview")
 build_path = os.path.join(".", "build")
@@ -47,7 +48,8 @@ def get_parasail_library_path(library_name):
     raise RuntimeError(f"{library_name} not found in the virtual environment.")
 
 
-def create_command(path, args):
+def make_platform_build_command(settings):
+    path = os.path.join("backend", "src", "app.py")
     file_without_extension = os.path.splitext(os.path.basename(path))[0]
     report_path = os.path.join(
         "build", f"{file_without_extension}-compilation-report.xml"
@@ -62,7 +64,15 @@ def create_command(path, args):
         f"--include-data-dir={bio_data_src_path}={bio_data_dest_path}",
         f"--include-data-file={parasail_library_path}={os.path.join('parasail', parasail_library_name)}",
         f"--report={report_path}",
-    ] + args
+        "--standalone",
+        "--include-data-dir=gui=gui",
+        "--include-data-dir=docs=docs",
+        "--nofollow-import-to=matplotlib",
+        "--nofollow-import-to=doctest",
+        "--output-filename=SDT2",
+        f"--output-dir={build_path}",
+        "--assume-yes-for-downloads",
+    ]
 
     match platform.system():
         case "Windows":
@@ -82,7 +92,7 @@ def create_command(path, args):
         case _:
             pass
 
-    if not platform.system() == "Darwin":
+    if not platform.system() == "Darwin" and not settings.disable_onefile:
         command.append("--onefile")
 
     command.append(path)
@@ -101,19 +111,15 @@ def run_command(command):
 
 
 def main():
-    command = create_command(
-        os.path.join("backend", "src", "app.py"),
-        [
-            "--standalone",
-            "--include-data-dir=gui=gui",
-            "--include-data-dir=docs=docs",
-            "--nofollow-import-to=matplotlib",
-            "--nofollow-import-to=doctest",
-            "--output-filename=SDT2",
-            f"--output-dir={build_path}",
-            "--assume-yes-for-downloads",
-        ],
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--disable-onefile",
+        action="store_true",
+        help="Disable --onefile on Windows and Linux",
     )
+    settings = parser.parse_args()
+
+    command = make_platform_build_command(settings)
 
     if run_command(command) and platform.system() == "Darwin":
         os.rename(

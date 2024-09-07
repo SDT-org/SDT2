@@ -48,11 +48,17 @@ jobs:
           source venv-pywebview/bin/activate
           bun run build
 
-      - name: Windows - Build
+      - name: Windows - Build Onefile
         if: matrix.os == 'windows-latest'
         run: |
           venv-pywebview\\Scripts\\activate
           bun run build
+
+      - name: Windows - Build Standalone
+        if: matrix.os == 'windows-latest'
+        run: |
+          venv-pywebview\\Scripts\\activate
+          bun run build -- --disable-onefile
 
       - name: macOS - Prepare artifact
         if: matrix.os == 'macos-latest'
