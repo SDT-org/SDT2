@@ -231,9 +231,9 @@ class Api:
         result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG)
         if result:
             if isinstance(result, str):
-                set_state(alignment_output_path=result)
+                set_state(export_path=result)
             else:
-                set_state(alignment_output_path=result[0])
+                set_state(export_path=result[0])
         else:
             raise Exception("path result was None")
 
