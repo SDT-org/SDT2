@@ -500,7 +500,7 @@ def on_closed():
 
 
 def about_window():
-    webview.create_window("About", get_entrypoint("about.html"))
+    webview.create_window("About", get_entrypoint("about.html"), js_api=api)
 
 
 def manual_window():
