@@ -1,3 +1,24 @@
+## Developing
+
+### Prerequisites
+
+- (Optional but recommended) [Install NVM](https://github.com/nvm-sh/nvm?tab=readme-ov-file#install--update-script)
+- [Install Node LTS]
+  - With NVM you can do this with `nvm install --lts` then `nvm use --lts`
+- Install Bun https://bun.sh/docs/installation
+- (Optional but recommended) [Install pyenv](https://github.com/pyenv/pyenv?tab=readme-ov-file#installation)
+- (Linux) Make sure the following are installed:
+  - libffi-dev
+  - autoconf
+  - automake
+  - libtools
+- Install Python 3.11
+  - With pyenv you can do this with `pyenv install 3.11` then `pyenv local 3.11`
+- Install virtualenv: `pip install virtualenv`
+### Setup
+
+- Run `bun run init`
+
 ## License
 
 This project is licensed under the terms of the GNU General Public License v3.0 (GPL-3.0).
