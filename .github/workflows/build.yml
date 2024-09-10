@@ -60,11 +60,11 @@ jobs:
           cd build
           zip -r SDT2.app.zip SDT2.app
 
-      - name: Ubuntu - Set execute permissions
+      - name: Ubuntu - Prepare artifact
         if: matrix.os == 'ubuntu-latest' || (matrix.os == 'ubuntu-22.04' && matrix.arch == 'arm64')
-        run: chmod +x build/SDT2
+        run: chmod +x build/SDT2 && tar -czvf build/SDT2.tar.gz -C build SDT2
 
-      - name: Windows - Sign EXE
+      - name: Windows - Sign artifact
         if: matrix.os == 'windows-latest'
         uses: azure/trusted-signing-action@v0.4.0
         with:
@@ -86,5 +86,4 @@ jobs:
           path: |
             ${{ matrix.os == 'windows-latest' && 'build/SDT2.exe' || '' }}
             ${{ matrix.os == 'macos-latest' && 'build/SDT2.app.zip' || '' }}
-            ${{ matrix.os == 'ubuntu-latest' && 'build/SDT2' || '' }}
-            ${{ matrix.os == 'ubuntu-22.04' && matrix.arch == 'arm64' && 'build/SDT2' || '' }}
+            ${{ (matrix.os == 'ubuntu-latest' || (matrix.os == 'ubuntu-22.04' && matrix.arch == 'arm64')) && 'build/SDT2.tar.gz' || '' }}
