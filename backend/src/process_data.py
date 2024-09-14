@@ -113,10 +113,6 @@ def get_alignment_scores(
     print(f"\rNumber of sequences: {len(seq_ids)}\r", flush=True)
     print(f"\rNumber of pairs: {total_pairs}\r", flush=True)
 
-    bound_process_pair = partial(
-        process_pair,
-        settings=settings,
-    )
     sample_size = 3
     sampled_seqs = random.sample(
         list(seq_dict.values()), min(len(seq_dict), sample_size)
@@ -128,6 +124,7 @@ def get_alignment_scores(
         process_pair,
         settings=settings,
     )
+
     with pool:
         results = pool.imap(bound_process_pair, id_sequence_pairs)
         for _, result in enumerate(results, 1):
