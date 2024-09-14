@@ -1,14 +1,19 @@
 :root {
-  --background-color: #fff;
+  --background-color: #f6f6f6;
   --foreground-color: #000;
-  --border-color: #ddd;
-  --shadow-color: #ccc;
-  --drop-shadow-color: #aaa;
-  --secondary-background-color: #f8f8f8;
+  --border-color: #d9dadb;
+  --shadow-color: #c8c8c8;
+  --drop-shadow-color: #b5b5b5;
+  --secondary-background-color: #f0f0f0;
   --secondary-foreground-color: #666;
-  --secondary-border-color: #eaeaea;
-  --pressed-color: #ececec;
+  --secondary-border-color: #e0e0e0;
+  --button-background-color: #F7F7FA;
+  --pressed-color: #e6e6e6;
   --focus-ring-color: Highlight;
+  --form-background-color: #fafafa;
+  --header-background-color: #fafafa;
+  --sidebar-background-color: #f6f6f6;
+  --main-background-color: #e6e6e6;
 }
 
 // @media (prefers-color-scheme: dark) {
@@ -27,6 +32,54 @@
 
 html, body {
   background: var(--background-color);
+}
+
+button {
+  min-width: 40px;
+  min-height: 30px;
+  background: var(--button-background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+
+  &[data-pressed], &:active {
+    background: var(--pressed-color);
+  }
+}
+
+input, select {
+  border: 1px solid var(--border-color);
+  border-radius: 0.2rem;
+}
+
+select, select option {
+  text-transform:capitalize;
+}
+
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding: 2px 5px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  cursor: pointer;
+  width: 100%;
+  max-width: 300px;
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSI2IiB2aWV3Qm94PSIwIDAgMTAgNiI+PHBvbHlnb24gcG9pbnRzPSIwLDAgNSw2IDEwLDAiIHN0eWxlPSJmaWxsOiAjY2NjOyIvPjwvc3ZnPg==');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 10px;
+  outline: none;
+}
+
+select:focus {
+  border-color: var(--focus-ring-color);
+  box-shadow: 0 0 5px var(--focus-ring-color);
+}
+
+select::-ms-expand {
+  display: none;
 }
 
 .app-wrapper {
@@ -63,7 +116,9 @@ html, body {
 
 .app-header {
   grid-area: header;
-  border-bottom: 0.1rem solid var(--border-color);
+  background: var(--header-background-color);
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
   padding: 0.8rem;
   z-index: 1;
   display: grid;
@@ -74,8 +129,6 @@ html, body {
 
   &.runner, &.loader {
     grid-template-columns: min-content;
-    box-shadow: none;
-    border-color: transparent;
   }
 
   .left,
@@ -108,7 +161,7 @@ html, body {
   }
 
   .data-view {
-    border: 0.1rem solid var(--border-color);
+    border: 1px solid var(--border-color);
     border-radius: 0.3rem;
     display: flex;
 
@@ -125,13 +178,10 @@ html, body {
   button {
     min-width: 4.8rem;
     min-height: 30px;
-    // background: #fff;
-    // border: 0.1rem solid var(--border-color);
-    // border-radius: 0.3rem;
 
-    // &[data-pressed] {
-    //   background: var(--pressed-color);
-    // }
+    &[data-pressed] {
+      background: var(--pressed-color);
+    }
   }
 }
 
@@ -143,15 +193,16 @@ html, body {
 }
 
 .app-sidebar {
+  background-color: var(--sidebar-background-color);
   grid-area: sidebar;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border-right: 0.1rem solid var(--border-color);
+  border-right: 1px solid var(--border-color);
   font-size: 0.875rem;
 
   .group {
-    border-bottom: 0.1rem solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
     padding: 0.8rem;
 
     &:last-child {
@@ -162,6 +213,7 @@ html, body {
 }
 
 .app-main {
+  background: var(--main-background-color);
   grid-area: main;
   overflow: auto;
   min-width: 20rem;
@@ -176,10 +228,11 @@ html, body {
 }
 
 .app-footer {
+  background: var(--main-background-color);
+  color: var(--secondary-foreground-color);
   grid-area: footer;
   padding: 1rem;
   text-align: center;
-  color: var(--secondary-foreground-color);
   font-size: 0.9rem;
   display: flex;
   justify-content: space-between;
@@ -196,17 +249,10 @@ html, body {
   display: flex;
 }
 
-input, select {
-  border: 0.1rem solid var(--border-color);
-  border-radius: 0.2rem;
-}
-
-select, select option {
-  text-transform:capitalize;
-}
-
 .form-wrapper {
-  border: 1px solid var(--foreground-color);
+  background: var(--form-background-color);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 0 0.2rem var(--shadow-color);
   border-radius: 0.4rem;
   padding: 2.4rem;
   justify-content: left;
@@ -282,7 +328,7 @@ select, select option {
           font-size: 0.8rem;
           font-weight: 600;
           border-radius: 0.25rem;
-          padding: 0.1rem 0.3rem;
+          padding: 1px 0.3rem;
           background: #333;
           color: var(--background-color);
           margin-right: 0.25rem;
@@ -340,7 +386,7 @@ select, select option {
   .advanced-settings {
     font-size: 0.875rem;
     background: var(--secondary-background-color);
-    border: 0.1rem solid var(--secondary-border-color);
+    border: 1px solid var(--secondary-border-color);
     border-radius: 0.4rem;
     padding: 0.6rem;
     margin-bottom: 1.6rem;
@@ -388,7 +434,7 @@ select, select option {
 
   .success {
     color: green;
-    border: 0.1rem solid green;
+    border: 1px solid green;
     border-radius: 0.4rem;
     font-weight: bold;
     padding: 0.8rem;
@@ -432,6 +478,7 @@ select, select option {
 }
 
 .app-sidebar-footer {
+  background: var(--background-color);
   border-top: 1px solid var(--border-color);
 
   select {
@@ -489,7 +536,7 @@ select, select option {
 
   details {
     width: 100%;
-    border: 0.1rem solid var(--foreground-color);
+    border: 1px solid var(--foreground-color);
     border-radius: 0.4rem;
     padding: 1rem;
     margin-top: 4rem;
@@ -638,7 +685,7 @@ select, select option {
 }
 
 .validation-error {
-  border: 0.1rem solid red;
+  border: 1px solid red;
   border-radius: 0.4rem;
   color: red;
   font-weight: 500;
@@ -690,7 +737,7 @@ select, select option {
   }
 
   .react-aria-Separator {
-    height: 0.1rem;
+    height: 1px;
     background: var(--border-color);
     margin: 0.4rem 0;
   }

@@ -1,7 +1,3 @@
-@import './styles/fonts.scss';
-@import './styles/app.scss';
-@import './styles/modal.scss';
-
 /* https://www.joshwcomeau.com/css/custom-css-reset/ */
 
 /*
@@ -61,3 +57,7 @@ html { font-family: 'Inter', sans-serif; }
 @supports (font-variation-settings: normal) {
   html { font-family: 'Inter var', sans-serif; }
 }
+
+@import './styles/fonts.scss';
+@import './styles/app.scss';
+@import './styles/modal.scss';
