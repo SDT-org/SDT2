@@ -11,6 +11,11 @@
         box-sizing: border-box;
       }
 
+      a,
+      a:visited {
+        color: #000;
+      }
+
       body {
         font-family: sans-serif;
         padding: 20px;
@@ -23,7 +28,7 @@
         color: #888;
       }
 
-      .license {
+      .gray-box {
         margin-top: 20px;
         background-color: #f8f8f8;
         padding: 16px 20px;
@@ -76,6 +81,18 @@
         border-radius: 4px;
         border: 2px solid transparent;
       }
+
+      .two-up {
+        display: flex;
+        flex-direction: row;
+
+        .left {
+          flex: 1;
+        }
+        .right {
+          flex: 1;
+        }
+      }
     </style>
   </head>
 
@@ -113,136 +130,161 @@
       pairwise sequence alignments.
     </p>
 
-    <h2>Advisors</h2>
-    <ul>
-      <li>Brejnev Muhire</li>
-      <li>Darren Martin</li>
-      <li>Simona Kraberger</li>
-      <li>Qiyun Zhu</li>
-      <li>Pierre Lefeuvre</li>
-      <li>Philippe Roumagnac</li>
-      <li>Arvind Varsani</li>
-    </ul>
+    <div class="two-up">
+      <div class="left">
+        <h2>Advisors</h2>
+        <ul>
+          <li>Brejnev Muhire</li>
+          <li>Darren Martin</li>
+          <li>Simona Kraberger</li>
+          <li>Qiyun Zhu</li>
+          <li>Pierre Lefeuvre</li>
+          <li>Philippe Roumagnac</li>
+        </ul>
 
-    <h2>Libraries Used</h2>
-    <p>This project uses the following projects/technologies:</p>
-    <ul>
-      <li>
-        <strong
-          ><a href="https://github.com/jeffdaily/parasail" target="_blank"
-            >Parasail</a
-          ></strong
-        >
-        and the
-        <a href="https://github.com/jeffdaily/parasail-python" target="_blank"
-          >Python bindings</a
-        >
-        -
-        <a
-          href="https://github.com/jeffdaily/parasail?tab=License-1-ov-file#readme"
-          target="_blank"
-          >License</a
-        >
-      </li>
-      <li>
-        <strong
-          ><a href="https://github.com/r0x0r/pywebview" target="_blank"
-            >pywebview</a
-          ></strong
-        >
-        -
-        <a href="https://github.com/r0x0r/pywebview/blob/master/LICENSE"
-          >BSD 3 License</a
-        >
-      </li>
-      <li>
-        <strong
-          ><a href="https://github.com/biopython/biopython" target="_blank"
-            >Biopython</a
-          ></strong
-        >
-        -
-        <a href="https://github.com/biopython/biopython/blob/master/LICENSE.rst"
-          >Biopython License Agreement</a
-        >
-      </li>
-      <li>
-        <strong
-          ><a href="https://github.com/numpy/numpy" target="_blank"
-            >numpy</a
-          ></strong
-        >
-        -
-        <a href="https://github.com/numpy/numpy/blob/main/LICENSE.txt"
-          >License</a
-        >
-      </li>
-      <li>
-        <strong
-          ><a href="https://github.com/scipy/scipy" target="_blank"
-            >scipy</a
-          ></strong
-        >
-        -
-        <a href="https://github.com/scipy/scipy/blob/main/LICENSE.txt"
-          >BSD 3-Clause License</a
-        >
-      </li>
-      <li>
-        <strong
-          ><a href="https://github.com/giampaolo/psutil" target="_blank"
-            >psutil</a
-          ></strong
-        >
-        -
-        <a href="https://github.com/giampaolo/psutil/blob/master/LICENSE"
-          >BSD 3-Clause License</a
-        >
-      </li>
-      <li>
-        <strong
-          ><a href="https://github.com/pandas-dev/pandas" target="_blank"
-            >Pandas</a
-          ></strong
-        >
-        -
-        <a href="https://github.com/pandas-dev/pandas/blob/main/LICENSE"
-          >BSD 3-Clause License</a
-        >
-      </li>
-      <li>
-        <strong
-          ><a href="https://github.com/Nuitka/Nuitka" target="_blank"
-            >Nuitka</a
-          ></strong
-        >
-        -
-        <a href="https://github.com/Nuitka/Nuitka/blob/main/LICENSE.txt"
-          >Apache License 2.0</a
-        >
-      </li>
-      <li>
-        <strong
-          ><a href="https://github.com/facebook/react" target="_blank"
-            >React</a
-          ></strong
-        >
-        -
-        <a href="https://github.com/facebook/react/blob/main/LICENSE"
-          >Apache License 2.0</a
-        >
-      </li>
-    </ul>
+        <h4>Principal Investigator</h4>
+        <ul>
+          <li>Arvind Varsani</li>
+        </ul>
+      </div>
 
-    <div class="license">
-      <h2>License</h2>
+      <div class="right">
+        <h2>Libraries Used</h2>
+        <p>This project uses the following projects/technologies:</p>
+        <ul>
+          <li>
+            <strong
+              ><a href="https://github.com/jeffdaily/parasail" target="_blank"
+                >Parasail</a
+              ></strong
+            >
+            and the
+            <a
+              href="https://github.com/jeffdaily/parasail-python"
+              target="_blank"
+              >Python bindings</a
+            >
+            -
+            <a
+              href="https://github.com/jeffdaily/parasail?tab=License-1-ov-file#readme"
+              target="_blank"
+              >License</a
+            >
+          </li>
+          <li>
+            <strong
+              ><a href="https://github.com/r0x0r/pywebview" target="_blank"
+                >pywebview</a
+              ></strong
+            >
+            -
+            <a href="https://github.com/r0x0r/pywebview/blob/master/LICENSE"
+              >BSD 3 License</a
+            >
+          </li>
+          <li>
+            <strong
+              ><a href="https://github.com/biopython/biopython" target="_blank"
+                >Biopython</a
+              ></strong
+            >
+            -
+            <a
+              href="https://github.com/biopython/biopython/blob/master/LICENSE.rst"
+              >Biopython License Agreement</a
+            >
+          </li>
+          <li>
+            <strong
+              ><a href="https://github.com/numpy/numpy" target="_blank"
+                >numpy</a
+              ></strong
+            >
+            -
+            <a href="https://github.com/numpy/numpy/blob/main/LICENSE.txt"
+              >License</a
+            >
+          </li>
+          <li>
+            <strong
+              ><a href="https://github.com/scipy/scipy" target="_blank"
+                >scipy</a
+              ></strong
+            >
+            -
+            <a href="https://github.com/scipy/scipy/blob/main/LICENSE.txt"
+              >BSD 3-Clause License</a
+            >
+          </li>
+          <li>
+            <strong
+              ><a href="https://github.com/giampaolo/psutil" target="_blank"
+                >psutil</a
+              ></strong
+            >
+            -
+            <a href="https://github.com/giampaolo/psutil/blob/master/LICENSE"
+              >BSD 3-Clause License</a
+            >
+          </li>
+          <li>
+            <strong
+              ><a href="https://github.com/pandas-dev/pandas" target="_blank"
+                >Pandas</a
+              ></strong
+            >
+            -
+            <a href="https://github.com/pandas-dev/pandas/blob/main/LICENSE"
+              >BSD 3-Clause License</a
+            >
+          </li>
+          <li>
+            <strong
+              ><a href="https://github.com/Nuitka/Nuitka" target="_blank"
+                >Nuitka</a
+              ></strong
+            >
+            -
+            <a href="https://github.com/Nuitka/Nuitka/blob/main/LICENSE.txt"
+              >Apache License 2.0</a
+            >
+          </li>
+          <li>
+            <strong
+              ><a href="https://github.com/facebook/react" target="_blank"
+                >React</a
+              ></strong
+            >
+            -
+            <a href="https://github.com/facebook/react/blob/main/LICENSE"
+              >Apache License 2.0</a
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="gray-box">
+      <h2>History</h2>
       <p>
-        This software is licensed under the GNU General Public License (GPL).
-        For detailed information, visit the
-        <a href="https://www.gnu.org/licenses/gpl-3.0.html">GPL v3 License</a>
-        page.
+        This project builds off the concepts and ideas developed in the original
+        <a href="https://github.com/brejnev/SDT-python" target="_blank"
+          >Sequence Demarcation Tool</a
+        >
+        developed by Brejnev Muhire, Darren Martin, and Arvind Varsani.
       </p>
     </div>
+
+    <h2>License</h2>
+    <p>
+      This software is licensed under the GNU General Public License (GPL). For
+      detailed information, visit the
+      <a href="https://www.gnu.org/licenses/gpl-3.0.html">GPL v3 License</a>
+      page.
+    </p>
+
+    <h3>Special Thanks</h3>
+    <p>To the Varsani Lab and [.......]</p>
 
     <div class="footer">
       <p>
