@@ -54,16 +54,6 @@ jobs:
           venv-pywebview\\Scripts\\activate
           bun run build
 
-      - name: macOS - Prepare artifact
-        if: matrix.os == 'macos-latest'
-        run: |
-          cd build
-          zip -r SDT2.app.zip SDT2.app
-
-      - name: Ubuntu - Prepare artifact
-        if: matrix.os == 'ubuntu-latest' || (matrix.os == 'ubuntu-22.04' && matrix.arch == 'arm64')
-        run: chmod +x build/SDT2 && tar -czvf build/SDT2.tar.gz -C build SDT2
-
       - name: Windows - Sign artifact
         if: matrix.os == 'windows-latest'
         uses: azure/trusted-signing-action@v0.4.0
@@ -79,6 +69,32 @@ jobs:
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
+
+      - name: macOS - Sign artifact
+        if: matrix.os == 'macos-latest'
+        run: |
+          echo ${{ secrets.MACOS_CERTIFICATE }} | base64 --decode > certificate.p12
+
+          security create-keychain -p "${{ secrets.MACOS_CI_KEYCHAIN_PWD }}" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "${{ secrets.MACOS_CI_KEYCHAIN_PWD }}" build.keychain
+          security import certificate.p12 -k build.keychain -P "${{ secrets.MACOS_CERTIFICATE_PWD }}" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${{ secrets.MACOS_CI_KEYCHAIN_PWD }}" build.keychain
+
+          /usr/bin/codesign -f -o runtime --timestamp -s "${{ secrets.MACOS_CERTIFICATE_NAME }}" --deep ./build/SDT2.app
+          /usr/bin/codesign -vvv ./build/SDT2.app
+
+      - name: macOS - Notarize artifact
+        if: matrix.os == 'macos-latest'
+        run: |
+          ditto -c -k --keepParent "build/SDT2.app" "build/SDT2.app.zip"
+          xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}" --team-id "${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}" --password "${{ secrets.MACOS_NOTARIZATION_PWD }}" > /dev/null
+          xcrun notarytool submit "build/SDT2.app.zip" --keychain-profile "notarytool-profile" --wait
+          xcrun stapler staple "./build/SDT2.app"
+
+      - name: Ubuntu - Prepare artifact
+        if: matrix.os == 'ubuntu-latest' || (matrix.os == 'ubuntu-22.04' && matrix.arch == 'arm64')
+        run: chmod +x build/SDT2 && tar -czvf build/SDT2.tar.gz -C build SDT2
 
       - uses: actions/upload-artifact@v4
         with:
