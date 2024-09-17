@@ -33,7 +33,6 @@ const RunnerSettings = ({
   >({
     recommended: 1,
     best: 1,
-    high: 1,
     balanced: 1,
     low: 1,
   });
@@ -117,14 +116,19 @@ const RunnerSettings = ({
   React.useEffect(() => {
     if (appState.compute_stats) {
       const stats = appState.compute_stats;
+
       setAppState((previous) => ({
         ...previous,
-        client: { ...previous.client, compute_cores: stats.recommended_cores },
+        client: {
+          ...previous.client,
+          compute_cores: stats.recommended_cores,
+          performanceProfile: "recommended",
+        },
       }));
+
       setComputeModes({
         recommended: stats.recommended_cores,
         best: stats.total_cores,
-        high: Math.max(stats.total_cores - 1, 1),
         balanced: Math.floor(Math.max(stats.total_cores / 2, 1)),
         low: 1,
       });
@@ -240,8 +244,7 @@ const RunnerSettings = ({
                         {appState.client.performanceProfile === "custom"
                           ? appState.client.compute_cores
                           : computeModes[appState.client.performanceProfile]}
-                        <span>/</span>
-                        {appState.compute_stats?.total_cores}
+                        /{appState.compute_stats?.total_cores}
                       </span>
                       cores
                     </>
@@ -251,8 +254,9 @@ const RunnerSettings = ({
             </div>
 
             {appState.compute_stats &&
-            appState.compute_stats.recommended_cores <
-              appState.compute_stats.total_cores ? (
+            appState.client.compute_cores *
+              appState.compute_stats.required_memory >
+              appState.compute_stats.total_memory ? (
               <div className="compute-forecast">
                 <p>
                   <b>Warning:</b> Analysing these sequences may cause system

@@ -120,7 +120,7 @@ def get_compute_stats(filename):
     total_cores = multiprocessing.cpu_count()
     return {
         "total_cores": total_cores,
-        "recommended_cores": min(total_cores, total_memory // required_memory),
+        "recommended_cores": min(total_cores - 1, total_memory // required_memory),
         "total_memory": total_memory,
         "required_memory": required_memory,
         "available_memory": psutil.virtual_memory().available,
