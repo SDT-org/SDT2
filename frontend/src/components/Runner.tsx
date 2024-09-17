@@ -244,7 +244,8 @@ const RunnerSettings = ({
                         {appState.client.performanceProfile === "custom"
                           ? appState.client.compute_cores
                           : computeModes[appState.client.performanceProfile]}
-                        /{appState.compute_stats?.total_cores}
+                        <span>/</span>
+                        {appState.compute_stats?.total_cores}
                       </span>
                       cores
                     </>
