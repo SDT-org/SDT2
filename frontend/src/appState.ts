@@ -8,7 +8,6 @@ export type SaveableImageFormat = "png" | "jpeg" | "svg";
 export type PerformanceProfile =
   | "recommended"
   | "best"
-  | "high"
   | "balanced"
   | "low"
   | "custom";
