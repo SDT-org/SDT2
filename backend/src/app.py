@@ -378,7 +378,7 @@ class Api:
             )
 
         image_format = str(args["image_format"]).lower()
-        saveable_formats = ["jpg", "svg", "png"]
+        saveable_formats = ["jpeg", "svg", "png"]
 
         if image_format not in saveable_formats:
             raise Exception(f"Expected image_format to be one of {saveable_formats}")
