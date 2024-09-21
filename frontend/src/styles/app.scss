@@ -256,10 +256,17 @@ select::-ms-expand {
   border-radius: 0.4rem;
   padding: 2.4rem;
   justify-content: left;
+  position: relative;
 
-  &.runner-wrapper {
+  &.runner-wrapper, &.loader-wrapper {
     max-width: 30rem;
     width: 100%;
+  }
+
+  &.loader-wrapper {
+    .actions {
+      margin-top: 2.4rem;
+    }
   }
 }
 
@@ -267,6 +274,7 @@ select::-ms-expand {
   display: grid;
   grid-template-rows: 1fr;
   grid-template-columns: 1fr;
+  width: 100%;
 
   h4,
   .section-header {
@@ -656,7 +664,6 @@ select::-ms-expand {
 
 .loader {
   .react-aria-ProgressBar {
-    max-width: 25rem;
     font-size: 0.9rem;
     font-weight: 600;
 
@@ -673,14 +680,6 @@ select::-ms-expand {
   .number {
     font-weight: 0.95rem;
     font-weight: 500;
-  }
-
-  .cancel-run {
-    position: absolute;
-    bottom: 2rem;
-    display: block;
-    width: 100%;
-    max-width: 25rem;
   }
 }
 

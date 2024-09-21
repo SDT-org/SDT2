@@ -37,42 +37,47 @@ export const Loader = ({
         <div>{mainMenu}</div>
       </div>
       <div className="app-main centered loader">
-        <ProgressBar value={progress}>
-          {({ percentage, valueText }) => (
-            <>
-              <Label>{stage ? `${stage}...` : null}</Label>
-              <span className="value">
-                {stage === "Analyzing" && valueText}
-              </span>
-              <div className="bar">
-                <div
-                  className="fill"
-                  style={{ width: percentage + "%" }}
-                  data-animation={estimated_time && estimated_time > 10}
-                />
-              </div>
-              <div className="estimate">
-                {(stage === "Analyzing" && estimatedDisplay) || <>&nbsp;</>}
-              </div>
-            </>
-          )}
-        </ProgressBar>
-        <Button
-          className="cancel-run"
-          onPress={() => {
-            if (
-              window.confirm(
-                "Are you sure you want to cancel? All analysis progress will be lost.",
-              )
-            ) {
-              setCanceling(true);
-              window.pywebview.api.cancel_run();
-            }
-          }}
-          isDisabled={canceling}
-        >
-          {canceling ? "Canceling..." : "Cancel Run"}
-        </Button>
+        <div className="form-wrapper loader-wrapper">
+          <form className="form">
+            <ProgressBar value={progress}>
+              {({ percentage, valueText }) => (
+                <>
+                  <Label>{stage ? `${stage}...` : null}</Label>
+                  <span className="value">
+                    {stage === "Analyzing" && valueText}
+                  </span>
+                  <div className="bar">
+                    <div
+                      className="fill"
+                      style={{ width: percentage + "%" }}
+                      data-animation={estimated_time && estimated_time > 10}
+                    />
+                  </div>
+                  <div className="estimate">
+                    {(stage === "Analyzing" && estimatedDisplay) || <>&nbsp;</>}
+                  </div>
+                </>
+              )}
+            </ProgressBar>
+            <div className="actions">
+              <Button
+                onPress={() => {
+                  if (
+                    window.confirm(
+                      "Are you sure you want to cancel? All analysis progress will be lost.",
+                    )
+                  ) {
+                    setCanceling(true);
+                    window.pywebview.api.cancel_run();
+                  }
+                }}
+                isDisabled={canceling}
+              >
+                {canceling ? "Canceling..." : "Cancel Run"}
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
