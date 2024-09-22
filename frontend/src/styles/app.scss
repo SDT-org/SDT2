@@ -7,7 +7,7 @@
   --secondary-background-color: #f0f0f0;
   --secondary-foreground-color: #666;
   --secondary-border-color: #e0e0e0;
-  --button-background-color: #F7F7FA;
+  --button-background-color: #f7f7fa;
   --pressed-color: #e6e6e6;
   --focus-ring-color: Highlight;
   --form-background-color: #fafafa;
@@ -30,7 +30,8 @@
 //   }
 // }
 
-html, body {
+html,
+body {
   background: var(--background-color);
 }
 
@@ -41,18 +42,21 @@ button {
   border: 1px solid var(--border-color);
   border-radius: 3px;
 
-  &[data-pressed], &:active {
+  &[data-pressed],
+  &:active {
     background: var(--pressed-color);
   }
 }
 
-input, select {
+input,
+select {
   border: 1px solid var(--border-color);
   border-radius: 0.2rem;
 }
 
-select, select option {
-  text-transform:capitalize;
+select,
+select option {
+  text-transform: capitalize;
 }
 
 select {
@@ -66,7 +70,7 @@ select {
   cursor: pointer;
   width: 100%;
   max-width: 300px;
-  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSI2IiB2aWV3Qm94PSIwIDAgMTAgNiI+PHBvbHlnb24gcG9pbnRzPSIwLDAgNSw2IDEwLDAiIHN0eWxlPSJmaWxsOiAjY2NjOyIvPjwvc3ZnPg==');
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMCIgaGVpZ2h0PSI2IiB2aWV3Qm94PSIwIDAgMTAgNiI+PHBvbHlnb24gcG9pbnRzPSIwLDAgNSw2IDEwLDAiIHN0eWxlPSJmaWxsOiAjY2NjOyIvPjwvc3ZnPg==");
   background-repeat: no-repeat;
   background-position: right 10px center;
   padding-right: 10px;
@@ -127,7 +131,8 @@ select::-ms-expand {
   font-size: 0.875rem;
   box-shadow: 0 0 0.2rem var(--shadow-color);
 
-  &.runner, &.loader {
+  &.runner,
+  &.loader {
     grid-template-columns: min-content;
   }
 
@@ -222,7 +227,8 @@ select::-ms-expand {
     margin: 0 auto;
   }
 
-  &.runner, &.loader {
+  &.runner,
+  &.loader {
     padding: 1.6rem;
   }
 }
@@ -258,7 +264,8 @@ select::-ms-expand {
   justify-content: left;
   position: relative;
 
-  &.runner-wrapper, &.loader-wrapper {
+  &.runner-wrapper,
+  &.loader-wrapper {
     max-width: 30rem;
     width: 100%;
   }
@@ -370,7 +377,8 @@ select::-ms-expand {
       margin-left: 0.4rem;
     }
 
-    input + label, label input + span {
+    input + label,
+    label input + span {
       text-transform: capitalize;
     }
 
@@ -585,7 +593,12 @@ select::-ms-expand {
   gap: 0.2rem;
   position: relative;
 
-  [slot="increment"], [slot="decrement"] {
+  button {
+    all: unset;
+  }
+
+  [slot="increment"],
+  [slot="decrement"] {
     visibility: hidden;
     background: var(--background-color);
     border: 0;
@@ -604,13 +617,15 @@ select::-ms-expand {
     font-weight: bold;
     line-height: 0;
 
-    &:active, &:hover {
+    &:active,
+    &:hover {
       background: #ddd;
     }
   }
 
   &:hover {
-    [slot="increment"], [slot="decrement"] {
+    [slot="increment"],
+    [slot="decrement"] {
       visibility: visible;
     }
   }
@@ -633,8 +648,9 @@ select::-ms-expand {
 
 .react-aria-ProgressBar {
   display: grid;
-  grid-template-areas: "label value"
-                       "bar bar";
+  grid-template-areas:
+    "label value"
+    "bar bar";
   grid-template-columns: 1fr auto;
   gap: 0.4rem;
   width: 100%;
@@ -656,7 +672,7 @@ select::-ms-expand {
     background: black;
     height: 100%;
 
-    &[data-animation=true] {
+    &[data-animation="true"] {
       transition: width 0.25s;
     }
   }
@@ -667,7 +683,8 @@ select::-ms-expand {
     font-size: 0.9rem;
     font-weight: 600;
 
-    .estimate, .value {
+    .estimate,
+    .value {
       font-variant-numeric: tabular-nums;
     }
 
@@ -716,11 +733,12 @@ select::-ms-expand {
   border-radius: 4px;
   min-width: 16rem;
 
-  [role=menuitem] {
+  [role="menuitem"] {
     font-size: 0.9rem;
     display: grid;
-    grid-template-areas: "label kbd"
-                         "desc  kbd";
+    grid-template-areas:
+      "label kbd"
+      "desc  kbd";
     align-items: center;
     column-gap: 20px;
     cursor: default;
@@ -744,8 +762,9 @@ select::-ms-expand {
 
 .react-aria-Slider {
   display: grid;
-  grid-template-areas: "label output"
-                       "track track";
+  grid-template-areas:
+    "label output"
+    "track track";
   grid-template-columns: 1fr auto;
   max-width: 100%;
 
@@ -765,7 +784,7 @@ select::-ms-expand {
 
     /* track line */
     &:before {
-      content: '';
+      content: "";
       display: block;
       position: absolute;
       background: var(--border-color);
@@ -785,7 +804,7 @@ select::-ms-expand {
     }
   }
 
-  &[data-orientation=horizontal] {
+  &[data-orientation="horizontal"] {
     flex-direction: column;
     width: 100%;
 
