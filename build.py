@@ -67,6 +67,7 @@ def make_platform_build_command(settings):
         "--standalone",
         "--include-data-dir=gui=gui",
         "--include-data-dir=docs=docs",
+        "--include-data-dir=assets=assets",
         "--nofollow-import-to=matplotlib",
         "--nofollow-import-to=doctest",
         "--output-filename=SDT2",
@@ -120,8 +121,9 @@ def main():
     settings = parser.parse_args()
 
     command = make_platform_build_command(settings)
+    result = run_command(command)
 
-    if run_command(command) and platform.system() == "Darwin":
+    if result and platform.system() == "Darwin":
         os.rename(
             os.path.join(".", "build", "app.app"),
             os.path.join(".", "build", "SDT2.app"),

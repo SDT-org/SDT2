@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SDT2 Manual</title>
     <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      a,
+      a:visited {
+        color: #000;
+      }
+
       body {
         font-family: sans-serif;
         padding: 20px;
@@ -17,142 +28,263 @@
         color: #888;
       }
 
-      .license {
+      .gray-box {
         margin-top: 20px;
         background-color: #f8f8f8;
-        padding: 10px;
+        padding: 16px 20px;
         border-radius: 5px;
+      }
+
+      .license h2 {
+        margin: 0;
+      }
+
+      .meta {
+        display: grid;
+        grid-template-columns: min-content 1fr;
+        gap: 10px;
+        place-content: center;
+      }
+
+      .meta img {
+        height: 50px;
+        width: 50px;
+      }
+      .meta .title-wrapper {
+        display: grid;
+        grid-row-columns: auto auto;
+        gap: 8px;
+      }
+      .meta h1 {
+        font-size: 1.6rem;
+        line-height: 1.6rem;
+        display: flex;
+        gap: 8px;
+      }
+      .meta h1,
+      .meta p {
+        margin: 0;
+        line-height: 1;
+      }
+      .meta .app-version {
+        font-size: 0.85rem;
+        line-height: 1;
+        display: flex;
+        align-content: center;
+        padding: 0 4px;
+        display: inline-block;
+        color: #2a4661;
+
+        background:
+          linear-gradient(#fff, #fff) padding-box,
+          linear-gradient(to right, #ff6167, #20b9ff, #2a4661) border-box;
+        border-radius: 4px;
+        border: 2px solid transparent;
+      }
+
+      .two-up {
+        display: flex;
+        flex-direction: row;
+
+        .left {
+          flex: 1;
+        }
+        .right {
+          flex: 1;
+        }
       }
     </style>
   </head>
+
+  <script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function () {
+      function checkPywebview() {
+        if (window.pywebview) {
+          window.pywebview.api.app_config().then((config) => {
+            document.getElementById("app-version").innerText =
+              `Version ${JSON.parse(config).appVersion}`;
+          });
+        } else {
+          setTimeout(checkPywebview, 10);
+        }
+      }
+
+      checkPywebview();
+    });
+  </script>
+
   <body>
-    <h1>About SDT2</h1>
+    <div class="meta">
+      <img src="/images/app.png" alt="SDT2 Icon" />
+      <div class="title-wrapper">
+        <h1>
+          Sequence Demarcation Tool 2
+          <div id="app-version" class="app-version">Version 2.0</div>
+        </h1>
+        <p>Developed by Josiah Ivey and Michael Lund</p>
+      </div>
+    </div>
 
-    SDT2 is a sequence classification tool based on percent identities from pairwise sequence alignments.
+    <p>
+      SDT2 is a sequence classification tool based on percent identities from
+      pairwise sequence alignments.
+    </p>
 
-    <h2>Developers</h2>
-    <ul>
-      <li><b>Josiah Ivey</b> - Lead Developer</li>
-      <li><b>Michael Lund</b> - Developer and Bioinformatics</li>
-    </ul>
+    <div class="two-up">
+      <div class="left">
+        <h2>Advisors</h2>
+        <ul>
+          <li>Brejnev Muhire</li>
+          <li>Darren Martin</li>
+          <li>Simona Kraberger</li>
+          <li>Qiyun Zhu</li>
+          <li>Pierre Lefeuvre</li>
+          <li>Philippe Roumagnac</li>
+        </ul>
 
-    <h2>Collaborators and Advisors</h2>
-    <ul>
-      <li>Brejnev Muhire</li>
-      <li>Darren Martin</li>
-      <li>Simona Kraberger</li>
-      <li>Qiyun Zhu</li>
-      <li>Pierre Lefeuvre</li>
-      <li>Philippe Roumagnac</li>
-      <li>Arvind Varsani</li>
-    </ul>
+        <h4>Principal Investigator</h4>
+        <ul>
+          <li>Arvind Varsani</li>
+        </ul>
+      </div>
 
-    <h2>Libraries Used</h2>
-    <p>This project uses the following projects/technologies:</p>
-    <ul>
-      <li>
-        <strong><a href="https://github.com/jeffdaily/parasail" target="_blank">Parasail</a> and the <a href="https://github.com/jeffdaily/parasail-python" target="_blank">Python bindings</a>
-          - <a href="https://github.com/jeffdaily/parasail?tab=License-1-ov-file#readme" target="_blank">License</a>
-        </li>
-      <li>
-        <strong
-          ><a href="https://github.com/r0x0r/pywebview" target="_blank"
-            >pywebview</a
-          ></strong
-        >
-        -
-        <a href="https://github.com/r0x0r/pywebview/blob/master/LICENSE"
-          >BSD 3 License</a
-        >
-      </li>
-      <li>
-        <strong
-          ><a href="https://github.com/biopython/biopython" target="_blank"
-            >Biopython</a
-          ></strong
-        >
-        -
-        <a href="https://github.com/biopython/biopython/blob/master/LICENSE.rst"
-          >Biopython License Agreement</a
-        >
-      </li>
-      <li>
-        <strong
-          ><a href="https://github.com/numpy/numpy" target="_blank"
-            >numpy</a
-          ></strong
-        >
-        -
-        <a href="https://github.com/numpy/numpy/blob/main/LICENSE.txt"
-          >License</a
-        >
-      </li>
-      <li>
-        <strong
-          ><a href="https://github.com/scipy/scipy" target="_blank"
-            >scipy</a
-          ></strong
-        >
-        -
-        <a href="https://github.com/scipy/scipy/blob/main/LICENSE.txt"
-          >BSD 3-Clause License</a
-        >
-      </li>
-      <li>
-        <strong
-          ><a href="https://github.com/giampaolo/psutil" target="_blank"
-            >psutil</a
-          ></strong
-        >
-        -
-        <a href="https://github.com/giampaolo/psutil/blob/master/LICENSE"
-          >BSD 3-Clause License</a
-        >
-      </li>
-      <li>
-        <strong
-          ><a href="https://github.com/pandas-dev/pandas" target="_blank"
-            >Pandas</a
-          ></strong
-        >
-        -
-        <a href="https://github.com/pandas-dev/pandas/blob/main/LICENSE"
-          >BSD 3-Clause License</a
-        >
-      </li>
-      <li>
-        <strong
-          ><a href="https://github.com/Nuitka/Nuitka" target="_blank"
-            >Nuitka</a
-          ></strong
-        >
-        -
-        <a href="https://github.com/Nuitka/Nuitka/blob/main/LICENSE.txt"
-          >Apache License 2.0</a
-        >
-      </li>
-      <li>
-        <strong
-          ><a href="https://github.com/facebook/react" target="_blank"
-            >React</a
-          ></strong
-        >
-        -
-        <a href="https://github.com/facebook/react/blob/main/LICENSE"
-          >Apache License 2.0</a
-        >
-      </li>
-    </ul>
+      <div class="right">
+        <h2>Libraries Used</h2>
+        <p>This project uses the following projects/technologies:</p>
+        <ul>
+          <li>
+            <strong
+              ><a href="https://github.com/jeffdaily/parasail" target="_blank"
+                >Parasail</a
+              ></strong
+            >
+            and the
+            <a
+              href="https://github.com/jeffdaily/parasail-python"
+              target="_blank"
+              >Python bindings</a
+            >
+            -
+            <a
+              href="https://github.com/jeffdaily/parasail?tab=License-1-ov-file#readme"
+              target="_blank"
+              >License</a
+            >
+          </li>
+          <li>
+            <strong
+              ><a href="https://github.com/r0x0r/pywebview" target="_blank"
+                >pywebview</a
+              ></strong
+            >
+            -
+            <a href="https://github.com/r0x0r/pywebview/blob/master/LICENSE"
+              >BSD 3 License</a
+            >
+          </li>
+          <li>
+            <strong
+              ><a href="https://github.com/biopython/biopython" target="_blank"
+                >Biopython</a
+              ></strong
+            >
+            -
+            <a
+              href="https://github.com/biopython/biopython/blob/master/LICENSE.rst"
+              >Biopython License Agreement</a
+            >
+          </li>
+          <li>
+            <strong
+              ><a href="https://github.com/numpy/numpy" target="_blank"
+                >numpy</a
+              ></strong
+            >
+            -
+            <a href="https://github.com/numpy/numpy/blob/main/LICENSE.txt"
+              >License</a
+            >
+          </li>
+          <li>
+            <strong
+              ><a href="https://github.com/scipy/scipy" target="_blank"
+                >scipy</a
+              ></strong
+            >
+            -
+            <a href="https://github.com/scipy/scipy/blob/main/LICENSE.txt"
+              >BSD 3-Clause License</a
+            >
+          </li>
+          <li>
+            <strong
+              ><a href="https://github.com/giampaolo/psutil" target="_blank"
+                >psutil</a
+              ></strong
+            >
+            -
+            <a href="https://github.com/giampaolo/psutil/blob/master/LICENSE"
+              >BSD 3-Clause License</a
+            >
+          </li>
+          <li>
+            <strong
+              ><a href="https://github.com/pandas-dev/pandas" target="_blank"
+                >Pandas</a
+              ></strong
+            >
+            -
+            <a href="https://github.com/pandas-dev/pandas/blob/main/LICENSE"
+              >BSD 3-Clause License</a
+            >
+          </li>
+          <li>
+            <strong
+              ><a href="https://github.com/Nuitka/Nuitka" target="_blank"
+                >Nuitka</a
+              ></strong
+            >
+            -
+            <a href="https://github.com/Nuitka/Nuitka/blob/main/LICENSE.txt"
+              >Apache License 2.0</a
+            >
+          </li>
+          <li>
+            <strong
+              ><a href="https://github.com/facebook/react" target="_blank"
+                >React</a
+              ></strong
+            >
+            -
+            <a href="https://github.com/facebook/react/blob/main/LICENSE"
+              >Apache License 2.0</a
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
 
-    <div class="license">
-      <h2>TODO: License</h2>
+    <div class="gray-box">
+      <h2>History</h2>
       <p>
-        This software is licensed under the GNU General Public License (GPL).
-        For detailed information, visit the
-        <a href="https://www.gnu.org/licenses/gpl-3.0.html">GPL v3 License</a>
-        page.
+        This project builds off the concepts and ideas developed in the original
+        <a href="https://github.com/brejnev/SDT-python" target="_blank"
+          >Sequence Demarcation Tool</a
+        >
+        developed by Brejnev Muhire, Darren Martin, and Arvind Varsani.
       </p>
     </div>
+
+    <h2>License</h2>
+    <p>
+      This software is licensed under the GNU General Public License (GPL). For
+      detailed information, visit the
+      <a href="https://www.gnu.org/licenses/gpl-3.0.html">GPL v3 License</a>
+      page.
+    </p>
+
+    <h3>Special Thanks</h3>
+    <p>To the Varsani Lab and everyone that helped with testing.</p>
 
     <div class="footer">
       <p>
