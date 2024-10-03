@@ -40,7 +40,7 @@ export type AppState = {
     cluster_method: (typeof clusterMethods)[number];
     compute_cores: number;
     error?: Error | null;
-    errorInfo?: ErrorInfo;
+    errorInfo?: ErrorInfo | PromiseRejectionEvent["reason"] | null;
     saveFormat: SaveableImageFormat;
     showExportModal: boolean;
   };

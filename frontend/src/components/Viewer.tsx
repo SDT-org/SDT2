@@ -110,7 +110,9 @@ export const Viewer = ({
     ])
       .catch(() => {
         setLoading(false);
-        alert("An error occured while processing this file.");
+        alert(
+          "An error occured while processing this file. Please ensure it is a valid, SDT-compatible file.",
+        );
         window.pywebview.api.reset_state();
       })
       .finally(() => {

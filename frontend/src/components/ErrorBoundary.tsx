@@ -1,5 +1,5 @@
 import React, { ErrorInfo } from "react";
-import { AppState, SetAppState, useSetAppError } from "../appState";
+import { AppState, SetAppState, initialAppState } from "../appState";
 import { Dialog, Modal } from "react-aria-components";
 
 interface Props {
@@ -49,26 +49,49 @@ export class ErrorBoundary extends React.Component<Props> {
         ...previous,
         client: {
           ...previous.client,
-          error: Error(e.reason),
+          error: new Error(e.reason),
+          errorInfo: e.reason,
         },
       };
     });
   }
 
-  getMailTo(error?: Error) {
-    let mailTo = `mailto:TODO@TODO?subject=SDT2%20crash`;
+  getMailTo(error?: Error, details = "") {
+    let mailTo = `mailto:SDT_admin@proton.me?subject=SDT2%20Issue`;
 
     if (error) {
-      mailTo = `${mailTo}:%20${error.message}&body=${encodeURI(
-        error.stack || "",
-      )}`;
+      mailTo = `${mailTo}:%20${error.message}&body=${encodeURI(details)}`;
     }
 
     return mailTo;
   }
 
+  getIssueUrl(error?: Error, details = "") {
+    const url = new URL("https://github.com/SDT-org/SDT2/issues/new");
+
+    if (!error) {
+      return url.toString();
+    }
+
+    url.searchParams.set("labels", "bug");
+    url.searchParams.set("title", error.message);
+    url.searchParams.set("body", details);
+
+    return url.toString();
+  }
+
   override render() {
     const error = this.props.appState.client.error;
+    const errorInfo = this.props.appState.client.errorInfo;
+
+    const errorDetails = [
+      errorInfo?.stack,
+      error?.stack,
+      errorInfo?.componentStack,
+    ]
+      .filter(Boolean)
+      .join("\n\n---\n\n");
+
     const resetAppError = () =>
       this.props.setAppState((previous) => {
         return {
@@ -76,9 +99,12 @@ export class ErrorBoundary extends React.Component<Props> {
           client: {
             ...previous.client,
             error: null,
+            errorInfo: null,
           },
         };
       });
+
+    const resetApp = () => this.props.setAppState(initialAppState);
 
     if (error) {
       return (
@@ -88,24 +114,27 @@ export class ErrorBoundary extends React.Component<Props> {
               <h1>Something went wrong.</h1>
               <p>
                 Please{" "}
-                <a href={this.getMailTo(error)} target="_blank">
+                <a href={this.getMailTo(error, errorDetails)} target="_blank">
                   send us an email
                 </a>{" "}
-                with the error details.
+                with the error details, or{" "}
+                <a href={this.getIssueUrl(error, errorDetails)} target="_blank">
+                  open an issue
+                </a>
+                .
               </p>
               <details open={true}>
                 <summary>{error?.message.toString()}</summary>
-                <pre>
-                  {this.props.appState.client.errorInfo?.componentStack}
-                </pre>
+                <pre>{errorDetails}</pre>
               </details>
               <details>
                 <summary>App State</summary>
                 <pre>{JSON.stringify(this.props.appState, null, 2)}</pre>
               </details>
-              <div className="footer">
-                <button onClick={resetAppError}>Close</button>
-              </div>
+            </div>
+            <div className="actions space-between">
+              <button onClick={resetApp}>Reset</button>
+              <button onClick={resetAppError}>Continue</button>
             </div>
           </Dialog>
         </Modal>
