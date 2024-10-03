@@ -133,6 +133,18 @@ export const Heatmap = ({
                       Reverse
                     </label>
                   </div>
+                  <div className="subfield">
+                    <div></div>
+                    <NumberInput
+                      label="Cutoff 1"
+                      field="cutoff_1"
+                      value={settings.cutoff_1}
+                      updateValue={updateSettings}
+                      min={0}
+                      max={100}
+                      step={1}
+                    />
+                  </div>
                 </div>
                 <div className="field">
                   <NumberInput
@@ -144,6 +156,17 @@ export const Heatmap = ({
                     max={20}
                     step={1}
                   />
+                  <div className="subfield">
+                    <NumberInput
+                      label="Cutoff 2"
+                      field="cuitoff_2"
+                      value={settings.cutoff_2}
+                      updateValue={updateSettings}
+                      min={0}
+                      max={100}
+                      step={1}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -339,10 +362,10 @@ export const Heatmap = ({
                 />
               </div>
             </div>
-          </div>
-        </div>
+          </div> {/* Close .form */}
+        </div> {/* Close .app-sidebar-toolbar */}
         <div className="app-sidebar-footer">{footer}</div>
-      </div>
+      </div> {/* Close .app-sidebar */}
       <div className="app-main">
         {data ? (
           <Plot
@@ -354,9 +377,8 @@ export const Heatmap = ({
                 reversescale: settings.reverse,
                 type: "heatmap",
                 hovertemplate:
-                  "Seq 1: %{y}<br>Seq 2: %{x}<br>Percent Pairwise Identity: %{z}<extra></extra>", //remove trace:0 bubble and only display x,y, and
-                // @ts-ignore
-                hoverongaps: false, // disable  hover values for NaNs
+                  "Seq 1: %{y}<br>Seq 2: %{x}<br>Percent Pairwise Identity: %{z}<extra></extra>",
+                hoverongaps: false,
                 transpose: false,
                 zsmooth: false,
                 autosize: true,
@@ -364,7 +386,6 @@ export const Heatmap = ({
                 showscale: settings.showscale,
                 zmin: settings.vmin,
                 zmax: settings.vmax,
-                // Gap between columns of cells. Actual 0 values cause blurriness on macOS
                 xgap: settings.cellspace || 0.001,
                 ygap: settings.cellspace || 0.001,
                 colorbar: {
@@ -372,13 +393,10 @@ export const Heatmap = ({
                   thickness: parseInt(settings.cbar_aspect, 10),
                   xpad: parseInt(settings.cbar_pad, 10),
                 },
-                //add colorbar switch if w want with showscale: false
               },
               {
                 type: "scattergl",
                 mode: "text",
-                // @ts-ignore
-                scrollZoom: true,
                 textfont: {
                   family: "Arial",
                   size: settings.annotation_font_size,
@@ -426,7 +444,6 @@ export const Heatmap = ({
                 tickvals: [...Array(tickText.length).keys()],
                 ticktext: tickText,
                 showticklabels: settings.axis_labels,
-                // @ts-ignore
                 ticks: settings.axis_labels ? false : "",
                 autorange: true,
                 showline: false,
@@ -446,13 +463,11 @@ export const Heatmap = ({
                 tickvals: [...Array(tickText.length).keys()],
                 ticktext: tickText,
                 showticklabels: settings.axis_labels,
-                // @ts-ignore
                 ticks: settings.axis_labels ? false : "",
                 autorange: "reversed",
                 showline: false,
                 zeroline: false,
                 showgrid: false,
-                // add switch for forced square cells scaleanchor: 'x',
               },
             }}
             style={{ width: "100%", height: "100%" }}

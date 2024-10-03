@@ -30,6 +30,8 @@ export interface HeatmapSettings {
   axlabel_xfontsize: number;
   axlabel_yrotation: number;
   axlabel_yfontsize: number;
+  cutoff_1: number;
+  cutoff_2: number;
 }
 export type HeatmapData = string[][];
 
