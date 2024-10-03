@@ -3,10 +3,14 @@ import Plotly from "plotly.js-dist-min";
 import createPlotlyComponent from "react-plotly.js/factory";
 import { Colorscale, HeatmapData, HeatmapSettings } from "../plotTypes";
 import { NumberInput } from "./NumberInput";
-import { colorScales } from "../colorScales";
+import { colorScales as defaultColorScales } from "../colorScales";
 import tinycolor from "tinycolor2";
 
 const Plot = createPlotlyComponent(Plotly);
+
+const colorScales = {
+  ...defaultColorScales,
+};
 
 export const Heatmap = ({
   settings,
@@ -21,6 +25,8 @@ export const Heatmap = ({
   tickText: string[];
   footer?: React.ReactNode;
 }) => {
+  console.log(settings);
+  console.log(settings.colorscale);
   const annotations = React.useMemo(() => {
     const x: number[] = [];
     const y: number[] = [];
@@ -133,18 +139,6 @@ export const Heatmap = ({
                       Reverse
                     </label>
                   </div>
-                  <div className="subfield">
-                    <div></div>
-                    <NumberInput
-                      label="Cutoff 1"
-                      field="cutoff_1"
-                      value={settings.cutoff_1}
-                      updateValue={updateSettings}
-                      min={0}
-                      max={100}
-                      step={1}
-                    />
-                  </div>
                 </div>
                 <div className="field">
                   <NumberInput
@@ -156,19 +150,37 @@ export const Heatmap = ({
                     max={20}
                     step={1}
                   />
-                  <div className="subfield">
-                    <NumberInput
-                      label="Cutoff 2"
-                      field="cuitoff_2"
-                      value={settings.cutoff_2}
-                      updateValue={updateSettings}
-                      min={0}
-                      max={100}
-                      step={1}
-                    />
-                  </div>
                 </div>
               </div>
+              {settings.colorscale === "Discrete" ? (
+                <>
+                  <div className="col-2">
+                    <div className="field">
+                      <div></div>
+                      <NumberInput
+                        label="Cutoff 1"
+                        field="cutoff_1"
+                        value={settings.cutoff_1}
+                        updateValue={updateSettings}
+                        min={0}
+                        max={100}
+                        step={1}
+                      />
+                    </div>
+                    <div className="field">
+                      <NumberInput
+                        label="Cutoff 2"
+                        field="cuitoff_2"
+                        value={settings.cutoff_2}
+                        updateValue={updateSettings}
+                        min={0}
+                        max={100}
+                        step={1}
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : null}
             </div>
             <div className="group">
               <div className="field">
@@ -362,10 +374,10 @@ export const Heatmap = ({
                 />
               </div>
             </div>
-          </div> {/* Close .form */}
-        </div> {/* Close .app-sidebar-toolbar */}
+          </div>
+        </div>
         <div className="app-sidebar-footer">{footer}</div>
-      </div> {/* Close .app-sidebar */}
+      </div>
       <div className="app-main">
         {data ? (
           <Plot
@@ -378,6 +390,7 @@ export const Heatmap = ({
                 type: "heatmap",
                 hovertemplate:
                   "Seq 1: %{y}<br>Seq 2: %{x}<br>Percent Pairwise Identity: %{z}<extra></extra>",
+                // @ts-ignore
                 hoverongaps: false,
                 transpose: false,
                 zsmooth: false,
@@ -386,6 +399,7 @@ export const Heatmap = ({
                 showscale: settings.showscale,
                 zmin: settings.vmin,
                 zmax: settings.vmax,
+                // Gap between columns of cells. Actual 0 values cause blurriness on macOS
                 xgap: settings.cellspace || 0.001,
                 ygap: settings.cellspace || 0.001,
                 colorbar: {
@@ -397,6 +411,8 @@ export const Heatmap = ({
               {
                 type: "scattergl",
                 mode: "text",
+                // @ts-ignore
+                scrollZoom: true,
                 textfont: {
                   family: "Arial",
                   size: settings.annotation_font_size,
@@ -444,6 +460,7 @@ export const Heatmap = ({
                 tickvals: [...Array(tickText.length).keys()],
                 ticktext: tickText,
                 showticklabels: settings.axis_labels,
+                // @ts-ignore
                 ticks: settings.axis_labels ? false : "",
                 autorange: true,
                 showline: false,
@@ -463,6 +480,7 @@ export const Heatmap = ({
                 tickvals: [...Array(tickText.length).keys()],
                 ticktext: tickText,
                 showticklabels: settings.axis_labels,
+                // @ts-ignore
                 ticks: settings.axis_labels ? false : "",
                 autorange: "reversed",
                 showline: false,

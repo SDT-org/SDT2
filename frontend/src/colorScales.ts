@@ -16,10 +16,13 @@ type scaleNames =
   | "Earth"
   | "Electric"
   | "Viridis"
-  | "Cividis";
+  | "Cividis"
+  | "Discrete";
 
 // https://github.com/plotly/plotly.js/blob/482802bd31cbf2638040357fcc4ff3bafa3292f8/src/components/colorscale/scales.js
-export const colorScales: { [K in scaleNames]: [[number, string], ...[number, string][]] } = {
+export const colorScales: {
+  [K in scaleNames]: [[number, string], ...[number, string][]];
+} = {
   Greys: [
     [0, "rgb(0,0,0)"],
     [1, "rgb(255,255,255)"],
@@ -210,5 +213,10 @@ export const colorScales: { [K in scaleNames]: [[number, string], ...[number, st
     [0.882353, "rgb(225,204,92)"],
     [0.941176, "rgb(243,219,79)"],
     [1.0, "rgb(255,233,69)"],
+  ],
+
+  Discrete: [
+    [0, "rgb(0,0,0)"],
+    [1, "rgb(255,255,255)"],
   ],
 };

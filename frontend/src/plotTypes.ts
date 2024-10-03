@@ -21,7 +21,7 @@ export interface HeatmapSettings {
   annotation_rounding: 0 | 1 | 2;
   annotation_alpha: string;
   color: string;
-  showscale:boolean,
+  showscale: boolean;
   cbar_shrink: number;
   cbar_pad: string;
   cbar_aspect: string;
