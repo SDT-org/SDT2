@@ -1,6 +1,7 @@
 import multiprocessing
 import os
 import sys
+import platform
 from Bio import SeqIO
 import psutil
 import webview
@@ -114,16 +115,16 @@ def get_compute_stats(filename):
     for record in SeqIO.parse(filename, "fasta"):
         max_len = max(max_len, len(record.seq))
 
-    required_memory = max_len * max_len
-    total_memory = psutil.virtual_memory().total
+    state = get_state()
 
-    total_cores = multiprocessing.cpu_count()
+    required_memory = max_len * max_len
+    total_memory = state.platform["memory"]
+    total_cores = state.platform["cores"]
+
     return {
-        "total_cores": total_cores,
         "recommended_cores": min(
             max(total_cores - 1, 1), total_memory // required_memory
         ),
-        "total_memory": total_memory,
         "required_memory": required_memory,
         "available_memory": psutil.virtual_memory().available,
     }
@@ -530,6 +531,11 @@ if __name__ == "__main__":
     get_state, set_state, reset_state = create_app_state(
         debug=os.getenv("DEBUG", "false").lower() == "true",
         tempdir_path=temp_dir.name,
+        platform=dict(
+            platform=platform.platform(),
+            cores=multiprocessing.cpu_count(),
+            memory=psutil.virtual_memory().total,
+        ),
         on_update=lambda _: update_client_state(window),
     )
 

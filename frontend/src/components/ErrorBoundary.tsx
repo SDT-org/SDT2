@@ -1,6 +1,7 @@
 import React, { ErrorInfo } from "react";
 import { AppState, SetAppState, initialAppState } from "../appState";
 import { Dialog, Modal } from "react-aria-components";
+import { formatBytes } from "../helpers";
 
 interface Props {
   appState: AppState;
@@ -83,11 +84,23 @@ export class ErrorBoundary extends React.Component<Props> {
   override render() {
     const error = this.props.appState.client.error;
     const errorInfo = this.props.appState.client.errorInfo;
+    const platform = this.props.appState.platform;
+    const stats = this.props.appState.compute_stats;
+    const objectToHuman = (obj?: Object) =>
+      Object.entries(obj ?? {})
+        .map((v) => `${v[0].toUpperCase()}: ${v[1]}`)
+        .join("\n");
 
     const errorDetails = [
       errorInfo?.stack,
       error?.stack,
       errorInfo?.componentStack,
+      objectToHuman({ ...platform, memory: formatBytes(platform.memory) }),
+      objectToHuman({
+        ...stats,
+        available_memory: formatBytes(stats?.available_memory || 0),
+        required_memory: formatBytes(stats?.required_memory || 0),
+      }),
     ]
       .filter(Boolean)
       .join("\n\n---\n\n");
