@@ -39,7 +39,7 @@ export type AppState = {
     performanceProfile: PerformanceProfile;
     cluster_method: (typeof clusterMethods)[number];
     compute_cores: number;
-    error?: Error;
+    error?: Error | null;
     errorInfo?: ErrorInfo;
     saveFormat: SaveableImageFormat;
     showExportModal: boolean;

@@ -477,10 +477,13 @@ select, select option {
   }
 }
 
-.error-screen {
-  height: 100vh;
+.error-modal {
   padding: 2rem;
   justify-content: flex-start;
+  overflow: auto;
+  width: 80vw;
+  height: 80vh;
+  position: relative;
 
   h1 {
     color: red;
@@ -515,6 +518,12 @@ select, select option {
       padding: 1rem;
       margin: 1rem 0 0;
     }
+  }
+
+  .footer {
+    position: absolute;
+    bottom: 0;
+    padding: 1rem;
   }
 }
 

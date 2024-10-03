@@ -1,5 +1,6 @@
 import React, { ErrorInfo } from "react";
-import { AppState, SetAppState } from "../appState";
+import { AppState, SetAppState, useSetAppError } from "../appState";
+import { Dialog, Modal } from "react-aria-components";
 
 interface Props {
   appState: AppState;
@@ -10,6 +11,18 @@ interface Props {
 export class ErrorBoundary extends React.Component<Props> {
   constructor(props: Props) {
     super(props);
+    this.handlePromiseRejection = this.handlePromiseRejection.bind(this);
+  }
+
+  override componentDidMount(): void {
+    window.addEventListener("unhandledrejection", this.handlePromiseRejection);
+  }
+
+  override componentWillUnmount(): void {
+    window.removeEventListener(
+      "unhandledrejection",
+      this.handlePromiseRejection,
+    );
   }
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
@@ -30,6 +43,18 @@ export class ErrorBoundary extends React.Component<Props> {
     };
   }
 
+  handlePromiseRejection(e: PromiseRejectionEvent) {
+    this.props.setAppState((previous) => {
+      return {
+        ...previous,
+        client: {
+          ...previous.client,
+          error: Error(e.reason),
+        },
+      };
+    });
+  }
+
   getMailTo(error?: Error) {
     let mailTo = `mailto:TODO@TODO?subject=SDT2%20crash`;
 
@@ -44,27 +69,46 @@ export class ErrorBoundary extends React.Component<Props> {
 
   override render() {
     const error = this.props.appState.client.error;
+    const resetAppError = () =>
+      this.props.setAppState((previous) => {
+        return {
+          ...previous,
+          client: {
+            ...previous.client,
+            error: null,
+          },
+        };
+      });
 
     if (error) {
       return (
-        <div className="app-main centered error-screen">
-          <h1>Something went wrong.</h1>
-          <p>
-            Please{" "}
-            <a href={this.getMailTo(error)} target="_blank">
-              send us an email
-            </a>{" "}
-            with the error details.
-          </p>
-          <details open={true}>
-            <summary>{error?.message.toString()}</summary>
-            <pre>{this.props.appState.client.errorInfo?.componentStack}</pre>
-          </details>
-          <details>
-            <summary>App State</summary>
-            <pre>{JSON.stringify(this.props.appState, null, 2)}</pre>
-          </details>
-        </div>
+        <Modal isDismissable isOpen={true} onOpenChange={resetAppError}>
+          <Dialog>
+            <div className="error-modal">
+              <h1>Something went wrong.</h1>
+              <p>
+                Please{" "}
+                <a href={this.getMailTo(error)} target="_blank">
+                  send us an email
+                </a>{" "}
+                with the error details.
+              </p>
+              <details open={true}>
+                <summary>{error?.message.toString()}</summary>
+                <pre>
+                  {this.props.appState.client.errorInfo?.componentStack}
+                </pre>
+              </details>
+              <details>
+                <summary>App State</summary>
+                <pre>{JSON.stringify(this.props.appState, null, 2)}</pre>
+              </details>
+              <div className="footer">
+                <button onClick={resetAppError}>Close</button>
+              </div>
+            </div>
+          </Dialog>
+        </Modal>
       );
     }
 
