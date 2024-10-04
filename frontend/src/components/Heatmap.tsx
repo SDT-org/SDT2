@@ -8,10 +8,6 @@ import tinycolor from "tinycolor2";
 
 const Plot = createPlotlyComponent(Plotly);
 
-const colorScales = {
-  ...defaultColorScales,
-};
-
 export const Heatmap = ({
   settings,
   updateSettings,
@@ -25,8 +21,20 @@ export const Heatmap = ({
   tickText: string[];
   footer?: React.ReactNode;
 }) => {
-  console.log(settings);
-  console.log(settings.colorscale);
+  const colorScales = {
+    ...defaultColorScales,
+    Discrete: [
+      [0, "rgb(0, 0, 255)"],
+      [settings.cutoff_2 / 100, "rgb(0, 255, 0)"],
+      [settings.cutoff_1 / 100, "rgb(0, 255, 0)"],
+      [settings.cutoff_1 / 100 + 0.01, "rgb(200, 0, 0)"],
+      [1, "rgb(255, 0, 0)"],
+    ],
+  };
+
+  console.log(data);
+  console.log(colorScales["Discrete"]);
+
   const annotations = React.useMemo(() => {
     const x: number[] = [];
     const y: number[] = [];
@@ -162,7 +170,7 @@ export const Heatmap = ({
                         field="cutoff_1"
                         value={settings.cutoff_1}
                         updateValue={updateSettings}
-                        min={0}
+                        min={settings.cutoff_2 + 1}
                         max={100}
                         step={1}
                       />
@@ -170,11 +178,11 @@ export const Heatmap = ({
                     <div className="field">
                       <NumberInput
                         label="Cutoff 2"
-                        field="cuitoff_2"
+                        field="cutoff_2"
                         value={settings.cutoff_2}
                         updateValue={updateSettings}
                         min={0}
-                        max={100}
+                        max={settings.cutoff_1 - 1}
                         step={1}
                       />
                     </div>
@@ -360,7 +368,7 @@ export const Heatmap = ({
                   value={settings.vmin}
                   updateValue={updateSettings}
                   min={1}
-                  max={100} // need to add vmax min as upper lim
+                  max={settings.vmax - 1}
                   step={1}
                 />
                 <NumberInput
@@ -368,7 +376,7 @@ export const Heatmap = ({
                   field="vmax"
                   value={settings.vmax}
                   updateValue={updateSettings}
-                  min={1}
+                  min={settings.vmin + 1}
                   max={100}
                   step={1}
                 />
@@ -385,7 +393,7 @@ export const Heatmap = ({
             data={[
               {
                 z: data,
-                colorscale: settings.colorscale,
+                colorscale: colorScales[settings.colorscale],
                 reversescale: settings.reverse,
                 type: "heatmap",
                 hovertemplate:
