@@ -21,20 +21,22 @@ export const Heatmap = ({
   tickText: string[];
   footer?: React.ReactNode;
 }) => {
+  const discreteColorScale: Array<[number, string]> = [
+    [0, "#CDF0FF"],
+    [Math.max(0, settings.cutoff_2 / 100 - 0.01), "#20B9FF"],
+    [settings.cutoff_2 / 100, "#C3E8D3"],
+    [settings.cutoff_1 / 100, "#009942"],
+    [Math.min(1, settings.cutoff_1 / 100 + 0.01), "#FFDCDD"],
+  ];
+
+  if (settings.cutoff_1 < 100) {
+    discreteColorScale.push([1, "#FF6167"]);
+  }
+
   const colorScales = {
     ...defaultColorScales,
-    Discrete: [
-      [0, "rgb(0, 0, 255)"],
-      [settings.cutoff_2 / 100 - 0.01, "rgb(0, 0, 255)"],
-      [settings.cutoff_2 / 100, "rgb(0, 255, 0)"],
-      [settings.cutoff_1 / 100, "rgb(0, 255, 0)"],
-      [settings.cutoff_1 / 100 + 0.01, "rgb(200, 0, 0)"],
-      [1, "rgb(255, 0, 0)"],
-    ],
+    Discrete: discreteColorScale,
   };
-
-  console.log(data);
-  console.log(colorScales["Discrete"]);
 
   const annotations = React.useMemo(() => {
     const x: number[] = [];
@@ -371,6 +373,7 @@ export const Heatmap = ({
                   min={1}
                   max={settings.vmax - 1}
                   step={1}
+                  isDisabled={settings.colorscale === "Discrete"}
                 />
                 <NumberInput
                   label="Max"
@@ -380,6 +383,7 @@ export const Heatmap = ({
                   min={settings.vmin + 1}
                   max={100}
                   step={1}
+                  isDisabled={settings.colorscale === "Discrete"}
                 />
               </div>
             </div>

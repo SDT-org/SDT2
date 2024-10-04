@@ -11,7 +11,7 @@ export enum LineColor {
 }
 
 export interface HeatmapSettings {
-  colorscale: Colorscale;
+  colorscale: Colorscale | "Discrete";
   reverse: boolean;
   vmax: number;
   vmin: number;
