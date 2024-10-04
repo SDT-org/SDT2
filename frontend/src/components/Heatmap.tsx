@@ -25,6 +25,7 @@ export const Heatmap = ({
     ...defaultColorScales,
     Discrete: [
       [0, "rgb(0, 0, 255)"],
+      [settings.cutoff_2 / 100 - 0.01, "rgb(0, 0, 255)"],
       [settings.cutoff_2 / 100, "rgb(0, 255, 0)"],
       [settings.cutoff_1 / 100, "rgb(0, 255, 0)"],
       [settings.cutoff_1 / 100 + 0.01, "rgb(200, 0, 0)"],
