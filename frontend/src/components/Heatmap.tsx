@@ -3,7 +3,7 @@ import Plotly from "plotly.js-dist-min";
 import createPlotlyComponent from "react-plotly.js/factory";
 import { Colorscale, HeatmapData, HeatmapSettings } from "../plotTypes";
 import { NumberInput } from "./NumberInput";
-import { colorScales } from "../colorScales";
+import { colorScales as defaultColorScales } from "../colorScales";
 import tinycolor from "tinycolor2";
 
 const Plot = createPlotlyComponent(Plotly);
@@ -21,6 +21,23 @@ export const Heatmap = ({
   tickText: string[];
   footer?: React.ReactNode;
 }) => {
+  const discreteColorScale: Array<[number, string]> = [
+    [0, "#CDF0FF"],
+    [Math.max(0, settings.cutoff_2 / 100 - 0.01), "#20B9FF"],
+    [settings.cutoff_2 / 100, "#C3E8D3"],
+    [settings.cutoff_1 / 100, "#009942"],
+    [Math.min(1, settings.cutoff_1 / 100 + 0.01), "#FFDCDD"],
+  ];
+
+  if (settings.cutoff_1 < 100) {
+    discreteColorScale.push([1, "#FF6167"]);
+  }
+
+  const colorScales = {
+    ...defaultColorScales,
+    Discrete: discreteColorScale,
+  };
+
   const annotations = React.useMemo(() => {
     const x: number[] = [];
     const y: number[] = [];
@@ -146,6 +163,35 @@ export const Heatmap = ({
                   />
                 </div>
               </div>
+              {settings.colorscale === "Discrete" ? (
+                <>
+                  <div className="col-2">
+                    <div className="field">
+                      <div></div>
+                      <NumberInput
+                        label="Cutoff 1"
+                        field="cutoff_1"
+                        value={settings.cutoff_1}
+                        updateValue={updateSettings}
+                        min={settings.cutoff_2 + 1}
+                        max={100}
+                        step={1}
+                      />
+                    </div>
+                    <div className="field">
+                      <NumberInput
+                        label="Cutoff 2"
+                        field="cutoff_2"
+                        value={settings.cutoff_2}
+                        updateValue={updateSettings}
+                        min={0}
+                        max={settings.cutoff_1 - 1}
+                        step={1}
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : null}
             </div>
             <div className="group">
               <div className="field">
@@ -325,17 +371,19 @@ export const Heatmap = ({
                   value={settings.vmin}
                   updateValue={updateSettings}
                   min={1}
-                  max={100} // need to add vmax min as upper lim
+                  max={settings.vmax - 1}
                   step={1}
+                  isDisabled={settings.colorscale === "Discrete"}
                 />
                 <NumberInput
                   label="Max"
                   field="vmax"
                   value={settings.vmax}
                   updateValue={updateSettings}
-                  min={1}
+                  min={settings.vmin + 1}
                   max={100}
                   step={1}
+                  isDisabled={settings.colorscale === "Discrete"}
                 />
               </div>
             </div>
@@ -350,20 +398,20 @@ export const Heatmap = ({
             data={[
               {
                 z: data,
-                colorscale: settings.colorscale,
+                colorscale: colorScales[settings.colorscale],
                 reversescale: settings.reverse,
                 type: "heatmap",
                 hovertemplate:
-                  "Seq 1: %{y}<br>Seq 2: %{x}<br>Percent Pairwise Identity: %{z}<extra></extra>", //remove trace:0 bubble and only display x,y, and
+                  "Seq 1: %{y}<br>Seq 2: %{x}<br>Percent Pairwise Identity: %{z}<extra></extra>",
                 // @ts-ignore
-                hoverongaps: false, // disable  hover values for NaNs
+                hoverongaps: false,
                 transpose: false,
                 zsmooth: false,
                 autosize: true,
                 set_aspect: 3,
                 showscale: settings.showscale,
-                zmin: settings.vmin,
-                zmax: settings.vmax,
+                zmin: settings.colorscale === "Discrete" ? 0 : settings.vmin,
+                zmax: settings.colorscale === "Discrete" ? 100 : settings.vmax,
                 // Gap between columns of cells. Actual 0 values cause blurriness on macOS
                 xgap: settings.cellspace || 0.001,
                 ygap: settings.cellspace || 0.001,
@@ -372,7 +420,6 @@ export const Heatmap = ({
                   thickness: parseInt(settings.cbar_aspect, 10),
                   xpad: parseInt(settings.cbar_pad, 10),
                 },
-                //add colorbar switch if w want with showscale: false
               },
               {
                 type: "scattergl",
@@ -452,7 +499,6 @@ export const Heatmap = ({
                 showline: false,
                 zeroline: false,
                 showgrid: false,
-                // add switch for forced square cells scaleanchor: 'x',
               },
             }}
             style={{ width: "100%", height: "100%" }}

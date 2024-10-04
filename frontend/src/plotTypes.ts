@@ -11,7 +11,7 @@ export enum LineColor {
 }
 
 export interface HeatmapSettings {
-  colorscale: Colorscale;
+  colorscale: Colorscale | "Discrete";
   reverse: boolean;
   vmax: number;
   vmin: number;
@@ -21,7 +21,7 @@ export interface HeatmapSettings {
   annotation_rounding: 0 | 1 | 2;
   annotation_alpha: string;
   color: string;
-  showscale:boolean,
+  showscale: boolean;
   cbar_shrink: number;
   cbar_pad: string;
   cbar_aspect: string;
@@ -30,6 +30,8 @@ export interface HeatmapSettings {
   axlabel_xfontsize: number;
   axlabel_yrotation: number;
   axlabel_yfontsize: number;
+  cutoff_1: number;
+  cutoff_2: number;
 }
 export type HeatmapData = string[][];
 

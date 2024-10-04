@@ -53,6 +53,8 @@ export const Viewer = ({
       axlabel_xfontsize: 12,
       axlabel_yrotation: 360,
       axlabel_yfontsize: 12,
+      cutoff_1: 95,
+      cutoff_2: 75,
     },
   );
 
