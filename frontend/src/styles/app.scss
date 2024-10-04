@@ -477,10 +477,13 @@ select, select option {
   }
 }
 
-.error-screen {
-  height: 100vh;
+.error-modal {
   padding: 2rem;
   justify-content: flex-start;
+  overflow: auto;
+  width: 80vw;
+  height: 80vh;
+  position: relative;
 
   h1 {
     color: red;
@@ -492,7 +495,7 @@ select, select option {
     border: 0.1rem solid var(--foreground-color);
     border-radius: 0.4rem;
     padding: 1rem;
-    margin-top: 4rem;
+    margin-top: 2rem;
     font-family: "Menlo", "Consolas", "monospace";
 
     & + details {

@@ -115,7 +115,7 @@ const RunnerSettings = ({
 
   React.useEffect(() => {
     if (appState.compute_stats) {
-      const stats = appState.compute_stats;
+      const stats = { ...appState.compute_stats, ...appState.platform };
 
       setAppState((previous) => ({
         ...previous,
@@ -128,8 +128,8 @@ const RunnerSettings = ({
 
       setComputeModes({
         recommended: stats.recommended_cores,
-        best: stats.total_cores,
-        balanced: Math.floor(Math.max(stats.total_cores / 2, 1)),
+        best: stats.cores,
+        balanced: Math.floor(Math.max(stats.cores / 2, 1)),
         low: 1,
       });
     }
@@ -228,7 +228,7 @@ const RunnerSettings = ({
                       <Slider
                         onChange={handleChangeComputeCores}
                         minValue={1}
-                        maxValue={appState.compute_stats.total_cores}
+                        maxValue={appState.platform.cores}
                         defaultValue={appState.client.compute_cores}
                       >
                         <Label>Cores</Label>
@@ -245,7 +245,7 @@ const RunnerSettings = ({
                           ? appState.client.compute_cores
                           : computeModes[appState.client.performanceProfile]}
                         <span>/</span>
-                        {appState.compute_stats?.total_cores}
+                        {appState.platform.cores}
                       </span>
                       cores
                     </>
@@ -257,7 +257,7 @@ const RunnerSettings = ({
             {appState.compute_stats &&
             appState.client.compute_cores *
               appState.compute_stats.required_memory >
-              appState.compute_stats.total_memory ? (
+              appState.platform.memory ? (
               <div className="compute-forecast">
                 <p>
                   <b>Warning:</b> Analysing these sequences may cause system
@@ -275,7 +275,7 @@ const RunnerSettings = ({
                     appState.compute_stats.required_memory *
                       appState.client.compute_cores,
                   )}{" "}
-                  / {formatBytes(appState.compute_stats.total_memory)}{" "}
+                  / {formatBytes(appState.platform.memory)}{" "}
                   <small>
                     ({formatBytes(appState.compute_stats.required_memory)} per
                     core)
