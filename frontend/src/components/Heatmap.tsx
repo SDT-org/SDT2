@@ -406,8 +406,8 @@ export const Heatmap = ({
                 autosize: true,
                 set_aspect: 3,
                 showscale: settings.showscale,
-                zmin: settings.vmin,
-                zmax: settings.vmax,
+                zmin: settings.colorscale === "Discrete" ? 0 : settings.vmin,
+                zmax: settings.colorscale === "Discrete" ? 100 : settings.vmax,
                 // Gap between columns of cells. Actual 0 values cause blurriness on macOS
                 xgap: settings.cellspace || 0.001,
                 ygap: settings.cellspace || 0.001,
