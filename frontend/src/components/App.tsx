@@ -82,6 +82,7 @@ export const App = () => {
         setShowDebugState(!showDebugState);
       }
     });
+    (window as any).APP_STATE = appState;
   }
 
   React.useEffect(() => {

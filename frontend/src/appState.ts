@@ -28,19 +28,22 @@ export type AppState = {
   estimated_time?: number;
   validation_error_id?: keyof typeof messages;
   compute_stats?: {
-    total_cores: number;
     recommended_cores: number;
-    total_memory: number;
     required_memory: number;
     available_memory: number;
+  };
+  platform: {
+    cores: number;
+    memory: number;
+    platform: string;
   };
   client: {
     dataView: "heatmap" | "plot";
     performanceProfile: PerformanceProfile;
     cluster_method: (typeof clusterMethods)[number];
     compute_cores: number;
-    error?: Error;
-    errorInfo?: ErrorInfo;
+    error?: Error | null;
+    errorInfo?: ErrorInfo | PromiseRejectionEvent["reason"] | null;
     saveFormat: SaveableImageFormat;
     showExportModal: boolean;
   };
@@ -66,6 +69,11 @@ export const initialAppState: AppState = {
     showExportModal: false,
     compute_cores: 1,
     performanceProfile: "recommended",
+  },
+  platform: {
+    cores: 1,
+    memory: 1,
+    platform: "unknown",
   },
 };
 
