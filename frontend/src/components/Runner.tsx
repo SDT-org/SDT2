@@ -111,28 +111,39 @@ const RunnerSettings = ({
         computeModes[appState.client.performanceProfile],
       );
     }
-  }, [appState.filename, appState.client.performanceProfile]);
+  }, [
+    computeModes,
+    appState.filename,
+    appState.compute_stats,
+    appState.client.performanceProfile,
+  ]);
 
   React.useEffect(() => {
-    if (appState.compute_stats) {
-      const stats = { ...appState.compute_stats, ...appState.platform };
-
-      setAppState((previous) => ({
-        ...previous,
-        client: {
-          ...previous.client,
-          compute_cores: stats.recommended_cores,
-          performanceProfile: "recommended",
-        },
-      }));
-
-      setComputeModes({
-        recommended: stats.recommended_cores,
-        best: stats.cores,
-        balanced: Math.floor(Math.max(stats.cores / 2, 1)),
-        low: 1,
-      });
+    if (!appState.compute_stats) {
+      return;
     }
+    const stats = appState.compute_stats;
+    const platform = appState.platform;
+
+    setAppState((previous) => ({
+      ...previous,
+      client: {
+        ...previous.client,
+        compute_cores: stats.recommended_cores,
+        performanceProfile: "recommended",
+      },
+    }));
+
+    setComputeModes({
+      recommended: stats.recommended_cores,
+      best: platform.cores,
+      balanced: Math.floor(Math.max(platform.cores / 2, 1)),
+      low: 1,
+    });
+
+    setImpactScore(
+      appState.client.compute_cores / appState.compute_stats.recommended_cores,
+    );
   }, [appState.compute_stats]);
 
   return (
@@ -248,16 +259,18 @@ const RunnerSettings = ({
                         {appState.platform.cores}
                       </span>
                       cores
-                    </>
+                    </div>
                   )}
                 </div>
               </div>
             </div>
 
             {appState.compute_stats &&
-            appState.client.compute_cores *
+            (appState.client.compute_cores *
               appState.compute_stats.required_memory >
-              appState.platform.memory ? (
+              appState.platform.memory ||
+              appState.client.compute_cores >
+                appState.compute_stats?.recommended_cores) ? (
               <div className="compute-forecast">
                 <p>
                   <b>Warning:</b> Analysing these sequences may cause system

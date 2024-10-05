@@ -34,7 +34,7 @@ declare global {
         close_app: () => Promise<void>;
       };
     };
-    syncAppState: () => Promise<void>;
+    syncAppState: (state: AppState) => void;
   }
 }
 

@@ -507,7 +507,8 @@ def get_entrypoint(filename="index.html"):
 
 
 def update_client_state(window: webview.Window):
-    window.evaluate_js("syncAppState()")
+    js_app_state = json.dumps(get_state()._asdict())
+    window.evaluate_js(f"syncAppState({js_app_state})")
 
 
 def on_closed():
