@@ -140,10 +140,6 @@ const RunnerSettings = ({
       balanced: Math.floor(Math.max(platform.cores / 2, 1)),
       low: 1,
     });
-
-    setImpactScore(
-      appState.client.compute_cores / appState.compute_stats.recommended_cores,
-    );
   }, [appState.compute_stats]);
 
   return (
