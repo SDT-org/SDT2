@@ -117,16 +117,19 @@ def get_compute_stats(filename):
 
     state = get_state()
 
-    required_memory = max_len * max_len
-    total_memory = state.platform["memory"]
+    required_memory = (
+        max_len * max_len
+    ) + 100000000  # Each process has a minimum of about 100MB
+    available_memory = psutil.virtual_memory().available
     total_cores = state.platform["cores"]
 
     return {
         "recommended_cores": min(
-            max(total_cores - 1, 1), total_memory // required_memory
+            max(round(total_cores * 0.75), 1),
+            available_memory // required_memory,
         ),
         "required_memory": required_memory,
-        "available_memory": psutil.virtual_memory().available,
+        "available_memory": available_memory,
     }
 
 
@@ -142,6 +145,19 @@ class Api:
 
     def app_config(self):
         return json.dumps({"appVersion": app_version})
+
+    def processes_info(self):
+        process = psutil.Process()
+        info = []
+
+        for child in process.children(recursive=True):
+            try:
+                cpu_percent = child.cpu_percent(interval=0.1)
+                memory = child.memory_info().rss
+                info.append((child.pid, cpu_percent, memory, child.nice()))
+            except:
+                pass
+        return json.dumps(info)
 
     def save_image(self, args: dict):
         state = get_state()
