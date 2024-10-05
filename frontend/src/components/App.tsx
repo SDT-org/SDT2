@@ -1,10 +1,5 @@
 import * as React from "react";
-import {
-  AppState,
-  AppStateContext,
-  initialAppState,
-  syncAppState,
-} from "../appState";
+import { AppState, AppStateContext, initialAppState } from "../appState";
 import { Runner } from "./Runner";
 import { Loader } from "./Loader";
 import { Viewer } from "./Viewer";
@@ -72,8 +67,11 @@ export const App = () => {
   };
 
   if (typeof window.syncAppState !== "function") {
-    window.syncAppState = () => syncAppState(setAppState);
-    window.syncAppState();
+    window.syncAppState = (state: AppState) => {
+      setAppState((previous) => {
+        return { ...previous, ...state };
+      });
+    };
   }
 
   if (appState.debug) {

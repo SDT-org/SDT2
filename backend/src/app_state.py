@@ -83,6 +83,10 @@ def create_app_state(
 
     def set_state(**kwargs):
         nonlocal state
+
+        if state.debug == True:
+            print(kwargs)
+
         state = state._replace(**kwargs)
         on_state_updated()
 
@@ -92,9 +96,6 @@ def create_app_state(
         on_state_updated()
 
     def on_state_updated():
-        if state.debug == True:
-            print("State updated:", state)
-
         if on_update:
             on_update(state)
 
