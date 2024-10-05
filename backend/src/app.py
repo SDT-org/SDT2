@@ -308,7 +308,7 @@ class Api:
                         counter.value += 1
                     pair_count = get_state().pair_count
                     if pair_count and pair_count > 0:
-                        progress = (counter.value / pair_count) * 100
+                        progress = round((counter.value / pair_count) * 100)
                         elapsed = perf_counter() - start_time
                         estimated_total = elapsed * (pair_count / counter.value)
                         estimated = round(estimated_total - elapsed)
