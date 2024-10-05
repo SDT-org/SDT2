@@ -259,7 +259,7 @@ const RunnerSettings = ({
                         {appState.platform.cores}
                       </span>
                       cores
-                    </div>
+                    </>
                   )}
                 </div>
               </div>
