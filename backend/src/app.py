@@ -189,9 +189,8 @@ class Api:
                 "SDT1 Matrix file (*.txt)",
             ),
         )
-        print(result)
         if not result:
-            raise Exception("filename result was None")
+            return False
         basename = os.path.basename(result[0])
         filetype, _ = mimetypes.guess_type(basename)
 
@@ -237,14 +236,13 @@ class Api:
 
     def select_alignment_output_path(self):
         result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG)
-        print(result)
         if result:
             if isinstance(result, str):
                 set_state(alignment_output_path=result)
             else:
                 set_state(alignment_output_path=result[0])
         else:
-            raise Exception("path result was None")
+            return False
 
     def select_export_path(self):
         result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG)
@@ -254,7 +252,7 @@ class Api:
             else:
                 set_state(export_path=result[0])
         else:
-            raise Exception("path result was None")
+            return False
 
     def get_state(self):
         return get_state()._asdict()
