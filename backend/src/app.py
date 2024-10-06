@@ -122,11 +122,15 @@ def get_compute_stats(filename):
     ) + 100000000  # Each process has a minimum of about 100MB
     available_memory = psutil.virtual_memory().available
     total_cores = state.platform["cores"]
+    min_cores = available_memory // required_memory
+
+    if required_memory > available_memory:
+        min_cores = 0
 
     return {
         "recommended_cores": min(
             max(round(total_cores * 0.75), 1),
-            available_memory // required_memory,
+            min_cores,
         ),
         "required_memory": required_memory,
         "available_memory": available_memory,
@@ -158,6 +162,13 @@ class Api:
             except:
                 pass
         return json.dumps(info)
+
+    def update_available_memory(self):
+        stats = get_state().compute_stats
+        if stats == None:
+            return
+        stats["available_memory"] = psutil.virtual_memory().available
+        set_state(compute_stats=stats)
 
     def save_image(self, args: dict):
         state = get_state()

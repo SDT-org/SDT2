@@ -5,13 +5,6 @@ export const clusterMethods = ["Neighbor-Joining", "UPGMA", "None"] as const;
 
 export type SaveableImageFormat = "png" | "jpeg" | "svg";
 
-export type PerformanceProfile =
-  | "recommended"
-  | "best"
-  | "balanced"
-  | "low"
-  | "custom";
-
 export type AppState = {
   view: "runner" | "loader" | "viewer";
   filename: string[];
@@ -39,7 +32,6 @@ export type AppState = {
   };
   client: {
     dataView: "heatmap" | "plot";
-    performanceProfile: PerformanceProfile;
     cluster_method: (typeof clusterMethods)[number];
     compute_cores: number;
     error?: Error | null;
@@ -68,7 +60,6 @@ export const initialAppState: AppState = {
     saveFormat: "svg",
     showExportModal: false,
     compute_cores: 1,
-    performanceProfile: "recommended",
   },
   platform: {
     cores: 1,
