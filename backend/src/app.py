@@ -163,12 +163,8 @@ class Api:
                 pass
         return json.dumps(info)
 
-    def update_available_memory(self):
-        stats = get_state().compute_stats
-        if stats == None:
-            return
-        stats["available_memory"] = psutil.virtual_memory().available
-        set_state(compute_stats=stats)
+    def get_available_memory(self):
+        return psutil.virtual_memory().available
 
     def save_image(self, args: dict):
         state = get_state()
