@@ -9,6 +9,11 @@
   --secondary-border-color: #eaeaea;
   --pressed-color: #ececec;
   --focus-ring-color: Highlight;
+  --fill-color: var(--foreground-color);
+  --impact-extreme-color: red;
+  --impact-high-color: orange;
+  --impact-medium-color: gold;
+  --impact-low-color: var(--foreground-color);
 }
 
 // @media (prefers-color-scheme: dark) {
@@ -25,7 +30,8 @@
 //   }
 // }
 
-html, body {
+html,
+body {
   background: var(--background-color);
 }
 
@@ -72,7 +78,8 @@ html, body {
   font-size: 0.875rem;
   box-shadow: 0 0 0.2rem var(--shadow-color);
 
-  &.runner, &.loader {
+  &.runner,
+  &.loader {
     grid-template-columns: min-content;
     box-shadow: none;
     border-color: transparent;
@@ -170,7 +177,8 @@ html, body {
     margin: 0 auto;
   }
 
-  &.runner, &.loader {
+  &.runner,
+  &.loader {
     padding: 1.6rem;
   }
 }
@@ -196,13 +204,15 @@ html, body {
   display: flex;
 }
 
-input, select {
+input,
+select {
   border: 0.1rem solid var(--border-color);
   border-radius: 0.2rem;
 }
 
-select, select option {
-  text-transform:capitalize;
+select,
+select option {
+  text-transform: capitalize;
 }
 
 .form-wrapper {
@@ -267,27 +277,15 @@ select, select option {
       font-size: 0.95rem;
 
       &.performance {
-        select {
-          width: 100%;
+        margin-left: 10px;
+
+        .react-aria-Meter {
+          margin-top: 10px;
         }
       }
 
-      .performance-details {
-        display: flex;
-        align-items: center;
-        padding-top: 0.4rem;
-
-        .cores {
-          display: flex;
-          font-size: 0.8rem;
-          font-weight: 600;
-          border-radius: 0.25rem;
-          padding: 0.1rem 0.3rem;
-          background: #333;
-          color: var(--background-color);
-          margin-right: 0.25rem;
-          gap: 0.2rem;
-        }
+      label.header {
+        margin-bottom: 0.4rem;
       }
     }
 
@@ -316,7 +314,8 @@ select, select option {
       margin-left: 0.4rem;
     }
 
-    input + label, label input + span {
+    input + label,
+    label input + span {
       text-transform: capitalize;
     }
 
@@ -533,7 +532,8 @@ select, select option {
   gap: 0.2rem;
   position: relative;
 
-  [slot="increment"], [slot="decrement"] {
+  [slot="increment"],
+  [slot="decrement"] {
     visibility: hidden;
     background: var(--background-color);
     border: 0;
@@ -552,13 +552,15 @@ select, select option {
     font-weight: bold;
     line-height: 0;
 
-    &:active, &:hover {
+    &:active,
+    &:hover {
       background: #ddd;
     }
   }
 
   &:hover {
-    [slot="increment"], [slot="decrement"] {
+    [slot="increment"],
+    [slot="decrement"] {
       visibility: visible;
     }
   }
@@ -581,8 +583,9 @@ select, select option {
 
 .react-aria-ProgressBar {
   display: grid;
-  grid-template-areas: "label value"
-                       "bar bar";
+  grid-template-areas:
+    "label value"
+    "bar bar";
   grid-template-columns: 1fr auto;
   gap: 0.4rem;
   width: 100%;
@@ -604,7 +607,7 @@ select, select option {
     background: black;
     height: 100%;
 
-    &[data-animation=true] {
+    &[data-animation="true"] {
       transition: width 0.25s;
     }
   }
@@ -616,7 +619,8 @@ select, select option {
     font-size: 0.9rem;
     font-weight: 600;
 
-    .estimate, .value {
+    .estimate,
+    .value {
       font-variant-numeric: tabular-nums;
     }
 
@@ -673,11 +677,12 @@ select, select option {
   border-radius: 4px;
   min-width: 16rem;
 
-  [role=menuitem] {
+  [role="menuitem"] {
     font-size: 0.9rem;
     display: grid;
-    grid-template-areas: "label kbd"
-                         "desc  kbd";
+    grid-template-areas:
+      "label kbd"
+      "desc  kbd";
     align-items: center;
     column-gap: 20px;
     cursor: default;
@@ -701,31 +706,66 @@ select, select option {
 
 .react-aria-Slider {
   display: grid;
-  grid-template-areas: "label output"
-                       "track track";
+  grid-template-areas:
+    "label output"
+    "track track";
   grid-template-columns: 1fr auto;
   max-width: 100%;
 
-  .react-aria-Label {
+  label.react-aria-Label {
     grid-area: label;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
   }
 
   .react-aria-SliderOutput {
     grid-area: output;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    text-align: center;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    svg {
+      width: 14px;
+      color: var(--impact-medium-color);
+    }
+
+    &[data-impact="extreme"] svg {
+      color: var(--impact-extreme-color);
+    }
+    &[data-impact="high"] svg {
+      color: var(--impact-high-color);
+    }
+    &[data-impact="medium"] svg {
+      color: var(--impact-medium-color);
+    }
   }
 
   .react-aria-SliderTrack {
     grid-area: track;
     position: relative;
+    margin: 10px 0;
 
-    /* track line */
-    &:before {
-      content: '';
+    .track,
+    .fill {
       display: block;
       position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 4px;
+      border-radius: 5px;
+    }
+
+    .track {
       background: var(--border-color);
+      width: 100%;
+    }
+
+    .fill {
+      background: var(--fill-color);
     }
   }
 
@@ -733,33 +773,65 @@ select, select option {
     width: 1.4rem;
     height: 1.4rem;
     border-radius: 50%;
-    background: var(--foreground-color);
-    border: 2px solid var(--border-color);
+    background: var(--fill-color);
+    border: 2px solid var(--background-color);
     forced-color-adjust: none;
 
     &[data-focus-visible] {
       outline: 2px solid var(--focus-ring-color);
     }
   }
+}
 
-  &[data-orientation=horizontal] {
-    flex-direction: column;
-    width: 100%;
+.react-aria-Meter {
+  display: grid;
+  grid-template-areas:
+    "label value"
+    "bar bar";
+  grid-template-columns: 1fr auto;
+  gap: 4px;
+  width: 100;
+  color: var(--foreground-color);
 
-    .react-aria-SliderTrack {
-      height: 30px;
-      width: 100%;
+  .react-aria-Label {
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
 
-      &:before {
-        height: 3px;
-        width: 100%;
-        top: 50%;
-        transform: translateY(-50%);
-      }
+  .value {
+    grid-area: value;
+    font-size: 0.8rem;
+  }
+
+  .bar {
+    grid-area: bar;
+    box-shadow: inset 0px 0px 0px 1px var(--border-color);
+    forced-color-adjust: none;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+
+  .fill {
+    background: var(--foreground-color);
+    height: 100%;
+    &[data-impact="extreme"] {
+      background: var(--impact-extreme-color);
     }
-
-    .react-aria-SliderThumb {
-      top: 50%;
+    &[data-impact="high"] {
+      background: var(--impact-high-color);
     }
+    &[data-impact="medium"] {
+      background: var(--impact-medium-color);
+    }
+    &[data-impact="low"] {
+      background: var(--impact-low-color);
+    }
+  }
+}
+
+@media (forced-colors: active) {
+  .react-aria-Meter {
+    --fill-color: Highlight;
   }
 }

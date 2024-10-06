@@ -26,6 +26,7 @@ declare global {
         }) => Promise<void>;
         run_process_data: (args: RunProcessDataArgs) => Promise<void>;
         processes_info: () => Promise<any>;
+        update_available_memory: () => Promise<void>;
         cancel_run: () => Promise<void>;
         get_heatmap_data: () => Promise<string>;
         get_line_histo_data: () => Promise<string>;
