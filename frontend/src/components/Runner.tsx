@@ -96,54 +96,50 @@ const RunnerSettings = ({
     };
   }, []);
 
-  // React.useEffect(() => {
-  //   handleChangeComputeCores(appState.compute_stats?.recommended_cores || 1);
-  // }, [appState.filename, appState.compute_stats]);
-
-  // React.useEffect(() => {
-  //   handleChangeComputeCores(appState.compute_stats?.recommended_cores || 1);
-  // }, [appState.filename]);
-
   React.useEffect(() => {
     if (!appState.compute_stats) {
       return;
     }
     const stats = appState.compute_stats;
-
-    setAppState((previous) => ({
-      ...previous,
-      client: {
-        ...previous.client,
-        compute_cores: stats.recommended_cores,
-      },
-    }));
+    handleChangeComputeCores(stats.recommended_cores);
   }, [appState.compute_stats?.recommended_cores]);
 
   React.useEffect(() => {
-    const id = setInterval(
-      () => window.pywebview.api.update_available_memory(),
-      3000,
-    );
+    const id = setInterval(() => {
+      if (!appState.compute_stats) {
+        return;
+      }
+
+      window.pywebview.api.get_available_memory().then((value) =>
+        setAppState((previous) => {
+          console.log(previous);
+          return {
+            ...previous,
+            compute_stats: {
+              ...(previous.compute_stats || {
+                recommended_cores: 1,
+                required_memory: 1,
+              }),
+              available_memory: value,
+            },
+          };
+        }),
+      );
+    }, 3000);
+
     return () => clearInterval(id);
-  }, []);
+  }, [appState.compute_stats]);
 
-  const estimatedMemory = React.useMemo(
-    () =>
-      (appState.compute_stats?.required_memory || 1) *
-      appState.client.compute_cores,
-    [appState.compute_stats?.required_memory, appState.client.compute_cores],
-  );
+  const estimatedMemory =
+    (appState.compute_stats?.required_memory || 1) *
+    (appState.client.compute_cores || 1);
 
-  const estimatedMemoryValue = React.useMemo(
-    () =>
-      appState.compute_stats
-        ? ((appState.compute_stats.required_memory *
-            appState.client.compute_cores) /
-            appState.compute_stats.available_memory) *
-          100
-        : 1,
-    [appState.compute_stats, appState.client.compute_cores],
-  );
+  const estimatedMemoryValue = appState.compute_stats
+    ? ((appState.compute_stats.required_memory *
+        (appState.client.compute_cores || 1)) /
+        appState.compute_stats.available_memory) *
+      100
+    : 1;
 
   const impactName = (percentage: number) =>
     percentage > 99
@@ -155,9 +151,7 @@ const RunnerSettings = ({
           : "low";
 
   const coresImpact =
-    appState.compute_stats &&
-    appState.client.compute_cores > appState.compute_stats.recommended_cores &&
-    appState.compute_stats.recommended_cores === 0
+    appState.compute_stats && appState.compute_stats.recommended_cores === 0
       ? "extreme"
       : impactName(
           (appState.client.compute_cores / appState.platform.cores) * 100,
@@ -279,7 +273,7 @@ const RunnerSettings = ({
                         <>
                           <Label>Memory</Label>
                           <span className="value">
-                            {formatBytes(estimatedMemory, 0)}
+                            {formatBytes(estimatedMemory, 1)}
                           </span>
                           <div className="bar">
                             <div
@@ -297,7 +291,7 @@ const RunnerSettings = ({
                     <small>
                       Available:{" "}
                       {formatBytes(
-                        appState.compute_stats?.available_memory || 0,
+                        appState.compute_stats?.available_memory || 1,
                         0,
                       )}{" "}
                       / {formatBytes(appState.platform.memory || 0, 0)}
@@ -308,9 +302,8 @@ const RunnerSettings = ({
             </div>
 
             {appState.compute_stats &&
-            (appState.client.compute_cores *
-              appState.compute_stats.required_memory >
-              appState.platform.memory ||
+            (appState.compute_stats?.recommended_cores === 0 ||
+              estimatedMemory > appState.platform.memory ||
               appState.client.compute_cores >
                 appState.compute_stats?.recommended_cores) ? (
               <div className="compute-forecast">
