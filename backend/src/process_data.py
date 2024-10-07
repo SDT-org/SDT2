@@ -69,7 +69,9 @@ def process_pair(id_sequence_pair, settings):
     id2 = ids[1]
     seq1 = id_sequence_pair[1][0]
     seq2 = id_sequence_pair[1][1]
-
+    if id1 == id2:
+        print("skipping"+id1+"-"+id1)
+        return id_sequence_pair[0],0 
     if settings["is_aa"]:
         aln = parasail.nw_trace(seq1, seq2, 10, 1, parasail.blosum62)
     else:
@@ -106,7 +108,7 @@ def get_alignment_scores(
     for ids in combos:
         id_sequence_pairs.append([ids, [seq_dict[ids[0]], seq_dict[ids[1]]]])
 
-    # calculate the total combinations witout self
+    # calculate the total combinations including self
     total_pairs = sum(1 for _ in cwr(seq_ids, 2))
     set_pair_count(total_pairs)
 

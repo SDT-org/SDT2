@@ -117,16 +117,23 @@ def get_compute_stats(filename):
 
     state = get_state()
 
-    required_memory = max_len * max_len
-    total_memory = state.platform["memory"]
+    required_memory = (
+        max_len * max_len
+    ) + 100000000  # Each process has a minimum of about 100MB
+    available_memory = psutil.virtual_memory().available
     total_cores = state.platform["cores"]
+    min_cores = available_memory // required_memory
+
+    if required_memory > available_memory:
+        min_cores = 0
 
     return {
         "recommended_cores": min(
-            max(total_cores - 1, 1), total_memory // required_memory
+            max(round(total_cores * 0.75), 1),
+            min_cores,
         ),
         "required_memory": required_memory,
-        "available_memory": psutil.virtual_memory().available,
+        "available_memory": available_memory,
     }
 
 
@@ -142,6 +149,22 @@ class Api:
 
     def app_config(self):
         return json.dumps({"appVersion": app_version})
+
+    def processes_info(self):
+        process = psutil.Process()
+        info = []
+
+        for child in process.children(recursive=True):
+            try:
+                cpu_percent = child.cpu_percent(interval=0.1)
+                memory = child.memory_info().rss
+                info.append((child.pid, cpu_percent, memory, child.nice()))
+            except:
+                pass
+        return json.dumps(info)
+
+    def get_available_memory(self):
+        return psutil.virtual_memory().available
 
     def save_image(self, args: dict):
         state = get_state()
@@ -173,9 +196,8 @@ class Api:
                 "SDT1 Matrix file (*.txt)",
             ),
         )
-        print(result)
         if not result:
-            raise Exception("filename result was None")
+            return False
         basename = os.path.basename(result[0])
         filetype, _ = mimetypes.guess_type(basename)
 
@@ -221,14 +243,13 @@ class Api:
 
     def select_alignment_output_path(self):
         result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG)
-        print(result)
         if result:
             if isinstance(result, str):
                 set_state(alignment_output_path=result)
             else:
                 set_state(alignment_output_path=result[0])
         else:
-            raise Exception("path result was None")
+            return False
 
     def select_export_path(self):
         result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG)
@@ -238,7 +259,7 @@ class Api:
             else:
                 set_state(export_path=result[0])
         else:
-            raise Exception("path result was None")
+            return False
 
     def get_state(self):
         return get_state()._asdict()
@@ -294,7 +315,7 @@ class Api:
                         counter.value += 1
                     pair_count = get_state().pair_count
                     if pair_count and pair_count > 0:
-                        progress = (counter.value / pair_count) * 100
+                        progress = round((counter.value / pair_count) * 100)
                         elapsed = perf_counter() - start_time
                         estimated_total = elapsed * (pair_count / counter.value)
                         estimated = round(estimated_total - elapsed)
@@ -493,7 +514,8 @@ def get_entrypoint(filename="index.html"):
 
 
 def update_client_state(window: webview.Window):
-    window.evaluate_js("syncAppState()")
+    js_app_state = json.dumps(get_state()._asdict())
+    window.evaluate_js(f"syncAppState({js_app_state})")
 
 
 def on_closed():

@@ -1,9 +1,10 @@
 import React from "react";
 import { AppState } from "../appState";
 import { Button, Label, ProgressBar } from "react-aria-components";
+import { formatBytes } from "../helpers";
 
 export const Loader = ({
-  appState: { stage, progress, estimated_time },
+  appState: { stage, progress, estimated_time, debug, compute_stats },
   mainMenu,
 }: {
   appState: AppState;
@@ -12,6 +13,9 @@ export const Loader = ({
   const [canceling, setCanceling] = React.useState(false);
   const [estimatedDisplay, setEstimatedDisplay] = React.useState("");
   const updatedTime = React.useRef(Date.now());
+  const [processInfo, setProcessInfo] = React.useState<
+    [number, number, number, string][]
+  >([]);
 
   React.useEffect(() => {
     if (!estimated_time || Date.now() - updatedTime.current < 3000) {
@@ -30,6 +34,26 @@ export const Loader = ({
     );
     updatedTime.current = Date.now();
   }, [estimated_time]);
+
+  React.useEffect(() => {
+    if (!debug) {
+      return;
+    }
+
+    const id = setInterval(
+      () =>
+        window.pywebview.api.processes_info().then((data) => {
+          const parsedData = JSON.parse(data);
+          if (!parsedData) {
+            return;
+          }
+
+          setProcessInfo(parsedData.sort());
+        }),
+      500,
+    );
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <div className="app-wrapper with-header loader">
@@ -57,6 +81,16 @@ export const Loader = ({
             </>
           )}
         </ProgressBar>
+        {debug ? (
+          <pre>
+            Required: {formatBytes(compute_stats?.required_memory || 0)}
+            <br />
+            {processInfo.map(
+              (i) =>
+                `[${i[0]}] ${i[1].toString().padStart(5, " ")} ${formatBytes(i[2]).padStart(5, " ")} ${i[3]}\n`,
+            )}
+          </pre>
+        ) : null}
         <Button
           className="cancel-run"
           onPress={() => {
