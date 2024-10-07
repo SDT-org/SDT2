@@ -69,16 +69,15 @@ def process_pair(id_sequence_pair, settings):
     id2 = ids[1]
     seq1 = id_sequence_pair[1][0]
     seq2 = id_sequence_pair[1][1]
-    if seq1 == seq2:
-        score=0
+    if id1 == id2:
+        print("skipping"+id1+"-"+id1)
+        return id_sequence_pair[0],0 
     if settings["is_aa"]:
         aln = parasail.nw_trace(seq1, seq2, 10, 1, parasail.blosum62)
     else:
         aln = parasail.nw_trace(seq1, seq2, 13, 1, parasail.blosum62)
-    if seq1 == seq2:
-        score=0
-    else:
-        score = get_similarity(aln.traceback.query, aln.traceback.ref)
+
+    score = get_similarity(aln.traceback.query, aln.traceback.ref)
 
     if settings.get("aln_out"):
         fname = os.path.join(
