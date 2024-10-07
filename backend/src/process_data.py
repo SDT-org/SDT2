@@ -70,7 +70,7 @@ def process_pair(id_sequence_pair, settings):
     seq1 = id_sequence_pair[1][0]
     seq2 = id_sequence_pair[1][1]
     if seq1 == seq2:
-        score=1
+        score=0
     if settings["is_aa"]:
         aln = parasail.nw_trace(seq1, seq2, 10, 1, parasail.blosum62)
     else:
