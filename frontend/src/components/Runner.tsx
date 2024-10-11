@@ -2,7 +2,6 @@ import React from "react";
 import { AppState, SetAppState, clusterMethods } from "../appState";
 import messages from "../messages";
 import {
-  Checkbox,
   Label,
   Meter,
   Slider,
@@ -35,18 +34,13 @@ const WarningIcon = () => (
 const RunnerSettings = ({
   appState,
   setAppState,
+  startProcessData,
 }: {
   appState: AppState;
   setAppState: SetAppState;
+  startProcessData: () => void;
 }) => {
   const [showOutputSelector, setShowOutputSelector] = React.useState(false);
-
-  const handleRun = () => {
-    window.pywebview.api.run_process_data({
-      cluster_method: appState.client.cluster_method,
-      compute_cores: appState.client.compute_cores,
-    });
-  };
 
   const handleChangeClusterMethod = (
     value: typeof appState.client.cluster_method,
@@ -89,7 +83,7 @@ const RunnerSettings = ({
         !appState.validation_error_id
       ) {
         event.preventDefault();
-        handleRun();
+        startProcessData();
       }
     };
     document.addEventListener("keydown", handleEnter);
@@ -329,7 +323,7 @@ const RunnerSettings = ({
             <div className="actions">
               <button
                 type="button"
-                onClick={handleRun}
+                onClick={startProcessData}
                 disabled={!fileName || appState.validation_error_id}
               >
                 Run
@@ -351,10 +345,12 @@ export const Runner = ({
   appState,
   setAppState,
   mainMenu,
+  startProcessData,
 }: {
   appState: AppState;
   setAppState: SetAppState;
   mainMenu: React.ReactNode;
+  startProcessData: () => void;
 }) => {
   const [appConfig, setAppConfig] = React.useState<{ appVersion: string }>();
   const fetchAppConfig = () => {
@@ -380,7 +376,11 @@ export const Runner = ({
     <div className="app-wrapper with-header with-footer">
       <div className="app-header runner">{mainMenu}</div>
       <div className="app-main centered runner">
-        <RunnerSettings appState={appState} setAppState={setAppState} />
+        <RunnerSettings
+          appState={appState}
+          setAppState={setAppState}
+          startProcessData={startProcessData}
+        />
       </div>
       <div className="app-footer centered">
         <div>{appConfig ? appConfig.appVersion : null}</div>
