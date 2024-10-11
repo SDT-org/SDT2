@@ -78,7 +78,7 @@ export const App = () => {
           throw e;
         }
       });
-  }, []);
+  }, [appState.client.cluster_method, appState.client.compute_cores]);
 
   const APP_VIEWS: { [K in AppState["view"]]: React.ReactElement } = {
     runner: <Runner {...commonViewProps} startProcessData={startProcessData} />,

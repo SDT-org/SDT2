@@ -193,8 +193,9 @@ const RunnerSettings = ({
                       {({ state }) => (
                         <>
                           {appState.compute_stats &&
-                          appState.client.compute_cores >
-                            appState.compute_stats.recommended_cores ? (
+                          (appState.compute_stats.recommended_cores === 0 ||
+                            appState.client.compute_cores >
+                              appState.compute_stats.recommended_cores) ? (
                             <WarningIcon />
                           ) : null}
                           {state.getThumbValueLabel(0)} /{" "}
