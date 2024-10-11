@@ -2,6 +2,7 @@ import React from "react";
 import { AppState, SetAppState, clusterMethods } from "../appState";
 import messages from "../messages";
 import {
+  Checkbox,
   Label,
   Meter,
   Slider,
@@ -38,6 +39,8 @@ const RunnerSettings = ({
   appState: AppState;
   setAppState: SetAppState;
 }) => {
+  const [showOutputSelector, setShowOutputSelector] = React.useState(false);
+
   const handleRun = () => {
     window.pywebview.api.run_process_data({
       cluster_method: appState.client.cluster_method,
@@ -178,14 +181,119 @@ const RunnerSettings = ({
         </div>
         {isFastaType && !appState.validation_error_id ? (
           <>
-            <details className="advanced-settings">
-              <summary>
-                <strong>Advanced</strong>
-              </summary>
+            <div className="field runner-settings performance">
+              <label className="header" htmlFor="compute-cores">
+                Compute Performance
+              </label>
+              {appState.compute_stats ? (
+                <>
+                  <Slider
+                    id="compute-cores"
+                    onChange={handleChangeComputeCores}
+                    minValue={1}
+                    maxValue={appState.platform.cores}
+                    value={appState.client.compute_cores}
+                  >
+                    <Label>Cores</Label>
+                    <SliderOutput data-impact={coresImpact}>
+                      {({ state }) => (
+                        <>
+                          {appState.compute_stats &&
+                          appState.client.compute_cores >
+                            appState.compute_stats.recommended_cores ? (
+                            <WarningIcon />
+                          ) : null}
+                          {state.getThumbValueLabel(0)} /{" "}
+                          {appState.platform.cores}
+                        </>
+                      )}
+                    </SliderOutput>
+                    <SliderTrack data-impact={coresImpact}>
+                      {({ state }) => (
+                        <>
+                          <div className="track" />
+                          <div
+                            className="fill"
+                            style={{
+                              width: state.getThumbPercent(0) * 100 + "%",
+                            }}
+                          />
+                          <SliderThumb />
+                        </>
+                      )}
+                    </SliderTrack>
+                  </Slider>
+                  <small>
+                    Recommended: {appState.compute_stats.recommended_cores}
+                  </small>
+                  <Meter value={estimatedMemoryValue}>
+                    {({ percentage }) => (
+                      <>
+                        <Label>Memory</Label>
+                        <span className="value">
+                          {formatBytes(estimatedMemory, 1)}
+                        </span>
+                        <div className="bar">
+                          <div
+                            className="fill"
+                            data-impact={impactName(percentage)}
+                            style={{
+                              width: percentage + "%",
+                              minWidth: "4px",
+                            }}
+                          />
+                        </div>
+                      </>
+                    )}
+                  </Meter>
+                  <small>
+                    Available:{" "}
+                    {formatBytes(
+                      appState.compute_stats?.available_memory || 1,
+                      0,
+                    )}{" "}
+                    / {formatBytes(appState.platform.memory || 0, 0)}
+                  </small>
+                </>
+              ) : null}
+            </div>
+            <div className="field runner-settings">
+              <label className="header">Clustering Method</label>
+              {clusterMethods.map((value) => (
+                <label className="radio" key={value}>
+                  <input
+                    key={value}
+                    type="radio"
+                    id={value}
+                    name="cluster-method"
+                    value={value}
+                    checked={appState.client.cluster_method === value}
+                    onChange={() => handleChangeClusterMethod(value)}
+                  />
+                  <span>{value}</span>
+                </label>
+              ))}
+            </div>
 
-              <div className="group">
+            <div className="advanced-settings">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={showOutputSelector}
+                  onChange={() => {
+                    setShowOutputSelector(!showOutputSelector);
+                    if (!showOutputSelector) {
+                      setAppState((previous) => {
+                        return { ...previous, alignment_output_path: "" };
+                      });
+                    }
+                  }}
+                />
+                Output alignments to folder
+              </label>
+
+              {showOutputSelector ? (
                 <div className="field">
-                  <label className="header">Alignment Output Folder</label>
                   <div className="input-with-button">
                     <input
                       type="text"
@@ -198,107 +306,11 @@ const RunnerSettings = ({
                         window.pywebview.api.select_alignment_output_path()
                       }
                     >
-                      Select...
+                      Select folder...
                     </button>
                   </div>
                 </div>
-              </div>
-            </details>
-
-            <div className="col-2">
-              <div className="field runner-settings">
-                <label className="header">Clustering Method</label>
-                {clusterMethods.map((value) => (
-                  <label className="radio" key={value}>
-                    <input
-                      key={value}
-                      type="radio"
-                      id={value}
-                      name="cluster-method"
-                      value={value}
-                      checked={appState.client.cluster_method === value}
-                      onChange={() => handleChangeClusterMethod(value)}
-                    />
-                    <span>{value}</span>
-                  </label>
-                ))}
-              </div>
-
-              <div className="field runner-settings performance">
-                <label className="header" htmlFor="compute-cores">
-                  Compute Performance
-                </label>
-                {appState.compute_stats ? (
-                  <>
-                    <Slider
-                      id="compute-cores"
-                      onChange={handleChangeComputeCores}
-                      minValue={1}
-                      maxValue={appState.platform.cores}
-                      value={appState.client.compute_cores}
-                    >
-                      <Label>Cores</Label>
-                      <SliderOutput data-impact={coresImpact}>
-                        {({ state }) => (
-                          <>
-                            {appState.compute_stats &&
-                            appState.client.compute_cores >
-                              appState.compute_stats.recommended_cores ? (
-                              <WarningIcon />
-                            ) : null}
-                            {state.getThumbValueLabel(0)}
-                          </>
-                        )}
-                      </SliderOutput>
-                      <SliderTrack data-impact={coresImpact}>
-                        {({ state }) => (
-                          <>
-                            <div className="track" />
-                            <div
-                              className="fill"
-                              style={{
-                                width: state.getThumbPercent(0) * 100 + "%",
-                              }}
-                            />
-                            <SliderThumb />
-                          </>
-                        )}
-                      </SliderTrack>
-                    </Slider>
-                    <small>
-                      Recommended: {appState.compute_stats.recommended_cores}
-                    </small>
-                    <Meter value={estimatedMemoryValue}>
-                      {({ percentage }) => (
-                        <>
-                          <Label>Memory</Label>
-                          <span className="value">
-                            {formatBytes(estimatedMemory, 1)}
-                          </span>
-                          <div className="bar">
-                            <div
-                              className="fill"
-                              data-impact={impactName(percentage)}
-                              style={{
-                                width: percentage + "%",
-                                minWidth: "4px",
-                              }}
-                            />
-                          </div>
-                        </>
-                      )}
-                    </Meter>
-                    <small>
-                      Available:{" "}
-                      {formatBytes(
-                        appState.compute_stats?.available_memory || 1,
-                        0,
-                      )}{" "}
-                      / {formatBytes(appState.platform.memory || 0, 0)}
-                    </small>
-                  </>
-                ) : null}
-              </div>
+              ) : null}
             </div>
 
             {appState.compute_stats &&

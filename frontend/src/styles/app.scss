@@ -275,10 +275,9 @@ select option {
 
     &.runner-settings {
       font-size: 0.95rem;
+      margin-top: 0.8rem;
 
       &.performance {
-        margin-left: 10px;
-
         .react-aria-Meter {
           margin-top: 10px;
         }
@@ -343,6 +342,12 @@ select option {
     border-radius: 0.4rem;
     padding: 0.6rem;
     margin-bottom: 1.6rem;
+
+    label {
+      gap: 5px;
+      display: flex;
+      align-items: center;
+    }
 
     .group {
       margin-top: 0.8rem;
