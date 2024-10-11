@@ -198,7 +198,12 @@ class Api:
         )
         if not result:
             return False
-        basename = os.path.basename(result[0])
+
+        if isinstance(result, str):
+            basename = os.path.basename(result)
+        else:
+            basename = os.path.basename(result[0])
+
         filetype, _ = mimetypes.guess_type(basename)
 
         if filetype in matrix_filetypes:
