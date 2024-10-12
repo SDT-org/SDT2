@@ -134,6 +134,7 @@ def get_compute_stats(filename):
         ),
         "required_memory": required_memory,
         "available_memory": available_memory,
+        "free_swap": psutil.swap_memory().free,
     }
 
 
@@ -164,7 +165,9 @@ class Api:
         return json.dumps(info)
 
     def get_available_memory(self):
-        return psutil.virtual_memory().available
+        return json.dumps(
+            [psutil.virtual_memory().available, psutil.swap_memory().free]
+        )
 
     def save_image(self, args: dict):
         state = get_state()
@@ -562,6 +565,7 @@ if __name__ == "__main__":
             platform=platform.platform(),
             cores=multiprocessing.cpu_count(),
             memory=psutil.virtual_memory().total,
+            swap=psutil.swap_memory().total,
         ),
         on_update=lambda _: update_client_state(window),
     )

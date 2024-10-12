@@ -107,9 +107,9 @@ const RunnerSettings = ({
         return;
       }
 
-      window.pywebview.api.get_available_memory().then((value) =>
+      window.pywebview.api.get_available_memory().then((data) => {
+        const [available_memory, free_swap] = JSON.parse(data);
         setAppState((previous) => {
-          console.log(previous);
           return {
             ...previous,
             compute_stats: {
@@ -117,11 +117,12 @@ const RunnerSettings = ({
                 recommended_cores: 1,
                 required_memory: 1,
               }),
-              available_memory: value,
+              available_memory,
+              free_swap,
             },
           };
-        }),
-      );
+        });
+      });
     }, 3000);
 
     return () => clearInterval(id);
@@ -188,7 +189,7 @@ const RunnerSettings = ({
                     maxValue={appState.platform.cores}
                     value={appState.client.compute_cores}
                   >
-                    <Label>Cores</Label>
+                    <Label>Cores Used</Label>
                     <SliderOutput data-impact={coresImpact}>
                       {({ state }) => (
                         <>
@@ -224,9 +225,15 @@ const RunnerSettings = ({
                   <Meter value={estimatedMemoryValue}>
                     {({ percentage }) => (
                       <>
-                        <Label>Memory</Label>
+                        <Label>Estimated Memory</Label>
                         <span className="value">
                           {formatBytes(estimatedMemory, 1)}
+                          {appState.compute_stats?.available_memory
+                            ? ` / ${formatBytes(
+                                appState.compute_stats?.available_memory || 0,
+                                0,
+                              )} Available`
+                            : null}
                         </span>
                         <div className="bar">
                           <div
@@ -242,12 +249,18 @@ const RunnerSettings = ({
                     )}
                   </Meter>
                   <small>
-                    Available:{" "}
-                    {formatBytes(
-                      appState.compute_stats?.available_memory || 1,
-                      0,
-                    )}{" "}
-                    / {formatBytes(appState.platform.memory || 0, 0)}
+                    {appState.compute_stats && estimatedMemoryValue > 100 ? (
+                      <>
+                        Swap:{" "}
+                        {formatBytes(
+                          estimatedMemory -
+                            appState.compute_stats.available_memory,
+                        )}
+                        {appState.platform.swap > 0
+                          ? ` / ${formatBytes(appState.platform.swap)} Available`
+                          : null}
+                      </>
+                    ) : null}
                   </small>
                 </>
               ) : null}
@@ -314,10 +327,9 @@ const RunnerSettings = ({
               appState.client.compute_cores >
                 appState.compute_stats?.recommended_cores) ? (
               <div className="compute-forecast">
-                <p>
-                  <b>Warning:</b> System instability may occur when exceeding
-                  recommended cores.
-                </p>
+                <b>Warning:</b> System instability may occur when exceeding
+                recommended cores or available memory. When exceeding available
+                memory, it is recommended to limit cores used.
               </div>
             ) : null}
 

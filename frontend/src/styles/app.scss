@@ -218,7 +218,7 @@ select option {
 .form-wrapper {
   border: 1px solid var(--foreground-color);
   border-radius: 0.4rem;
-  padding: 2.4rem;
+  padding: 1.6rem;
   justify-content: left;
 
   &.runner-wrapper {
@@ -275,7 +275,7 @@ select option {
 
     &.runner-settings {
       font-size: 0.95rem;
-      margin-top: 0.8rem;
+      margin: 0.8rem 0;
 
       &.performance {
         .react-aria-Meter {
@@ -285,6 +285,9 @@ select option {
 
       label.header {
         margin-bottom: 0.4rem;
+      }
+
+      small {
       }
     }
 
@@ -658,7 +661,8 @@ select option {
 }
 
 .compute-forecast {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  line-height: 1.2rem;
   border: 1px solid orange;
   background: lighten(orange, 40%);
   padding: 0.6rem;

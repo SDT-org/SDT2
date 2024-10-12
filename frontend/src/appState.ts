@@ -24,10 +24,12 @@ export type AppState = {
     recommended_cores: number;
     required_memory: number;
     available_memory: number;
+    free_swap: number;
   };
   platform: {
     cores: number;
     memory: number;
+    swap: number;
     platform: string;
   };
   client: {
