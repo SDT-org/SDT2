@@ -41,6 +41,15 @@ const RunnerSettings = ({
   startProcessData: () => void;
 }) => {
   const [showOutputSelector, setShowOutputSelector] = React.useState(false);
+  const clusterOptionRefs = React.useRef<(HTMLLabelElement | null)[]>([]);
+
+  const handleClusterOptionFocus = (index: number) => {
+    clusterOptionRefs.current[index]?.setAttribute("data-focused", "true");
+  };
+
+  const handleClusterOptionBlur = (index: number) => {
+    clusterOptionRefs.current[index]?.removeAttribute("data-focused");
+  };
 
   const handleChangeClusterMethod = (
     value: typeof appState.client.cluster_method,
@@ -174,12 +183,39 @@ const RunnerSettings = ({
         </div>
         {isFastaType && !appState.validation_error_id ? (
           <>
+            <div className="field runner-settings">
+              <label className="header">Clustering Method</label>
+              <div className="clustering-method">
+                {clusterMethods.map((value, index) => (
+                  <label
+                    className="radio"
+                    key={value}
+                    ref={(el) => (clusterOptionRefs.current[index] = el)}
+                    data-selected={appState.client.cluster_method === value}
+                  >
+                    <input
+                      key={value}
+                      type="radio"
+                      id={value}
+                      name="cluster-method"
+                      value={value}
+                      checked={appState.client.cluster_method === value}
+                      onChange={() => handleChangeClusterMethod(value)}
+                      onFocus={() => handleClusterOptionFocus(index)}
+                      onBlur={() => handleClusterOptionBlur(index)}
+                    />
+                    <span>{value}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
             <div className="field runner-settings performance">
               <label className="header" htmlFor="compute-cores">
                 Performance
               </label>
               {appState.compute_stats ? (
-                <>
+                <div className="performance-settings">
                   <Slider
                     id="compute-cores"
                     onChange={handleChangeComputeCores}
@@ -257,25 +293,8 @@ const RunnerSettings = ({
                       </>
                     ) : null}
                   </small>
-                </>
+                </div>
               ) : null}
-            </div>
-            <div className="field runner-settings">
-              <label className="header">Clustering Method</label>
-              {clusterMethods.map((value) => (
-                <label className="radio" key={value}>
-                  <input
-                    key={value}
-                    type="radio"
-                    id={value}
-                    name="cluster-method"
-                    value={value}
-                    checked={appState.client.cluster_method === value}
-                    onChange={() => handleChangeClusterMethod(value)}
-                  />
-                  <span>{value}</span>
-                </label>
-              ))}
             </div>
 
             <div className="advanced-settings">

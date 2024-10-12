@@ -8,7 +8,7 @@
   --secondary-foreground-color: #666;
   --secondary-border-color: #eaeaea;
   --pressed-color: #ececec;
-  --focus-ring-color: Highlight;
+  --focus-ring-color: SelectedItem;
   --fill-color: var(--foreground-color);
   --impact-extreme-color: red;
   --impact-high-color: orange;
@@ -278,6 +278,11 @@ select option {
       margin: 0.8rem 0;
 
       &.performance {
+        .performance-settings {
+          border: 1px solid var(--border-color);
+          border-radius: 4px;
+          padding: 0.6rem;
+        }
         .react-aria-Meter {
           margin-top: 10px;
         }
@@ -288,6 +293,30 @@ select option {
       }
 
       small {
+      }
+
+      .clustering-method {
+        display: grid;
+        grid-template-columns: auto 1fr 1fr;
+        grid-template-rows: 1fr;
+        gap: 4px;
+        grid-template-areas:
+          ". . .";
+
+        .radio {
+          border: 1px solid var(--border-color);
+          border-radius: 4px;
+          padding: 0.4rem 0.6rem;
+          font-size: 0.85rem;
+
+          &[data-selected="true"] {
+            border-color: var(--fill-color);
+          }
+
+          &[data-focused="true"] {
+            outline: 2px solid var(--focus-ring-color);
+          }
+        }
       }
     }
 

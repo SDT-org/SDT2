@@ -28,7 +28,6 @@ export type AppState = {
   platform: {
     cores: number;
     memory: number;
-    swap: number;
     platform: string;
   };
   client: {
