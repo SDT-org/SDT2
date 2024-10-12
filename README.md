@@ -2,9 +2,6 @@
 
 ### Prerequisites
 
-- (Optional but recommended) [Install NVM](https://github.com/nvm-sh/nvm?tab=readme-ov-file#install--update-script)
-- [Install Node LTS]
-  - With NVM you can do this with `nvm install --lts` then `nvm use --lts`
 - Install Bun https://bun.sh/docs/installation
 - (Optional but recommended) [Install pyenv](https://github.com/pyenv/pyenv?tab=readme-ov-file#installation)
 - (Linux) Make sure the following are installed:
@@ -15,9 +12,16 @@
 - Install Python 3.11
   - With pyenv you can do this with `pyenv install 3.11` then `pyenv local 3.11`
 - Install virtualenv: `pip install virtualenv`
+
 ### Setup
 
 - Run `bun run init`
+
+### Run
+
+- Run `bun run start`
+  - To enable dev mode on MacOS/Linux, run with the DEBUG flag: `DEBUG=true bun run start`
+  - To enable dev mode in Windows powershell, run `$env:DEBUG="true"` once before starting
 
 ## License
 
