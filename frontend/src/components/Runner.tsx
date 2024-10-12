@@ -107,8 +107,7 @@ const RunnerSettings = ({
         return;
       }
 
-      window.pywebview.api.get_available_memory().then((data) => {
-        const [available_memory, free_swap] = JSON.parse(data);
+      window.pywebview.api.get_available_memory().then((available_memory) =>
         setAppState((previous) => {
           return {
             ...previous,
@@ -118,11 +117,10 @@ const RunnerSettings = ({
                 required_memory: 1,
               }),
               available_memory,
-              free_swap,
             },
           };
-        });
-      });
+        }),
+      );
     }, 3000);
 
     return () => clearInterval(id);
@@ -178,7 +176,7 @@ const RunnerSettings = ({
           <>
             <div className="field runner-settings performance">
               <label className="header" htmlFor="compute-cores">
-                Compute Performance
+                Performance
               </label>
               {appState.compute_stats ? (
                 <>
@@ -256,9 +254,6 @@ const RunnerSettings = ({
                           estimatedMemory -
                             appState.compute_stats.available_memory,
                         )}
-                        {appState.platform.swap > 0
-                          ? ` / ${formatBytes(appState.platform.swap)} Available`
-                          : null}
                       </>
                     ) : null}
                   </small>
