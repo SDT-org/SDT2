@@ -215,84 +215,89 @@ const RunnerSettings = ({
                 Performance
               </label>
               {appState.compute_stats ? (
-                <div className="performance-settings">
-                  <Slider
-                    id="compute-cores"
-                    onChange={handleChangeComputeCores}
-                    minValue={1}
-                    maxValue={appState.platform.cores}
-                    value={appState.client.compute_cores}
-                  >
-                    <Label>Cores Used</Label>
-                    <SliderOutput data-impact={coresImpact}>
-                      {({ state }) => (
-                        <>
-                          {appState.compute_stats &&
-                          (appState.compute_stats.recommended_cores === 0 ||
-                            appState.client.compute_cores >
-                              appState.compute_stats.recommended_cores) ? (
-                            <WarningIcon />
-                          ) : null}
-                          {state.getThumbValueLabel(0)} /{" "}
-                          {appState.platform.cores}
-                        </>
-                      )}
-                    </SliderOutput>
-                    <SliderTrack data-impact={coresImpact}>
-                      {({ state }) => (
-                        <>
-                          <div className="track" />
-                          <div
-                            className="fill"
-                            style={{
-                              width: state.getThumbPercent(0) * 100 + "%",
-                            }}
-                          />
-                          <SliderThumb />
-                        </>
-                      )}
-                    </SliderTrack>
-                  </Slider>
-                  <small>
-                    Recommended: {appState.compute_stats.recommended_cores}
-                  </small>
-                  <Meter value={estimatedMemoryValue}>
-                    {({ percentage }) => (
-                      <>
-                        <Label>Estimated Memory</Label>
-                        <span className="value">
-                          {formatBytes(estimatedMemory, 1)}
-                          {appState.compute_stats?.available_memory
-                            ? ` / ${formatBytes(
-                                appState.compute_stats?.available_memory || 0,
-                                0,
-                              )} Available`
-                            : null}
-                        </span>
-                        <div className="bar">
-                          <div
-                            className="fill"
-                            data-impact={impactName(percentage)}
-                            style={{
-                              width: percentage + "%",
-                              minWidth: "4px",
-                            }}
-                          />
-                        </div>
-                      </>
-                    )}
-                  </Meter>
-                  <small>
-                    {appState.compute_stats && estimatedMemoryValue > 100 ? (
-                      <>
-                        Swap:{" "}
-                        {formatBytes(
-                          estimatedMemory -
-                            appState.compute_stats.available_memory,
+                <div className="performance-settings col-2">
+                  <div className="">
+                    <Slider
+                      id="compute-cores"
+                      onChange={handleChangeComputeCores}
+                      minValue={1}
+                      maxValue={appState.platform.cores}
+                      value={appState.client.compute_cores}
+                    >
+                      <Label>Cores Used</Label>
+                      <SliderOutput data-impact={coresImpact}>
+                        {({ state }) => (
+                          <>
+                            {appState.compute_stats &&
+                            (appState.compute_stats.recommended_cores === 0 ||
+                              appState.client.compute_cores >
+                                appState.compute_stats.recommended_cores) ? (
+                              <WarningIcon />
+                            ) : null}
+                            {state.getThumbValueLabel(0)} /{" "}
+                            {appState.platform.cores}
+                          </>
                         )}
-                      </>
-                    ) : null}
-                  </small>
+                      </SliderOutput>
+                      <SliderTrack data-impact={coresImpact}>
+                        {({ state }) => (
+                          <>
+                            <div className="track" />
+                            <div
+                              className="fill"
+                              style={{
+                                width: state.getThumbPercent(0) * 100 + "%",
+                              }}
+                            />
+                            <SliderThumb />
+                          </>
+                        )}
+                      </SliderTrack>
+                    </Slider>
+                    <small>
+                      Recommended: {appState.compute_stats.recommended_cores}
+                    </small>
+                  </div>
+                  <div className="">
+                    <Meter value={estimatedMemoryValue}>
+                      {({ percentage }) => (
+                        <>
+                          <Label>Estimated Memory</Label>
+                          <span className="value">
+                            {formatBytes(estimatedMemory, 1)}
+                          </span>
+                          <div className="bar">
+                            <div
+                              className="fill"
+                              data-impact={impactName(percentage)}
+                              style={{
+                                width: percentage + "%",
+                                minWidth: "4px",
+                              }}
+                            />
+                          </div>
+                        </>
+                      )}
+                    </Meter>
+                    <small>
+                      {appState.compute_stats?.available_memory
+                        ? ` / ${formatBytes(
+                            appState.compute_stats?.available_memory || 0,
+                            0,
+                          )} Available`
+                        : null}{" "}
+                      Available{" "}
+                      {appState.compute_stats && estimatedMemoryValue > 100 ? (
+                        <>
+                          Swap:{" "}
+                          {formatBytes(
+                            estimatedMemory -
+                              appState.compute_stats.available_memory,
+                          )}
+                        </>
+                      ) : null}
+                    </small>
+                  </div>
                 </div>
               ) : null}
             </div>
