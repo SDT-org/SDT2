@@ -26,9 +26,8 @@ export interface HeatmapSettings {
   cbar_pad: string;
   cbar_aspect: string;
   axis_labels: boolean;
-  axlabel_xrotation: number;
+  axlabel_rotation: number;
   axlabel_xfontsize: number;
-  axlabel_yrotation: number;
   axlabel_yfontsize: number;
   cutoff_1: number;
   cutoff_2: number;

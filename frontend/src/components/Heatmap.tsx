@@ -261,40 +261,13 @@ export const Heatmap = ({
               </div>
               <div className="col-2">
                 <NumberInput
-                  label="X Font Size"
+                  label="Font Size"
                   field="axlabel_xfontsize"
                   value={settings.axlabel_xfontsize}
                   updateValue={updateSettings}
                   min={1}
                   max={40}
                   step={1}
-                />
-                <NumberInput
-                  label="X Rotation"
-                  field="axlabel_xrotation"
-                  value={settings.axlabel_xrotation}
-                  updateValue={updateSettings}
-                  min={0}
-                  max={360}
-                  step={10}
-                />
-                <NumberInput
-                  label="Y Font Size"
-                  field="axlabel_yfontsize"
-                  value={settings.axlabel_yfontsize}
-                  updateValue={updateSettings}
-                  min={1}
-                  max={40}
-                  step={1}
-                />
-                <NumberInput
-                  label="Y Rotation"
-                  field="axlabel_yrotation"
-                  value={settings.axlabel_yrotation}
-                  updateValue={updateSettings}
-                  min={0}
-                  max={360}
-                  step={10}
                 />
               </div>
             </div>
@@ -315,56 +288,8 @@ export const Heatmap = ({
                   Scale Bar
                 </label>
               </div>
-              <div className="range-group">
-                <div className="field">
-                  <label htmlFor="cbar-shrink">Height</label>
-                  <input
-                    type="range"
-                    name="cbar-shrink"
-                    id="cbar-shrink"
-                    min="0.1"
-                    max="1"
-                    step=".1"
-                    value={settings.cbar_shrink}
-                    onChange={(e) =>
-                      updateSettings({
-                        cbar_shrink: parseFloat(e.target.value),
-                      })
-                    }
-                  />
-                </div>
-                <div className="field">
-                  <label htmlFor="cbar-aspect">Width</label>
-                  <input
-                    type="range"
-                    name="cbar-aspect"
-                    id="cbar-aspect"
-                    min="1"
-                    max="100"
-                    step="1"
-                    value={settings.cbar_aspect}
-                    onChange={(e) =>
-                      updateSettings({ cbar_aspect: e.target.value })
-                    }
-                  />
-                </div>
-                <div className="field">
-                  <label htmlFor="cbar-pad">Pad</label>
-                  <input
-                    type="range"
-                    name="cbar-pad"
-                    id="cbar-pad"
-                    min="0"
-                    max="20"
-                    step="1"
-                    value={settings.cbar_pad}
-                    onChange={(e) =>
-                      updateSettings({ cbar_pad: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
               <div className="col-2">
+                {/* Min input */}
                 <NumberInput
                   label="Min"
                   field="vmin"
@@ -375,17 +300,24 @@ export const Heatmap = ({
                   step={1}
                   isDisabled={settings.colorscale === "Discrete"}
                 />
-                <NumberInput
-                  label="Max"
-                  field="vmax"
-                  value={settings.vmax}
-                  updateValue={updateSettings}
-                  min={settings.vmin + 1}
-                  max={100}
-                  step={1}
-                  isDisabled={settings.colorscale === "Discrete"}
+              
+                {/* Slider for Height */}
+                <label htmlFor="cbar-shrink">Height</label>
+                <input
+                  type="range"
+                  name="cbar-shrink"
+                  id="cbar-shrink"
+                  min="0.1"
+                  max="1"
+                  step=".1"
+                  value={settings.cbar_shrink}
+                  onChange={(e) =>
+                    updateSettings({
+                      cbar_shrink: parseFloat(e.target.value),
+                    })
+                  }
                 />
-              </div>
+              </div>         
             </div>
           </div>
         </div>
@@ -469,7 +401,7 @@ export const Heatmap = ({
                   size: settings.axlabel_xfontsize,
                   color: "black",
                 },
-                tickangle: settings.axlabel_xrotation,
+                tickangle: settings.axlabel_rotation,
                 tickvals: [...Array(tickText.length).keys()],
                 ticktext: tickText,
                 showticklabels: settings.axis_labels,
@@ -486,10 +418,10 @@ export const Heatmap = ({
                 automargin: true,
                 tickfont: {
                   family: "Arial, sans-serif",
-                  size: settings.axlabel_yfontsize,
+                  size: settings.axlabel_xfontsize,
                   color: "black",
                 },
-                tickangle: settings.axlabel_yrotation,
+                tickangle: settings.axlabel_rotation,
                 tickvals: [...Array(tickText.length).keys()],
                 ticktext: tickText,
                 showticklabels: settings.axis_labels,
