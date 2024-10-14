@@ -88,6 +88,7 @@ const RunnerSettings = ({
     const handleEnter = (event: KeyboardEvent) => {
       if (
         event.key === "Enter" &&
+        (event.ctrlKey || event.metaKey || event.altKey) &&
         Boolean(appState.filename) &&
         !appState.validation_error_id
       ) {
@@ -216,7 +217,7 @@ const RunnerSettings = ({
               </label>
               {appState.compute_stats ? (
                 <div className="performance-settings col-2">
-                  <div className="">
+                  <div className="cores-used">
                     <Slider
                       id="compute-cores"
                       onChange={handleChangeComputeCores}
@@ -224,7 +225,7 @@ const RunnerSettings = ({
                       maxValue={appState.platform.cores}
                       value={appState.client.compute_cores}
                     >
-                      <Label>Cores Used</Label>
+                      <Label>Cores</Label>
                       <SliderOutput data-impact={coresImpact}>
                         {({ state }) => (
                           <>
@@ -258,13 +259,19 @@ const RunnerSettings = ({
                       Recommended: {appState.compute_stats.recommended_cores}
                     </small>
                   </div>
-                  <div className="">
+                  <div className="estimated-memory">
                     <Meter value={estimatedMemoryValue}>
                       {({ percentage }) => (
                         <>
-                          <Label>Estimated Memory</Label>
+                          <Label>Memory</Label>
                           <span className="value">
-                            {formatBytes(estimatedMemory, 1)}
+                            {formatBytes(estimatedMemory, 1)} /{" "}
+                            {appState.compute_stats?.available_memory
+                              ? `${formatBytes(
+                                  appState.compute_stats?.available_memory || 0,
+                                  0,
+                                )} Available`
+                              : null}
                           </span>
                           <div className="bar">
                             <div
@@ -280,22 +287,21 @@ const RunnerSettings = ({
                       )}
                     </Meter>
                     <small>
-                      {appState.compute_stats?.available_memory
-                        ? ` / ${formatBytes(
-                            appState.compute_stats?.available_memory || 0,
-                            0,
-                          )} Available`
-                        : null}{" "}
-                      Available{" "}
-                      {appState.compute_stats && estimatedMemoryValue > 100 ? (
-                        <>
-                          Swap:{" "}
-                          {formatBytes(
-                            estimatedMemory -
-                              appState.compute_stats.available_memory,
-                          )}
-                        </>
-                      ) : null}
+                      <span>
+                        {appState.compute_stats &&
+                        estimatedMemoryValue > 100 ? (
+                          <>
+                            Swap:{" "}
+                            {formatBytes(
+                              estimatedMemory -
+                                appState.compute_stats.available_memory,
+                            )}
+                          </>
+                        ) : null}
+                      </span>
+                      <span>
+                        {formatBytes(appState.platform.memory, 0)} Total
+                      </span>
                     </small>
                   </div>
                 </div>
