@@ -8,6 +8,7 @@ import webview
 import tempfile
 import shutil
 import json
+import csv
 import pandas as pd
 import numpy as np
 import base64
@@ -55,7 +56,9 @@ def get_matrix_path():
         return os.path.join(state.tempdir_path, f"{file_base}_mat.csv")
     else:
         return state.filename[0]
-
+def get_stats_path():
+    state = get_state()
+    return state.filename[0]
 
 def find_source_files(prefix, suffixes):
     state = get_state()
@@ -350,10 +353,24 @@ class Api:
         do_cancel_run()
 
     def load_data(self):
+        state = get_state()
+        file_base = os.path.splitext(state.basename)[0]
         matrix_path = get_matrix_path()
-
         # https://stackoverflow.com/a/57824142
         # SDT1 matrix CSVs do not have padding for columns
+        
+        ######
+        stats_col= os.path.join(state.tempdir_path, f"{file_base}_stats.csv")
+        stat_col_names = ['Sequence ID', 'GC %', 'Sequence Length'] 
+        stats_df = pd.read_csv(stats_col, header=None, names=stat_col_names)
+
+
+        gc_stats = stats_df.loc[:,'GC %']
+        print(f'gc_stats .loc:\n{gc_stats}\n')
+        len_stats = stats_df.loc[:,'Sequence Length']
+        print(f'len_stats .loc:\n{len_stats}\n')
+        #######
+        
         with open(matrix_path, "r") as temp_f:
             col_count = [len(l.split(",")) for l in temp_f.readlines()]
             column_names = [i for i in range(0, max(col_count))]
@@ -369,7 +386,7 @@ class Api:
         data_no_diag = np.where(diag_mask, np.nan, data)
         min_val = int(np.nanmin(data_no_diag))
         max_val = int(np.nanmax(data_no_diag))
-        return data, tickText, min_val, max_val
+        return data, tickText, min_val, max_val, gc_stats, len_stats
 
     def confirm_overwrite(self, destination_files):
         files_to_overwrite = [f for f in destination_files if os.path.exists(f)]

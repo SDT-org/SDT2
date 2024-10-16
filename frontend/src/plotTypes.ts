@@ -60,5 +60,7 @@ export type HistogramData = {
   y: number[];
   x2: number[];
   y2: number[];
+  gc_stats: number[];
+  len_stats: number[];
   hover: string[];
 };
