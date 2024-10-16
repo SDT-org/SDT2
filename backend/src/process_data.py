@@ -198,17 +198,11 @@ def save_cols_to_csv(df, filename):
     )
     columnar_df.to_csv(filename + "_cols.csv", mode="w", header=True, index=False)
 def save_stats_to_csv(seq_stats, filename):
-    print(seq_stats)
-    print("THESE ARE seq_stats!")
     stats_list = []
     for key, value in (seq_stats.items()):
         stats_list.append([key, value[0], value[1] ])
-        print(stats_list)
-        print("this is statlist")
     stats_df = pd.DataFrame(
     stats_list, columns=["Sequence", "GC %", "Sequence Length"])
-    
-    print(stats_df)
     stats_df.to_csv(filename + "_stats.csv", mode="w", header=True, index=False)
 
 def output_summary(file_name, start_time, end_time, run_summary):
