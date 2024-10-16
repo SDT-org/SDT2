@@ -366,9 +366,7 @@ class Api:
 
 
         gc_stats = stats_df.loc[:,'GC %']
-        print(f'gc_stats .loc:\n{gc_stats}\n')
         len_stats = stats_df.loc[:,'Sequence Length']
-        print(f'len_stats .loc:\n{len_stats}\n')
         #######
         
         with open(matrix_path, "r") as temp_f:
@@ -475,7 +473,7 @@ class Api:
         return True
 
     def get_heatmap_data(self):
-        data, tickText, min_val, max_val = self.load_data()
+        data, tickText, min_val, max_val, _, _ = self.load_data()
         heat_data = pd.DataFrame(data, index=tickText)
         parsedData = heat_data.values.tolist()
         return json.dumps(
@@ -487,7 +485,7 @@ class Api:
 
     def get_line_histo_data(self):
         # caluclating hist data manually to allow for line and scatter
-        data, _, min_val, max_val = self.load_data()
+        data, _, min_val, max_val, gc_stats, len_stats = self.load_data()
         # Create a mask for the diagonal elements
         diag_mask = np.eye(data.shape[0], dtype=bool)
 
