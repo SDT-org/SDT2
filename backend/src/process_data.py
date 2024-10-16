@@ -12,7 +12,8 @@ from functools import partial
 import numpy as np
 import pandas as pd
 import parasail
-from Bio import SeqIO, Phylo
+from Bio import SeqIO, Phylo, SeqUtils
+from Bio.SeqUtils import gc_fraction
 from Bio.Phylo.TreeConstruction import (
     DistanceTreeConstructor,
     DistanceMatrix,
@@ -39,6 +40,17 @@ def run_preprocessing(raw_seq_dict):
         seq_dict[key] = str(sequence)
     return seq_dict
 
+def grab_stats(seq_dict):
+    #https://stackoverflow.com/questions/20585920/how-to-add-multiple-values-to-a-dictionary-key
+    seq_stats={} 
+    for key, record in seq_dict.items():
+        gcCount = round(gc_fraction(str(record)),2)
+        genLen= (len(record))
+        seq_stats.setdefault(key, [])
+        seq_stats[key].append(gcCount)
+        seq_stats[key].append(genLen)
+    return seq_stats
+    
 
 ##Calculate the similarity scores from the alignments by iterating through each position in the alignemtn files as a zip
 def get_similarity(seq1, seq2):
@@ -185,7 +197,19 @@ def save_cols_to_csv(df, filename):
         columns=["First Sequence", "Second Sequence", "Identity Score"],
     )
     columnar_df.to_csv(filename + "_cols.csv", mode="w", header=True, index=False)
-
+def save_stats_to_csv(seq_stats, filename):
+    print(seq_stats)
+    print("THESE ARE seq_stats!")
+    stats_list = []
+    for key, value in (seq_stats.items()):
+        stats_list.append([key, value[0], value[1] ])
+        print(stats_list)
+        print("this is statlist")
+    stats_df = pd.DataFrame(
+    stats_list, columns=["Sequence", "GC %", "Sequence Length"])
+    
+    print(stats_df)
+    stats_df.to_csv(filename + "_stats.csv", mode="w", header=True, index=False)
 
 def output_summary(file_name, start_time, end_time, run_summary):
     # Adjust the indentation of each line
@@ -249,7 +273,8 @@ def process_data(
 
     set_stage("Preprocessing")
     seq_dict = run_preprocessing(processed_seq_dict)
-
+    seq_stats= grab_stats(seq_dict)
+    
     set_stage("Analyzing")
     print("Stage: Analyzing")
 
@@ -286,12 +311,14 @@ def process_data(
         df = pd.DataFrame(aln_lowt, index=new_order)
         save_matrix_to_csv(df, os.path.join(out_dir, f"{file_base}_mat.csv"))
         save_cols_to_csv(df, os.path.join(out_dir, f"{file_base}"))
+        save_stats_to_csv(seq_stats, os.path.join(out_dir, f"{file_base}"))
     else:
         aln_lowt = np.tril(np.around(aln_scores, 2))
         aln_lowt[np.triu_indices(aln_lowt.shape[0], k=1)] = np.nan
         df = pd.DataFrame(aln_lowt, index=order)
         save_matrix_to_csv(df, os.path.join(out_dir, f"{file_base}_mat.csv"))
         save_cols_to_csv(df, os.path.join(out_dir, f"{file_base}"))
+        save_stats_to_csv(seq_stats, os.path.join(out_dir, f"{file_base}"))
 
     set_stage("Finalizing")
     print("Stage: Finalizing")
