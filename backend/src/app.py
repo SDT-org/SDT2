@@ -391,7 +391,7 @@ class Api:
 
         if state.filetype == "text/fasta":
             prefix = os.path.splitext(state.basename)[0]
-            suffixes = ["_cols", "_mat", "_summary", "_tree"]
+            suffixes = ["_cols", "_mat", "_summary", "_tree", "_stats"]
         else:
             prefix = os.path.splitext(state.basename)[0].removesuffix("_mat")
             suffixes = ["_mat"]
