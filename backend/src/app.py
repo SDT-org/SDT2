@@ -97,12 +97,11 @@ def assert_window():
 
 
 def save_image_from_api(data, format, destination):
-
     encoded = data.split(",")[1]
 
     if format == "svg":
         data = urllib.parse.unquote(encoded)
-        with open(destination, "w") as file:
+        with open(destination, "w", encoding="utf-8") as file:
             file.write(data)
     else:
         data = base64.b64decode(encoded)
