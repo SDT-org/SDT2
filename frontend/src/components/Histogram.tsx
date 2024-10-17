@@ -2,9 +2,9 @@ import React from "react";
 import Plotly from "plotly.js-dist-min";
 import createPlotlyComponent from "react-plotly.js/factory";
 import { NumberInput } from "./NumberInput";
-import { HistogramData, HistogramSettings } from "../plotTypes";
+import { HistogramData, HistogramSettings} from "../plotTypes";
+import { DistributionPlots as defaultDistributionPlots} from "../plotTypes";
 import { Layout, PlotData } from "plotly.js-dist-min";
-import { SaveImage } from "./SaveImage";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -56,7 +56,10 @@ export const Histogram = ({
       </div>
     );
   }
-
+  const DistributionPlots = {
+    ...defaultDistributionPlots
+  };
+  console.log(DistributionPlots);
   const histogramTrace = React.useMemo(
     () =>
       ({
@@ -289,7 +292,6 @@ export const Histogram = ({
                   label="Outline Width"
                   field="barOutlineWidth"
                   value={settings.barOutlineWidth}
-                  disabled={!settings.showHistogram}
                   updateValue={updateSettings}
                   min={0}
                   max={5}

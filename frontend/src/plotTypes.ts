@@ -9,7 +9,13 @@ export enum LineColor {
   Blue = "blue",
   Green = "green",
 }
-
+export enum DistributionPlots {
+  Bar = "Bar Plot",
+  Line = "Line PLot",
+  Red = "Box Plot",
+  Blue = "Raincloud Plot",
+  Green = "Violin Plot",
+}
 export interface HeatmapSettings {
   colorscale: Colorscale | "Discrete";
   reverse: boolean;

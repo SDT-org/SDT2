@@ -1,31 +1,31 @@
-type scaleNames =
-  | "Greys"
-  | "YlGnBu"
-  | "Greens"
-  | "YlOrRd"
-  | "Bluered"
-  | "RdBu"
-  | "Reds"
-  | "Blues"
-  | "Picnic"
-  | "Rainbow"
-  | "Portland"
-  | "Jet"
-  | "Hot"
-  | "Blackbody"
-  | "Earth"
-  | "Electric"
-  | "Viridis"
-  | "Cividis";
+  type scaleNames =
+    | "Greys"
+    | "YlGnBu"
+    | "Greens"
+    | "YlOrRd"
+    | "Bluered"
+    | "RdBu"
+    | "Reds"
+    | "Blues"
+    | "Picnic"
+    | "Rainbow"
+    | "Portland"
+    | "Jet"
+    | "Hot"
+    | "Blackbody"
+    | "Earth"
+    | "Electric"
+    | "Viridis"
+    | "Cividis";
 
-// https://github.com/plotly/plotly.js/blob/482802bd31cbf2638040357fcc4ff3bafa3292f8/src/components/colorscale/scales.js
-export const colorScales: {
-  [K in scaleNames]: [[number, string], ...[number, string][]];
-} = {
-  Greys: [
-    [0, "rgb(0,0,0)"],
-    [1, "rgb(255,255,255)"],
-  ],
+  // https://github.com/plotly/plotly.js/blob/482802bd31cbf2638040357fcc4ff3bafa3292f8/src/components/colorscale/scales.js
+  export const colorScales: {
+    [K in scaleNames]: [[number, string], ...[number, string][]];
+  } = {
+    Greys: [
+      [0, "rgb(0,0,0)"],
+      [1, "rgb(255,255,255)"],
+    ],
 
   YlGnBu: [
     [0, "rgb(8,29,88)"],
