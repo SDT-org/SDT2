@@ -1,6 +1,5 @@
 import React from "react";
 import { AppState, SetAppState } from "../appState";
-import { initialAppState } from "../appState";
 import {
   HeatmapData,
   HeatmapSettings,

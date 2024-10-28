@@ -69,21 +69,25 @@ def process_pair(id_sequence_pair, settings):
     id2 = ids[1]
     seq1 = id_sequence_pair[1][0]
     seq2 = id_sequence_pair[1][1]
+    if id1 == id2:
+        return id_sequence_pair[0], 0
+    open = 10 if settings["is_aa"] else 13
 
-    if settings["is_aa"]:
-        aln = parasail.nw_trace(seq1, seq2, 10, 1, parasail.blosum62)
-    else:
-        aln = parasail.nw_trace(seq1, seq2, 13, 1, parasail.blosum62)
+    try:
+        result = parasail.nw_trace(seq1, seq2, open, 1, parasail.blosum62)
+        query = result.traceback.query
+    except:
+        raise Exception("PARASAIL_TRACEBACK")
 
-    score = get_similarity(aln.traceback.query, aln.traceback.ref)
+    score = get_similarity(query, result.traceback.ref)
 
     if settings.get("aln_out"):
         fname = os.path.join(
-            settings["aln_out"], str(id1 + "__" + id2) + "_aligned.fasta"
+            settings["aln_out"], str(id1 + "_" + id2) + "_aligned.fasta"
         )
         seq_records = [
-            SeqRecord(Seq(aln.traceback.query), id=ids[0], description=""),
-            SeqRecord(Seq(aln.traceback.ref), id=ids[1], description=""),
+            SeqRecord(Seq(result.traceback.query), id=ids[0], description=""),
+            SeqRecord(Seq(result.traceback.ref), id=ids[1], description=""),
         ]
         SeqIO.write(seq_records, fname, "fasta")
 
@@ -106,7 +110,7 @@ def get_alignment_scores(
     for ids in combos:
         id_sequence_pairs.append([ids, [seq_dict[ids[0]], seq_dict[ids[1]]]])
 
-    # calculate the total combinations witout self
+    # calculate the total combinations including self
     total_pairs = sum(1 for _ in cwr(seq_ids, 2))
     set_pair_count(total_pairs)
 

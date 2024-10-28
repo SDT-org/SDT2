@@ -1,10 +1,5 @@
 import * as React from "react";
-import {
-  AppState,
-  AppStateContext,
-  initialAppState,
-  syncAppState,
-} from "../appState";
+import { AppState, AppStateContext, initialAppState } from "../appState";
 import { Runner } from "./Runner";
 import { Loader } from "./Loader";
 import { Viewer } from "./Viewer";
@@ -65,15 +60,38 @@ export const App = () => {
   };
   const [showDebugState, setShowDebugState] = React.useState(false);
 
+  const startProcessData = React.useCallback(() => {
+    window.pywebview.api
+      .run_process_data({
+        cluster_method: appState.client.cluster_method,
+        compute_cores: appState.client.compute_cores,
+      })
+      .catch((e) => {
+        if (e.toString().includes("PARASAIL_TRACEBACK")) {
+          alert(
+            "An error occured while aligning. " +
+              "Please ensure you have adequate swap/page size and system memory.\n\n" +
+              "Error ID: PARASAIL_TRACEBACK",
+          );
+          window.pywebview.api.cancel_run();
+        } else {
+          throw e;
+        }
+      });
+  }, [appState.client.cluster_method, appState.client.compute_cores]);
+
   const APP_VIEWS: { [K in AppState["view"]]: React.ReactElement } = {
-    runner: <Runner {...commonViewProps} />,
+    runner: <Runner {...commonViewProps} startProcessData={startProcessData} />,
     loader: <Loader {...commonViewProps} />,
     viewer: <Viewer {...commonViewProps} />,
   };
 
   if (typeof window.syncAppState !== "function") {
-    window.syncAppState = () => syncAppState(setAppState);
-    window.syncAppState();
+    window.syncAppState = (state: AppState) => {
+      setAppState((previous) => {
+        return { ...previous, ...state };
+      });
+    };
   }
 
   if (appState.debug) {

@@ -5,13 +5,6 @@ export const clusterMethods = ["Neighbor-Joining", "UPGMA", "None"] as const;
 
 export type SaveableImageFormat = "png" | "jpeg" | "svg";
 
-export type PerformanceProfile =
-  | "recommended"
-  | "best"
-  | "balanced"
-  | "low"
-  | "custom";
-
 export type AppState = {
   view: "runner" | "loader" | "viewer";
   filename: string[];
@@ -39,7 +32,6 @@ export type AppState = {
   };
   client: {
     dataView: "heatmap" | "plot";
-    performanceProfile: PerformanceProfile;
     cluster_method: (typeof clusterMethods)[number];
     compute_cores: number;
     error?: Error | null;
@@ -68,7 +60,6 @@ export const initialAppState: AppState = {
     saveFormat: "svg",
     showExportModal: false,
     compute_cores: 1,
-    performanceProfile: "recommended",
   },
   platform: {
     cores: 1,
@@ -93,22 +84,6 @@ export const useAppState = () => {
     throw new Error("useAppState must be used within an AppStateProvider");
   }
   return context;
-};
-
-export const syncAppState = (setAppState: SetAppState) => {
-  if (!window.pywebview) {
-    console.warn("Frontend-only mode detected, app state will not be synced.");
-    return Promise.resolve();
-  }
-
-  return window.pywebview.api.get_state().then((data) => {
-    setAppState((previous) => {
-      return {
-        ...previous,
-        ...data,
-      };
-    });
-  });
 };
 
 export default useAppState;
