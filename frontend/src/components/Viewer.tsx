@@ -3,11 +3,11 @@ import { AppState, SetAppState } from "../appState";
 import {
   HeatmapData,
   HeatmapSettings,
-  HistogramData,
-  HistogramSettings,
+  DistributionData,
+  DistributionSettings,
 } from "../plotTypes";
 import { Heatmap } from "./Heatmap";
-import { Histogram } from "./Histogram";
+import { Distribution } from "./Distribution";
 import {
   Button,
   Key,
@@ -29,7 +29,7 @@ export const Viewer = ({
   const [loading, setLoading] = React.useState(false);
   const [heatmapTickText, setHeatmapTickText] = React.useState<string[]>([""]);
   const [heatmapData, setHeatmapData] = React.useState<HeatmapData>();
-  const [histogramData, setHisogramData] = React.useState<HistogramData>();
+  const [DistributionData, setHisogramData] = React.useState<DistributionData>();
 
   const [heatmapSettings, setHeatmapSettings] = React.useState<HeatmapSettings>(
     {
@@ -57,8 +57,8 @@ export const Viewer = ({
     },
   );
 
-  const [histogramSettings, setHistogramSettings] =
-    React.useState<HistogramSettings>({
+  const [DistributionSettings, setDistributionSettings] =
+    React.useState<DistributionSettings>({
       lineColor: "tomato",
       lineWidth: 3,
       lineShape: "linear",
@@ -104,9 +104,9 @@ export const Viewer = ({
           }),
         });
       }),
-      window.pywebview.api.get_line_histo_data().then((data) => {
-        const histogramData = JSON.parse(data.replace(/\bNaN\b/g, "null"));
-        setHisogramData(histogramData);
+      window.pywebview.api.get_distribution_data().then((data) => {
+        const DistributionData = JSON.parse(data.replace(/\bNaN\b/g, "null"));
+        setHisogramData(DistributionData);
       }),
     ])
       .catch(() => {
@@ -133,8 +133,8 @@ export const Viewer = ({
       };
     });
   };
-  const updateHistogramSettings = (newState: Partial<HistogramSettings>) => {
-    setHistogramSettings((previous) => {
+  const updateDistributionSettings = (newState: Partial<DistributionSettings>) => {
+    setDistributionSettings((previous) => {
       return {
         ...previous,
         ...newState,
@@ -207,11 +207,11 @@ export const Viewer = ({
         ) : null}
       </TabPanel>
       <TabPanel id="plot" className="app-panel">
-        {histogramData ? (
-          <Histogram
-            data={histogramData}
-            settings={histogramSettings}
-            updateSettings={updateHistogramSettings}
+        {DistributionData ? (
+          <Distribution
+            data={DistributionData}
+            settings={DistributionSettings}
+            updateSettings={updateDistributionSettings}
           />
         ) : null}
       </TabPanel>

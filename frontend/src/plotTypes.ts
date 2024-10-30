@@ -11,10 +11,10 @@ export enum LineColor {
 }
 export enum DistributionPlots {
   Bar = "Bar Plot",
-  Line = "Line PLot",
-  Red = "Box Plot",
-  Blue = "Raincloud Plot",
-  Green = "Violin Plot",
+  Scatter = "Scatter PLot",
+  Box = "Box Plot",
+  Violin = "Violin Plot",
+  Contour = "Contour Plot",
 }
 export interface HeatmapSettings {
   colorscale: Colorscale | "Discrete";
@@ -41,7 +41,7 @@ export interface HeatmapSettings {
 }
 export type HeatmapData = string[][];
 
-export interface HistogramSettings {
+export interface defaultDistributionPlots {
   showHistogram: boolean;
   showLinePlot: boolean;
   lineColor: string;
@@ -61,7 +61,7 @@ export interface HistogramSettings {
   showTickLabels: boolean;
   showAxisLabels: boolean;
 }
-export type HistogramData = {
+export type DistributionData = {
   x: number[];
   y: number[];
   x2: number[];
@@ -69,4 +69,7 @@ export type HistogramData = {
   gc_stats: number[];
   len_stats: number[];
   hover: string[];
+};
+export type DistributionSettings = {
+
 };

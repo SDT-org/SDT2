@@ -483,7 +483,7 @@ class Api:
             )
         )
 
-    def get_line_histo_data(self):
+    def get_distribution_data(self):
         # caluclating hist data manually to allow for line and scatter
         data, _, min_val, max_val, gc_stats, len_stats = self.load_data()
         # Create a mask for the diagonal elements
@@ -564,7 +564,7 @@ if __name__ == "__main__":
         width=1200,
         height=900,
         min_size=(640, 480),
-        confirm_close=True,
+        confirm_close=False,
         # maximized=True
     )
 

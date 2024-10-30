@@ -29,7 +29,7 @@ declare global {
         get_available_memory: () => Promise<number>;
         cancel_run: () => Promise<void>;
         get_heatmap_data: () => Promise<string>;
-        get_line_histo_data: () => Promise<string>;
+        get_distribution_data: () => Promise<string>;
         show_about: () => Promise<void>;
         show_manual: () => Promise<void>;
         close_app: () => Promise<void>;
