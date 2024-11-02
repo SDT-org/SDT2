@@ -1,32 +1,26 @@
-// HistogramPlot.tsx
 import React from "react";
-import { PlotData, Layout } from "plotly.js-dist-min";
 import Plotly from "plotly.js-dist-min";
+import { Layout, PlotData } from "plotly.js-dist-min";
 import createPlotlyComponent from "react-plotly.js/factory";
+import {DistributionData,DistributionSettings } from "../plotTypes";
+
 
 const Plot = createPlotlyComponent(Plotly);
 
-interface HistogramPlotProps {
-  x: number[];
-  y: number[];
-  settings: {
-    color: string;
-    outlineColor: string;
-    outlineWidth: number;
-  };
+export interface HistogramPlotSettings {
+  color: string;
+  outlineColor: string;
+  outlineWidth: number;
 }
 
-const HistogramPlot: React.FC<HistogramPlotProps> = ({ x, y, settings }) => {
+
+
+const HistogramPlot: React.FC<DistributionData> = ({ x, y, gc_stats, len_stats, raw_mat, flat_mat }) => {
   const trace: Partial<PlotData> = {
-    type: "bar",
-    x: x,
-    y: y,
+    type: "histogram",
+    x: raw_mat,
     marker: {
-      color: settings.color,
-      line: {
-        width: settings.outlineWidth,
-        color: settings.outlineColor,
-      },
+      color: "pink",
     },
     name: "Histogram",
     hovertemplate: "Percent Identity: %{x}<br>Proportion: %{y}<extra></extra>",
@@ -57,9 +51,9 @@ const HistogramPlot: React.FC<HistogramPlotProps> = ({ x, y, settings }) => {
 
   const config = {
     responsive: true,
-    displayModeBar: false, // Hides the mode bar
+    displayModeBar: false, 
     scrollZoom: true,
-    displaylogo: false, // Hides the Plotly logo
+    displaylogo: false,
   };
 
   return (

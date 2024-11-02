@@ -8,7 +8,6 @@ import webview
 import tempfile
 import shutil
 import json
-import csv
 import pandas as pd
 import numpy as np
 import base64
@@ -21,6 +20,7 @@ from app_state import create_app_state
 from validations import validate_fasta
 from process_data import process_data
 from multiprocessing import Lock, Manager, Pool, cpu_count
+from flask import jsonify
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
@@ -490,13 +490,14 @@ class Api:
         diag_mask = np.eye(data.shape[0], dtype=bool)
 
         # Exclude the diagonal elements
-        data_no_diag = np.where(diag_mask, np.nan, data)
-
+        raw_mat = np.where(diag_mask, np.nan, data)
         # Flatten the data and remove NaN values
-        clean_vals = data_no_diag[~np.isnan(data_no_diag)].flatten()
-        clean_vals = np.rint(clean_vals)
+        flat_mat = raw_mat[~np.isnan(raw_mat)].flatten()
+        
+        round_vals = np.rint(flat_mat)
+
         # get unique values count number of occurances
-        uniquev, countsv = np.unique(clean_vals, return_counts=True)
+        uniquev, countsv = np.unique(round_vals, return_counts=True)
         props = np.around(countsv / countsv.sum(), 2)
         # subtract 1 from minimum value for chart clarity
         min_val = min_val - 1
@@ -515,9 +516,12 @@ class Api:
         data_to_dump = {
             "x": list(proportion_dict.keys()),
             "y": list(proportion_dict.values()),
+            "raw_mat":flat_mat.tolist(),
+            "round_mat":list(round_vals),
+            "gc":list(gc_stats),
+            "length":list(len_stats)
         }
-
-        return json.dumps(data_to_dump)
+        return jsonify(data_to_dump)
 
 
 def file_exists(path):

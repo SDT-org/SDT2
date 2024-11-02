@@ -2,6 +2,12 @@ import { colorScales } from "./colorScales";
 
 export type Colorscale = keyof typeof colorScales;
 
+interface DataToPlot {
+  x: number[];
+  y: number[];
+  gcContent:number[];
+  length:number[];
+}
 export enum LineColor {
   White = "white",
   Black = "black",
@@ -66,10 +72,13 @@ export type DistributionData = {
   y: number[];
   x2: number[];
   y2: number[];
+  raw_mat:number[];
+  round_mat:number[];
   gc_stats: number[];
   len_stats: number[];
   hover: string[];
 };
 export type DistributionSettings = {
+
 
 };
