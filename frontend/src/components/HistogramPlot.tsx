@@ -2,8 +2,9 @@ import React from "react";
 import Plotly from "plotly.js-dist-min";
 import { Layout, PlotData } from "plotly.js-dist-min";
 import createPlotlyComponent from "react-plotly.js/factory";
-import {DistributionData,DistributionSettings } from "../plotTypes";
+import {DistributionData} from "../plotTypes";
 
+// need to import settings
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -15,16 +16,21 @@ export interface HistogramPlotSettings {
 
 
 
-const HistogramPlot: React.FC<DistributionData> = ({ x, y, gc_stats, len_stats, raw_mat, flat_mat }) => {
+const HistogramPlot = ({ x, y, gc_stats, len_stats, raw_mat, }: DistributionData) => {
   const trace: Partial<PlotData> = {
-    type: "histogram",
     x: raw_mat,
-    marker: {
-      color: "pink",
-    },
+    type: "histogram",
+        histnorm: 'probability',
+        marker: {
+          color: 'pink',
+        },
     name: "Histogram",
     hovertemplate: "Percent Identity: %{x}<br>Proportion: %{y}<extra></extra>",
   };
+
+  console.log('raw_mat', raw_mat);
+  console.log('len_stats', len_stats);
+  console.log('gc_stats', gc_stats);
 
   const layout: Partial<Layout> = {
     margin: {

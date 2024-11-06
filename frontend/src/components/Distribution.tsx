@@ -1,7 +1,7 @@
 import React from "react";
 import HistogramPlot from "./HistogramPlot";
 import { NumberInput } from "./NumberInput";
-import { DistributionData, DistributionSettings, defaultDistributionPlots } from "../plottypes";
+import { DistributionData, DistributionSettings } from "../plotTypes";
 
 enum ColorOption {
   White = "white",
@@ -33,7 +33,7 @@ export const Distribution = ({
   }
 
   // Assign x and y explicitly
-  const { x, y } = data;
+  const { x, y,raw_mat } = data;
 
   return (
     <>
@@ -140,10 +140,10 @@ export const Distribution = ({
                 <label htmlFor="bar-color">Color</label>
                 <select
                   id="bar-color"
-                  value={settings.barColor}
+                  value={settings.color}
                   disabled={!settings.showHistogram}
                   onChange={(e) =>
-                    updateSettings({ barColor: e.target.value })
+                    updateSettings({ color: e.target.value })
                   }
                 >
                   {Object.entries(ColorOption).map(([key, value]) => (
@@ -202,6 +202,7 @@ export const Distribution = ({
           <HistogramPlot
             x={x}
             y={y}
+            raw_mat={raw_mat}
             settings={{
               color: settings.barColor,
               outlineColor: settings.barlineColor,

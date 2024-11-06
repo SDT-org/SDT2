@@ -47,7 +47,7 @@ export interface HeatmapSettings {
 }
 export type HeatmapData = string[][];
 
-export interface defaultDistributionPlots {
+export interface DistributionSettings {
   showHistogram: boolean;
   showLinePlot: boolean;
   lineColor: string;
@@ -77,8 +77,4 @@ export type DistributionData = {
   gc_stats: number[];
   len_stats: number[];
   hover: string[];
-};
-export type DistributionSettings = {
-
-
 };

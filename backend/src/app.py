@@ -20,7 +20,6 @@ from app_state import create_app_state
 from validations import validate_fasta
 from process_data import process_data
 from multiprocessing import Lock, Manager, Pool, cpu_count
-from flask import jsonify
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
@@ -493,7 +492,8 @@ class Api:
         raw_mat = np.where(diag_mask, np.nan, data)
         # Flatten the data and remove NaN values
         flat_mat = raw_mat[~np.isnan(raw_mat)].flatten()
-        
+        print(gc_stats)
+        print(len_stats)
         round_vals = np.rint(flat_mat)
 
         # get unique values count number of occurances
@@ -516,12 +516,12 @@ class Api:
         data_to_dump = {
             "x": list(proportion_dict.keys()),
             "y": list(proportion_dict.values()),
-            "raw_mat":flat_mat.tolist(),
+            "raw_mat":list(flat_mat),
             "round_mat":list(round_vals),
             "gc":list(gc_stats),
             "length":list(len_stats)
         }
-        return jsonify(data_to_dump)
+        return json.dumps(data_to_dump)
 
 
 def file_exists(path):
