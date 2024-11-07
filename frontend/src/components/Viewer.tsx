@@ -1,11 +1,6 @@
 import React from "react";
 import { AppState, SetAppState } from "../appState";
-import {
-  HeatmapData,
-  HeatmapSettings,
-  DistributionData,
-  DistributionSettings,
-} from "../plotTypes";
+import { HeatmapData, HeatmapSettings, DistributionData } from "../plotTypes";
 import { Heatmap } from "./Heatmap";
 import { Distribution } from "./Distribution";
 import {
@@ -29,7 +24,8 @@ export const Viewer = ({
   const [loading, setLoading] = React.useState(false);
   const [heatmapTickText, setHeatmapTickText] = React.useState<string[]>([""]);
   const [heatmapData, setHeatmapData] = React.useState<HeatmapData>();
-  const [DistributionData, setHisogramData] = React.useState<DistributionData>();
+  const [DistributionData, setHisogramData] =
+    React.useState<DistributionData>();
 
   const [heatmapSettings, setHeatmapSettings] = React.useState<HeatmapSettings>(
     {
@@ -56,28 +52,6 @@ export const Viewer = ({
       cutoff_2: 75,
     },
   );
-
-  const [DistributionSettings, setDistributionSettings] =
-    React.useState<DistributionSettings>({
-      lineColor: "tomato",
-      lineWidth: 3,
-      lineShape: "linear",
-      barlineColor: "tomato",
-      barOutlineWidth: 1,
-      barColor: "lightblue",
-      showHistogram: true,
-      showLinePlot: false,
-      showScatterPlot: false,
-      markerSymbol: "square",
-      markerColor: "tomato",
-      markerSize: 7,
-      showGrid: true,
-      showLine: true,
-      showZeroLine: true,
-      plotTitle: "Distribution of Percent Identities",
-      showTickLabels: true,
-      showAxisLabels: true,
-    });
 
   const getData = () => {
     setLoading(true);
@@ -127,14 +101,6 @@ export const Viewer = ({
 
   const updateHeatmapState = (newState: Partial<HeatmapSettings>) => {
     setHeatmapSettings((previous) => {
-      return {
-        ...previous,
-        ...newState,
-      };
-    });
-  };
-  const updateDistributionSettings = (newState: Partial<DistributionSettings>) => {
-    setDistributionSettings((previous) => {
       return {
         ...previous,
         ...newState,
@@ -207,13 +173,7 @@ export const Viewer = ({
         ) : null}
       </TabPanel>
       <TabPanel id="plot" className="app-panel">
-        {DistributionData ? (
-          <Distribution
-            data={DistributionData}
-            settings={DistributionSettings}
-            updateSettings={updateDistributionSettings}
-          />
-        ) : null}
+        {DistributionData ? <Distribution data={DistributionData} /> : null}
       </TabPanel>
       {loading ? <div className="api-loader"></div> : null}
     </Tabs>

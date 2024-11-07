@@ -5,8 +5,8 @@ export type Colorscale = keyof typeof colorScales;
 interface DataToPlot {
   x: number[];
   y: number[];
-  gcContent:number[];
-  length:number[];
+  gcContent: number[];
+  length: number[];
 }
 export enum LineColor {
   White = "white",
@@ -47,33 +47,13 @@ export interface HeatmapSettings {
 }
 export type HeatmapData = string[][];
 
-export interface DistributionSettings {
-  showHistogram: boolean;
-  showLinePlot: boolean;
-  lineColor: string;
-  lineWidth: number;
-  lineShape: string;
-  barColor: string;
-  barlineColor: string;
-  barOutlineWidth: number;
-  markerSymbol: string;
-  markerSize: number;
-  markerColor: string;
-  plotTitle: string;
-  showGrid: boolean;
-  showLine: boolean;
-  showZeroLine: boolean;
-  showScatterPlot: boolean;
-  showTickLabels: boolean;
-  showAxisLabels: boolean;
-}
 export type DistributionData = {
   x: number[];
   y: number[];
   x2: number[];
   y2: number[];
-  raw_mat:number[];
-  round_mat:number[];
+  raw_mat: number[];
+  round_mat: number[];
   gc_stats: number[];
   len_stats: number[];
   hover: string[];
