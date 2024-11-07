@@ -86,16 +86,17 @@ export const Histogram = ({
   const histogramTrace = React.useMemo(
     () =>
       ({
-        type: "bar",
-        x: data.x,
-        y: data.y,
+        type: "histogram",
+        x: data.raw_mat,
+        histnorm: 'probability',
         marker: {
           color: settings.barColor,
-          line: {
-            width: settings.barOutlineWidth,
-            color: settings.barlineColor,
-          },
+           line: {
+             width: settings.barOutlineWidth,
+             color: settings.barlineColor,
+           },
         },
+        nbinsx: data.x.length,
         name: "Histogram",
         hovertemplate:
           "Percent Identity: %{x}<br>Proportion: %{y}<extra></extra>",
@@ -103,42 +104,42 @@ export const Histogram = ({
     [data, settings],
   );
 
-  const linePlotTrace = React.useMemo(
-    () =>
-      ({
-        x: data.x,
-        y: data.y,
-        type: "scatter",
-        line: {
-          shape: settings.lineShape,
-          color: settings.lineColor,
-          width: settings.lineWidth,
-        },
-        name: "Line Plot",
-        hovertemplate:
-          "Percent Identity: %{x}<br>Proportion: %{y}<extra></extra>",
-      }) as Partial<PlotData>,
-    [data, settings],
-  );
+  // const linePlotTrace = React.useMemo(
+  //   () =>
+  //     ({
+  //       x: data.x,
+  //       y: data.y,
+  //       type: "scatter",
+  //       line: {
+  //         shape: settings.lineShape,
+  //         color: settings.lineColor,
+  //         width: settings.lineWidth,
+  //       },
+  //       name: "Line Plot",
+  //       hovertemplate:
+  //         "Percent Identity: %{x}<br>Proportion: %{y}<extra></extra>",
+  //     }) as Partial<PlotData>,
+  //   [data, settings],
+  // );
 
-  const scatterPlotTrace = React.useMemo(
-    () =>
-      ({
-        x: data.x,
-        y: data.y,
-        type: "scatter",
-        mode: "markers",
-        marker: {
-          size: settings.markerSize,
-          symbol: settings.markerSymbol,
-          color: settings.markerColor,
-        },
-        name: "Line Plot",
-        hovertemplate:
-          "Percent Identity: %{x}<br>Proportion: %{y}<extra></extra>",
-      }) as Partial<PlotData>,
-    [data, settings],
-  );
+  // const scatterPlotTrace = React.useMemo(
+  //   () =>
+  //     ({
+  //       x: data.x,
+  //       y: data.y,
+  //       type: "scatter",
+  //       mode: "markers",
+  //       marker: {
+  //         size: settings.markerSize,
+  //         symbol: settings.markerSymbol,
+  //         color: settings.markerColor,
+  //       },
+  //       name: "Line Plot",
+  //       hovertemplate:
+  //         "Percent Identity: %{x}<br>Proportion: %{y}<extra></extra>",
+  //     }) as Partial<PlotData>,
+  //   [data, settings],
+  // );
 
   const layout = React.useMemo(
     () =>
