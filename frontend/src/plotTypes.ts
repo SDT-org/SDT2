@@ -2,12 +2,6 @@ import { colorScales } from "./colorScales";
 
 export type Colorscale = keyof typeof colorScales;
 
-interface DataToPlot {
-  x: number[];
-  y: number[];
-  gcContent: number[];
-  length: number[];
-}
 export enum LineColor {
   White = "white",
   Black = "black",

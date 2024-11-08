@@ -88,7 +88,7 @@ export const Histogram = ({
       ({
         type: "histogram",
         x: data.raw_mat,
-        histnorm: 'probability',
+        histnorm: 'percent',
         marker: {
           color: settings.barColor,
            line: {
@@ -96,7 +96,7 @@ export const Histogram = ({
              color: settings.barlineColor,
            },
         },
-        nbinsx: data.x.length,
+        nbinsx: data.raw_mat.length,
         name: "Histogram",
         hovertemplate:
           "Percent Identity: %{x}<br>Proportion: %{y}<extra></extra>",
@@ -107,7 +107,6 @@ export const Histogram = ({
   // const linePlotTrace = React.useMemo(
   //   () =>
   //     ({
-  //       x: data.x,
   //       y: data.y,
   //       type: "scatter",
   //       line: {
@@ -147,10 +146,10 @@ export const Histogram = ({
         title: settings.plotTitle,
         xaxis: {
           title: settings.showAxisLabels ? "Percent Pairwise Identity" : "",
-          range: [
-            Math.floor(Math.min(...data.x)),
-            Math.ceil(Math.max(...data.x)),
-          ],
+          // range: [
+          //   Math.floor(Math.min(...data.x)),
+          //   Math.ceil(Math.max(...data.x)),
+          // ],
           fixedrange: true,
           dtick: 1,
           showline: settings.showLine,

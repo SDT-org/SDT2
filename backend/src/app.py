@@ -359,13 +359,11 @@ class Api:
         # SDT1 matrix CSVs do not have padding for columns
         
         ######
-        stats_col= os.path.join(state.tempdir_path, f"{file_base}_stats.csv")
-        stat_col_names = ['Sequence ID', 'GC %', 'Sequence Length'] 
-        stats_df = pd.read_csv(stats_col, header=None, names=stat_col_names)
-
-
-        gc_stats = stats_df.loc[:,'GC %']
-        len_stats = stats_df.loc[:,'Sequence Length']
+        stats_col= os.path.join(state.tempdir_path, f"{file_base}_stats.csv") 
+        stats_df = pd.read_csv(stats_col, header=0)
+        gc_stats = stats_df["GC %"].map('{:.0%}'.format).tolist()
+        len_stats = stats_df["Sequence Length"].tolist()
+        print(len_stats)
         #######
         
         with open(matrix_path, "r") as temp_f:
@@ -492,8 +490,6 @@ class Api:
         raw_mat = np.where(diag_mask, np.nan, data)
         # Flatten the data and remove NaN values
         flat_mat = raw_mat[~np.isnan(raw_mat)].flatten()
-        print(gc_stats)
-        print(len_stats)
         round_vals = np.rint(flat_mat)
 
         # get unique values count number of occurances
@@ -512,13 +508,14 @@ class Api:
         proportion_dict.update(
             {int(val): float(prop) for val, prop in zip(uniquev, props)}
         )
-
+        print(list(proportion_dict.keys()))
+        print(list(proportion_dict.values()))
         data_to_dump = {
             "x": list(proportion_dict.keys()),
             "y": list(proportion_dict.values()),
             "raw_mat":list(flat_mat),
             "round_mat":list(round_vals),
-            "gc":list(gc_stats),
+            "gc": gc_stats,
             "length":list(len_stats)
         }
         return json.dumps(data_to_dump)
