@@ -74,6 +74,8 @@ export const Violin = ({
     showAxisLabels: true,
   });
 
+  console.log(data); 
+
   const updateSettings = (newState: Partial<typeof settings>) => {
     setSettings((previous) => {
       return {
@@ -82,12 +84,11 @@ export const Violin = ({
       };
     });
   };
-
   const violinTrace = React.useMemo(
     () =>
       ({
         type: 'violin',
-        y: data.raw_mat, // x-y switches h-v
+        y: data.gc, // x-y switches h-v
         points: 'all',
         pointpos: 0,
         box: {

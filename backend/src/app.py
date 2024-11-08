@@ -363,7 +363,6 @@ class Api:
         stats_df = pd.read_csv(stats_col, header=0)
         gc_stats = stats_df["GC %"].map('{:.0%}'.format).tolist()
         len_stats = stats_df["Sequence Length"].tolist()
-        print(len_stats)
         #######
         
         with open(matrix_path, "r") as temp_f:
@@ -508,15 +507,13 @@ class Api:
         proportion_dict.update(
             {int(val): float(prop) for val, prop in zip(uniquev, props)}
         )
-        print(list(proportion_dict.keys()))
-        print(list(proportion_dict.values()))
         data_to_dump = {
             "x": list(proportion_dict.keys()),
             "y": list(proportion_dict.values()),
             "raw_mat":list(flat_mat),
             "round_mat":list(round_vals),
-            "gc": gc_stats,
-            "length":list(len_stats)
+            "gc_stats": list(gc_stats),
+            "length_stats":list(len_stats)
         }
         return json.dumps(data_to_dump)
 
