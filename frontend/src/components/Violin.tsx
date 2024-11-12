@@ -16,27 +16,6 @@ enum ColorOption {
   Purple = "plum",
   Pink = "lightcoral",
 }
-enum LineOption {
-  Bar = "hvh",
-  Spline = "spline",
-  Linear = "linear",
-}
-enum MarkerOption {
-  Circle = "circle",
-  Square = "square",
-  Diamond = "diamond",
-  Hexagram = "hexagram",
-  TriangleUp = "triangle-up",
-  TriangleDown = "triangle-down",
-  Pentagon = "pentagon",
-  CircleOpen = "circle-open",
-  SquareOpen = "square-open",
-  DiamondOpen = "diamond-open",
-  HexagramOpen = "hexagram-open",
-  TriangleUpOpen = "triangle-up-open",
-  TriangleDownOpen = "triangle-down-open",
-  PentagonOpen = "pentagon-open",
-}
 
 export const Violin = ({
   data,
@@ -57,21 +36,23 @@ export const Violin = ({
     lineColor: "tomato",
     lineWidth: 3,
     lineShape: "linear",
-    barlineColor: "tomato",
+    boxlineColor: "tomato",
+    boxlineWidth: 3,
     barOutlineWidth: 1,
-    barColor: "lightblue",
-    showHistogram: true,
-    showLinePlot: false,
-    showScatterPlot: false,
-    markerSymbol: "square",
+    fillColor: "lightblue",
     markerColor: "tomato",
     markerSize: 7,
+    points: "all",
+    showViolin: true,
+    showBox: true,
+    showPoints: true,
+    showZeroLine: false,
     showGrid: true,
-    showLine: true,
-    showZeroLine: true,
     plotTitle: "Distribution of Percent Identities",
     showTickLabels: true,
     showAxisLabels: true,
+    bandwidth: 8,
+    jitter: .3
   });
 
   console.log(data); 
@@ -88,24 +69,34 @@ export const Violin = ({
     () =>
       ({
         type: 'violin',
-        y: data.gc, // x-y switches h-v
-        points: 'all',
-        pointpos: 0,
-        box: {
-          visible: true
-        },
-        boxpoints: 'outliers',
+        y: data.raw_mat, // x-y switches h-v
         line: {
-          color: settings.barlineColor
+          color: settings.lineColor,
+          width: settings.lineWidth
         },
-        fillcolor: settings.barColor,
+        points: settings.points,
+        visible: settings.showViolin,
+        pointpos: 0,
+        fillcolor: settings.fillColor,
         opacity: 0.6,
+        box: {
+          visible: settings.showBox,
+          line:{ 
+            color: settings.boxlineColor,
+            width: settings.boxlineWidth
+          }
+        },
+
+        marker: {
+        color:settings.markerColor,
+        size:settings.markerSize
+        },
         meanline: {
           visible: true 
         },
         bandwidth: 8,
-        hovertemplate:
-          "Percent Identity: %{x}<br>Proportion: %{y}<extra></extra>",
+        jitter: .5,
+        hovertemplate: "Percent Identity: %{x}<br>Percent Identity: %{y}<extra></extra>",
       }) as Partial<PlotData>,
     [data, settings],
   );
@@ -115,27 +106,15 @@ export const Violin = ({
       ({
         title: settings.plotTitle,
         xaxis: {
-          title: settings.showAxisLabels ? "Percent Pairwise Identity" : "",
-          // range: [
-          //   Math.floor(Math.min(...data.x)),
-          //   Math.ceil(Math.max(...data.x)),
-          // ],
           fixedrange: true,
           dtick: 1,
-          showline: settings.showLine,
-          zeroline: settings.showLine,
-          showgrid: settings.showGrid,
           showticklabels: settings.showTickLabels,
         },
         yaxis: {
-          title: settings.showAxisLabels
-            ? "Proportion of Pairwise Identities"
-            : "",
           side: "left",
           rangemode: "tozero",
           fixedrange: true,
-          showline: settings.showLine,
-          zeroline: settings.showLine,
+          zeroline: false,
           showgrid: settings.showGrid,
           showticklabels: settings.showTickLabels,
         },
@@ -202,15 +181,15 @@ export const Violin = ({
               </div>
               <div className="col-2">
                 <div className="field">
-                  <label htmlFor="showLine">
+                  <label htmlFor="showBox">
                     <input
                       type="checkbox"
-                      name="showLine"
-                      id="showLine"
-                      checked={settings.showLine}
+                      name="showBox"
+                      id="showBox"
+                      checked={settings.showBox}
                       onChange={() =>
                         updateSettings({
-                          showLine: !settings.showLine,
+                          showBox: !settings.showBox,
                         })
                       }
                     />
@@ -240,99 +219,111 @@ export const Violin = ({
                 <label className="header">
                   <input
                     type="checkbox"
-                    checked={settings.showHistogram}
+                    checked={settings.showViolin}
                     onChange={(e) =>
-                      updateSettings({ showHistogram: e.target.checked })
+                      updateSettings({ showViolin: e.target.checked, })
                     }
                   />
-                  Bar Plot
+                  Violin Plot
                 </label>
               </div>
-              <div className="field">
-                <label htmlFor="bar-color">Color</label>
-                <select
-                  id="bar-color"
-                  value={settings.barColor}
-                  disabled={!settings.showHistogram}
-                  onChange={(e) => updateSettings({ barColor: e.target.value })}
-                >
-                  {Object.entries(ColorOption).map(([key, value]) => (
-                    <option key={key} value={value}>
-                      {key}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-2">
-                <div className="field">
-                  <label htmlFor="bar-line-color">Outline</label>
-                  <select
-                    id="bar-line-color"
-                    value={settings.barlineColor}
-                    disabled={!settings.showHistogram}
-                    onChange={(e) =>
-                      updateSettings({ barlineColor: e.target.value })
-                    }
-                  >
-                    {Object.entries(ColorOption).map(([key, value]) => (
-                      <option key={key} value={value}>
-                        {key}
-                      </option>
-                    ))}
-                  </select>
+              <div className="row">
+                <div className="col-2">
+                  <div className="field">
+                    <label htmlFor="fill-color">Fill Color</label>
+                    <select
+                      id="fill-color"
+                      value={settings.fillColor}
+                      disabled={!settings.showViolin}
+                      onChange={(e) => updateSettings({ fillColor: e.target.value })}
+                    >
+                      {Object.entries(ColorOption).map(([key, value]) => (
+                        <option key={key} value={value}>
+                          {key}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
-                <NumberInput
-                  label="Outline Width"
-                  field="barOutlineWidth"
-                  value={settings.barOutlineWidth}
-                  disabled={!settings.showHistogram}
-                  updateValue={updateSettings}
-                  min={0}
-                  max={5}
-                  step={1}
-                />
+                    
+                <div className="col-2">
+                  <div className="field">
+                    <label htmlFor="points">Points</label>
+                    <select
+                      id="points"
+                      value={settings.points}
+                      onChange={(e) =>
+                        updateSettings({
+                          points: e.target.value as "all" | "outliers" | "suspectedoutliers" | "false",
+                        })
+                      }
+                    >
+                      {["all", "outliers", "suspectedoutliers", "false"].map((value) => (
+                        <option key={value} value={value}>
+                          {value}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
               </div>
+                    
+              <div className="row">
+                <div className="col-2">
+                  <div className="field">
+                    <label htmlFor="line-color">Line Color</label>
+                    <select
+                      id="line-color"
+                      value={settings.lineColor}
+                      disabled={!settings.showViolin}
+                      onChange={(e) => updateSettings({ lineColor: e.target.value })}
+                    >
+                      {Object.entries(ColorOption).map(([key, value]) => (
+                        <option key={key} value={value}>
+                          {key}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                    
+                <div className="col-2">
+                  <NumberInput
+                    label="Line Width"
+                    field="lineWidth"
+                    value={settings.lineWidth}
+                    disabled={!settings.showViolin}
+                    updateValue={updateSettings}
+                    min={0}
+                    max={5}
+                    step={1}
+                  />
+                </div>
+              </div>
+
             </div>
             <div className="group">
               <div className="field">
                 <label className="header">
                   <input
                     type="checkbox"
-                    checked={settings.showLinePlot}
+                    checked={settings.showBox}
                     onChange={(e) =>
-                      updateSettings({ showLinePlot: e.target.checked })
+                      updateSettings({ showBox: e.target.checked })
                     }
                   />
-                  Line Plot
+                  Box Plot
                 </label>
-              </div>
-
-              <div className="field">
-                <label htmlFor="line-shape">Shape</label>
-                <select
-                  id="line-shape"
-                  value={settings.lineShape}
-                  disabled={!settings.showLinePlot}
-                  onChange={(e) =>
-                    updateSettings({ lineShape: e.target.value })
-                  }
-                >
-                  {Object.entries(LineOption).map(([key, value]) => (
-                    <option key={key} value={value}>
-                      {key}
-                    </option>
-                  ))}
-                </select>
               </div>
               <div className="col-2">
                 <div className="field">
-                  <label htmlFor="line-color">Color</label>
+                  <label htmlFor="box-line-color">Color</label>
                   <select
-                    id="line-color"
-                    value={settings.lineColor}
-                    disabled={!settings.showLinePlot}
+                    id="box-line-color"
+                    value={settings.boxlineColor}
+                    disabled={!settings.showBox}
                     onChange={(e) =>
-                      updateSettings({ lineColor: e.target.value })
+                      updateSettings({ boxlineColor: e.target.value })
                     }
                   >
                     {Object.entries(ColorOption).map(([key, value]) => (
@@ -344,9 +335,9 @@ export const Violin = ({
                 </div>
                 <NumberInput
                   label="Width"
-                  field="lineWidth"
-                  value={settings.lineWidth}
-                  isDisabled={!settings.showLinePlot}
+                  field="boxlineWidth"
+                  value={settings.boxlineWidth}
+                  isDisabled={!settings.showBox}
                   updateValue={updateSettings}
                   min={0}
                   max={10}
@@ -359,30 +350,13 @@ export const Violin = ({
                 <label className="header">
                   <input
                     type="checkbox"
-                    checked={settings.showScatterPlot}
+                    checked={settings.showPoints}
                     onChange={(e) =>
-                      updateSettings({ showScatterPlot: e.target.checked })
+                      updateSettings({ showPoints: e.target.checked })
                     }
                   />
-                  Markers
+                  Show Points
                 </label>
-              </div>
-              <div className="field">
-                <label htmlFor="marker-symbol">Symbol</label>
-                <select
-                  id="marker-symbol"
-                  value={settings.markerSymbol}
-                  disabled={!settings.showScatterPlot}
-                  onChange={(e) =>
-                    updateSettings({ markerSymbol: e.target.value })
-                  }
-                >
-                  {Object.entries(MarkerOption).map(([key, value]) => (
-                    <option key={key} value={value}>
-                      {key}
-                    </option>
-                  ))}
-                </select>
               </div>
               <div className="col-2">
                 <div className="field">
@@ -390,7 +364,7 @@ export const Violin = ({
                   <select
                     id="markerColor"
                     value={settings.markerColor}
-                    disabled={!settings.showScatterPlot}
+                    disabled={!settings.showPoints}
                     onChange={(e) =>
                       updateSettings({ markerColor: e.target.value })
                     }
@@ -407,11 +381,11 @@ export const Violin = ({
                     label="Size"
                     field="markerSize"
                     value={settings.markerSize}
-                    isDisabled={!settings.showScatterPlot}
+                    isDisabled={!settings.points}
                     updateValue={updateSettings}
                     min={0}
                     max={20}
-                    step={1} //want to change to .5 but breaks
+                    step={1} 
                   />
                 </div>
               </div>
@@ -423,9 +397,9 @@ export const Violin = ({
       <div className="app-main">
         <Plot
           data={[
-            settings.showHistogram ? violinTrace : {},
-            settings.showLinePlot ? linePlotTrace : {},
-            settings.showScatterPlot ? scatterPlotTrace : {}, // Add a new trace for the scatter plot
+            settings.showViolin ? violinTrace : {},
+            // settings.showBox ? linePlotTrace : {},
+            // settings. ? scatterPlotTrace : {}, // Add a new trace for the scatter plot
           ]}
           layout={layout}
           config={{
