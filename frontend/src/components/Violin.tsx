@@ -82,9 +82,9 @@ export const Violin = ({
         },
         
         fillcolor: settings.fillColor,
-        opacity: 0.6,
+        opacity: .5,
   
-        points: settings.points,
+        points: settings.points === "None" ? false : settings.points, // Convert "None" to "false"
         pointpos: 0,
         jitter: 0.5,
         bandwidth: 8,
@@ -269,16 +269,17 @@ export const Violin = ({
                       value={settings.points}
                       onChange={(e) =>
                         updateSettings({
-                          points: e.target.value as "all" | "outliers" | "suspectedoutliers" | "false",
+                          points: e.target.value as "all" | "outliers" | "suspectedoutliers" | "None",
                         })
                       }
                     >
-                      {["all", "outliers", "suspectedoutliers", "false"].map((value) => (
+                      {["all", "outliers", "suspectedoutliers", "None"].map((value) => (
                         <option key={value} value={value}>
-                          {value}
+                          {value === "None" ? "None" : value}
                         </option>
                       ))}
                     </select>
+                    
                   </div>
                 </div>
               </div>
@@ -309,7 +310,7 @@ export const Violin = ({
                       disabled={!settings.showViolin}
                       updateValue={updateSettings}
                       min={0}
-                      max={5}
+                      max={20}
                       step={1}
                     />
                   </div>
@@ -354,7 +355,7 @@ export const Violin = ({
                   isDisabled={!settings.showBox}
                   updateValue={updateSettings}
                   min={0}
-                  max={10}
+                  max={20}
                   step={1}
                 />
               </div>
@@ -374,7 +375,7 @@ export const Violin = ({
               </div>
               <div className="col-2">
                 <div className="field">
-                  <label htmlFor="markerColor">Color</label>
+                  <label htmlFor="markerColor">Point Color</label>
                   <select
                     id="markerColor"
                     value={settings.markerColor}
@@ -392,7 +393,7 @@ export const Violin = ({
                 </div>
                 <div className="field">
                   <NumberInput
-                    label="Size"
+                    label="Point Size"
                     field="markerSize"
                     value={settings.markerSize}
                     isDisabled={!settings.points}

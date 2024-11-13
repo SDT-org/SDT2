@@ -15,6 +15,7 @@ enum ColorOption {
   Green = "lightgreen",
   Purple = "plum",
   Pink = "lightcoral",
+  None = "rgba(0,0,0,0)",
 }
 enum LineOption {
   Bar = "hvh",
@@ -66,6 +67,7 @@ export const Histogram = ({
     markerSymbol: "square",
     markerColor: "tomato",
     markerSize: 7,
+    binSize: data.raw_mat.length,
     showGrid: true,
     showLine: true,
     showZeroLine: true,
@@ -90,13 +92,17 @@ export const Histogram = ({
         x: data.raw_mat,
         histnorm: 'percent',
         marker: {
+          colorscale: 'Viridis',
           color: settings.barColor,
            line: {
              width: settings.barOutlineWidth,
              color: settings.barlineColor,
            },
         },
-        nbinsx: data.raw_mat.length,
+        nbinsx: settings.binSize,
+        // xbins: {
+        //   size: settings.binSize, // Set the bin width 
+        // },
         name: "Histogram",
         hovertemplate:
           "Percent Identity: %{x}<br>Proportion: %{y}<extra></extra>",
@@ -104,41 +110,6 @@ export const Histogram = ({
     [data, settings],
   );
 
-  // const linePlotTrace = React.useMemo(
-  //   () =>
-  //     ({
-  //       y: data.y,
-  //       type: "scatter",
-  //       line: {
-  //         shape: settings.lineShape,
-  //         color: settings.lineColor,
-  //         width: settings.lineWidth,
-  //       },
-  //       name: "Line Plot",
-  //       hovertemplate:
-  //         "Percent Identity: %{x}<br>Proportion: %{y}<extra></extra>",
-  //     }) as Partial<PlotData>,
-  //   [data, settings],
-  // );
-
-  // const scatterPlotTrace = React.useMemo(
-  //   () =>
-  //     ({
-  //       x: data.x,
-  //       y: data.y,
-  //       type: "scatter",
-  //       mode: "markers",
-  //       marker: {
-  //         size: settings.markerSize,
-  //         symbol: settings.markerSymbol,
-  //         color: settings.markerColor,
-  //       },
-  //       name: "Line Plot",
-  //       hovertemplate:
-  //         "Percent Identity: %{x}<br>Proportion: %{y}<extra></extra>",
-  //     }) as Partial<PlotData>,
-  //   [data, settings],
-  // );
 
   const layout = React.useMemo(
     () =>
@@ -146,10 +117,6 @@ export const Histogram = ({
         title: settings.plotTitle,
         xaxis: {
           title: settings.showAxisLabels ? "Percent Pairwise Identity" : "",
-          // range: [
-          //   Math.floor(Math.min(...data.x)),
-          //   Math.ceil(Math.max(...data.x)),
-          // ],
           fixedrange: true,
           dtick: 1,
           showline: settings.showLine,
@@ -265,33 +232,34 @@ export const Histogram = ({
                 </div>
               </div>
             </div>
-            <div className="group">
-              <div className="field">
-                <label className="header">
-                  <input
-                    type="checkbox"
-                    checked={settings.showHistogram}
+            <div className="row">
+              <div className="col-2">
+                <div className="field">
+                  <label htmlFor="bin-color">Bin Color</label>
+                  <select
+                    id="bin-color"
+                    value={settings.barColor}
+                    disabled={!settings.showHistogram}
                     onChange={(e) =>
-                      updateSettings({ showHistogram: e.target.checked })
+                      updateSettings({ barColor: e.target.value })
                     }
-                  />
-                  Bar Plot
-                </label>
-              </div>
-              <div className="field">
-                <label htmlFor="bar-color">Color</label>
-                <select
-                  id="bar-color"
-                  value={settings.barColor}
-                  disabled={!settings.showHistogram}
-                  onChange={(e) => updateSettings({ barColor: e.target.value })}
-                >
-                  {Object.entries(ColorOption).map(([key, value]) => (
-                    <option key={key} value={value}>
-                      {key}
-                    </option>
-                  ))}
-                </select>
+                  >
+                    {Object.entries(ColorOption).map(([key, value]) => (
+                      <option key={key} value={value}>
+                        {key}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <NumberInput
+                  label="Bin Size"
+                  field="binSize"
+                  value={settings.binSize}
+                  updateValue={updateSettings}
+                  min={1}  
+                  max={20}
+                  step={1}
+                />
               </div>
               <div className="col-2">
                 <div className="field">
@@ -317,9 +285,9 @@ export const Histogram = ({
                   value={settings.barOutlineWidth}
                   disabled={!settings.showHistogram}
                   updateValue={updateSettings}
-                  min={0}
-                  max={5}
-                  step={1}
+                  min={2}
+                  max={data.raw_mat.length}
+                  step={10}
                 />
               </div>
             </div>
