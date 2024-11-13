@@ -31,6 +31,8 @@ export const Violin = ({
       </div>
     );
   }
+  const minDataValue = Math.min(...data.raw_mat);
+  const maxDataValue = Math.max(...data.raw_mat);
 
   const [settings, setSettings] = React.useState({
     lineColor: "tomato",
@@ -48,6 +50,7 @@ export const Violin = ({
     showPoints: true,
     showZeroLine: false,
     showGrid: true,
+    showAxisLines: true,
     plotTitle: "Distribution of Percent Identities",
     showTickLabels: true,
     showAxisLabels: true,
@@ -69,38 +72,47 @@ export const Violin = ({
     () =>
       ({
         type: 'violin',
+        name: "",
         y: data.raw_mat, // x-y switches h-v
+        visible: settings.showViolin,
+        
         line: {
           color: settings.lineColor,
-          width: settings.lineWidth
+          width: settings.lineWidth,
         },
-        points: settings.points,
-        visible: settings.showViolin,
-        pointpos: 0,
+        
         fillcolor: settings.fillColor,
         opacity: 0.6,
+  
+        points: settings.points,
+        pointpos: 0,
+        jitter: 0.5,
+        bandwidth: 8,
+  
         box: {
           visible: settings.showBox,
-          line:{ 
+          line: {
             color: settings.boxlineColor,
-            width: settings.boxlineWidth
-          }
+            width: settings.boxlineWidth,
+          },
         },
-
+  
         marker: {
-        color:settings.markerColor,
-        size:settings.markerSize
+          visible: settings.showPoints,
+          color: settings.markerColor,
+          size: settings.markerSize,
         },
+  
         meanline: {
-          visible: true 
+          visible: true,
         },
-        bandwidth: 8,
-        jitter: .5,
-        hovertemplate: "Percent Identity: %{x}<br>Percent Identity: %{y}<extra></extra>",
+  
+        hovertemplate:
+          "Percent Identity: %{x}<br>Percent Identity: %{y}<extra></extra>",
       }) as Partial<PlotData>,
-    [data, settings],
+    [data, settings]
   );
-
+  
   const layout = React.useMemo(
     () =>
       ({
@@ -108,6 +120,9 @@ export const Violin = ({
         xaxis: {
           fixedrange: true,
           dtick: 1,
+          zeroline: false,
+          showgrid: settings.showGrid,
+          showline: settings.showAxisLines,
           showticklabels: settings.showTickLabels,
         },
         yaxis: {
@@ -116,17 +131,20 @@ export const Violin = ({
           fixedrange: true,
           zeroline: false,
           showgrid: settings.showGrid,
+          showline: settings.showAxisLines,
           showticklabels: settings.showTickLabels,
+          title: settings.showAxisLabels ? "Percent Pairwise Identity" : undefined,
+          range: [minDataValue -20, maxDataValue+20],
         },
-
+        
         dragmode: "pan",
-        fixedrange: true,
         barmode: "overlay",
         showlegend: false,
         margin: { l: 50, r: 50, t: 50, b: 50 },
       }) as Partial<Layout>,
-    [data, settings],
+    [data, settings]
   );
+  
   return (
     <>
       <div className="app-sidebar">
@@ -181,15 +199,15 @@ export const Violin = ({
               </div>
               <div className="col-2">
                 <div className="field">
-                  <label htmlFor="showBox">
+                  <label htmlFor="showAxisLines">
                     <input
                       type="checkbox"
-                      name="showBox"
-                      id="showBox"
-                      checked={settings.showBox}
+                      name="showAxisLines"
+                      id="showAxisLines"
+                      checked={settings.showAxisLines}
                       onChange={() =>
                         updateSettings({
-                          showBox: !settings.showBox,
+                          showAxisLines: !settings.showAxisLines,
                         })
                       }
                     />
@@ -244,9 +262,6 @@ export const Violin = ({
                       ))}
                     </select>
                   </div>
-                </div>
-                    
-                <div className="col-2">
                   <div className="field">
                     <label htmlFor="points">Points</label>
                     <select
@@ -285,22 +300,21 @@ export const Violin = ({
                       ))}
                     </select>
                   </div>
-                </div>
-                    
-                <div className="col-2">
-                  <NumberInput
-                    label="Line Width"
-                    field="lineWidth"
-                    value={settings.lineWidth}
-                    disabled={!settings.showViolin}
-                    updateValue={updateSettings}
-                    min={0}
-                    max={5}
-                    step={1}
-                  />
+                      
+                  <div className="field">
+                    <NumberInput
+                      label="Line Width"
+                      field="lineWidth"
+                      value={settings.lineWidth}
+                      disabled={!settings.showViolin}
+                      updateValue={updateSettings}
+                      min={0}
+                      max={5}
+                      step={1}
+                    />
+                  </div>
                 </div>
               </div>
-
             </div>
             <div className="group">
               <div className="field">
