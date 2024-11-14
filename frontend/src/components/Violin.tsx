@@ -15,8 +15,49 @@ enum ColorOption {
   Green = "lightgreen",
   Purple = "plum",
   Pink = "lightcoral",
-  None = "none",
+  Orange = "orange",
+  Yellow = "gold",
+  Cyan = "cyan",
+  Teal = "teal",
+  Magenta = "magenta",
+  Brown = "saddlebrown",
+  Lime = "lime",
+  Coral = "coral",
+  Turquoise = "turquoise",
+  Indigo = "indigo",
+  Violet = "violet",
+  Lavender = "lavender",
+  Peach = "peachpuff",
+  SkyBlue = "skyblue",
+  Olive = "olive",
+  Tan = "tan",
+  Salmon = "salmon",
+  Maroon = "maroon",
+  Navy = "navy",
+  Khaki = "khaki",
+  Periwinkle = "periwinkle",
+  Mint = "mintcream",
+  Azure = "azure",
+  Chartreuse = "chartreuse",
+  Goldrod = "goldenrod",
+  SlateBlue = "slateblue",
+  LightSeaGreen = "lightseagreen",
+  DarkCyan = "darkcyan",
+  RosyBrown = "rosybrown",
+  PaleVioletRed = "palevioletred",
+  DeepPink = "deeppink",
+  DarkOrange = "darkorange",
+  Crimson = "crimson",
+  LightSalmon = "lightsalmon",
+  Orchid = "orchid",
+  Thistle = "thistle",
+  DarkKhaki = "darkkhaki",
+  LightCoral = "lightcoral",
+  MediumOrchid = "mediumorchid",
+  None = "rgba(0,0,0,0)", // No color (use transparent or ignore)
 }
+
+
 
 export const Violin = ({
   data,
@@ -54,6 +95,7 @@ export const Violin = ({
     pointOrientation: "Violin",
     points: "all",
     pointPos: 0,
+    pointOpacity: 0.5,
     showViolin: true,
     showBox: true,
     showPoints: true,
@@ -102,6 +144,7 @@ export const Violin = ({
           visible: settings.showPoints,
           color: settings.markerColor,
           size: settings.markerSize,
+          opacity: settings.pointOpacity
         },
         meanline: {
           visible: true,
@@ -134,6 +177,8 @@ export const Violin = ({
         whiskerwidth:settings.whiskerWidth,
         marker: {
           visible: settings.showBox,
+          color: settings.markerColor,
+          opacity: settings.pointOpacity
         },
         fillcolor:settings.boxfillColor,
         hovertemplate:
@@ -473,7 +518,7 @@ export const Violin = ({
               </div>
               <div className="row">
                 <div className="col-2">
-                <div className="field">
+                  <div className="field">
                     <NumberInput
                       label="Box Opacity"
                       field="boxOpacity"
@@ -538,7 +583,6 @@ export const Violin = ({
                   </label>
                 </div>
               </div>
-
               <div className="row">
                 <div className="col-2">
                   <div className="field">
@@ -623,6 +667,36 @@ export const Violin = ({
                     />
                   </div>
                 </div>
+              <div className="row">
+                <div className="col-2">
+                  <div className="field">
+                    <NumberInput
+                      label="Point Opacity"
+                      field="pointOpacity"
+                      type="float"
+                      value={settings.pointOpacity}
+                      isDisabled={!settings.showPoints}
+                      updateValue={updateSettings}
+                      min={0}
+                      max={1}
+                      step={0.1}
+                    />
+                  </div>
+                  <div className="field">
+                    <NumberInput
+                      label="Jitter"
+                      field="jitter"
+                      value={settings.jitter}
+                      type="float"
+                      isDisabled={!settings.showPoints}
+                      updateValue={updateSettings}
+                      min={0}
+                      max={1}
+                      step={0.1}
+                    />
+                  </div>
+                </div>
+              </div>
               </div>
             </div>
           </div>
