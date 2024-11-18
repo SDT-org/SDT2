@@ -11,10 +11,9 @@ enum ColorOption {
   White = "white",
   Black = "black",
   Tomato = "tomato",
-  LightBLue = "lightblue",
-  LightGreen = "lightgreen",
+  Blue = "lightblue",
+  Green = "lightgreen",
   Purple = "plum",
-  Lightcoral = "lightcoral",
   Orange = "orange",
   Yellow = "gold",
   Cyan = "cyan",
@@ -111,7 +110,7 @@ export const Histogram = ({
            },
         },
         xbins: {
-          size: settings.binSize, // Set the bin width 
+          size: settings.binSize, 
         },
         name: "Histogram",
         hovertemplate:
@@ -293,9 +292,9 @@ export const Histogram = ({
                   field="histOutlineWidth"
                   value={settings.histOutlineWidth}
                   updateValue={updateSettings}
-                  min={2}
-                  max={data.raw_mat.length}
-                  step={10}
+                  min={0}
+                  max={15}
+                  step={1}
                 />
               </div>
             </div>

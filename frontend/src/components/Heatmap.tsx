@@ -348,21 +348,6 @@ export const Heatmap = ({
                     }
                   />
                 </div>
-                <div className="field">
-                  <label htmlFor="cbar-pad">Pad</label>
-                  <input
-                    type="range"
-                    name="cbar-pad"
-                    id="cbar-pad"
-                    min="0"
-                    max="20"
-                    step="1"
-                    value={settings.cbar_pad}
-                    onChange={(e) =>
-                      updateSettings({ cbar_pad: e.target.value })
-                    }
-                  />
-                </div>
               </div>
               <div className="col-2">
                 <NumberInput
