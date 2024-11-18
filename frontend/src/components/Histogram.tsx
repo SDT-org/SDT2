@@ -10,35 +10,52 @@ const Plot = createPlotlyComponent(Plotly);
 enum ColorOption {
   White = "white",
   Black = "black",
-  Red = "tomato",
-  Blue = "lightblue",
-  Green = "lightgreen",
+  Tomato = "tomato",
+  LightBLue = "lightblue",
+  LightGreen = "lightgreen",
   Purple = "plum",
-  Pink = "lightcoral",
-  None = "rgba(0,0,0,0)",
+  Lightcoral = "lightcoral",
+  Orange = "orange",
+  Yellow = "gold",
+  Cyan = "cyan",
+  Teal = "teal",
+  Magenta = "magenta",
+  Brown = "saddlebrown",
+  Lime = "lime",
+  Coral = "coral",
+  Turquoise = "turquoise",
+  Indigo = "indigo",
+  Violet = "violet",
+  Lavender = "lavender",
+  Peach = "peachpuff",
+  SkyBlue = "skyblue",
+  Olive = "olive",
+  Tan = "tan",
+  Salmon = "salmon",
+  Maroon = "maroon",
+  Navy = "navy",
+  Khaki = "khaki",
+  Periwinkle = "periwinkle",
+  Mint = "mintcream",
+  Azure = "azure",
+  Chartreuse = "chartreuse",
+  Goldrod = "goldenrod",
+  SlateBlue = "slateblue",
+  LightSeaGreen = "lightseagreen",
+  DarkCyan = "darkcyan",
+  RosyBrown = "rosybrown",
+  PaleVioletRed = "palevioletred",
+  DeepPink = "deeppink",
+  DarkOrange = "darkorange",
+  Crimson = "crimson",
+  LightSalmon = "lightsalmon",
+  Orchid = "orchid",
+  Thistle = "thistle",
+  DarkKhaki = "darkkhaki",
+  LightCoral = "lightcoral",
+  MediumOrchid = "mediumorchid",
+  None = "rgba(0,0,0,0)", // No color (use transparent or ignore)
 }
-enum LineOption {
-  Bar = "hvh",
-  Spline = "spline",
-  Linear = "linear",
-}
-enum MarkerOption {
-  Circle = "circle",
-  Square = "square",
-  Diamond = "diamond",
-  Hexagram = "hexagram",
-  TriangleUp = "triangle-up",
-  TriangleDown = "triangle-down",
-  Pentagon = "pentagon",
-  CircleOpen = "circle-open",
-  SquareOpen = "square-open",
-  DiamondOpen = "diamond-open",
-  HexagramOpen = "hexagram-open",
-  TriangleUpOpen = "triangle-up-open",
-  TriangleDownOpen = "triangle-down-open",
-  PentagonOpen = "pentagon-open",
-}
-
 export const Histogram = ({
   data,
   footer,
@@ -57,17 +74,11 @@ export const Histogram = ({
   const [settings, setSettings] = React.useState({
     lineColor: "tomato",
     lineWidth: 3,
-    lineShape: "linear",
-    barlineColor: "tomato",
-    barOutlineWidth: 1,
+    histlineColor: "tomato",
+    histOutlineWidth: 1,
     barColor: "lightblue",
     showHistogram: true,
-    showLinePlot: false,
-    showScatterPlot: false,
-    markerSymbol: "square",
-    markerColor: "tomato",
-    markerSize: 7,
-    binSize: data.raw_mat.length,
+    binSize: 1,
     showGrid: true,
     showLine: true,
     showZeroLine: true,
@@ -95,14 +106,13 @@ export const Histogram = ({
           colorscale: 'Viridis',
           color: settings.barColor,
            line: {
-             width: settings.barOutlineWidth,
-             color: settings.barlineColor,
+             width: settings.histOutlineWidth,
+             color: settings.histlineColor,
            },
         },
-        nbinsx: settings.binSize,
-        // xbins: {
-        //   size: settings.binSize, // Set the bin width 
-        // },
+        xbins: {
+          size: settings.binSize, // Set the bin width 
+        },
         name: "Histogram",
         hovertemplate:
           "Percent Identity: %{x}<br>Proportion: %{y}<extra></extra>",
@@ -239,7 +249,6 @@ export const Histogram = ({
                   <select
                     id="bin-color"
                     value={settings.barColor}
-                    disabled={!settings.showHistogram}
                     onChange={(e) =>
                       updateSettings({ barColor: e.target.value })
                     }
@@ -256,20 +265,20 @@ export const Histogram = ({
                   field="binSize"
                   value={settings.binSize}
                   updateValue={updateSettings}
-                  min={1}  
-                  max={20}
-                  step={1}
+                  type="float"
+                  min={0.5}  
+                  max={5}
+                  step={0.5}
                 />
               </div>
               <div className="col-2">
                 <div className="field">
-                  <label htmlFor="bar-line-color">Outline</label>
+                  <label htmlFor="hist-line-color">Outline</label>
                   <select
-                    id="bar-line-color"
-                    value={settings.barlineColor}
-                    disabled={!settings.showHistogram}
+                    id="hist-line-color"
+                    value={settings.histlineColor}
                     onChange={(e) =>
-                      updateSettings({ barlineColor: e.target.value })
+                      updateSettings({ histlineColor: e.target.value })
                     }
                   >
                     {Object.entries(ColorOption).map(([key, value]) => (
@@ -281,137 +290,13 @@ export const Histogram = ({
                 </div>
                 <NumberInput
                   label="Outline Width"
-                  field="barOutlineWidth"
-                  value={settings.barOutlineWidth}
-                  disabled={!settings.showHistogram}
+                  field="histOutlineWidth"
+                  value={settings.histOutlineWidth}
                   updateValue={updateSettings}
                   min={2}
                   max={data.raw_mat.length}
                   step={10}
                 />
-              </div>
-            </div>
-            <div className="group">
-              <div className="field">
-                <label className="header">
-                  <input
-                    type="checkbox"
-                    checked={settings.showLinePlot}
-                    onChange={(e) =>
-                      updateSettings({ showLinePlot: e.target.checked })
-                    }
-                  />
-                  Line Plot
-                </label>
-              </div>
-
-              <div className="field">
-                <label htmlFor="line-shape">Shape</label>
-                <select
-                  id="line-shape"
-                  value={settings.lineShape}
-                  disabled={!settings.showLinePlot}
-                  onChange={(e) =>
-                    updateSettings({ lineShape: e.target.value })
-                  }
-                >
-                  {Object.entries(LineOption).map(([key, value]) => (
-                    <option key={key} value={value}>
-                      {key}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-2">
-                <div className="field">
-                  <label htmlFor="line-color">Color</label>
-                  <select
-                    id="line-color"
-                    value={settings.lineColor}
-                    disabled={!settings.showLinePlot}
-                    onChange={(e) =>
-                      updateSettings({ lineColor: e.target.value })
-                    }
-                  >
-                    {Object.entries(ColorOption).map(([key, value]) => (
-                      <option key={key} value={value}>
-                        {key}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <NumberInput
-                  label="Width"
-                  field="lineWidth"
-                  value={settings.lineWidth}
-                  isDisabled={!settings.showLinePlot}
-                  updateValue={updateSettings}
-                  min={0}
-                  max={10}
-                  step={1}
-                />
-              </div>
-            </div>
-            <div className="group">
-              <div className="field">
-                <label className="header">
-                  <input
-                    type="checkbox"
-                    checked={settings.showScatterPlot}
-                    onChange={(e) =>
-                      updateSettings({ showScatterPlot: e.target.checked })
-                    }
-                  />
-                  Markers
-                </label>
-              </div>
-              <div className="field">
-                <label htmlFor="marker-symbol">Symbol</label>
-                <select
-                  id="marker-symbol"
-                  value={settings.markerSymbol}
-                  disabled={!settings.showScatterPlot}
-                  onChange={(e) =>
-                    updateSettings({ markerSymbol: e.target.value })
-                  }
-                >
-                  {Object.entries(MarkerOption).map(([key, value]) => (
-                    <option key={key} value={value}>
-                      {key}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="col-2">
-                <div className="field">
-                  <label htmlFor="markerColor">Color</label>
-                  <select
-                    id="markerColor"
-                    value={settings.markerColor}
-                    disabled={!settings.showScatterPlot}
-                    onChange={(e) =>
-                      updateSettings({ markerColor: e.target.value })
-                    }
-                  >
-                    {Object.entries(ColorOption).map(([key, value]) => (
-                      <option key={key} value={value}>
-                        {key}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="field">
-                  <NumberInput
-                    label="Size"
-                    field="markerSize"
-                    value={settings.markerSize}
-                    isDisabled={!settings.showScatterPlot}
-                    updateValue={updateSettings}
-                    min={0}
-                    max={20}
-                    step={1} //want to change to .5 but breaks
-                  />
-                </div>
               </div>
             </div>
           </div>
@@ -420,11 +305,7 @@ export const Histogram = ({
       </div>
       <div className="app-main">
         <Plot
-          data={[
-            settings.showHistogram ? histogramTrace : {},
-            settings.showLinePlot ? linePlotTrace : {},
-            settings.showScatterPlot ? scatterPlotTrace : {}, // Add a new trace for the scatter plot
-          ]}
+          data={[histogramTrace]}
           layout={layout}
           config={{
             responsive: true,

@@ -10,11 +10,11 @@ const Plot = createPlotlyComponent(Plotly);
 enum ColorOption {
   White = "white",
   Black = "black",
-  Red = "tomato",
-  Blue = "lightblue",
-  Green = "lightgreen",
+  Tomato = "tomato",
+  LightBLue = "lightblue",
+  LightGreen = "lightgreen",
   Purple = "plum",
-  Pink = "lightcoral",
+  Lightcoral = "lightcoral",
   Orange = "orange",
   Yellow = "gold",
   Cyan = "cyan",
@@ -331,10 +331,9 @@ export const Violin = ({
               </div>
             </div>
             <div className="group">
-              <div className="field">
+              <div className="field">            
                 <label>Plot Orientation</label>
-                <div style={{ display: "flex", gap: "100px" }}></div>
-                <div>
+                <div className="radio-group"></div>
                   <label>
                     <input
                       type="radio"
@@ -355,7 +354,6 @@ export const Violin = ({
                     />
                     Horizontal
                   </label>
-                </div>
               </div>
             </div>
             <div className="group">

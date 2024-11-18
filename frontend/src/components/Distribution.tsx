@@ -18,7 +18,7 @@ export const Distribution = ({
   }
   const [view, setView] = React.useState<
     "histogram" | "line" | "violin" | "scatter" | "box"
-  >("violin"); // Switch the default here until we have a switcher
+  >("histogram"); // Switch the default here until we have a switcher
 
   return (
     <>
