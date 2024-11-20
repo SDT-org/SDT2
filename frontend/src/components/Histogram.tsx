@@ -80,10 +80,10 @@ export const Histogram = ({
     binSize: 1,
     showGrid: true,
     showLine: true,
-    showZeroLine: true,
     plotTitle: "Distribution of Percent Identities",
     showTickLabels: true,
     showAxisLabels: true,
+    histnorm: 'percent',
   });
 
   const updateSettings = (newState: Partial<typeof settings>) => {
@@ -126,12 +126,16 @@ export const Histogram = ({
         title: settings.plotTitle,
         xaxis: {
           title: settings.showAxisLabels ? "Percent Pairwise Identity" : "",
-          fixedrange: true,
-          dtick: 1,
+          side: "bottom",
+          rangemode: "normal",
+          // fixedrange: true,
+          // dtick: settings.showTickLabels ? 1 : undefined, 
           showline: settings.showLine,
           zeroline: settings.showLine,
           showgrid: settings.showGrid,
           showticklabels: settings.showTickLabels,
+          // automargin: true,
+
         },
         yaxis: {
           title: settings.showAxisLabels
@@ -139,15 +143,16 @@ export const Histogram = ({
             : "",
           side: "left",
           rangemode: "tozero",
-          fixedrange: true,
+          // fixedrange: true,
           showline: settings.showLine,
           zeroline: settings.showLine,
           showgrid: settings.showGrid,
           showticklabels: settings.showTickLabels,
+          // automargin: true,
+
         },
 
         dragmode: "pan",
-        fixedrange: true,
         barmode: "overlay",
         showlegend: false,
         margin: { l: 50, r: 50, t: 50, b: 50 },

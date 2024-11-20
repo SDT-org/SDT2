@@ -1,6 +1,7 @@
 import React from "react";
 import { Histogram } from "./Histogram";
 import { Violin } from "./Violin";
+import { Raincloud } from "./Raincloud";
 import { DistributionData } from "../plotTypes";
 
 export const Distribution = ({
@@ -17,15 +18,14 @@ export const Distribution = ({
     );
   }
   const [view, setView] = React.useState<
-    "histogram" | "line" | "violin" | "scatter" | "box"
-  >("histogram"); // Switch the default here until we have a switcher
+    "histogram" | "line" | "violin" | "raincloud" | "box"
+  >("violin"); // Switch the default here until we have a switcher
 
   return (
     <>
       {view === "histogram" && <Histogram data={data} />}
-      {view === "line" && <Histogram data={data} />}
       {view === "violin" && <Violin data={data} />}
-      {view === "scatter" && <Histogram data={data} />}
+      {view === "raincloud" && <Raincloud data={data} />}
     </>
   );
 };
