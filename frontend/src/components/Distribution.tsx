@@ -18,8 +18,8 @@ export const Distribution = ({
     );
   }
   const [view, setView] = React.useState<
-    "histogram" | "line" | "violin" | "raincloud" | "box"
-  >("violin"); // Switch the default here until we have a switcher
+    "histogram" | "violin" | "raincloud" 
+  >("raincloud"); // Switch the default here until we have a switcher
 
   return (
     <>

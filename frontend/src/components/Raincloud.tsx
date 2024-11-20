@@ -96,7 +96,7 @@ export const Raincloud = ({
     showTickLabels: true,
     showAxisLabels: true,
     bandwidth: 8,
-    jitter: 1,
+    jitter: 0.5,
   });
 
   console.log(data);

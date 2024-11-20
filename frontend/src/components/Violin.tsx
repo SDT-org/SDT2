@@ -85,7 +85,7 @@ export const Violin = ({
     lineWidth: 3,
     violinOpacity: 0.5,
     boxfillColor: "lightblue",
-    boxWidth: 0.8,
+    boxWidth: 0.95,
     boxlineColor: "tomato",
     boxlineWidth: 3,
     boxOpacity: 0.5,
@@ -104,7 +104,7 @@ export const Violin = ({
     showAxisLines: true,
     showTickLabels: true,
     showAxisLabels: true,
-    bandwidth: 8,
+    bandwidth: 5,
     jitter: 0.5,
   });
 
