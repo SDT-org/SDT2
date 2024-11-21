@@ -55,21 +55,29 @@ export const Viewer = ({
 
   const getData = () => {
     setLoading(true);
-    Promise.all([
-      window.pywebview.api.get_heatmap_data().then((rawData) => {
+    window.pywebview.api
+      .get_data()
+      .then((rawData) => {
         const {
-          metadata,
           data,
+          metadata,
+          raw_mat,
+          gc_stats,
+          length_stats,
         }: {
+          data: string[][];
           metadata: {
             minVal: number;
             maxVal: number;
           };
-          data: string[][];
+          raw_mat: any;
+          gc_stats: any;
+          length_stats: any;
         } = JSON.parse(rawData.replace(/\bNaN\b/g, "null"));
         const [tickText, ...parsedData] = data;
         setHeatmapTickText(tickText as string[]);
         setHeatmapData(parsedData);
+        setHisogramData({ raw_mat, gc_stats, length_stats });
         updateHeatmapState({
           vmin: metadata.minVal,
           ...(appState.sequences_count > 99 && {
@@ -77,12 +85,7 @@ export const Viewer = ({
             cellspace: 0,
           }),
         });
-      }),
-      window.pywebview.api.get_distribution_data().then((data) => {
-        const DistributionData = JSON.parse(data.replace(/\bNaN\b/g, "null"));
-        setHisogramData(DistributionData);
-      }),
-    ])
+      })
       .catch(() => {
         setLoading(false);
         alert(

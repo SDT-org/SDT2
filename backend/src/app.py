@@ -55,9 +55,12 @@ def get_matrix_path():
         return os.path.join(state.tempdir_path, f"{file_base}_mat.csv")
     else:
         return state.filename[0]
+
+
 def get_stats_path():
     state = get_state()
     return state.filename[0]
+
 
 def find_source_files(prefix, suffixes):
     state = get_state()
@@ -351,37 +354,6 @@ class Api:
     def cancel_run(self):
         do_cancel_run()
 
-    def load_data(self):
-        state = get_state()
-        file_base = os.path.splitext(state.basename)[0]
-        matrix_path = get_matrix_path()
-        # https://stackoverflow.com/a/57824142
-        # SDT1 matrix CSVs do not have padding for columns
-        
-        ######
-        stats_col= os.path.join(state.tempdir_path, f"{file_base}_stats.csv") 
-        stats_df = pd.read_csv(stats_col, header=0)
-        gc_stats = stats_df["GC %"].map('{:.0%}'.format).tolist()
-        len_stats = stats_df["Sequence Length"].tolist()
-        #######
-        
-        with open(matrix_path, "r") as temp_f:
-            col_count = [len(l.split(",")) for l in temp_f.readlines()]
-            column_names = [i for i in range(0, max(col_count))]
-
-        df = pd.read_csv(
-            matrix_path, delimiter=",", index_col=0, header=None, names=column_names
-        )
-        tickText = df.index.tolist()
-        count = len(tickText)
-        set_state(sequences_count=count)
-        data = df.to_numpy()
-        diag_mask = np.eye(data.shape[0], dtype=bool)
-        data_no_diag = np.where(diag_mask, np.nan, data)
-        min_val = int(np.nanmin(data_no_diag))
-        max_val = int(np.nanmax(data_no_diag))
-        return data, tickText, min_val, max_val, gc_stats, len_stats
-
     def confirm_overwrite(self, destination_files):
         files_to_overwrite = [f for f in destination_files if os.path.exists(f)]
 
@@ -468,20 +440,47 @@ class Api:
 
         return True
 
-    def get_heatmap_data(self):
-        data, tickText, min_val, max_val, _, _ = self.load_data()
+    def load_data_and_stats(self):
+        state = get_state()
+        file_base = os.path.splitext(state.basename)[0]
+        matrix_path = get_matrix_path()
+        # https://stackoverflow.com/a/57824142
+        # SDT1 matrix CSVs do not have padding for columns
+
+        ######
+        stats_col = os.path.join(state.tempdir_path, f"{file_base}_stats.csv")
+        stats_df = pd.read_csv(stats_col, header=0)
+        gc_stats = stats_df["GC %"].map("{:.0%}".format).tolist()
+        len_stats = stats_df["Sequence Length"].tolist()
+        #######
+
+        with open(matrix_path, "r") as temp_f:
+            col_count = [len(l.split(",")) for l in temp_f.readlines()]
+            column_names = [i for i in range(0, max(col_count))]
+
+        df = pd.read_csv(
+            matrix_path, delimiter=",", index_col=0, header=None, names=column_names
+        )
+        tickText = df.index.tolist()
+        count = len(tickText)
+        set_state(sequences_count=count)
+        data = df.to_numpy()
+
+        diag_mask = np.eye(data.shape[0], dtype=bool)
+        data_no_diag = np.where(diag_mask, np.nan, data)
+        min_val = int(np.nanmin(data_no_diag))
+        max_val = int(np.nanmax(data_no_diag))
+
+        return data, tickText, min_val, max_val, gc_stats, len_stats
+
+    def get_data(self):
+        data, tickText, min_val, max_val, gc_stats, len_stats = (
+            self.load_data_and_stats()
+        )
         heat_data = pd.DataFrame(data, index=tickText)
         parsedData = heat_data.values.tolist()
-        return json.dumps(
-            dict(
-                metadata=dict(minVal=min_val, maxVal=max_val),
-                data=([tickText] + parsedData),
-            )
-        )
 
-    def get_distribution_data(self):
         # caluclating hist data manually to allow for line and scatter
-        data, _, min_val, max_val, gc_stats, len_stats = self.load_data()
         # Create a mask for the diagonal elements
         diag_mask = np.eye(data.shape[0], dtype=bool)
 
@@ -489,32 +488,14 @@ class Api:
         raw_mat = np.where(diag_mask, np.nan, data)
         # Flatten the data and remove NaN values
         flat_mat = raw_mat[~np.isnan(raw_mat)].flatten()
-        round_vals = np.rint(flat_mat)
 
-        # get unique values count number of occurances
-        uniquev, countsv = np.unique(round_vals, return_counts=True)
-        props = np.around(countsv / countsv.sum(), 2)
-        # subtract 1 from minimum value for chart clarity
-        min_val = min_val - 1
-        max_val = max_val + 2
-
-        # create list of range values with 102 as max to ensure the 100 values fully display
-        range_values = np.arange(min_val, max_val, 1)
-
-        # create empty dict of with numerical keys populated from range_values
-        proportion_dict = {int(val): float(0) for val in range_values}
-        # populate the values of the dictionary  with proportions stores in props as the correstpond to uniquev
-        proportion_dict.update(
-            {int(val): float(prop) for val, prop in zip(uniquev, props)}
+        data_to_dump = dict(
+            metadata=dict(minVal=min_val, maxVal=max_val),
+            data=([tickText] + parsedData),
+            raw_mat=list(flat_mat),
+            gc_stats=list(gc_stats),
+            length_stats=list(len_stats),
         )
-        data_to_dump = {
-            "x": list(proportion_dict.keys()),
-            "y": list(proportion_dict.values()),
-            "raw_mat":list(flat_mat),
-            "round_mat":list(round_vals),
-            "gc_stats": list(gc_stats),
-            "length_stats":list(len_stats)
-        }
         return json.dumps(data_to_dump)
 
 

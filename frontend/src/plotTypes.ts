@@ -42,13 +42,7 @@ export interface HeatmapSettings {
 export type HeatmapData = string[][];
 
 export type DistributionData = {
-  x: number[];
-  y: number[];
-  x2: number[];
-  y2: number[];
   raw_mat: number[];
-  round_mat: number[];
   gc_stats: number[];
-  len_stats: number[];
-  hover: string[];
+  length_stats: number[];
 };
