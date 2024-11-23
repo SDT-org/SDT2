@@ -20,7 +20,7 @@ from app_state import create_app_state
 from validations import validate_fasta
 from process_data import process_data
 from multiprocessing import Lock, Manager, Pool, cpu_count
-from itertools import combinations_with_replacement as cwr
+from itertools import combinations
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
@@ -496,7 +496,7 @@ class Api:
             raw_mat=list(flat_mat),
             gc_stats=list(gc_stats),
             length_stats=list(len_stats),
-            tick_text_combos=list(cwr(tick_text, 2)),
+            tick_text_combos=list(combinations(tick_text, 2)),
         )
         return json.dumps(data_to_dump)
 
