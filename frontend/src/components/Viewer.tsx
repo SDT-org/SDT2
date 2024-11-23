@@ -1,6 +1,11 @@
 import React from "react";
 import { AppState, SetAppState } from "../appState";
-import { HeatmapData, HeatmapSettings, DistributionData } from "../plotTypes";
+import {
+  HeatmapData,
+  HeatmapSettings,
+  DistributionData,
+  GetDataResponse,
+} from "../plotTypes";
 import { Heatmap } from "./Heatmap";
 import { Distribution } from "./Distribution";
 import {
@@ -55,36 +60,32 @@ export const Viewer = ({
 
   const getData = () => {
     setLoading(true);
+
     window.pywebview.api
       .get_data()
       .then((rawData) => {
         const {
           data,
           metadata,
-          raw_mat,
+          identity_scores,
           gc_stats,
           length_stats,
-          tick_text_combos,
-        }: {
-          data: string[][];
-          metadata: {
-            minVal: number;
-            maxVal: number;
-          };
-          raw_mat: any;
-          gc_stats: any;
-          length_stats: any;
-          tick_text_combos: string[];
-        } = JSON.parse(rawData.replace(/\bNaN\b/g, "null"));
+        }: GetDataResponse = JSON.parse(rawData.replace(/\bNaN\b/g, "null"));
+
         const [tickText, ...parsedData] = data;
+
+        console.log(identity_scores);
+
         setTickText(tickText as string[]);
         setHeatmapData(parsedData);
         setDistributionData({
-          raw_mat,
+          metadata,
           gc_stats,
           length_stats,
-          tick_text_combos,
+          raw_mat: identity_scores.map((i) => i[2]),
+          identity_combos: identity_scores.map((i) => [i[0], i[1]]),
         });
+
         updateHeatmapState({
           vmin: metadata.minVal,
           ...(appState.sequences_count > 99 && {
@@ -93,8 +94,9 @@ export const Viewer = ({
           }),
         });
       })
-      .catch(() => {
+      .catch((e) => {
         setLoading(false);
+        console.error(e);
         alert(
           "An error occured while processing this file. Please ensure it is a valid, SDT-compatible file.",
         );

@@ -41,9 +41,21 @@ export interface HeatmapSettings {
 }
 export type HeatmapData = string[][];
 
-export type DistributionData = {
-  raw_mat: number[];
+export type GetDataResponse = {
+  data: string[][];
+  metadata: {
+    minVal: number;
+    maxVal: number;
+  };
   gc_stats: number[];
   length_stats: number[];
-  tick_text_combos: string[];
+  identity_scores: [string, string, number][];
+};
+
+export type DistributionData = Omit<
+  GetDataResponse,
+  "data" | "identity_scores"
+> & {
+  raw_mat: number[];
+  identity_combos: [string, string][];
 };

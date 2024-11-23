@@ -20,7 +20,6 @@ from app_state import create_app_state
 from validations import validate_fasta
 from process_data import process_data
 from multiprocessing import Lock, Manager, Pool, cpu_count
-from itertools import combinations
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
@@ -445,12 +444,14 @@ class Api:
         state = get_state()
         file_base = os.path.splitext(state.basename)[0]
         matrix_path = get_matrix_path()
+        stats_path = os.path.join(state.tempdir_path, f"{file_base}_stats.csv")
+        cols_path = os.path.join(state.tempdir_path, f"{file_base}_cols.csv")
+
         # https://stackoverflow.com/a/57824142
         # SDT1 matrix CSVs do not have padding for columns
 
         ######
-        stats_col = os.path.join(state.tempdir_path, f"{file_base}_stats.csv")
-        stats_df = pd.read_csv(stats_col, header=0)
+        stats_df = pd.read_csv(stats_path, header=0)
         gc_stats = stats_df["GC %"].map("{:.0%}".format).tolist()
         len_stats = stats_df["Sequence Length"].tolist()
         #######
@@ -472,31 +473,24 @@ class Api:
         min_val = int(np.nanmin(data_no_diag))
         max_val = int(np.nanmax(data_no_diag))
 
-        return data, tick_text, min_val, max_val, gc_stats, len_stats
+        identity_scores = pd.read_csv(cols_path, skiprows=1).values.tolist()
+
+        # TODO might be able to make one tick text object for both to use?
+        return data, tick_text, min_val, max_val, gc_stats, len_stats, identity_scores
 
     def get_data(self):
-        data, tick_text, min_val, max_val, gc_stats, len_stats = (
+        data, tick_text, min_val, max_val, gc_stats, len_stats, identity_scores = (
             self.load_data_and_stats()
         )
         heat_data = pd.DataFrame(data, index=tick_text)
         parsedData = heat_data.values.tolist()
 
-        # caluclating hist data manually to allow for line and scatter
-        # Create a mask for the diagonal elements
-        diag_mask = np.eye(data.shape[0], dtype=bool)
-
-        # Exclude the diagonal elements
-        raw_mat = np.where(diag_mask, np.nan, data)
-        # Flatten the data and remove NaN values
-        flat_mat = raw_mat[~np.isnan(raw_mat)].flatten()
-
         data_to_dump = dict(
             metadata=dict(minVal=min_val, maxVal=max_val),
             data=([tick_text] + parsedData),
-            raw_mat=list(flat_mat),
+            identity_scores=identity_scores,
             gc_stats=list(gc_stats),
             length_stats=list(len_stats),
-            tick_text_combos=list(combinations(tick_text, 2)),
         )
         return json.dumps(data_to_dump)
 
