@@ -45,4 +45,5 @@ export type DistributionData = {
   raw_mat: number[];
   gc_stats: number[];
   length_stats: number[];
+  tick_text_combos: string[];
 };

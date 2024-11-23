@@ -20,6 +20,7 @@ from app_state import create_app_state
 from validations import validate_fasta
 from process_data import process_data
 from multiprocessing import Lock, Manager, Pool, cpu_count
+from itertools import combinations_with_replacement as cwr
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
@@ -461,8 +462,8 @@ class Api:
         df = pd.read_csv(
             matrix_path, delimiter=",", index_col=0, header=None, names=column_names
         )
-        tickText = df.index.tolist()
-        count = len(tickText)
+        tick_text = df.index.tolist()
+        count = len(tick_text)
         set_state(sequences_count=count)
         data = df.to_numpy()
 
@@ -471,13 +472,13 @@ class Api:
         min_val = int(np.nanmin(data_no_diag))
         max_val = int(np.nanmax(data_no_diag))
 
-        return data, tickText, min_val, max_val, gc_stats, len_stats
+        return data, tick_text, min_val, max_val, gc_stats, len_stats
 
     def get_data(self):
-        data, tickText, min_val, max_val, gc_stats, len_stats = (
+        data, tick_text, min_val, max_val, gc_stats, len_stats = (
             self.load_data_and_stats()
         )
-        heat_data = pd.DataFrame(data, index=tickText)
+        heat_data = pd.DataFrame(data, index=tick_text)
         parsedData = heat_data.values.tolist()
 
         # caluclating hist data manually to allow for line and scatter
@@ -491,10 +492,11 @@ class Api:
 
         data_to_dump = dict(
             metadata=dict(minVal=min_val, maxVal=max_val),
-            data=([tickText] + parsedData),
+            data=([tick_text] + parsedData),
             raw_mat=list(flat_mat),
             gc_stats=list(gc_stats),
             length_stats=list(len_stats),
+            tick_text_combos=list(cwr(tick_text, 2)),
         )
         return json.dumps(data_to_dump)
 

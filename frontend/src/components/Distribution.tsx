@@ -6,8 +6,10 @@ import { DistributionData } from "../plotTypes";
 
 export const Distribution = ({
   data,
+  tickText,
 }: {
   data: DistributionData | undefined;
+  tickText: string[];
   footer?: React.ReactNode;
 }) => {
   if (!data) {
@@ -17,14 +19,14 @@ export const Distribution = ({
       </div>
     );
   }
-  const [view, setView] = React.useState<
-    "histogram" | "violin" | "raincloud" 
-  >("raincloud"); // Switch the default here until we have a switcher
+  const [view, setView] = React.useState<"histogram" | "violin" | "raincloud">(
+    "violin",
+  ); // Switch the default here until we have a switcher
 
   return (
     <>
       {view === "histogram" && <Histogram data={data} />}
-      {view === "violin" && <Violin data={data} />}
+      {view === "violin" && <Violin data={data} tickText={tickText} />}
       {view === "raincloud" && <Raincloud data={data} />}
     </>
   );

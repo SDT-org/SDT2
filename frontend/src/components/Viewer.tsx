@@ -22,9 +22,9 @@ export const Viewer = ({
   mainMenu: React.ReactNode;
 }) => {
   const [loading, setLoading] = React.useState(false);
-  const [heatmapTickText, setHeatmapTickText] = React.useState<string[]>([""]);
+  const [tickText, setTickText] = React.useState<string[]>([""]);
   const [heatmapData, setHeatmapData] = React.useState<HeatmapData>();
-  const [DistributionData, setHisogramData] =
+  const [distributionData, setDistributionData] =
     React.useState<DistributionData>();
 
   const [heatmapSettings, setHeatmapSettings] = React.useState<HeatmapSettings>(
@@ -64,6 +64,7 @@ export const Viewer = ({
           raw_mat,
           gc_stats,
           length_stats,
+          tick_text_combos,
         }: {
           data: string[][];
           metadata: {
@@ -73,11 +74,17 @@ export const Viewer = ({
           raw_mat: any;
           gc_stats: any;
           length_stats: any;
+          tick_text_combos: string[];
         } = JSON.parse(rawData.replace(/\bNaN\b/g, "null"));
         const [tickText, ...parsedData] = data;
-        setHeatmapTickText(tickText as string[]);
+        setTickText(tickText as string[]);
         setHeatmapData(parsedData);
-        setHisogramData({ raw_mat, gc_stats, length_stats });
+        setDistributionData({
+          raw_mat,
+          gc_stats,
+          length_stats,
+          tick_text_combos,
+        });
         updateHeatmapState({
           vmin: metadata.minVal,
           ...(appState.sequences_count > 99 && {
@@ -171,12 +178,14 @@ export const Viewer = ({
             data={heatmapData}
             settings={heatmapSettings}
             updateSettings={updateHeatmapState}
-            tickText={heatmapTickText}
+            tickText={tickText}
           />
         ) : null}
       </TabPanel>
       <TabPanel id="plot" className="app-panel">
-        {DistributionData ? <Distribution data={DistributionData} /> : null}
+        {distributionData ? (
+          <Distribution data={distributionData} tickText={tickText} />
+        ) : null}
       </TabPanel>
       {loading ? <div className="api-loader"></div> : null}
     </Tabs>

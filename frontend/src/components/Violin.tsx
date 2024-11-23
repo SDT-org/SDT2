@@ -57,13 +57,13 @@ enum ColorOption {
   None = "rgba(0,0,0,0)", // No color (use transparent or ignore)
 }
 
-
-
 export const Violin = ({
   data,
+  tickText,
   footer,
 }: {
   data: DistributionData | undefined;
+  tickText: string[];
   footer?: React.ReactNode;
 }) => {
   if (!data) {
@@ -78,7 +78,7 @@ export const Violin = ({
 
   const [settings, setSettings] = React.useState({
     plotTitle: "Distribution of Percent Identities",
-    plotOrientation: "vertical", 
+    plotOrientation: "vertical",
     fillColor: "lightblue",
     bandWidth: 8,
     lineColor: "tomato",
@@ -132,11 +132,11 @@ export const Violin = ({
         fillcolor: settings.fillColor,
         opacity: settings.violinOpacity,
         points:
-        settings.pointOrientation === "Violin"
-          ? settings.points === "None"
-            ? false
-            : settings.points
-          : false,
+          settings.pointOrientation === "Violin"
+            ? settings.points === "None"
+              ? false
+              : settings.points
+            : false,
         pointpos: settings.pointPos,
         jitter: settings.jitter,
         bandwidth: settings.bandWidth,
@@ -144,15 +144,17 @@ export const Violin = ({
           visible: settings.showPoints,
           color: settings.markerColor,
           size: settings.markerSize,
-          opacity: settings.pointOpacity
+          opacity: settings.pointOpacity,
         },
         meanline: {
           visible: true,
         },
-        hovertemplate:
-          "Percent Identity: %{x}<br>Percent Identity: %{y}<extra></extra>",
-      } as Partial<PlotData>),
-    [data, settings]
+        hovertemplate: "%{text}<br>Percent Identity: %{y}<extra></extra>",
+        text: data.tick_text_combos.map(
+          (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}`,
+        ),
+      }) as Partial<PlotData>,
+    [data, settings],
   );
   const boxTrace = React.useMemo(
     () =>
@@ -162,11 +164,11 @@ export const Violin = ({
         [settings.plotOrientation === "vertical" ? "y" : "x"]: data.raw_mat,
         visible: settings.showBox,
         boxpoints:
-        settings.pointOrientation === "Box"
-          ? settings.points === "None"
-            ? false
-            : settings.points
-          : false,
+          settings.pointOrientation === "Box"
+            ? settings.points === "None"
+              ? false
+              : settings.points
+            : false,
         pointpos: settings.pointPos,
         jitter: settings.jitter,
         line: {
@@ -174,76 +176,75 @@ export const Violin = ({
           width: settings.boxlineWidth,
         },
         opacity: settings.boxOpacity,
-        whiskerwidth:settings.whiskerWidth,
+        whiskerwidth: settings.whiskerWidth,
         marker: {
           visible: settings.showBox,
           color: settings.markerColor,
-          opacity: settings.pointOpacity
+          opacity: settings.pointOpacity,
         },
-        fillcolor:settings.boxfillColor,
+        fillcolor: settings.boxfillColor,
         hovertemplate:
           "Percent Identity: %{x}<br>Percent Identity: %{y}<extra></extra>",
-      } as Partial<PlotData>),
-    [data, settings]
+      }) as Partial<PlotData>,
+    [data, settings],
   );
 
-    const layout = React.useMemo(() => {
-      const isVertical = settings.plotOrientation === "vertical";
-    
-      return {
-        title: settings.plotTitle,
-        xaxis: isVertical
-          ? {
-              fixedrange: true,
-              dtick: 1,
-              zeroline: false,
-              showgrid: settings.showGrid,
-              showline: settings.showAxisLines,
-              showticklabels: settings.showTickLabels,
-            }
-          : {
-              side: "left",
-              rangemode: "tozero",
-              fixedrange: true,
-              zeroline: false,
-              showgrid: settings.showGrid,
-              showline: settings.showAxisLines,
-              showticklabels: settings.showTickLabels,
-              title: settings.showAxisLabels
-                ? "Percent Pairwise Identity"
-                : undefined,
-              range: [minDataValue - 20, maxDataValue + 20],
-            },
-        yaxis: isVertical
-          ? {
-              side: "left",
-              rangemode: "tozero",
-              fixedrange: true,
-              zeroline: false,
-              showgrid: settings.showGrid,
-              showline: settings.showAxisLines,
-              showticklabels: settings.showTickLabels,
-              title: settings.showAxisLabels
-                ? "Percent Pairwise Identity"
-                : undefined,
-              range: [minDataValue - 20, maxDataValue + 20],
-            }
-          : {
-              fixedrange: true,
-              dtick: 1,
-              zeroline: false,
-              showgrid: settings.showGrid,
-              showline: settings.showAxisLines,
-              showticklabels: settings.showTickLabels,
-            },
-        dragmode: "pan",
-        barmode: "overlay",
-        showlegend: false,
-        boxgap: settings.boxWidth,
-        margin: { l: 50, r: 50, t: 50, b: 50 },
-      } as Partial<Layout>;
-    }, [data, settings]);
-  
+  const layout = React.useMemo(() => {
+    const isVertical = settings.plotOrientation === "vertical";
+
+    return {
+      title: settings.plotTitle,
+      xaxis: isVertical
+        ? {
+            fixedrange: true,
+            dtick: 1,
+            zeroline: false,
+            showgrid: settings.showGrid,
+            showline: settings.showAxisLines,
+            showticklabels: settings.showTickLabels,
+          }
+        : {
+            side: "left",
+            rangemode: "tozero",
+            fixedrange: true,
+            zeroline: false,
+            showgrid: settings.showGrid,
+            showline: settings.showAxisLines,
+            showticklabels: settings.showTickLabels,
+            title: settings.showAxisLabels
+              ? "Percent Pairwise Identity"
+              : undefined,
+            range: [minDataValue - 20, maxDataValue + 20],
+          },
+      yaxis: isVertical
+        ? {
+            side: "left",
+            rangemode: "tozero",
+            fixedrange: true,
+            zeroline: false,
+            showgrid: settings.showGrid,
+            showline: settings.showAxisLines,
+            showticklabels: settings.showTickLabels,
+            title: settings.showAxisLabels
+              ? "Percent Pairwise Identity"
+              : undefined,
+            range: [minDataValue - 20, maxDataValue + 20],
+          }
+        : {
+            fixedrange: true,
+            dtick: 1,
+            zeroline: false,
+            showgrid: settings.showGrid,
+            showline: settings.showAxisLines,
+            showticklabels: settings.showTickLabels,
+          },
+      dragmode: "pan",
+      barmode: "overlay",
+      showlegend: false,
+      boxgap: settings.boxWidth,
+      margin: { l: 50, r: 50, t: 50, b: 50 },
+    } as Partial<Layout>;
+  }, [data, settings]);
 
   return (
     <>
@@ -331,29 +332,33 @@ export const Violin = ({
               </div>
             </div>
             <div className="group">
-              <div className="field">            
+              <div className="field">
                 <label>Plot Orientation</label>
                 <div className="radio-group"></div>
-                  <label>
-                    <input
-                      type="radio"
-                      name="orientation"
-                      value="vertical"
-                      checked={settings.plotOrientation === "vertical"}
-                      onChange={(e) => updateSettings({ plotOrientation: e.target.value })}
-                    />
-                    Vertical
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="orientation"
-                      value="horizontal"
-                      checked={settings.plotOrientation === "horizontal"}
-                      onChange={(e) => updateSettings({ plotOrientation: e.target.value })}
-                    />
-                    Horizontal
-                  </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="orientation"
+                    value="vertical"
+                    checked={settings.plotOrientation === "vertical"}
+                    onChange={(e) =>
+                      updateSettings({ plotOrientation: e.target.value })
+                    }
+                  />
+                  Vertical
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    name="orientation"
+                    value="horizontal"
+                    checked={settings.plotOrientation === "horizontal"}
+                    onChange={(e) =>
+                      updateSettings({ plotOrientation: e.target.value })
+                    }
+                  />
+                  Horizontal
+                </label>
               </div>
             </div>
             <div className="group">
@@ -476,7 +481,7 @@ export const Violin = ({
                       min={0.5}
                       max={1}
                       step={0.05}
-                      type="float" 
+                      type="float"
                     />
                   </div>
                 </div>
@@ -555,7 +560,9 @@ export const Violin = ({
                       name="pointOrientation"
                       value="Violin"
                       checked={settings.pointOrientation === "Violin"}
-                      onChange={(e) => updateSettings({ pointOrientation: e.target.value })}
+                      onChange={(e) =>
+                        updateSettings({ pointOrientation: e.target.value })
+                      }
                     />
                     Violin
                   </label>
@@ -565,7 +572,9 @@ export const Violin = ({
                       name="pointOrientation"
                       value="Box"
                       checked={settings.pointOrientation === "Box"}
-                      onChange={(e) => updateSettings({ pointOrientation: e.target.value })}
+                      onChange={(e) =>
+                        updateSettings({ pointOrientation: e.target.value })
+                      }
                     />
                     Box
                   </label>
@@ -575,7 +584,9 @@ export const Violin = ({
                       name="pointOrientation"
                       value="None"
                       checked={settings.pointOrientation === "None"}
-                      onChange={(e) => updateSettings({ pointOrientation: e.target.value })}
+                      onChange={(e) =>
+                        updateSettings({ pointOrientation: e.target.value })
+                      }
                     />
                     None
                   </label>
@@ -583,12 +594,12 @@ export const Violin = ({
               </div>
               <div className="row">
                 <div className="col-2">
-                <div className="field">
+                  <div className="field">
                     <NumberInput
                       label="Point Position"
                       field="pointPos"
                       value={settings.pointPos}
-                      type="float"    
+                      type="float"
                       updateValue={updateSettings}
                       min={-2}
                       max={-1}
@@ -616,7 +627,7 @@ export const Violin = ({
                           <option key={value} value={value}>
                             {value === "None" ? "None" : value}
                           </option>
-                        )
+                        ),
                       )}
                     </select>
                   </div>
@@ -652,36 +663,36 @@ export const Violin = ({
                     />
                   </div>
                 </div>
-              <div className="row">
-                <div className="col-2">
-                  <div className="field">
-                    <NumberInput
-                      label="Point Opacity"
-                      field="pointOpacity"
-                      type="float"
-                      value={settings.pointOpacity}
-                      isDisabled={!settings.showPoints}
-                      updateValue={updateSettings}
-                      min={0}
-                      max={1}
-                      step={0.1}
-                    />
-                  </div>
-                  <div className="field">
-                    <NumberInput
-                      label="Jitter"
-                      field="jitter"
-                      value={settings.jitter}
-                      type="float"
-                      isDisabled={!settings.showPoints}
-                      updateValue={updateSettings}
-                      min={0}
-                      max={1}
-                      step={0.1}
-                    />
+                <div className="row">
+                  <div className="col-2">
+                    <div className="field">
+                      <NumberInput
+                        label="Point Opacity"
+                        field="pointOpacity"
+                        type="float"
+                        value={settings.pointOpacity}
+                        isDisabled={!settings.showPoints}
+                        updateValue={updateSettings}
+                        min={0}
+                        max={1}
+                        step={0.1}
+                      />
+                    </div>
+                    <div className="field">
+                      <NumberInput
+                        label="Jitter"
+                        field="jitter"
+                        value={settings.jitter}
+                        type="float"
+                        isDisabled={!settings.showPoints}
+                        updateValue={updateSettings}
+                        min={0}
+                        max={1}
+                        step={0.1}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
               </div>
             </div>
           </div>
