@@ -334,31 +334,32 @@ export const Violin = ({
             <div className="group">
               <div className="field">
                 <label>Plot Orientation</label>
-                <div className="radio-group"></div>
-                <label>
-                  <input
-                    type="radio"
-                    name="orientation"
-                    value="vertical"
-                    checked={settings.plotOrientation === "vertical"}
-                    onChange={(e) =>
-                      updateSettings({ plotOrientation: e.target.value })
-                    }
-                  />
-                  Vertical
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="orientation"
-                    value="horizontal"
-                    checked={settings.plotOrientation === "horizontal"}
-                    onChange={(e) =>
-                      updateSettings({ plotOrientation: e.target.value })
-                    }
-                  />
-                  Horizontal
-                </label>
+                <div className="radio-group">
+                  <label>
+                    <input
+                      type="radio"
+                      name="orientation"
+                      value="vertical"
+                      checked={settings.plotOrientation === "vertical"}
+                      onChange={(e) =>
+                        updateSettings({ plotOrientation: e.target.value })
+                      }
+                    />
+                    Vertical
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="orientation"
+                      value="horizontal"
+                      checked={settings.plotOrientation === "horizontal"}
+                      onChange={(e) =>
+                        updateSettings({ plotOrientation: e.target.value })
+                      }
+                    />
+                    Horizontal
+                  </label>
+                </div>
               </div>
             </div>
             <div className="group">
