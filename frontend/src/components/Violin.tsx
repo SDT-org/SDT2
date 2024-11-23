@@ -4,58 +4,10 @@ import createPlotlyComponent from "react-plotly.js/factory";
 import { NumberInput } from "./NumberInput";
 import { Layout, PlotData } from "plotly.js-dist-min";
 import { DistributionData } from "../plotTypes";
+import { ColorOption } from "../colors";
+import { formatTitle } from "../helpers";
 
 const Plot = createPlotlyComponent(Plotly);
-
-enum ColorOption {
-  White = "white",
-  Black = "black",
-  Tomato = "tomato",
-  LightBLue = "lightblue",
-  LightGreen = "lightgreen",
-  Purple = "plum",
-  Lightcoral = "lightcoral",
-  Orange = "orange",
-  Yellow = "gold",
-  Cyan = "cyan",
-  Teal = "teal",
-  Magenta = "magenta",
-  Brown = "saddlebrown",
-  Lime = "lime",
-  Coral = "coral",
-  Turquoise = "turquoise",
-  Indigo = "indigo",
-  Violet = "violet",
-  Lavender = "lavender",
-  Peach = "peachpuff",
-  SkyBlue = "skyblue",
-  Olive = "olive",
-  Tan = "tan",
-  Salmon = "salmon",
-  Maroon = "maroon",
-  Navy = "navy",
-  Khaki = "khaki",
-  Periwinkle = "periwinkle",
-  Mint = "mintcream",
-  Azure = "azure",
-  Chartreuse = "chartreuse",
-  Goldrod = "goldenrod",
-  SlateBlue = "slateblue",
-  LightSeaGreen = "lightseagreen",
-  DarkCyan = "darkcyan",
-  RosyBrown = "rosybrown",
-  PaleVioletRed = "palevioletred",
-  DeepPink = "deeppink",
-  DarkOrange = "darkorange",
-  Crimson = "crimson",
-  LightSalmon = "lightsalmon",
-  Orchid = "orchid",
-  Thistle = "thistle",
-  DarkKhaki = "darkkhaki",
-  LightCoral = "lightcoral",
-  MediumOrchid = "mediumorchid",
-  None = "rgba(0,0,0,0)", // No color (use transparent or ignore)
-}
 
 export const Violin = ({
   data,
@@ -150,7 +102,7 @@ export const Violin = ({
           visible: true,
         },
         hovertemplate: "%{text}<br>Percent Identity: %{y}<extra></extra>",
-        text: data.tick_text_combos.map(
+        text: data.identity_combos.map(
           (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}`,
         ),
       }) as Partial<PlotData>,
@@ -389,7 +341,7 @@ export const Violin = ({
                     >
                       {Object.entries(ColorOption).map(([key, value]) => (
                         <option key={key} value={value}>
-                          {key}
+                          {formatTitle(key)}
                         </option>
                       ))}
                     </select>
@@ -467,7 +419,7 @@ export const Violin = ({
                     >
                       {Object.entries(ColorOption).map(([key, value]) => (
                         <option key={key} value={value}>
-                          {key}
+                          {formatTitle(key)}
                         </option>
                       ))}
                     </select>
@@ -486,8 +438,6 @@ export const Violin = ({
                     />
                   </div>
                 </div>
-              </div>
-              <div className="row">
                 <div className="col-2">
                   <div className="field">
                     <label htmlFor="box-line-color">Line Color</label>
@@ -501,7 +451,7 @@ export const Violin = ({
                     >
                       {Object.entries(ColorOption).map(([key, value]) => (
                         <option key={key} value={value}>
-                          {key}
+                          {formatTitle(key)}
                         </option>
                       ))}
                     </select>
@@ -646,7 +596,7 @@ export const Violin = ({
                     >
                       {Object.entries(ColorOption).map(([key, value]) => (
                         <option key={key} value={value}>
-                          {key}
+                          {formatTitle(key)}
                         </option>
                       ))}
                     </select>

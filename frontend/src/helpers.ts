@@ -28,3 +28,5 @@ export const formatBytes = (bytes: number, decimals = 2) => {
 
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 };
+
+export const formatTitle = (key: string) => key.replaceAll("_", " ");
