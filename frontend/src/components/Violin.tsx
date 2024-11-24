@@ -210,8 +210,8 @@ export const Violin = ({
       <div className="app-sidebar">
         <div className="app-sidebar-toolbar">
           <div className="form">
-            <div className="row">
-              <div className="col-2">
+            <div className="group">
+              <div className="row">
                 <div className="field">
                   <label htmlFor="data-source">Data Source</label>
                   <select
@@ -496,10 +496,8 @@ export const Violin = ({
                     />
                   </div>
                 </div>
-              </div>
-              <div className="row">
-                <div className="col-2">
-                  <div className="field">
+                <div className="row">
+                  <div className="col-2">
                     <NumberInput
                       label="Box Opacity"
                       field="boxOpacity"
@@ -511,10 +509,8 @@ export const Violin = ({
                       max={1}
                       step={0.1}
                     />
-                  </div>
-                  <div className="field">
                     <NumberInput
-                      label="Whisker Width"
+                      label="Whiskers"
                       field="whiskerWidth"
                       value={settings.whiskerWidth}
                       type="float"
