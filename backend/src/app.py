@@ -452,7 +452,7 @@ class Api:
 
         ######
         stats_df = pd.read_csv(stats_path, header=0)
-        gc_stats = stats_df["GC %"].map("{:.0%}".format).tolist()
+        gc_stats = stats_df["GC %"].map(lambda value: round(value * 100)).tolist()
         len_stats = stats_df["Sequence Length"].tolist()
         #######
 

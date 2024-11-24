@@ -24,8 +24,6 @@ export const Violin = ({
       </div>
     );
   }
-  const minDataValue = Math.min(...data.raw_mat);
-  const maxDataValue = Math.max(...data.raw_mat);
 
   const [settings, setSettings] = React.useState({
     plotTitle: "Distribution of Percent Identities",
@@ -57,9 +55,20 @@ export const Violin = ({
     showAxisLabels: true,
     bandwidth: 5,
     jitter: 0.5,
+    dataSource: "scores",
   });
 
   console.log(data);
+
+  const dataSets = {
+    scores: data.raw_mat,
+    gc: data.gc_stats,
+    length: data.length_stats,
+  };
+
+  const dataSet = dataSets[settings.dataSource as keyof typeof dataSets];
+  const minDataValue = Math.min(...dataSet);
+  const maxDataValue = Math.max(...dataSet);
 
   const updateSettings = (newState: Partial<typeof settings>) => {
     setSettings((previous) => {
@@ -74,7 +83,7 @@ export const Violin = ({
       ({
         type: "violin",
         name: "",
-        [settings.plotOrientation === "vertical" ? "y" : "x"]: data.raw_mat,
+        [settings.plotOrientation === "vertical" ? "y" : "x"]: dataSet,
         visible: settings.showViolin,
         line: {
           color: settings.lineColor,
@@ -100,6 +109,7 @@ export const Violin = ({
         meanline: {
           visible: true,
         },
+        hoveron: "points",
         hovertemplate: `%{text}<br>Percent Identity: %{${settings.plotOrientation === "vertical" ? "y" : "x"}}<extra></extra>`,
         text: data.identity_combos.map(
           (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}`,
@@ -112,7 +122,7 @@ export const Violin = ({
       ({
         type: "box",
         name: "",
-        [settings.plotOrientation === "vertical" ? "y" : "x"]: data.raw_mat,
+        [settings.plotOrientation === "vertical" ? "y" : "x"]: dataSet,
         visible: settings.showBox,
         boxpoints:
           settings.pointOrientation === "Box"
@@ -200,6 +210,25 @@ export const Violin = ({
       <div className="app-sidebar">
         <div className="app-sidebar-toolbar">
           <div className="form">
+            <div className="row">
+              <div className="col-2">
+                <div className="field">
+                  <label htmlFor="data-source">Data Source</label>
+                  <select
+                    id="data-source"
+                    value={settings.dataSource}
+                    onChange={(e) =>
+                      updateSettings({ dataSource: e.target.value })
+                    }
+                  >
+                    <option value="scores">Scores</option>
+                    <option value="gc">GC</option>
+                    <option value="length">Length</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
             <div className="group">
               <div className="field">
                 <label className="header">Title</label>
@@ -211,6 +240,7 @@ export const Violin = ({
                   }
                 />
               </div>
+
               <div className="row">
                 <div className="col-2">
                   <div className="field">
