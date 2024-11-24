@@ -135,8 +135,10 @@ export const Raincloud = ({
         meanline: {
           visible: true,
         },
-        hovertemplate:
-          "Percent Identity: %{x}<br>Percent Identity: %{y}<extra></extra>",
+        hovertemplate: "%{text}<br> <br>Percent Identity: %{x}<extra></extra>",
+        text: data.identity_combos.map(
+          (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}`,
+        ),
       }) as Partial<PlotData>,
     [data, settings],
   );

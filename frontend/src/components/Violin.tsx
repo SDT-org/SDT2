@@ -11,7 +11,6 @@ const Plot = createPlotlyComponent(Plotly);
 
 export const Violin = ({
   data,
-  tickText,
   footer,
 }: {
   data: DistributionData | undefined;
@@ -101,7 +100,7 @@ export const Violin = ({
         meanline: {
           visible: true,
         },
-        hovertemplate: "%{text}<br>Percent Identity: %{y}<extra></extra>",
+        hovertemplate: `%{text}<br>Percent Identity: %{${settings.plotOrientation === "vertical" ? "y" : "x"}}<extra></extra>`,
         text: data.identity_combos.map(
           (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}`,
         ),
@@ -149,7 +148,6 @@ export const Violin = ({
       xaxis: isVertical
         ? {
             fixedrange: true,
-            dtick: 1,
             zeroline: false,
             showgrid: settings.showGrid,
             showline: settings.showAxisLines,
@@ -184,7 +182,6 @@ export const Violin = ({
           }
         : {
             fixedrange: true,
-            dtick: 1,
             zeroline: false,
             showgrid: settings.showGrid,
             showline: settings.showAxisLines,
