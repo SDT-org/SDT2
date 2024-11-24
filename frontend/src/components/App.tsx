@@ -9,6 +9,7 @@ import { ExportModal } from "./ExportModal";
 
 export const App = () => {
   const [appState, setAppState] = React.useState<AppState>(initialAppState);
+  const [loading, setLoading] = React.useState(true);
   const [debugState, setDebugState] = React.useState("");
   const mainMenuCallbacks: MainMenuProps = {
     appState,
@@ -121,10 +122,33 @@ export const App = () => {
     setDebugState(JSON.stringify(appState, null, 2));
   }, [appState]);
 
+  const fetchAppState = () => {
+    setLoading(true);
+    window.pywebview.api.get_state().then((data) =>
+      setAppState((prev) => {
+        return { ...prev, ...data, client: { ...prev.client } };
+      }),
+    );
+    setLoading(false);
+  };
+
+  React.useEffect(() => {
+    const waitForPywebview = () =>
+      new Promise((resolve) => {
+        if (!window.pywebview) {
+          setTimeout(() => resolve(waitForPywebview()), 20);
+        } else {
+          resolve(true);
+        }
+      });
+
+    waitForPywebview().then(() => fetchAppState());
+  }, []);
+
   return (
     <ErrorBoundary appState={appState} setAppState={setAppState}>
       <AppStateContext.Provider value={{ appState, setAppState }}>
-        {APP_VIEWS[appState?.view || "viewer"]}
+        {!loading ? APP_VIEWS[appState?.view || "viewer"] : null}
         <ExportModal />
         {showDebugState ? <pre>AppState {debugState}</pre> : null}
       </AppStateContext.Provider>
