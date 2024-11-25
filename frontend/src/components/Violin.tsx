@@ -6,16 +6,23 @@ import { Layout, PlotData } from "plotly.js-dist-min";
 import { DistributionData } from "../plotTypes";
 import { ColorOption } from "../colors";
 import { formatTitle } from "../helpers";
+import { DataSets } from "./Distribution";
 
 const Plot = createPlotlyComponent(Plotly);
 
 export const Violin = ({
   data,
+  dataSets,
+  dataSetKey,
   footer,
+  sidebarComponent,
 }: {
   data: DistributionData | undefined;
+  dataSets: DataSets;
+  dataSetKey: keyof DataSets;
   tickText: string[];
   footer?: React.ReactNode;
+  sidebarComponent?: React.ReactNode;
 }) => {
   if (!data) {
     return (
@@ -55,18 +62,9 @@ export const Violin = ({
     showAxisLabels: true,
     bandwidth: 5,
     jitter: 0.5,
-    dataSource: "scores",
   });
 
-  console.log(data);
-
-  const dataSets = {
-    scores: data.raw_mat,
-    gc: data.gc_stats,
-    length: data.length_stats,
-  };
-
-  const dataSet = dataSets[settings.dataSource as keyof typeof dataSets];
+  const dataSet = dataSets[dataSetKey];
   const minDataValue = Math.min(...dataSet);
   const maxDataValue = Math.max(...dataSet);
 
@@ -115,7 +113,7 @@ export const Violin = ({
           (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}`,
         ),
       }) as Partial<PlotData>,
-    [data, settings],
+    [data, dataSetKey, settings],
   );
   const boxTrace = React.useMemo(
     () =>
@@ -147,7 +145,7 @@ export const Violin = ({
         hovertemplate:
           "Percent Identity: %{x}<br>Percent Identity: %{y}<extra></extra>",
       }) as Partial<PlotData>,
-    [data, settings],
+    [dataSetKey, settings],
   );
 
   const layout = React.useMemo(() => {
@@ -203,31 +201,14 @@ export const Violin = ({
       boxgap: settings.boxWidth,
       margin: { l: 50, r: 50, t: 50, b: 50 },
     } as Partial<Layout>;
-  }, [data, settings]);
+  }, [data, dataSetKey, settings]);
 
   return (
     <>
       <div className="app-sidebar">
         <div className="app-sidebar-toolbar">
           <div className="form">
-            <div className="group">
-              <div className="row">
-                <div className="field">
-                  <label htmlFor="data-source">Data Source</label>
-                  <select
-                    id="data-source"
-                    value={settings.dataSource}
-                    onChange={(e) =>
-                      updateSettings({ dataSource: e.target.value })
-                    }
-                  >
-                    <option value="scores">Scores</option>
-                    <option value="gc">GC</option>
-                    <option value="length">Length</option>
-                  </select>
-                </div>
-              </div>
-            </div>
+            {sidebarComponent}
 
             <div className="group">
               <div className="field">

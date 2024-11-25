@@ -250,6 +250,12 @@
       }
     }
 
+    .row {
+      & + .row {
+        margin-top: 0.8rem;
+      }
+    }
+
     .field {
       margin-bottom: 0.8rem;
 
@@ -337,7 +343,7 @@
 
     .radio-group {
       display: flex;
-      gap: 40px; 
+      gap: 40px;
     }
     .advanced-settings {
       font-size: 0.875rem;

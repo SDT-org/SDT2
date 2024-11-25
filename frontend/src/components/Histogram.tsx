@@ -4,6 +4,7 @@ import createPlotlyComponent from "react-plotly.js/factory";
 import { NumberInput } from "./NumberInput";
 import { Layout, PlotData } from "plotly.js-dist-min";
 import { DistributionData } from "../plotTypes";
+import { DataSets } from "./Distribution";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -55,12 +56,19 @@ enum ColorOption {
   MediumOrchid = "mediumorchid",
   None = "rgba(0,0,0,0)", // No color (use transparent or ignore)
 }
+
 export const Histogram = ({
   data,
+  dataSets,
+  dataSetKey,
   footer,
+  sidebarComponent,
 }: {
   data: DistributionData | undefined;
+  dataSets: DataSets;
+  dataSetKey: keyof DataSets;
   footer?: React.ReactNode;
+  sidebarComponent?: React.ReactNode;
 }) => {
   if (!data) {
     return (
@@ -83,7 +91,7 @@ export const Histogram = ({
     plotTitle: "Distribution of Percent Identities",
     showTickLabels: true,
     showAxisLabels: true,
-    histnorm: 'percent',
+    histnorm: "percent",
   });
 
   const updateSettings = (newState: Partial<typeof settings>) => {
@@ -95,30 +103,31 @@ export const Histogram = ({
     });
   };
 
+  const dataSet = dataSets[dataSetKey];
+
   const histogramTrace = React.useMemo(
     () =>
       ({
         type: "histogram",
-        x: data.raw_mat,
-        histnorm: 'percent',
+        x: dataSet,
+        histnorm: "percent",
         marker: {
-          colorscale: 'Viridis',
+          colorscale: "Viridis",
           color: settings.barColor,
-           line: {
-             width: settings.histOutlineWidth,
-             color: settings.histlineColor,
-           },
+          line: {
+            width: settings.histOutlineWidth,
+            color: settings.histlineColor,
+          },
         },
         xbins: {
-          size: settings.binSize, 
+          size: settings.binSize,
         },
         name: "Histogram",
         hovertemplate:
           "Percent Identity: %{x}<br>Proportion: %{y}<extra></extra>",
       }) as Partial<PlotData>,
-    [data, settings],
+    [data, dataSetKey, settings],
   );
-
 
   const layout = React.useMemo(
     () =>
@@ -129,13 +138,12 @@ export const Histogram = ({
           side: "bottom",
           rangemode: "normal",
           // fixedrange: true,
-          // dtick: settings.showTickLabels ? 1 : undefined, 
+          // dtick: settings.showTickLabels ? 1 : undefined,
           showline: settings.showLine,
           zeroline: settings.showLine,
           showgrid: settings.showGrid,
           showticklabels: settings.showTickLabels,
           // automargin: true,
-
         },
         yaxis: {
           title: settings.showAxisLabels
@@ -149,7 +157,6 @@ export const Histogram = ({
           showgrid: settings.showGrid,
           showticklabels: settings.showTickLabels,
           // automargin: true,
-
         },
 
         dragmode: "pan",
@@ -159,11 +166,13 @@ export const Histogram = ({
       }) as Partial<Layout>,
     [data, settings],
   );
+
   return (
     <>
       <div className="app-sidebar">
         <div className="app-sidebar-toolbar">
           <div className="form">
+            {sidebarComponent}
             <div className="group">
               <div className="field">
                 <label className="header">Title</label>
@@ -246,61 +255,63 @@ export const Histogram = ({
                 </div>
               </div>
             </div>
-            <div className="row">
-              <div className="col-2">
-                <div className="field">
-                  <label htmlFor="bin-color">Bin Color</label>
-                  <select
-                    id="bin-color"
-                    value={settings.barColor}
-                    onChange={(e) =>
-                      updateSettings({ barColor: e.target.value })
-                    }
-                  >
-                    {Object.entries(ColorOption).map(([key, value]) => (
-                      <option key={key} value={value}>
-                        {key}
-                      </option>
-                    ))}
-                  </select>
+            <div className="group">
+              <div className="row">
+                <div className="col-2">
+                  <div className="field">
+                    <label htmlFor="bin-color">Bin Color</label>
+                    <select
+                      id="bin-color"
+                      value={settings.barColor}
+                      onChange={(e) =>
+                        updateSettings({ barColor: e.target.value })
+                      }
+                    >
+                      {Object.entries(ColorOption).map(([key, value]) => (
+                        <option key={key} value={value}>
+                          {key}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <NumberInput
+                    label="Bin Size"
+                    field="binSize"
+                    value={settings.binSize}
+                    updateValue={updateSettings}
+                    type="float"
+                    min={0.5}
+                    max={5}
+                    step={0.5}
+                  />
                 </div>
-                <NumberInput
-                  label="Bin Size"
-                  field="binSize"
-                  value={settings.binSize}
-                  updateValue={updateSettings}
-                  type="float"
-                  min={0.5}  
-                  max={5}
-                  step={0.5}
-                />
-              </div>
-              <div className="col-2">
-                <div className="field">
-                  <label htmlFor="hist-line-color">Outline</label>
-                  <select
-                    id="hist-line-color"
-                    value={settings.histlineColor}
-                    onChange={(e) =>
-                      updateSettings({ histlineColor: e.target.value })
-                    }
-                  >
-                    {Object.entries(ColorOption).map(([key, value]) => (
-                      <option key={key} value={value}>
-                        {key}
-                      </option>
-                    ))}
-                  </select>
+                <div className="col-2">
+                  <div className="field">
+                    <label htmlFor="hist-line-color">Outline</label>
+                    <select
+                      id="hist-line-color"
+                      value={settings.histlineColor}
+                      onChange={(e) =>
+                        updateSettings({ histlineColor: e.target.value })
+                      }
+                    >
+                      {Object.entries(ColorOption).map(([key, value]) => (
+                        <option key={key} value={value}>
+                          {key}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <NumberInput
+                    label="Outline Width"
+                    field="histOutlineWidth"
+                    value={settings.histOutlineWidth}
+                    updateValue={updateSettings}
+                    min={0}
+                    max={15}
+                    step={1}
+                  />
                 </div>
-                <NumberInput
-                  label="Outline Width"
-                  field="histOutlineWidth"
-                  value={settings.histOutlineWidth}
-                  updateValue={updateSettings}
-                  min={0}
-                  max={15}
-                  step={1}
-                />
               </div>
             </div>
           </div>

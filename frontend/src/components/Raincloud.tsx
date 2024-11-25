@@ -5,6 +5,7 @@ import { NumberInput } from "./NumberInput";
 import { Layout, PlotData } from "plotly.js-dist-min";
 import { DistributionData } from "../plotTypes";
 import { formatTitle } from "../helpers";
+import { DataSets } from "./Distribution";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -60,10 +61,16 @@ enum ColorOption {
 
 export const Raincloud = ({
   data,
+  dataSets,
+  dataSetKey,
   footer,
+  sidebarComponent,
 }: {
   data: DistributionData | undefined;
+  dataSets: DataSets;
+  dataSetKey: keyof DataSets;
   footer?: React.ReactNode;
+  sidebarComponent?: React.ReactNode;
 }) => {
   if (!data) {
     return (
@@ -72,8 +79,9 @@ export const Raincloud = ({
       </div>
     );
   }
-  const minDataValue = Math.min(...data.raw_mat);
-  const maxDataValue = Math.max(...data.raw_mat);
+  const dataSet = dataSets[dataSetKey];
+  const minDataValue = Math.min(...dataSet);
+  const maxDataValue = Math.max(...dataSet);
 
   const [settings, setSettings] = React.useState({
     plotTitle: "Distribution of Percent Identities",
@@ -98,8 +106,6 @@ export const Raincloud = ({
     jitter: 0.5,
   });
 
-  console.log(data);
-
   const updateSettings = (newState: Partial<typeof settings>) => {
     setSettings((previous) => {
       return {
@@ -113,7 +119,7 @@ export const Raincloud = ({
       ({
         type: "violin",
         name: "",
-        x: data.raw_mat,
+        x: dataSet,
         side: "negative",
         points: settings.points !== "None" ? settings.points : false,
 
@@ -140,7 +146,7 @@ export const Raincloud = ({
           (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}`,
         ),
       }) as Partial<PlotData>,
-    [data, settings],
+    [data, dataSetKey, settings],
   );
 
   const layout = React.useMemo(() => {
@@ -172,13 +178,14 @@ export const Raincloud = ({
       showlegend: false,
       margin: { l: 50, r: 50, t: 50, b: 50 },
     } as Partial<Layout>;
-  }, [data, settings]);
+  }, [data, dataSetKey, settings]);
 
   return (
     <>
       <div className="app-sidebar">
         <div className="app-sidebar-toolbar">
           <div className="form">
+            {sidebarComponent}
             <div className="group">
               <div className="field">
                 <label className="header">Title</label>
@@ -259,161 +266,165 @@ export const Raincloud = ({
                 </div>
               </div>
             </div>
-            <div className="row">
-              <div className="col-2">
-                <div className="field">
-                  <label htmlFor="fill-color">Cloud Fill Color</label>
-                  <select
-                    id="fill-color"
-                    value={settings.fillColor}
-                    onChange={(e) =>
-                      updateSettings({ fillColor: e.target.value })
-                    }
-                  >
-                    {Object.entries(ColorOption).map(([key, value]) => (
-                      <option key={key} value={value}>
-                        {key}
-                      </option>
-                    ))}
-                  </select>
+            <div className="group">
+              <div className="row">
+                <div className="col-2">
+                  <div className="field">
+                    <label htmlFor="fill-color">Cloud Fill Color</label>
+                    <select
+                      id="fill-color"
+                      value={settings.fillColor}
+                      onChange={(e) =>
+                        updateSettings({ fillColor: e.target.value })
+                      }
+                    >
+                      {Object.entries(ColorOption).map(([key, value]) => (
+                        <option key={key} value={value}>
+                          {key}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="field">
+                    <NumberInput
+                      label="Band Width"
+                      field="bandWidth"
+                      value={settings.bandWidth}
+                      updateValue={updateSettings}
+                      min={0}
+                      max={20}
+                      step={1}
+                    />
+                  </div>
                 </div>
-                <div className="field">
-                  <NumberInput
-                    label="Band Width"
-                    field="bandWidth"
-                    value={settings.bandWidth}
-                    updateValue={updateSettings}
-                    min={0}
-                    max={20}
-                    step={1}
-                  />
-                </div>
-              </div>
-              <div className="col-2">
-                <div className="field">
-                  <label htmlFor="line-color">Line Color</label>
-                  <select
-                    id="line-color"
-                    value={settings.lineColor}
-                    onChange={(e) =>
-                      updateSettings({ lineColor: e.target.value })
-                    }
-                  >
-                    {Object.entries(ColorOption).map(([key, value]) => (
-                      <option key={key} value={value}>
-                        {key}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="field">
-                  <NumberInput
-                    label="Line Width"
-                    field="lineWidth"
-                    value={settings.lineWidth}
-                    updateValue={updateSettings}
-                    min={0}
-                    max={20}
-                    step={1}
-                  />
+                <div className="col-2">
+                  <div className="field">
+                    <label htmlFor="line-color">Line Color</label>
+                    <select
+                      id="line-color"
+                      value={settings.lineColor}
+                      onChange={(e) =>
+                        updateSettings({ lineColor: e.target.value })
+                      }
+                    >
+                      {Object.entries(ColorOption).map(([key, value]) => (
+                        <option key={key} value={value}>
+                          {key}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="field">
+                    <NumberInput
+                      label="Line Width"
+                      field="lineWidth"
+                      value={settings.lineWidth}
+                      updateValue={updateSettings}
+                      min={0}
+                      max={20}
+                      step={1}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="row">
-            <div className="col-2">
-              <div className="field">
-                <NumberInput
-                  label="Point Position"
-                  field="pointPos"
-                  value={settings.pointPos}
-                  type="float"
-                  updateValue={updateSettings}
-                  min={-2}
-                  max={-1}
-                  step={0.1}
-                />
-              </div>
-              <div className="field">
-                <label htmlFor="points">Points</label>
-                <select
-                  id="points"
-                  value={settings.points}
-                  onChange={(e) =>
-                    updateSettings({
-                      points: e.target.value as
-                        | "all"
-                        | "outliers"
-                        | "suspectedoutliers"
-                        | "None",
-                    })
-                  }
-                >
-                  {["all", "outliers", "suspectedoutliers", "None"].map(
-                    (value) => (
-                      <option key={value} value={value}>
-                        {value === "None" ? "None" : formatTitle(value)}
-                      </option>
-                    ),
-                  )}
-                </select>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-2">
-                <div className="field">
-                  <label htmlFor="markerColor">Point Color</label>
-                  <select
-                    id="markerColor"
-                    value={settings.markerColor}
-                    onChange={(e) =>
-                      updateSettings({ markerColor: e.target.value })
-                    }
-                  >
-                    {Object.entries(ColorOption).map(([key, value]) => (
-                      <option key={key} value={value}>
-                        {key}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="field">
-                  <NumberInput
-                    label="Point Size"
-                    field="markerSize"
-                    value={settings.markerSize}
-                    updateValue={updateSettings}
-                    min={0}
-                    max={20}
-                    step={1}
-                  />
-                </div>
-              </div>
+            <div className="group">
               <div className="row">
                 <div className="col-2">
                   <div className="field">
                     <NumberInput
-                      label="Point Opacity"
-                      field="pointOpacity"
+                      label="Point Position"
+                      field="pointPos"
+                      value={settings.pointPos}
                       type="float"
-                      value={settings.pointOpacity}
                       updateValue={updateSettings}
-                      min={0}
-                      max={1}
+                      min={-2}
+                      max={-1}
                       step={0.1}
                     />
                   </div>
                   <div className="field">
-                    <NumberInput
-                      label="Jitter"
-                      field="jitter"
-                      value={settings.jitter}
-                      type="float"
-                      updateValue={updateSettings}
-                      min={0}
-                      max={1}
-                      step={0.1}
-                    />
+                    <label htmlFor="points">Points</label>
+                    <select
+                      id="points"
+                      value={settings.points}
+                      onChange={(e) =>
+                        updateSettings({
+                          points: e.target.value as
+                            | "all"
+                            | "outliers"
+                            | "suspectedoutliers"
+                            | "None",
+                        })
+                      }
+                    >
+                      {["all", "outliers", "suspectedoutliers", "None"].map(
+                        (value) => (
+                          <option key={value} value={value}>
+                            {value === "None" ? "None" : formatTitle(value)}
+                          </option>
+                        ),
+                      )}
+                    </select>
+                  </div>
+                </div>
+                <div className="row">
+                  <div className="col-2">
+                    <div className="field">
+                      <label htmlFor="markerColor">Point Color</label>
+                      <select
+                        id="markerColor"
+                        value={settings.markerColor}
+                        onChange={(e) =>
+                          updateSettings({ markerColor: e.target.value })
+                        }
+                      >
+                        {Object.entries(ColorOption).map(([key, value]) => (
+                          <option key={key} value={value}>
+                            {key}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="field">
+                      <NumberInput
+                        label="Point Size"
+                        field="markerSize"
+                        value={settings.markerSize}
+                        updateValue={updateSettings}
+                        min={0}
+                        max={20}
+                        step={1}
+                      />
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-2">
+                      <div className="field">
+                        <NumberInput
+                          label="Point Opacity"
+                          field="pointOpacity"
+                          type="float"
+                          value={settings.pointOpacity}
+                          updateValue={updateSettings}
+                          min={0}
+                          max={1}
+                          step={0.1}
+                        />
+                      </div>
+                      <div className="field">
+                        <NumberInput
+                          label="Jitter"
+                          field="jitter"
+                          value={settings.jitter}
+                          type="float"
+                          updateValue={updateSettings}
+                          min={0}
+                          max={1}
+                          step={0.1}
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
