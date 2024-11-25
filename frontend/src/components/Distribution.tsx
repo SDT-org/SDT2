@@ -59,10 +59,8 @@ const VisualizationSwitcher = ({
 
 export const Distribution = ({
   data,
-  tickText,
 }: {
   data: DistributionData | undefined;
-  tickText: string[];
   footer?: React.ReactNode;
 }) => {
   if (!data) {
@@ -91,33 +89,18 @@ export const Distribution = ({
     />
   );
 
-  return (
-    <>
-      {visualization === "histogram" && (
-        <Histogram
-          data={data}
-          dataSets={dataSets}
-          dataSetKey={dataSetKey}
-          sidebarComponent={sidebarComponent}
-        />
-      )}
-      {visualization === "violin" && (
-        <Violin
-          data={data}
-          dataSets={dataSets}
-          dataSetKey={dataSetKey}
-          tickText={tickText}
-          sidebarComponent={sidebarComponent}
-        />
-      )}
-      {visualization === "raincloud" && (
-        <Raincloud
-          data={data}
-          dataSets={dataSets}
-          dataSetKey={dataSetKey}
-          sidebarComponent={sidebarComponent}
-        />
-      )}
-    </>
-  );
+  const commonProps = {
+    data,
+    dataSets,
+    dataSetKey,
+    sidebarComponent,
+  };
+
+  const components = {
+    histogram: <Histogram {...commonProps} />,
+    violin: <Violin {...commonProps} />,
+    raincloud: <Raincloud {...commonProps} />,
+  };
+
+  return components[visualization];
 };

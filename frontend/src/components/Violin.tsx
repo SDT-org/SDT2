@@ -20,7 +20,6 @@ export const Violin = ({
   data: DistributionData | undefined;
   dataSets: DataSets;
   dataSetKey: keyof DataSets;
-  tickText: string[];
   footer?: React.ReactNode;
   sidebarComponent?: React.ReactNode;
 }) => {

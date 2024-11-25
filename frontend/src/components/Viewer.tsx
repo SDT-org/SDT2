@@ -185,9 +185,7 @@ export const Viewer = ({
         ) : null}
       </TabPanel>
       <TabPanel id="plot" className="app-panel">
-        {distributionData ? (
-          <Distribution data={distributionData} tickText={tickText} />
-        ) : null}
+        {distributionData ? <Distribution data={distributionData} /> : null}
       </TabPanel>
       {loading ? <div className="api-loader"></div> : null}
     </Tabs>
