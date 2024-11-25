@@ -8,8 +8,10 @@
     "build": "bun run clean && bun run frontend:build && python build.py",
     "build:noclean": "bun run frontend:build && python build.py",
     "clean": "node -e \"['build', 'gui'].forEach(d => require('fs').rmSync(d, { recursive: true, force: true }));\"",
-    "frontend:dev": "vite build --mode development --config ./vite.config.js",
-    "frontend:watch": "vite build --watch --mode development --config ./vite.config.js",
+    "backend": "run-script-os",
+    "backend:default": "./venv-pywebview/bin/python backend/src/app.py",
+    "backend:windows": ".\\venv-pywebview\\Scripts\\python backend\\src\\app.py",
+    "frontend:dev": "vite dev --config ./vite.config.js",
     "frontend:build": "vite build --mode production --config ./vite.config.js --minify --emptyOutDir",
     "init": "npm install && run-script-os",
     "init:windows": "virtualenv -p python venv-pywebview && .\\venv-pywebview\\Scripts\\pip install Cython && .\\venv-pywebview\\Scripts\\pip install -r requirements.txt",
@@ -17,9 +19,7 @@
     "init:default": "virtualenv -p python3.11 venv-pywebview && ./venv-pywebview/bin/pip install Cython && ./venv-pywebview/bin/pip install -r requirements.txt",
     "init:qt5": "./venv-pywebview/bin/pip install pyqt5 pyqtwebengine -r requirements.txt",
     "init:gtk": "sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0 && ./venv-pywebview/bin/pip install pycairo pygobject -r requirements.txt",
-    "start": "bun run frontend:dev && run-script-os",
-    "start:windows": ".\\venv-pywebview\\Scripts\\python backend\\src\\app.py",
-    "start:default": "./venv-pywebview/bin/python backend/src/app.py"
+    "start": "concurrently --kill-others --success first --names \"frontend,backend\" \"bun run frontend:dev\" \"bun run backend\""
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.1",
@@ -38,6 +38,7 @@
     "@types/react-plotly.js": "^2.6.3",
     "@types/tinycolor2": "^1.4.6",
     "bun-types": "latest",
+    "concurrently": "^9.1.0",
     "prettier": "3.2.5",
     "run-script-os": "^1.1.6",
     "sass": "^1.63.6",

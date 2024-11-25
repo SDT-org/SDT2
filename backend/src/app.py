@@ -24,7 +24,7 @@ from multiprocessing import Lock, Manager, Pool, cpu_count
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
 
-is_nuitka = "__compiled__" in globals()
+is_compiled = "__compiled__" in globals()
 temp_dir = tempfile.TemporaryDirectory()
 
 default_window_title = "Sequence Demarcation Tool 2 Beta"
@@ -533,7 +533,7 @@ if __name__ == "__main__":
 
     window = webview.create_window(
         default_window_title,
-        entry,
+        url="http://localhost:5173/" if not is_compiled else entry,
         js_api=api,
         # TODO: store last window size and position
         width=1200,
