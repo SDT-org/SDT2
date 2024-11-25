@@ -24,6 +24,7 @@ from multiprocessing import Lock, Manager, Pool, cpu_count
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
 
+dev_frontend_host = "http://localhost:5173"
 is_compiled = "__compiled__" in globals()
 temp_dir = tempfile.TemporaryDirectory()
 
@@ -499,13 +500,13 @@ def file_exists(path):
     return os.path.exists(os.path.join(os.path.dirname(__file__), path))
 
 
-def get_entrypoint(filename="index.html"):
-    if file_exists(f"./gui/{filename}"):
-        return f"./gui/{filename}"
-    elif file_exists(f"../../gui/{filename}"):
-        return f"../../gui/{filename}"
-
-    raise Exception(f"{filename} not found")
+def get_html_path(filename="index.html"):
+    if is_compiled:
+        if file_exists(f"./gui/{filename}"):
+            return f"./gui/{filename}"
+        raise Exception(f"{filename} not found")
+    else:
+        return f"{dev_frontend_host}/{filename}"
 
 
 def update_client_state(window: webview.Window):
@@ -520,20 +521,19 @@ def on_closed():
 
 
 def about_window():
-    webview.create_window("About", get_entrypoint("about.html"), js_api=api)
+    webview.create_window("About", get_html_path("about.html"), js_api=api)
 
 
 def manual_window():
-    webview.create_window("SDT2 Manual", get_entrypoint("manual.html"))
+    webview.create_window("SDT2 Manual", get_html_path("manual.html"))
 
 
-entry = get_entrypoint()
 if __name__ == "__main__":
     api = Api()
 
     window = webview.create_window(
         default_window_title,
-        url="http://localhost:5173/" if not is_compiled else entry,
+        url=get_html_path(),
         js_api=api,
         # TODO: store last window size and position
         width=1200,
