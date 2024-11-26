@@ -61,6 +61,7 @@ export const Violin = ({
     showAxisLabels: true,
     bandwidth: 5,
     jitter: 0.5,
+    showMeanline:"Violin",
   });
 
   const dataSet = dataSets[dataSetKey];
@@ -88,6 +89,9 @@ export const Violin = ({
         },
         fillcolor: settings.fillColor,
         opacity: settings.violinOpacity,
+        meanline:{
+          visible: settings.showMeanline === "Violin"
+        },
         points:
           settings.pointOrientation === "Violin"
             ? settings.points === "None"
@@ -103,10 +107,8 @@ export const Violin = ({
           size: settings.markerSize,
           opacity: settings.pointOpacity,
         },
-        meanline: {
-          visible: true,
-        },
         hoveron: "points",
+        scalemode: "width",
         hovertemplate: `%{text}<br>Percent Identity: %{${settings.plotOrientation === "vertical" ? "y" : "x"}}<extra></extra>`,
         text: data.identity_combos.map(
           (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}`,
@@ -120,7 +122,7 @@ export const Violin = ({
         type: "box",
         name: "",
         [settings.plotOrientation === "vertical" ? "y" : "x"]: dataSet,
-        visible: settings.showBox,
+        boxmean: settings.showMeanline === "Box",
         boxpoints:
           settings.pointOrientation === "Box"
             ? settings.points === "None"
@@ -250,7 +252,7 @@ export const Violin = ({
                           })
                         }
                       />
-                      Tick Labels
+                      Labels
                     </label>
                   </div>
                 </div>
@@ -546,6 +548,47 @@ export const Violin = ({
                   </label>
                 </div>
               </div>
+              <div className="field">
+                <label>Show Mean</label>
+                <div style={{ display: "flex", gap: "20px" }}>
+                  <label>
+                    <input
+                      type="radio"
+                      name="showMeanline"
+                      value="Violin"
+                      checked={settings.showMeanline === "Violin"}
+                      onChange={(e) =>
+                        updateSettings({ showMeanline: e.target.value })
+                      }
+                    />
+                    Violin
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="showMeanline"
+                      value="Box"
+                      checked={settings.showMeanline === "Box"}
+                      onChange={(e) =>
+                        updateSettings({ showMeanline: e.target.value })
+                      }
+                    />
+                    Box
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="showMeanline"
+                      value="None"
+                      checked={settings.showMeanline === "None"}
+                      onChange={(e) =>
+                        updateSettings({ showMeanline: e.target.value })
+                      }
+                    />
+                    None
+                  </label>
+                </div>
+              </div>
               <div className="row">
                 <div className="col-2">
                   <div className="field">
@@ -556,7 +599,7 @@ export const Violin = ({
                       type="float"
                       updateValue={updateSettings}
                       min={-2}
-                      max={-1}
+                      max={2}
                       step={0.1}
                     />
                   </div>

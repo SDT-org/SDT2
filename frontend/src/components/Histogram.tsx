@@ -91,7 +91,7 @@ export const Histogram = ({
     plotTitle: "Distribution of Percent Identities",
     showTickLabels: true,
     showAxisLabels: true,
-    histnorm: "percent",
+    histnorm: "probability",
   });
 
   const updateSettings = (newState: Partial<typeof settings>) => {
@@ -112,7 +112,6 @@ export const Histogram = ({
         x: dataSet,
         histnorm: "percent",
         marker: {
-          colorscale: "Viridis",
           color: settings.barColor,
           line: {
             width: settings.histOutlineWidth,
@@ -124,7 +123,7 @@ export const Histogram = ({
         },
         name: "Histogram",
         hovertemplate:
-          "Percent Identity: %{x}<br>Proportion: %{y}<extra></extra>",
+          "Percent Identity: %{x}<br>Percentage: %{y}<extra></extra>",
       }) as Partial<PlotData>,
     [data, dataSetKey, settings],
   );
@@ -137,7 +136,7 @@ export const Histogram = ({
           title: settings.showAxisLabels ? "Percent Pairwise Identity" : "",
           side: "bottom",
           rangemode: "normal",
-          // fixedrange: true,
+          fixedrange: true,
           // dtick: settings.showTickLabels ? 1 : undefined,
           showline: settings.showLine,
           zeroline: settings.showLine,
@@ -151,7 +150,7 @@ export const Histogram = ({
             : "",
           side: "left",
           rangemode: "tozero",
-          // fixedrange: true,
+          fixedrange: true,
           showline: settings.showLine,
           zeroline: settings.showLine,
           showgrid: settings.showGrid,
@@ -161,7 +160,7 @@ export const Histogram = ({
 
         dragmode: "pan",
         barmode: "overlay",
-        showlegend: false,
+        showlegend: true,
         margin: { l: 50, r: 50, t: 50, b: 50 },
       }) as Partial<Layout>,
     [data, settings],
@@ -286,8 +285,8 @@ export const Histogram = ({
                   />
                 </div>
                 <div className="col-2">
-                  <div className="field">
-                    <label htmlFor="hist-line-color">Outline</label>
+                  <div className="field"> 
+                    <label htmlFor="hist-line-color">Outline Color</label>
                     <select
                       id="hist-line-color"
                       value={settings.histlineColor}
