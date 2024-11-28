@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch as RASwitch, SwitchProps } from "react-aria-components";
+import { Switch as RACSwitch, SwitchProps } from "react-aria-components";
 
 export const Switch = ({
   children,
@@ -7,10 +7,10 @@ export const Switch = ({
 }: React.PropsWithChildren<SwitchProps>) => {
   return (
     <>
-      <RASwitch {...props}>
+      <RACSwitch {...props}>
         <div className="indicator" />
         {children}
-      </RASwitch>
+      </RACSwitch>
     </>
   );
 };

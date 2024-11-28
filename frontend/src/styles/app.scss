@@ -238,7 +238,7 @@ select option {
 [data-hidden] {
   opacity: 1;
   height: auto;
-  transition: height .3s ease-out;
+  transition: height 0.3s ease-out;
 }
 [data-hidden="true"] {
   height: 0;
@@ -283,6 +283,20 @@ select option {
     }
   }
 
+  .col-2-1,
+  .col-2-1.field {
+    display: grid;
+    grid-template-areas: "left right" "row row";
+    grid-template-columns: 1fr auto;
+
+    label.header {
+      margin: 0;
+    }
+    .field {
+      margin-top: 0.4rem;
+    }
+  }
+
   .row {
     & + .row {
       margin-top: 0.8rem;
@@ -294,13 +308,15 @@ select option {
     padding: 0.8rem;
     margin: 0.8rem -0.8rem -0.8rem;
     border-top: 1px solid var(--secondary-border-color);
-   }
+  }
 
   .field {
     margin-bottom: 0.8rem;
 
     .subfield {
-      margin-top: 0.4rem;
+      &:not(.compact) {
+        margin-top: 0.4rem;
+      }
 
       label {
         font-weight: 400;
@@ -635,6 +651,11 @@ select option {
   input + button {
     margin: 0;
   }
+}
+
+label.sublabel,
+.form .field label.sublabel {
+  font-weight: 400;
 }
 
 .number-input-group {

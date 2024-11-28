@@ -6,6 +6,7 @@ import { NumberInput } from "./NumberInput";
 import { colorScales as defaultColorScales } from "../colorScales";
 import tinycolor from "tinycolor2";
 import { Switch } from "./Switch";
+import { Slider } from "./Slider";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -116,10 +117,31 @@ export const Heatmap = ({
         <div className="app-sidebar-toolbar">
           <div className="form">
             <div className="group">
-              <h4>Heatmap</h4>
-              <div className="col-2">
-                <div className="field">
-                  <label htmlFor="colorscale">Colorscale</label>
+              <div className="field col-2-1">
+                <label
+                  className="header"
+                  htmlFor="colorscale"
+                  style={{ gridArea: "left" }}
+                >
+                  Colorscale
+                </label>
+                <div className="subfield compact" style={{ gridArea: "right" }}>
+                  <label htmlFor="reverse">
+                    <input
+                      type="checkbox"
+                      name="reverse"
+                      id="reverse"
+                      defaultChecked={settings.reverse}
+                      onChange={() =>
+                        updateSettings({
+                          reverse: !settings.reverse,
+                        })
+                      }
+                    />
+                    Reverse
+                  </label>
+                </div>
+                <div className="field" style={{ gridArea: "row" }}>
                   <select
                     id="colorscale"
                     value={settings.colorscale}
@@ -135,35 +157,21 @@ export const Heatmap = ({
                       </option>
                     ))}
                   </select>
-                  <div className="subfield">
-                    <label htmlFor="reverse">
-                      <input
-                        type="checkbox"
-                        name="reverse"
-                        id="reverse"
-                        defaultChecked={settings.reverse}
-                        onChange={() =>
-                          updateSettings({
-                            reverse: !settings.reverse,
-                          })
-                        }
-                      />
-                      Reverse
-                    </label>
-                  </div>
-                </div>
-                <div className="field">
-                  <NumberInput
-                    label="Cell Spacing"
-                    field="cellspace"
-                    value={settings.cellspace}
-                    updateValue={updateSettings}
-                    min={0}
-                    max={20}
-                    step={1}
-                  />
                 </div>
               </div>
+
+              <div className="field">
+                <Slider
+                  label="Cell Spacing"
+                  labelClassName="sublabel"
+                  id="cellspace"
+                  onChange={(value) => updateSettings({ cellspace: value })}
+                  minValue={0}
+                  maxValue={20}
+                  value={settings.cellspace}
+                />
+              </div>
+
               {settings.colorscale === "Discrete" ? (
                 <>
                   <div className="col-2">
@@ -317,37 +325,28 @@ export const Heatmap = ({
               >
                 <div className="range-group">
                   <div className="field">
-                    <label htmlFor="cbar-shrink">Height</label>
-                    <input
-                      type="range"
-                      name="cbar-shrink"
-                      id="cbar-shrink"
-                      min="0.1"
-                      max="1"
-                      step=".1"
+                    <Slider
+                      label="Height"
+                      minValue={0.1}
+                      maxValue={1}
+                      step={0.1}
                       value={settings.cbar_shrink}
-                      onChange={(e) =>
+                      onChange={(value) =>
                         updateSettings({
-                          cbar_shrink: parseFloat(e.target.value),
+                          cbar_shrink: value,
                         })
                       }
                     />
                   </div>
-                  <div className="field">
-                    <label htmlFor="cbar-aspect">Width</label>
-                    <input
-                      type="range"
-                      name="cbar-aspect"
-                      id="cbar-aspect"
-                      min="1"
-                      max="100"
-                      step="1"
-                      value={settings.cbar_aspect}
-                      onChange={(e) =>
-                        updateSettings({ cbar_aspect: e.target.value })
-                      }
-                    />
-                  </div>
+                  <Slider
+                    label="Width"
+                    id="cbar-aspect"
+                    minValue={1}
+                    maxValue={100}
+                    step={1}
+                    value={settings.cbar_aspect}
+                    onChange={(value) => updateSettings({ cbar_aspect: value })}
+                  />
                 </div>
                 <div className="col-2">
                   <NumberInput
