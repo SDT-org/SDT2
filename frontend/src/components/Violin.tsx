@@ -113,6 +113,7 @@ export const Violin = ({
 
     return {
       title: settings.plotTitle,
+      uirevision: "true",
       xaxis: isVertical
         ? {
             fixedrange: true,

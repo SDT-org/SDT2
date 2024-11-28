@@ -64,6 +64,7 @@ export const Histogram = ({
     () =>
       ({
         title: settings.plotTitle,
+        uirevision: "true",
         xaxis: {
           title: settings.showAxisLabels ? "Percent Pairwise Identity" : "",
           side: "bottom",

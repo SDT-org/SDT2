@@ -434,6 +434,7 @@ export const Heatmap = ({
               displaylogo: false,
             }}
             layout={{
+              uirevision: "true",
               margin: {
                 l: 25,
                 r: 25,

@@ -76,6 +76,7 @@ export const Raincloud = ({
   const layout = React.useMemo(() => {
     return {
       title: settings.plotTitle,
+      uirevision: "true",
       xaxis: {
         side: "left",
         rangemode: "tozero",
