@@ -57,7 +57,7 @@ export const Violin = ({
         },
         points:
           settings.pointOrientation === "Violin"
-            ? settings.points === "None"
+            ? settings.points === false
               ? false
               : settings.points
             : false,
@@ -86,13 +86,7 @@ export const Violin = ({
         name: "",
         [settings.plotOrientation === "vertical" ? "y" : "x"]: dataSet,
         boxmean: settings.showMeanline === "Box",
-        // TODO: Might be unused
-        // boxpoints:
-        //   settings.pointOrientation === "Box"
-        //     ? settings.points === "None"
-        //       ? false
-        //       : settings.points
-        //     : false,
+        boxpoints: settings.pointOrientation === "Box" && settings.points,
         pointpos: settings.pointPos,
         jitter: settings.jitter,
         line: {
@@ -587,22 +581,21 @@ export const Violin = ({
                     <label htmlFor="points">Points</label>
                     <select
                       id="points"
-                      value={settings.points}
+                      value={settings.points.toString()}
                       disabled={!settings.showPoints}
                       onChange={(e) =>
                         updateSettings({
-                          points: e.target.value as
-                            | "all"
-                            | "outliers"
-                            | "suspectedoutliers"
-                            | "None",
+                          points: e.target.value as typeof settings.points,
                         })
                       }
                     >
-                      {["all", "outliers", "suspectedoutliers", "None"].map(
+                      {["all", "outliers", "suspectedoutliers", false].map(
                         (value) => (
-                          <option key={value} value={value}>
-                            {value === "None" ? "None" : value}
+                          <option
+                            key={value.toString()}
+                            value={value.toString()}
+                          >
+                            {value === false ? "None" : value}
                           </option>
                         ),
                       )}

@@ -59,7 +59,7 @@ export type DistributionState = {
     pointOpacity: number;
     pointOrientation: "Violin" | "Box" | "None";
     pointPos: number;
-    points: "all" | "outliers" | "suspectedoutliers" | "None";
+    points: "all" | "outliers" | "suspectedoutliers" | false;
     showAxisLines: boolean;
     showBox: boolean;
     showMeanline: "Violin" | "Box" | "None";
