@@ -171,11 +171,6 @@ body {
   .group {
     border-bottom: 0.1rem solid var(--border-color);
     padding: 0.8rem;
-
-    &:last-child {
-      border-bottom: 0;
-      margin-bottom: 0;
-    }
   }
 }
 

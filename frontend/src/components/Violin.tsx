@@ -662,7 +662,7 @@ export const Violin = ({
               </div>
             </div>
           </div>
-          <div className="app-sidebar-footer">{footer}</div>
+          {footer ? <div className="app-sidebar-footer">{footer}</div> : null}
         </div>
       </div>
       <div className="app-main">

@@ -5,6 +5,7 @@ import { Colorscale, HeatmapData, HeatmapSettings } from "../plotTypes";
 import { NumberInput } from "./NumberInput";
 import { colorScales as defaultColorScales } from "../colorScales";
 import tinycolor from "tinycolor2";
+import { Switch } from "./Switch";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -194,187 +195,187 @@ export const Heatmap = ({
               ) : null}
             </div>
             <div className="group">
-              <div className="field">
-                <label className="header">
-                  <input
-                    type="checkbox"
-                    name="annotation"
-                    id="annotation"
-                    checked={settings.annotation}
-                    onChange={() =>
-                      updateSettings({
-                        annotation: !settings.annotation,
-                      })
-                    }
+              <Switch
+                isSelected={settings.annotation}
+                onChange={(value) =>
+                  updateSettings({
+                    annotation: value,
+                  })
+                }
+              >
+                Percent Identities
+              </Switch>
+              <div
+                className="row"
+                data-hidden={!settings.annotation}
+                aria-hidden={!settings.annotation}
+              >
+                <div className="col-2">
+                  <div className="field">
+                    <label htmlFor="round-vals">Precision</label>
+                    <select
+                      id="round-vals"
+                      value={settings.annotation_rounding}
+                      onChange={(event) =>
+                        updateSettings({
+                          annotation_rounding: parseInt(
+                            event.target.value,
+                          ) as HeatmapSettings["annotation_rounding"],
+                        })
+                      }
+                      disabled={!settings.annotation}
+                    >
+                      <option value={0}>0</option>
+                      <option value={1}>1</option>
+                      <option value={2}>2</option>
+                    </select>
+                  </div>
+                  <NumberInput
+                    label="Font Size"
+                    field="annotation_font_size"
+                    value={settings.annotation_font_size}
+                    updateValue={updateSettings}
+                    min={1}
+                    max={20}
+                    step={1}
+                    isDisabled={!settings.annotation}
                   />
-                  Percent Identities
-                </label>
-              </div>
-              <div className="col-2">
-                <div className="field">
-                  <label htmlFor="round-vals">Precision</label>
-                  <select
-                    id="round-vals"
-                    value={settings.annotation_rounding}
-                    onChange={(event) =>
-                      updateSettings({
-                        annotation_rounding: parseInt(
-                          event.target.value,
-                        ) as HeatmapSettings["annotation_rounding"],
-                      })
-                    }
-                    disabled={!settings.annotation}
-                  >
-                    <option value={0}>0</option>
-                    <option value={1}>1</option>
-                    <option value={2}>2</option>
-                  </select>
                 </div>
-                <NumberInput
-                  label="Font Size"
-                  field="annotation_font_size"
-                  value={settings.annotation_font_size}
-                  updateValue={updateSettings}
-                  min={1}
-                  max={20}
-                  step={1}
-                  isDisabled={!settings.annotation}
-                />
               </div>
             </div>
             <div className="group">
-              <div className="field">
-                <label className="header">
-                  <input
-                    type="checkbox"
-                    name="axis_labels"
-                    id="axis_labels"
-                    checked={settings.axis_labels}
-                    onChange={() =>
-                      updateSettings({
-                        axis_labels: !settings.axis_labels,
-                      })
-                    }
+              <Switch
+                isSelected={settings.axis_labels}
+                onChange={(value) =>
+                  updateSettings({
+                    axis_labels: value,
+                  })
+                }
+              >
+                Axis Labels
+              </Switch>
+              <div
+                className="row"
+                data-hidden={!settings.axis_labels}
+                aria-hidden={!settings.axis_labels}
+              >
+                <div className="col-2">
+                  <NumberInput
+                    label="X Font Size"
+                    field="axlabel_xfontsize"
+                    value={settings.axlabel_xfontsize}
+                    updateValue={updateSettings}
+                    min={1}
+                    max={40}
+                    step={1}
                   />
-                  Axis Labels
-                </label>
-              </div>
-              <div className="col-2">
-                <NumberInput
-                  label="X Font Size"
-                  field="axlabel_xfontsize"
-                  value={settings.axlabel_xfontsize}
-                  updateValue={updateSettings}
-                  min={1}
-                  max={40}
-                  step={1}
-                />
-                <NumberInput
-                  label="X Rotation"
-                  field="axlabel_xrotation"
-                  value={settings.axlabel_xrotation}
-                  updateValue={updateSettings}
-                  min={0}
-                  max={360}
-                  step={10}
-                />
-                <NumberInput
-                  label="Y Font Size"
-                  field="axlabel_yfontsize"
-                  value={settings.axlabel_yfontsize}
-                  updateValue={updateSettings}
-                  min={1}
-                  max={40}
-                  step={1}
-                />
-                <NumberInput
-                  label="Y Rotation"
-                  field="axlabel_yrotation"
-                  value={settings.axlabel_yrotation}
-                  updateValue={updateSettings}
-                  min={0}
-                  max={360}
-                  step={10}
-                />
+                  <NumberInput
+                    label="X Rotation"
+                    field="axlabel_xrotation"
+                    value={settings.axlabel_xrotation}
+                    updateValue={updateSettings}
+                    min={0}
+                    max={360}
+                    step={10}
+                  />
+                  <NumberInput
+                    label="Y Font Size"
+                    field="axlabel_yfontsize"
+                    value={settings.axlabel_yfontsize}
+                    updateValue={updateSettings}
+                    min={1}
+                    max={40}
+                    step={1}
+                  />
+                  <NumberInput
+                    label="Y Rotation"
+                    field="axlabel_yrotation"
+                    value={settings.axlabel_yrotation}
+                    updateValue={updateSettings}
+                    min={0}
+                    max={360}
+                    step={10}
+                  />
+                </div>
               </div>
             </div>
             <div className="group">
-              <div className="field">
-                <label className="header">
-                  <input
-                    type="checkbox"
-                    name="showscale"
-                    id="showscale"
-                    checked={settings.showscale}
-                    onChange={() =>
-                      updateSettings({
-                        showscale: !settings.showscale,
-                      })
-                    }
+              <Switch
+                isSelected={settings.showscale}
+                onChange={(value) =>
+                  updateSettings({
+                    showscale: value,
+                  })
+                }
+              >
+                Scale Bar
+              </Switch>
+              <div
+                className="row"
+                data-hidden={!settings.showscale}
+                aria-hidden={!settings.showscale}
+              >
+                <div className="range-group">
+                  <div className="field">
+                    <label htmlFor="cbar-shrink">Height</label>
+                    <input
+                      type="range"
+                      name="cbar-shrink"
+                      id="cbar-shrink"
+                      min="0.1"
+                      max="1"
+                      step=".1"
+                      value={settings.cbar_shrink}
+                      onChange={(e) =>
+                        updateSettings({
+                          cbar_shrink: parseFloat(e.target.value),
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="field">
+                    <label htmlFor="cbar-aspect">Width</label>
+                    <input
+                      type="range"
+                      name="cbar-aspect"
+                      id="cbar-aspect"
+                      min="1"
+                      max="100"
+                      step="1"
+                      value={settings.cbar_aspect}
+                      onChange={(e) =>
+                        updateSettings({ cbar_aspect: e.target.value })
+                      }
+                    />
+                  </div>
+                </div>
+                <div className="col-2">
+                  <NumberInput
+                    label="Min"
+                    field="vmin"
+                    value={settings.vmin}
+                    updateValue={updateSettings}
+                    min={1}
+                    max={settings.vmax - 1}
+                    step={1}
+                    isDisabled={settings.colorscale === "Discrete"}
                   />
-                  Scale Bar
-                </label>
-              </div>
-              <div className="range-group">
-                <div className="field">
-                  <label htmlFor="cbar-shrink">Height</label>
-                  <input
-                    type="range"
-                    name="cbar-shrink"
-                    id="cbar-shrink"
-                    min="0.1"
-                    max="1"
-                    step=".1"
-                    value={settings.cbar_shrink}
-                    onChange={(e) =>
-                      updateSettings({
-                        cbar_shrink: parseFloat(e.target.value),
-                      })
-                    }
+                  <NumberInput
+                    label="Max"
+                    field="vmax"
+                    value={settings.vmax}
+                    updateValue={updateSettings}
+                    min={settings.vmin + 1}
+                    max={100}
+                    step={1}
+                    isDisabled={settings.colorscale === "Discrete"}
                   />
                 </div>
-                <div className="field">
-                  <label htmlFor="cbar-aspect">Width</label>
-                  <input
-                    type="range"
-                    name="cbar-aspect"
-                    id="cbar-aspect"
-                    min="1"
-                    max="100"
-                    step="1"
-                    value={settings.cbar_aspect}
-                    onChange={(e) =>
-                      updateSettings({ cbar_aspect: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-              <div className="col-2">
-                <NumberInput
-                  label="Min"
-                  field="vmin"
-                  value={settings.vmin}
-                  updateValue={updateSettings}
-                  min={1}
-                  max={settings.vmax - 1}
-                  step={1}
-                  isDisabled={settings.colorscale === "Discrete"}
-                />
-                <NumberInput
-                  label="Max"
-                  field="vmax"
-                  value={settings.vmax}
-                  updateValue={updateSettings}
-                  min={settings.vmin + 1}
-                  max={100}
-                  step={1}
-                  isDisabled={settings.colorscale === "Discrete"}
-                />
               </div>
             </div>
           </div>
         </div>
-        <div className="app-sidebar-footer">{footer}</div>
+        {footer ? <div className="app-sidebar-footer">{footer}</div> : null}
       </div>
       <div className="app-main">
         {data ? (
