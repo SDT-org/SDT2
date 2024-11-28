@@ -211,7 +211,7 @@ export const Raincloud = ({
                   <div className="field">
                     <NumberInput
                       label="Band Width"
-                      field="bandWidth"
+                      field="bandwidth"
                       value={settings.bandwidth}
                       updateValue={updateSettings}
                       min={0}
