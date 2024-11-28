@@ -5,59 +5,11 @@ import { NumberInput } from "./NumberInput";
 import { Layout, PlotData } from "plotly.js-dist-min";
 import { DistributionData } from "../plotTypes";
 import { formatTitle } from "../helpers";
-import { DataSets } from "./Distribution";
+import { ColorOptions } from "./ColorOptions";
+import { DataSets, DistributionState } from "../distributionState";
+import { ColorOption } from "../colors";
 
 const Plot = createPlotlyComponent(Plotly);
-
-enum ColorOption {
-  White = "white",
-  Black = "black",
-  Tomato = "tomato",
-  LightBLue = "lightblue",
-  LightGreen = "lightgreen",
-  Purple = "plum",
-  Lightcoral = "lightcoral",
-  Orange = "orange",
-  Yellow = "gold",
-  Cyan = "cyan",
-  Teal = "teal",
-  Magenta = "magenta",
-  Brown = "saddlebrown",
-  Lime = "lime",
-  Coral = "coral",
-  Turquoise = "turquoise",
-  Indigo = "indigo",
-  Violet = "violet",
-  Lavender = "lavender",
-  Peach = "peachpuff",
-  SkyBlue = "skyblue",
-  Olive = "olive",
-  Tan = "tan",
-  Salmon = "salmon",
-  Maroon = "maroon",
-  Navy = "navy",
-  Khaki = "khaki",
-  Periwinkle = "periwinkle",
-  Mint = "mintcream",
-  Azure = "azure",
-  Chartreuse = "chartreuse",
-  Goldrod = "goldenrod",
-  SlateBlue = "slateblue",
-  LightSeaGreen = "lightseagreen",
-  DarkCyan = "darkcyan",
-  RosyBrown = "rosybrown",
-  PaleVioletRed = "palevioletred",
-  DeepPink = "deeppink",
-  DarkOrange = "darkorange",
-  Crimson = "crimson",
-  LightSalmon = "lightsalmon",
-  Orchid = "orchid",
-  Thistle = "thistle",
-  DarkKhaki = "darkkhaki",
-  LightCoral = "lightcoral",
-  MediumOrchid = "mediumorchid",
-  None = "rgba(0,0,0,0)", // No color (use transparent or ignore)
-}
 
 export const Raincloud = ({
   data,
@@ -65,12 +17,16 @@ export const Raincloud = ({
   dataSetKey,
   footer,
   sidebarComponent,
+  settings,
+  updateSettings,
 }: {
   data: DistributionData | undefined;
   dataSets: DataSets;
   dataSetKey: keyof DataSets;
   footer?: React.ReactNode;
   sidebarComponent?: React.ReactNode;
+  settings: DistributionState["raincloud"];
+  updateSettings: React.Dispatch<Partial<DistributionState["raincloud"]>>;
 }) => {
   if (!data) {
     return (
@@ -83,37 +39,6 @@ export const Raincloud = ({
   const minDataValue = Math.min(...dataSet);
   const maxDataValue = Math.max(...dataSet);
 
-  const [settings, setSettings] = React.useState({
-    plotTitle: "Distribution of Percent Identities",
-    plotOrientation: "horizontal",
-    fillColor: "lightblue",
-    bandWidth: 8,
-    lineColor: "tomato",
-    lineWidth: 3,
-    violinOpacity: 0.5,
-    markerColor: "tomato",
-    markerSize: 7,
-    pointPos: -1.5,
-    pointOpacity: 0.5,
-    points: "all",
-    showPoints: true,
-    showZeroLine: false,
-    showGrid: true,
-    showAxisLines: true,
-    showTickLabels: true,
-    showAxisLabels: true,
-    bandwidth: 8,
-    jitter: 0.5,
-  });
-
-  const updateSettings = (newState: Partial<typeof settings>) => {
-    setSettings((previous) => {
-      return {
-        ...previous,
-        ...newState,
-      };
-    });
-  };
   const rainCloudTrace = React.useMemo(
     () =>
       ({
@@ -122,7 +47,6 @@ export const Raincloud = ({
         x: dataSet,
         side: "negative",
         points: settings.points !== "None" ? settings.points : false,
-
         line: {
           color: settings.lineColor,
           width: settings.lineWidth,
@@ -131,7 +55,7 @@ export const Raincloud = ({
         opacity: settings.violinOpacity,
         pointpos: settings.pointPos,
         jitter: settings.jitter,
-        bandwidth: settings.bandWidth,
+        bandwidth: settings.bandwidth,
         marker: {
           visible: true,
           color: settings.markerColor,
@@ -275,21 +199,19 @@ export const Raincloud = ({
                       id="fill-color"
                       value={settings.fillColor}
                       onChange={(e) =>
-                        updateSettings({ fillColor: e.target.value })
+                        updateSettings({
+                          fillColor: e.target.value as ColorOption,
+                        })
                       }
                     >
-                      {Object.entries(ColorOption).map(([key, value]) => (
-                        <option key={key} value={value}>
-                          {key}
-                        </option>
-                      ))}
+                      <ColorOptions />
                     </select>
                   </div>
                   <div className="field">
                     <NumberInput
                       label="Band Width"
                       field="bandWidth"
-                      value={settings.bandWidth}
+                      value={settings.bandwidth}
                       updateValue={updateSettings}
                       min={0}
                       max={20}
@@ -304,14 +226,12 @@ export const Raincloud = ({
                       id="line-color"
                       value={settings.lineColor}
                       onChange={(e) =>
-                        updateSettings({ lineColor: e.target.value })
+                        updateSettings({
+                          lineColor: e.target.value as ColorOption,
+                        })
                       }
                     >
-                      {Object.entries(ColorOption).map(([key, value]) => (
-                        <option key={key} value={value}>
-                          {key}
-                        </option>
-                      ))}
+                      <ColorOptions />
                     </select>
                   </div>
                   <div className="field">
@@ -376,14 +296,12 @@ export const Raincloud = ({
                         id="markerColor"
                         value={settings.markerColor}
                         onChange={(e) =>
-                          updateSettings({ markerColor: e.target.value })
+                          updateSettings({
+                            markerColor: e.target.value as ColorOption,
+                          })
                         }
                       >
-                        {Object.entries(ColorOption).map(([key, value]) => (
-                          <option key={key} value={value}>
-                            {key}
-                          </option>
-                        ))}
+                        <ColorOptions />
                       </select>
                     </div>
                     <div className="field">

@@ -4,58 +4,11 @@ import createPlotlyComponent from "react-plotly.js/factory";
 import { NumberInput } from "./NumberInput";
 import { Layout, PlotData } from "plotly.js-dist-min";
 import { DistributionData } from "../plotTypes";
-import { DataSets } from "./Distribution";
+import { ColorOptions } from "./ColorOptions";
+import { DataSets, DistributionState } from "../distributionState";
+import { ColorOption } from "../colors";
 
 const Plot = createPlotlyComponent(Plotly);
-
-enum ColorOption {
-  White = "white",
-  Black = "black",
-  Tomato = "tomato",
-  Blue = "lightblue",
-  Green = "lightgreen",
-  Purple = "plum",
-  Orange = "orange",
-  Yellow = "gold",
-  Cyan = "cyan",
-  Teal = "teal",
-  Magenta = "magenta",
-  Brown = "saddlebrown",
-  Lime = "lime",
-  Coral = "coral",
-  Turquoise = "turquoise",
-  Indigo = "indigo",
-  Violet = "violet",
-  Lavender = "lavender",
-  Peach = "peachpuff",
-  SkyBlue = "skyblue",
-  Olive = "olive",
-  Tan = "tan",
-  Salmon = "salmon",
-  Maroon = "maroon",
-  Navy = "navy",
-  Khaki = "khaki",
-  Periwinkle = "periwinkle",
-  Mint = "mintcream",
-  Azure = "azure",
-  Chartreuse = "chartreuse",
-  Goldrod = "goldenrod",
-  SlateBlue = "slateblue",
-  LightSeaGreen = "lightseagreen",
-  DarkCyan = "darkcyan",
-  RosyBrown = "rosybrown",
-  PaleVioletRed = "palevioletred",
-  DeepPink = "deeppink",
-  DarkOrange = "darkorange",
-  Crimson = "crimson",
-  LightSalmon = "lightsalmon",
-  Orchid = "orchid",
-  Thistle = "thistle",
-  DarkKhaki = "darkkhaki",
-  LightCoral = "lightcoral",
-  MediumOrchid = "mediumorchid",
-  None = "rgba(0,0,0,0)", // No color (use transparent or ignore)
-}
 
 export const Histogram = ({
   data,
@@ -63,12 +16,16 @@ export const Histogram = ({
   dataSetKey,
   footer,
   sidebarComponent,
+  settings,
+  updateSettings,
 }: {
   data: DistributionData | undefined;
   dataSets: DataSets;
   dataSetKey: keyof DataSets;
   footer?: React.ReactNode;
   sidebarComponent?: React.ReactNode;
+  settings: DistributionState["histogram"];
+  updateSettings: React.Dispatch<Partial<DistributionState["histogram"]>>;
 }) => {
   if (!data) {
     return (
@@ -77,31 +34,6 @@ export const Histogram = ({
       </div>
     );
   }
-
-  const [settings, setSettings] = React.useState({
-    lineColor: "tomato",
-    lineWidth: 3,
-    histlineColor: "tomato",
-    histOutlineWidth: 1,
-    barColor: "lightblue",
-    showHistogram: true,
-    binSize: 1,
-    showGrid: true,
-    showLine: true,
-    plotTitle: "Distribution of Percent Identities",
-    showTickLabels: true,
-    showAxisLabels: true,
-    histnorm: "probability",
-  });
-
-  const updateSettings = (newState: Partial<typeof settings>) => {
-    setSettings((previous) => {
-      return {
-        ...previous,
-        ...newState,
-      };
-    });
-  };
 
   const dataSet = dataSets[dataSetKey];
 
@@ -263,14 +195,12 @@ export const Histogram = ({
                       id="bin-color"
                       value={settings.barColor}
                       onChange={(e) =>
-                        updateSettings({ barColor: e.target.value })
+                        updateSettings({
+                          barColor: e.target.value as ColorOption,
+                        })
                       }
                     >
-                      {Object.entries(ColorOption).map(([key, value]) => (
-                        <option key={key} value={value}>
-                          {key}
-                        </option>
-                      ))}
+                      <ColorOptions />
                     </select>
                   </div>
                   <NumberInput
@@ -285,20 +215,18 @@ export const Histogram = ({
                   />
                 </div>
                 <div className="col-2">
-                  <div className="field"> 
+                  <div className="field">
                     <label htmlFor="hist-line-color">Outline Color</label>
                     <select
                       id="hist-line-color"
                       value={settings.histlineColor}
                       onChange={(e) =>
-                        updateSettings({ histlineColor: e.target.value })
+                        updateSettings({
+                          histlineColor: e.target.value as ColorOption,
+                        })
                       }
                     >
-                      {Object.entries(ColorOption).map(([key, value]) => (
-                        <option key={key} value={value}>
-                          {key}
-                        </option>
-                      ))}
+                      <ColorOptions />
                     </select>
                   </div>
                   <NumberInput

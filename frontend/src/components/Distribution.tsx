@@ -3,14 +3,11 @@ import { Histogram } from "./Histogram";
 import { Violin } from "./Violin";
 import { Raincloud } from "./Raincloud";
 import { DistributionData } from "../plotTypes";
-
-export type Visualization = "histogram" | "violin" | "raincloud";
-type DataSet = number[];
-export type DataSets = {
-  scores: DataSet;
-  gc: DataSet;
-  length: DataSet;
-};
+import {
+  DataSets,
+  useDistributionState,
+  Visualization,
+} from "../distributionState";
 
 const VisualizationSwitcher = ({
   activeDataSet,
@@ -59,10 +56,15 @@ const VisualizationSwitcher = ({
 
 export const Distribution = ({
   data,
+  state,
+  setState,
+  updateHistogram,
+  updateRaincloud,
+  updateViolin,
 }: {
   data: DistributionData | undefined;
   footer?: React.ReactNode;
-}) => {
+} & ReturnType<typeof useDistributionState>) => {
   if (!data) {
     return (
       <div className="app-main centered">
@@ -76,31 +78,49 @@ export const Distribution = ({
     length: data.length_stats,
   };
 
-  const [visualization, setVisualization] =
-    React.useState<Visualization>("histogram");
-  const [dataSetKey, setDataSetKey] = React.useState<keyof DataSets>("scores");
-
   const sidebarComponent = (
     <VisualizationSwitcher
-      activeDataSet={dataSetKey}
-      setActiveDataSet={setDataSetKey}
-      visualization={visualization}
-      setVisualization={setVisualization}
+      activeDataSet={state.dataSet}
+      setActiveDataSet={(value: keyof DataSets) =>
+        setState((prev) => ({ ...prev, dataSet: value }))
+      }
+      visualization={state.visualization}
+      setVisualization={(value: Visualization) =>
+        setState((prev) => ({ ...prev, visualization: value }))
+      }
     />
   );
 
   const commonProps = {
     data,
     dataSets,
-    dataSetKey,
+    dataSetKey: state.dataSet,
     sidebarComponent,
   };
 
   const components = {
-    histogram: <Histogram {...commonProps} />,
-    violin: <Violin {...commonProps} />,
-    raincloud: <Raincloud {...commonProps} />,
+    histogram: (
+      <Histogram
+        {...commonProps}
+        settings={state.histogram}
+        updateSettings={updateHistogram}
+      />
+    ),
+    violin: (
+      <Violin
+        {...commonProps}
+        settings={state.violin}
+        updateSettings={updateViolin}
+      />
+    ),
+    raincloud: (
+      <Raincloud
+        {...commonProps}
+        settings={state.raincloud}
+        updateSettings={updateRaincloud}
+      />
+    ),
   };
 
-  return components[visualization];
+  return components[state.visualization];
 };

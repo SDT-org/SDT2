@@ -4,9 +4,9 @@ import createPlotlyComponent from "react-plotly.js/factory";
 import { NumberInput } from "./NumberInput";
 import { Layout, PlotData } from "plotly.js-dist-min";
 import { DistributionData } from "../plotTypes";
+import { ColorOptions } from "./ColorOptions";
+import { DataSets, DistributionState } from "../distributionState";
 import { ColorOption } from "../colors";
-import { formatTitle } from "../helpers";
-import { DataSets } from "./Distribution";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -16,12 +16,16 @@ export const Violin = ({
   dataSetKey,
   footer,
   sidebarComponent,
+  settings,
+  updateSettings,
 }: {
   data: DistributionData | undefined;
   dataSets: DataSets;
   dataSetKey: keyof DataSets;
   footer?: React.ReactNode;
   sidebarComponent?: React.ReactNode;
+  settings: DistributionState["violin"];
+  updateSettings: React.Dispatch<Partial<DistributionState["violin"]>>;
 }) => {
   if (!data) {
     return (
@@ -31,51 +35,10 @@ export const Violin = ({
     );
   }
 
-  const [settings, setSettings] = React.useState({
-    plotTitle: "Distribution of Percent Identities",
-    plotOrientation: "vertical",
-    fillColor: "lightblue",
-    bandWidth: 8,
-    lineColor: "tomato",
-    lineWidth: 3,
-    violinOpacity: 0.5,
-    boxfillColor: "lightblue",
-    boxWidth: 0.95,
-    boxlineColor: "tomato",
-    boxlineWidth: 3,
-    boxOpacity: 0.5,
-    whiskerWidth: 0.2,
-    markerColor: "tomato",
-    markerSize: 7,
-    pointOrientation: "Violin",
-    points: "all",
-    pointPos: 0,
-    pointOpacity: 0.5,
-    showViolin: true,
-    showBox: true,
-    showPoints: true,
-    showZeroLine: false,
-    showGrid: true,
-    showAxisLines: true,
-    showTickLabels: true,
-    showAxisLabels: true,
-    bandwidth: 5,
-    jitter: 0.5,
-    showMeanline:"Violin",
-  });
-
   const dataSet = dataSets[dataSetKey];
   const minDataValue = Math.min(...dataSet);
   const maxDataValue = Math.max(...dataSet);
 
-  const updateSettings = (newState: Partial<typeof settings>) => {
-    setSettings((previous) => {
-      return {
-        ...previous,
-        ...newState,
-      };
-    });
-  };
   const violinTrace = React.useMemo(
     () =>
       ({
@@ -89,8 +52,8 @@ export const Violin = ({
         },
         fillcolor: settings.fillColor,
         opacity: settings.violinOpacity,
-        meanline:{
-          visible: settings.showMeanline === "Violin"
+        meanline: {
+          visible: settings.showMeanline === "Violin",
         },
         points:
           settings.pointOrientation === "Violin"
@@ -100,7 +63,7 @@ export const Violin = ({
             : false,
         pointpos: settings.pointPos,
         jitter: settings.jitter,
-        bandwidth: settings.bandWidth,
+        bandwidth: settings.bandwidth,
         marker: {
           visible: settings.showPoints,
           color: settings.markerColor,
@@ -123,12 +86,13 @@ export const Violin = ({
         name: "",
         [settings.plotOrientation === "vertical" ? "y" : "x"]: dataSet,
         boxmean: settings.showMeanline === "Box",
-        boxpoints:
-          settings.pointOrientation === "Box"
-            ? settings.points === "None"
-              ? false
-              : settings.points
-            : false,
+        // TODO: Might be unused
+        // boxpoints:
+        //   settings.pointOrientation === "Box"
+        //     ? settings.points === "None"
+        //       ? false
+        //       : settings.points
+        //     : false,
         pointpos: settings.pointPos,
         jitter: settings.jitter,
         line: {
@@ -295,7 +259,7 @@ export const Violin = ({
             <div className="group">
               <div className="field">
                 <label>Plot Orientation</label>
-                <div className="radio-group">
+                <div className="col-2">
                   <label>
                     <input
                       type="radio"
@@ -303,7 +267,10 @@ export const Violin = ({
                       value="vertical"
                       checked={settings.plotOrientation === "vertical"}
                       onChange={(e) =>
-                        updateSettings({ plotOrientation: e.target.value })
+                        updateSettings({
+                          plotOrientation: e.target
+                            .value as typeof settings.plotOrientation,
+                        })
                       }
                     />
                     Vertical
@@ -315,7 +282,10 @@ export const Violin = ({
                       value="horizontal"
                       checked={settings.plotOrientation === "horizontal"}
                       onChange={(e) =>
-                        updateSettings({ plotOrientation: e.target.value })
+                        updateSettings({
+                          plotOrientation: e.target
+                            .value as typeof settings.plotOrientation,
+                        })
                       }
                     />
                     Horizontal
@@ -345,21 +315,19 @@ export const Violin = ({
                       value={settings.fillColor}
                       disabled={!settings.showViolin}
                       onChange={(e) =>
-                        updateSettings({ fillColor: e.target.value })
+                        updateSettings({
+                          fillColor: e.target.value as ColorOption,
+                        })
                       }
                     >
-                      {Object.entries(ColorOption).map(([key, value]) => (
-                        <option key={key} value={value}>
-                          {formatTitle(key)}
-                        </option>
-                      ))}
+                      <ColorOptions />
                     </select>
                   </div>
                   <div className="field">
                     <NumberInput
                       label="Band Width"
-                      field="bandWidth"
-                      value={settings.bandWidth}
+                      field="bandwidth"
+                      value={settings.bandwidth}
                       isDisabled={!settings.showViolin}
                       updateValue={updateSettings}
                       min={0}
@@ -376,14 +344,12 @@ export const Violin = ({
                       value={settings.lineColor}
                       disabled={!settings.showViolin}
                       onChange={(e) =>
-                        updateSettings({ lineColor: e.target.value })
+                        updateSettings({
+                          lineColor: e.target.value as ColorOption,
+                        })
                       }
                     >
-                      {Object.entries(ColorOption).map(([key, value]) => (
-                        <option key={key} value={value}>
-                          {key}
-                        </option>
-                      ))}
+                      <ColorOptions />
                     </select>
                   </div>
                   <div className="field">
@@ -423,14 +389,12 @@ export const Violin = ({
                       value={settings.boxfillColor}
                       disabled={!settings.showBox}
                       onChange={(e) =>
-                        updateSettings({ boxfillColor: e.target.value })
+                        updateSettings({
+                          boxfillColor: e.target.value as ColorOption,
+                        })
                       }
                     >
-                      {Object.entries(ColorOption).map(([key, value]) => (
-                        <option key={key} value={value}>
-                          {formatTitle(key)}
-                        </option>
-                      ))}
+                      <ColorOptions />
                     </select>
                   </div>
                   <div className="field">
@@ -455,14 +419,12 @@ export const Violin = ({
                       value={settings.boxlineColor}
                       disabled={!settings.showBox}
                       onChange={(e) =>
-                        updateSettings({ boxlineColor: e.target.value })
+                        updateSettings({
+                          boxlineColor: e.target.value as ColorOption,
+                        })
                       }
                     >
-                      {Object.entries(ColorOption).map(([key, value]) => (
-                        <option key={key} value={value}>
-                          {formatTitle(key)}
-                        </option>
-                      ))}
+                      <ColorOptions />
                     </select>
                   </div>
                   <div className="field">
@@ -509,7 +471,7 @@ export const Violin = ({
             <div className="group">
               <div className="field">
                 <label>Show Points</label>
-                <div style={{ display: "flex", gap: "20px" }}>
+                <div className="col-3">
                   <label>
                     <input
                       type="radio"
@@ -517,7 +479,10 @@ export const Violin = ({
                       value="Violin"
                       checked={settings.pointOrientation === "Violin"}
                       onChange={(e) =>
-                        updateSettings({ pointOrientation: e.target.value })
+                        updateSettings({
+                          pointOrientation: e.target
+                            .value as typeof settings.pointOrientation,
+                        })
                       }
                     />
                     Violin
@@ -529,7 +494,10 @@ export const Violin = ({
                       value="Box"
                       checked={settings.pointOrientation === "Box"}
                       onChange={(e) =>
-                        updateSettings({ pointOrientation: e.target.value })
+                        updateSettings({
+                          pointOrientation: e.target
+                            .value as typeof settings.pointOrientation,
+                        })
                       }
                     />
                     Box
@@ -541,7 +509,10 @@ export const Violin = ({
                       value="None"
                       checked={settings.pointOrientation === "None"}
                       onChange={(e) =>
-                        updateSettings({ pointOrientation: e.target.value })
+                        updateSettings({
+                          pointOrientation: e.target
+                            .value as typeof settings.pointOrientation,
+                        })
                       }
                     />
                     None
@@ -550,7 +521,7 @@ export const Violin = ({
               </div>
               <div className="field">
                 <label>Show Mean</label>
-                <div style={{ display: "flex", gap: "20px" }}>
+                <div className="col-3">
                   <label>
                     <input
                       type="radio"
@@ -558,7 +529,10 @@ export const Violin = ({
                       value="Violin"
                       checked={settings.showMeanline === "Violin"}
                       onChange={(e) =>
-                        updateSettings({ showMeanline: e.target.value })
+                        updateSettings({
+                          showMeanline: e.target
+                            .value as typeof settings.showMeanline,
+                        })
                       }
                     />
                     Violin
@@ -570,7 +544,10 @@ export const Violin = ({
                       value="Box"
                       checked={settings.showMeanline === "Box"}
                       onChange={(e) =>
-                        updateSettings({ showMeanline: e.target.value })
+                        updateSettings({
+                          showMeanline: e.target
+                            .value as typeof settings.showMeanline,
+                        })
                       }
                     />
                     Box
@@ -582,7 +559,10 @@ export const Violin = ({
                       value="None"
                       checked={settings.showMeanline === "None"}
                       onChange={(e) =>
-                        updateSettings({ showMeanline: e.target.value })
+                        updateSettings({
+                          showMeanline: e.target
+                            .value as typeof settings.showMeanline,
+                        })
                       }
                     />
                     None
@@ -637,14 +617,12 @@ export const Violin = ({
                       value={settings.markerColor}
                       disabled={!settings.showPoints}
                       onChange={(e) =>
-                        updateSettings({ markerColor: e.target.value })
+                        updateSettings({
+                          markerColor: e.target.value as ColorOption,
+                        })
                       }
                     >
-                      {Object.entries(ColorOption).map(([key, value]) => (
-                        <option key={key} value={value}>
-                          {formatTitle(key)}
-                        </option>
-                      ))}
+                      <ColorOptions />
                     </select>
                   </div>
                   <div className="field">

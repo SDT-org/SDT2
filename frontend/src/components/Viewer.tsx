@@ -16,6 +16,7 @@ import {
   TabPanel,
   Tabs,
 } from "react-aria-components";
+import { useDistributionState } from "../distributionState";
 
 export const Viewer = ({
   appState,
@@ -58,6 +59,14 @@ export const Viewer = ({
     },
   );
 
+  const {
+    state: distributionState,
+    setState: setDistributionState,
+    updateHistogram,
+    updateRaincloud,
+    updateViolin,
+  } = useDistributionState();
+
   const getData = () => {
     setLoading(true);
 
@@ -73,8 +82,6 @@ export const Viewer = ({
         }: GetDataResponse = JSON.parse(rawData.replace(/\bNaN\b/g, "null"));
 
         const [tickText, ...parsedData] = data;
-
-        console.log(identity_scores);
 
         setTickText(tickText as string[]);
         setHeatmapData(parsedData);
@@ -185,7 +192,16 @@ export const Viewer = ({
         ) : null}
       </TabPanel>
       <TabPanel id="plot" className="app-panel">
-        {distributionData ? <Distribution data={distributionData} /> : null}
+        {distributionData ? (
+          <Distribution
+            data={distributionData}
+            state={distributionState}
+            setState={setDistributionState}
+            updateHistogram={updateHistogram}
+            updateRaincloud={updateRaincloud}
+            updateViolin={updateViolin}
+          />
+        ) : null}
       </TabPanel>
       {loading ? <div className="api-loader"></div> : null}
     </Tabs>

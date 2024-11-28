@@ -257,6 +257,18 @@ select option {
     }
   }
 
+  .col-3 {
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-gap: 0.8rem;
+    margin-bottom: 0.8rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
   .row {
     & + .row {
       margin-top: 0.8rem;
