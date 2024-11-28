@@ -571,4 +571,7 @@ if __name__ == "__main__":
     #     ),
     # ]
 
-    webview.start(debug=get_state().debug)
+    webview.start(
+        debug=get_state().debug,
+        private_mode=False,
+    )

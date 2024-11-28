@@ -81,63 +81,73 @@ const visualizationDefaults = {
   showTickLabels: true,
 };
 
+const initialDistributionState: DistributionState = {
+  visualization: "histogram",
+  dataSet: "scores",
+  histogram: {
+    ...visualizationDefaults,
+    barColor: ColorOption.Light_Blue,
+    binSize: 1,
+    histOutlineWidth: 1,
+    histlineColor: ColorOption.Tomato,
+    histnorm: "probability",
+    showHistogram: true,
+    showLine: true,
+  },
+  raincloud: {
+    ...visualizationDefaults,
+    bandwidth: 8,
+    jitter: 0.5,
+    markerColor: ColorOption.Tomato,
+    markerSize: 7,
+    plotOrientation: "horizontal",
+    pointOpacity: 0.5,
+    pointPos: -1.5,
+    points: "all",
+    showAxisLines: true,
+    showPoints: true,
+    showZeroLine: false,
+    violinOpacity: 0.5,
+    fillColor: ColorOption.Light_Blue,
+  },
+  violin: {
+    ...visualizationDefaults,
+    bandwidth: 5,
+    boxOpacity: 0.5,
+    boxWidth: 0.95,
+    boxfillColor: ColorOption.Light_Blue,
+    boxlineColor: ColorOption.Tomato,
+    boxlineWidth: 3,
+    fillColor: ColorOption.Light_Blue,
+    jitter: 0.5,
+    markerColor: ColorOption.Tomato,
+    markerSize: 7,
+    plotOrientation: "vertical",
+    pointOpacity: 0.5,
+    pointOrientation: "Violin",
+    pointPos: 0,
+    points: "all",
+    showAxisLines: true,
+    showBox: true,
+    showMeanline: "Violin",
+    showPoints: true,
+    showViolin: true,
+    showZeroLine: false,
+    violinOpacity: 0.5,
+    whiskerWidth: 0.2,
+  },
+};
+
 export const useDistributionState = () => {
-  const [state, setState] = React.useState<DistributionState>({
-    visualization: "histogram",
-    dataSet: "scores",
-    histogram: {
-      ...visualizationDefaults,
-      barColor: ColorOption.Light_Blue,
-      binSize: 1,
-      histOutlineWidth: 1,
-      histlineColor: ColorOption.Tomato,
-      histnorm: "probability",
-      showHistogram: true,
-      showLine: true,
-    },
-    raincloud: {
-      ...visualizationDefaults,
-      bandwidth: 8,
-      jitter: 0.5,
-      markerColor: ColorOption.Tomato,
-      markerSize: 7,
-      plotOrientation: "horizontal",
-      pointOpacity: 0.5,
-      pointPos: -1.5,
-      points: "all",
-      showAxisLines: true,
-      showPoints: true,
-      showZeroLine: false,
-      violinOpacity: 0.5,
-      fillColor: ColorOption.Light_Blue,
-    },
-    violin: {
-      ...visualizationDefaults,
-      bandwidth: 5,
-      boxOpacity: 0.5,
-      boxWidth: 0.95,
-      boxfillColor: ColorOption.Light_Blue,
-      boxlineColor: ColorOption.Tomato,
-      boxlineWidth: 3,
-      fillColor: ColorOption.Light_Blue,
-      jitter: 0.5,
-      markerColor: ColorOption.Tomato,
-      markerSize: 7,
-      plotOrientation: "vertical",
-      pointOpacity: 0.5,
-      pointOrientation: "Violin",
-      pointPos: 0,
-      points: "all",
-      showAxisLines: true,
-      showBox: true,
-      showMeanline: "Violin",
-      showPoints: true,
-      showViolin: true,
-      showZeroLine: false,
-      violinOpacity: 0.5,
-      whiskerWidth: 0.2,
-    },
-  });
+  const key = "distribution-state";
+  const saved = localStorage.getItem(key);
+  const [state, setState] = React.useState<DistributionState>(
+    saved ? JSON.parse(saved) : initialDistributionState,
+  );
+
+  React.useEffect(() => {
+    localStorage.setItem(key, JSON.stringify(state));
+  }, [state, setState]);
 
   const updateVisualization =
     (key: DistributionState["visualization"]) =>
