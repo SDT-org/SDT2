@@ -82,14 +82,24 @@ export const Loader = ({
           )}
         </ProgressBar>
         {debug ? (
-          <pre>
-            Required: {formatBytes(compute_stats?.required_memory || 0)}
-            <br />
-            {processInfo.map(
-              (i) =>
-                `[${i[0]}] ${i[1].toString().padStart(5, " ")} ${formatBytes(i[2]).padStart(5, " ")} ${i[3]}\n`,
-            )}
-          </pre>
+          <details
+            style={{
+              position: "absolute",
+              bottom: "1.6rem",
+              left: "1.6rem",
+              fontSize: "0.8rem",
+            }}
+          >
+            <summary>🔬</summary>
+            <pre>
+              Required: {formatBytes(compute_stats?.required_memory || 0)}
+              <br />
+              {processInfo.map(
+                (i) =>
+                  `[${i[0]}] ${i[1].toString().padStart(5, " ")} ${formatBytes(i[2]).padStart(5, " ")} ${i[3]}\n`,
+              )}
+            </pre>
+          </details>
         ) : null}
         <Button
           className="cancel-run"
