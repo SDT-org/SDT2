@@ -555,23 +555,4 @@ if __name__ == "__main__":
         on_update=lambda _: update_client_state(window),
     )
 
-    # menu_items = [
-    #     webview_menu.Menu(
-    #         "File",
-    #         [
-    #             webview_menu.MenuAction("Select file...", api.open_file_dialog),
-    #         ],
-    #     ),
-    #     webview_menu.Menu(
-    #         "Help",
-    #         [
-    #             webview_menu.MenuAction("About SDT2", about_window),
-    #             webview_menu.MenuAction("Manual", manual_window),
-    #         ],
-    #     ),
-    # ]
-
-    webview.start(
-        debug=get_state().debug,
-        private_mode=False,
-    )
+    webview.start(debug=get_state().debug, private_mode=False)
