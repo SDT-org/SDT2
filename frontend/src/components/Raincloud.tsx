@@ -191,10 +191,11 @@ export const Raincloud = ({
               </div>
             </div>
             <div className="group">
+              <h4>Cloud</h4>
               <div className="row">
                 <div className="col-2">
                   <div className="field">
-                    <label htmlFor="fill-color">Cloud Fill Color</label>
+                    <label htmlFor="fill-color">Fill Color</label>
                     <select
                       id="fill-color"
                       value={settings.fillColor}
@@ -249,32 +250,21 @@ export const Raincloud = ({
               </div>
             </div>
             <div className="group">
+              <h4>Points</h4>
               <div className="row">
                 <div className="col-2">
                   <div className="field">
-                    <NumberInput
-                      label="Point Position"
-                      field="pointPos"
-                      value={settings.pointPos}
-                      type="float"
-                      updateValue={updateSettings}
-                      min={-2}
-                      max={-1}
-                      step={0.1}
-                    />
-                  </div>
-                  <div className="field">
-                    <label htmlFor="points">Points</label>
+                    <label htmlFor="points">Display</label>
                     <select
                       id="points"
-                      value={settings.points}
+                      value={settings.points.toString()}
                       onChange={(e) =>
                         updateSettings({
                           points: e.target.value as
                             | "all"
                             | "outliers"
                             | "suspectedoutliers"
-                            | "None",
+                            | false,
                         })
                       }
                     >
@@ -287,11 +277,23 @@ export const Raincloud = ({
                       )}
                     </select>
                   </div>
+                  <div className="field">
+                    <NumberInput
+                      label="Position"
+                      field="pointPos"
+                      value={settings.pointPos}
+                      type="float"
+                      updateValue={updateSettings}
+                      min={-2}
+                      max={-1}
+                      step={0.1}
+                    />
+                  </div>
                 </div>
                 <div className="row">
                   <div className="col-2">
                     <div className="field">
-                      <label htmlFor="markerColor">Point Color</label>
+                      <label htmlFor="markerColor">Color</label>
                       <select
                         id="markerColor"
                         value={settings.markerColor}
@@ -306,7 +308,7 @@ export const Raincloud = ({
                     </div>
                     <div className="field">
                       <NumberInput
-                        label="Point Size"
+                        label="Size"
                         field="markerSize"
                         value={settings.markerSize}
                         updateValue={updateSettings}
@@ -320,7 +322,7 @@ export const Raincloud = ({
                     <div className="col-2">
                       <div className="field">
                         <NumberInput
-                          label="Point Opacity"
+                          label="Opacity"
                           field="pointOpacity"
                           type="float"
                           value={settings.pointOpacity}

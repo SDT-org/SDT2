@@ -38,7 +38,7 @@ export type DistributionState = {
     markerSize: number;
     pointOpacity: number;
     pointPos: number;
-    points: "all" | "outliers" | "suspectedoutliers" | "None";
+    points: "all" | "outliers" | "suspectedoutliers" | false;
     showAxisLines: boolean;
     showPoints: boolean;
     showZeroLine: boolean;
