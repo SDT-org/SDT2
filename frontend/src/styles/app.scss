@@ -1,5 +1,5 @@
 :root {
-  --canvas-color: #fafafa;
+  --canvas-color: #f5f5f5;
   --background-color: #fff;
   --foreground-color: #000;
   --border-color: #ddd;
@@ -238,7 +238,7 @@ select option {
 [data-hidden] {
   opacity: 1;
   height: auto;
-  transition: all .3s ease-out;
+  transition: height .3s ease-out;
 }
 [data-hidden="true"] {
   height: 0;
@@ -290,7 +290,11 @@ select option {
   }
   .react-aria-Switch + .row {
     margin-top: 0.8rem;
-  }
+    background: #fdfdff;
+    padding: 0.8rem;
+    margin: 0.8rem -0.8rem -0.8rem;
+    border-top: 1px solid var(--secondary-border-color);
+   }
 
   .field {
     margin-bottom: 0.8rem;

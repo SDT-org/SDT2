@@ -57,8 +57,11 @@
   }
 }
 
-.form .field label.react-aria-Switch {
-  font-weight: bold;
+.form label.react-aria-Switch {
+  font-weight: 600;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
 }
 
 body.blur {
