@@ -41,6 +41,15 @@ const RunnerSettings = ({
   startProcessData: () => void;
 }) => {
   const [showOutputSelector, setShowOutputSelector] = React.useState(false);
+  const clusterOptionRefs = React.useRef<(HTMLLabelElement | null)[]>([]);
+
+  const handleClusterOptionFocus = (index: number) => {
+    clusterOptionRefs.current[index]?.setAttribute("data-focused", "true");
+  };
+
+  const handleClusterOptionBlur = (index: number) => {
+    clusterOptionRefs.current[index]?.removeAttribute("data-focused");
+  };
 
   const handleChangeClusterMethod = (
     value: typeof appState.client.cluster_method,
@@ -79,6 +88,7 @@ const RunnerSettings = ({
     const handleEnter = (event: KeyboardEvent) => {
       if (
         event.key === "Enter" &&
+        (event.ctrlKey || event.metaKey || event.altKey) &&
         Boolean(appState.filename) &&
         !appState.validation_error_id
       ) {
@@ -107,9 +117,8 @@ const RunnerSettings = ({
         return;
       }
 
-      window.pywebview.api.get_available_memory().then((value) =>
+      window.pywebview.api.get_available_memory().then((available_memory) =>
         setAppState((previous) => {
-          console.log(previous);
           return {
             ...previous,
             compute_stats: {
@@ -117,7 +126,7 @@ const RunnerSettings = ({
                 recommended_cores: 1,
                 required_memory: 1,
               }),
-              available_memory: value,
+              available_memory,
             },
           };
         }),
@@ -175,99 +184,128 @@ const RunnerSettings = ({
         </div>
         {isFastaType && !appState.validation_error_id ? (
           <>
-            <div className="field runner-settings performance">
-              <label className="header" htmlFor="compute-cores">
-                Compute Performance
-              </label>
-              {appState.compute_stats ? (
-                <>
-                  <Slider
-                    id="compute-cores"
-                    onChange={handleChangeComputeCores}
-                    minValue={1}
-                    maxValue={appState.platform.cores}
-                    value={appState.client.compute_cores}
-                  >
-                    <Label>Cores</Label>
-                    <SliderOutput data-impact={coresImpact}>
-                      {({ state }) => (
-                        <>
-                          {appState.compute_stats &&
-                          (appState.compute_stats.recommended_cores === 0 ||
-                            appState.client.compute_cores >
-                              appState.compute_stats.recommended_cores) ? (
-                            <WarningIcon />
-                          ) : null}
-                          {state.getThumbValueLabel(0)} /{" "}
-                          {appState.platform.cores}
-                        </>
-                      )}
-                    </SliderOutput>
-                    <SliderTrack data-impact={coresImpact}>
-                      {({ state }) => (
-                        <>
-                          <div className="track" />
-                          <div
-                            className="fill"
-                            style={{
-                              width: state.getThumbPercent(0) * 100 + "%",
-                            }}
-                          />
-                          <SliderThumb />
-                        </>
-                      )}
-                    </SliderTrack>
-                  </Slider>
-                  <small>
-                    Recommended: {appState.compute_stats.recommended_cores}
-                  </small>
-                  <Meter value={estimatedMemoryValue}>
-                    {({ percentage }) => (
-                      <>
-                        <Label>Memory</Label>
-                        <span className="value">
-                          {formatBytes(estimatedMemory, 1)}
-                        </span>
-                        <div className="bar">
-                          <div
-                            className="fill"
-                            data-impact={impactName(percentage)}
-                            style={{
-                              width: percentage + "%",
-                              minWidth: "4px",
-                            }}
-                          />
-                        </div>
-                      </>
-                    )}
-                  </Meter>
-                  <small>
-                    Available:{" "}
-                    {formatBytes(
-                      appState.compute_stats?.available_memory || 1,
-                      0,
-                    )}{" "}
-                    / {formatBytes(appState.platform.memory || 0, 0)}
-                  </small>
-                </>
-              ) : null}
-            </div>
             <div className="field runner-settings">
               <label className="header">Clustering Method</label>
-              {clusterMethods.map((value) => (
-                <label className="radio" key={value}>
-                  <input
+              <div className="clustering-method">
+                {clusterMethods.map((value, index) => (
+                  <label
+                    className="radio"
                     key={value}
-                    type="radio"
-                    id={value}
-                    name="cluster-method"
-                    value={value}
-                    checked={appState.client.cluster_method === value}
-                    onChange={() => handleChangeClusterMethod(value)}
-                  />
-                  <span>{value}</span>
-                </label>
-              ))}
+                    ref={(el) => (clusterOptionRefs.current[index] = el)}
+                    data-selected={appState.client.cluster_method === value}
+                  >
+                    <input
+                      key={value}
+                      type="radio"
+                      id={value}
+                      name="cluster-method"
+                      value={value}
+                      checked={appState.client.cluster_method === value}
+                      onChange={() => handleChangeClusterMethod(value)}
+                      onFocus={() => handleClusterOptionFocus(index)}
+                      onBlur={() => handleClusterOptionBlur(index)}
+                    />
+                    <span>{value}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="field runner-settings performance">
+              <label className="header" htmlFor="compute-cores">
+                Performance
+              </label>
+              {appState.compute_stats ? (
+                <div className="performance-settings col-2">
+                  <div className="cores-used">
+                    <Slider
+                      id="compute-cores"
+                      onChange={handleChangeComputeCores}
+                      minValue={1}
+                      maxValue={appState.platform.cores}
+                      value={appState.client.compute_cores}
+                    >
+                      <Label>Cores</Label>
+                      <SliderOutput data-impact={coresImpact}>
+                        {({ state }) => (
+                          <>
+                            {appState.compute_stats &&
+                            (appState.compute_stats.recommended_cores === 0 ||
+                              appState.client.compute_cores >
+                                appState.compute_stats.recommended_cores) ? (
+                              <WarningIcon />
+                            ) : null}
+                            {state.getThumbValueLabel(0)} /{" "}
+                            {appState.platform.cores}
+                          </>
+                        )}
+                      </SliderOutput>
+                      <SliderTrack data-impact={coresImpact}>
+                        {({ state }) => (
+                          <>
+                            <div className="track" />
+                            <div
+                              className="fill"
+                              style={{
+                                width: state.getThumbPercent(0) * 100 + "%",
+                              }}
+                            />
+                            <SliderThumb />
+                          </>
+                        )}
+                      </SliderTrack>
+                    </Slider>
+                    <small>
+                      Recommended: {appState.compute_stats.recommended_cores}
+                    </small>
+                  </div>
+                  <div className="estimated-memory">
+                    <Meter value={estimatedMemoryValue}>
+                      {({ percentage }) => (
+                        <>
+                          <Label>Memory</Label>
+                          <span className="value">
+                            {formatBytes(estimatedMemory, 1)} /{" "}
+                            {appState.compute_stats?.available_memory
+                              ? `${formatBytes(
+                                  appState.compute_stats?.available_memory || 0,
+                                  0,
+                                )} Available`
+                              : null}
+                          </span>
+                          <div className="bar">
+                            <div
+                              className="fill"
+                              data-impact={impactName(percentage)}
+                              style={{
+                                width: percentage + "%",
+                                minWidth: "4px",
+                              }}
+                            />
+                          </div>
+                        </>
+                      )}
+                    </Meter>
+                    <small>
+                      <span>
+                        {appState.compute_stats &&
+                        estimatedMemoryValue > 100 ? (
+                          <>
+                            Swap:{" "}
+                            {formatBytes(
+                              estimatedMemory -
+                                appState.compute_stats.available_memory,
+                            )}
+                          </>
+                        ) : null}
+                      </span>
+                      <span>
+                        {formatBytes(appState.platform.memory, 0)} Total
+                      </span>
+                    </small>
+                  </div>
+                </div>
+              ) : null}
             </div>
 
             <div className="advanced-settings">
@@ -314,10 +352,9 @@ const RunnerSettings = ({
               appState.client.compute_cores >
                 appState.compute_stats?.recommended_cores) ? (
               <div className="compute-forecast">
-                <p>
-                  <b>Warning:</b> System instability may occur when exceeding
-                  recommended cores.
-                </p>
+                <b>Warning:</b> System instability may occur when exceeding
+                recommended cores or available memory. When exceeding available
+                memory, it is recommended to limit cores used.
               </div>
             ) : null}
 
