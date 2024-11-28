@@ -1,0 +1,69 @@
+.react-aria-Switch {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--foreground-color);
+  font-weight: 600;
+
+  .indicator {
+    width: 2rem;
+    height: 1.1rem;
+    border: 0.1rem solid var(--switch-border-color);
+    background: var(--border-color);
+    border-radius: 1rem;
+    transition: all 200ms outline 0ms;
+
+    &:before {
+      content: "";
+      display: block;
+      margin: 0.05rem;
+      width: 0.9rem;
+      height: 0.9rem;
+      background: var(--background-color);
+      border-radius: 1.6rem;
+      transition: all 200ms outline 0ms;
+      box-shadow: 0 0 1px var(--secondary-foreground-color);
+    }
+  }
+
+  &[data-pressed] .indicator {
+    &:before {
+      box-shadow: 0 0 1px var(--foreground-color);
+      background: var(--pressed-color);
+    }
+  }
+
+  &[data-selected] {
+    .indicator {
+      border-color: var(--fill-color);
+      background: var(--secondary-foreground-color);
+
+      &:before {
+        transform: translateX(100%);
+      }
+    }
+
+    &[data-pressed] {
+      .indicator:before {
+        border-color: var(--pressed-color);
+        background: var(--pressed-color);
+      }
+    }
+  }
+
+  &[data-focus-visible] .indicator {
+    outline: 0.2rem solid var(--focus-ring-color);
+    outline-offset: 0.1rem;
+  }
+}
+
+.form .field label.react-aria-Switch {
+  font-weight: bold;
+}
+
+body.blur {
+  .react-aria-Switch[data-selected] .indicator {
+    background: var(--switch-blur-color);
+    border-color: var(--switch-blur-border-color);
+  }
+}

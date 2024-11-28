@@ -15,6 +15,11 @@
   --impact-high-color: orange;
   --impact-medium-color: gold;
   --impact-low-color: var(--foreground-color);
+  --switch-border-color: #bbb;
+  --switch-blur-color: #acacac;
+  --switch-blur-border-color: #777;
+  --switch-pressed-color: #ccc;
+  --switch-pressed-border-color: #888;
 }
 
 // @media (prefers-color-scheme: dark) {
@@ -235,6 +240,19 @@ select option {
   }
 }
 
+[data-hidden] {
+  opacity: 1;
+  height: auto;
+  transition: all .3s ease-out;
+}
+[data-hidden="true"] {
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  visibility: hidden;
+  position: absolute;
+}
+
 .form {
   display: grid;
   grid-template-rows: 1fr;
@@ -274,6 +292,9 @@ select option {
     & + .row {
       margin-top: 0.8rem;
     }
+  }
+  .react-aria-Switch + .row {
+    margin-top: 0.8rem;
   }
 
   .field {

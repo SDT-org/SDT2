@@ -7,6 +7,7 @@ import { DistributionData } from "../plotTypes";
 import { ColorOptions } from "./ColorOptions";
 import { DataSets, DistributionState } from "../distributionState";
 import { ColorOption } from "../colors";
+import { Switch } from "./Switch";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -288,19 +289,17 @@ export const Violin = ({
               </div>
             </div>
             <div className="group">
-              <div className="field">
-                <label className="header">
-                  <input
-                    type="checkbox"
-                    checked={settings.showViolin}
-                    onChange={(e) =>
-                      updateSettings({ showViolin: e.target.checked })
-                    }
-                  />
-                  Violin Plot
-                </label>
-              </div>
-              <div className="row">
+              <Switch
+                isSelected={settings.showViolin}
+                onChange={(value) => updateSettings({ showViolin: value })}
+              >
+                Violin Plot
+              </Switch>
+              <div
+                className="row"
+                data-hidden={!settings.showViolin}
+                aria-hidden={!settings.showViolin}
+              >
                 <div className="col-2">
                   <div className="field">
                     <label htmlFor="fill-color">Fill Color</label>
@@ -362,19 +361,17 @@ export const Violin = ({
               </div>
             </div>
             <div className="group">
-              <div className="field">
-                <label className="header">
-                  <input
-                    type="checkbox"
-                    checked={settings.showBox}
-                    onChange={(e) =>
-                      updateSettings({ showBox: e.target.checked })
-                    }
-                  />
-                  Box Plot
-                </label>
-              </div>
-              <div className="row">
+              <Switch
+                isSelected={settings.showBox}
+                onChange={(value) => updateSettings({ showBox: value })}
+              >
+                Box Plot
+              </Switch>
+              <div
+                className="row"
+                data-hidden={!settings.showBox}
+                aria-hidden={!settings.showBox}
+              >
                 <div className="col-2">
                   <div className="field">
                     <label htmlFor="box-fill-color">Fill Color</label>
