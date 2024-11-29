@@ -3,6 +3,11 @@ import messages from "./messages";
 
 export const clusterMethods = ["Neighbor-Joining", "UPGMA", "None"] as const;
 
+export const clusterMethodDescriptions = [
+  "Unrooted phylogenetic tree for large datasets",
+  "Rooted phylogenetic tree ideal for ultra-metric datasets",
+];
+
 export type SaveableImageFormat = "png" | "jpeg" | "svg";
 
 export type AppState = {

@@ -1,0 +1,125 @@
+.runner-form {
+  .field + .field {
+    border-top: 0;
+    margin: 0;
+  }
+
+  .field {
+    margin: 0;
+
+    &:not(:last-child) {
+      padding: var(--app-container-padding) 0;
+      border-bottom: 0.1rem solid var(--border-color);
+    }
+
+    // label.header {
+    //   font-weight: bold;
+    // }
+
+    &:first-child {
+      padding-top: 0;
+    }
+
+    .setting {
+      margin: 1.2rem 0;
+    }
+
+    // .react-aria-Switch[data-selected] {
+    //   font-weight: 600;
+    // }
+
+    .react-aria-Switch {
+      font-weight: 600;
+    }
+
+    &.clustering {
+      .clustering-method .react-aria-RadioGroup {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 1fr;
+        gap: 0.8rem;
+
+        .react-aria-Radio {
+          border: 1px solid var(--border-color);
+          border-radius: 0.4rem;
+          padding: 0.4rem 0.6rem;
+          position: relative;
+          align-items: flex-start;
+          flex-direction: column;
+
+          &::before {
+            position: absolute;
+            top: 0.8rem;
+            right: 0.8rem;
+          }
+
+          &[data-selected="true"] {
+            border-color: var(--fill-color);
+          }
+
+          &[data-focused="true"] {
+            outline: 2px solid var(--focus-ring-color);
+          }
+
+          h4 {
+            display: inline-block;
+            font-weight: 500;
+          }
+
+          .description {
+            display: block;
+            font-size: 1.3rem;
+            font-weight: normal;
+          }
+        }
+      }
+    }
+
+    &.output {
+    }
+
+    &.performance {
+      .performance-settings {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.6rem;
+
+        > * {
+          border: 0.1rem solid var(--border-color);
+          border-radius: 0.4rem;
+          padding: 0.8rem;
+        }
+
+        svg {
+          width: 14px;
+          margin: 0 2px 2px 0;
+          color: var(--impact-medium-color);
+        }
+
+        &[data-impact="extreme"] svg {
+          color: var(--impact-extreme-color);
+        }
+        &[data-impact="high"] svg {
+          color: var(--impact-high-color);
+        }
+        &[data-impact="medium"] svg {
+          color: var(--impact-medium-color);
+        }
+
+        .react-aria-Meter {
+          gap: 6px;
+        }
+
+        .react-aria-Meter + small {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 0.8rem;
+        }
+
+        .cores-used {
+          padding-right: 1.6rem;
+          border-right: 1px solid var(--border-color);
+        }
+      }
+    }
+  }
+}

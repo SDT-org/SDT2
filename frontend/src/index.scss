@@ -2,6 +2,7 @@
 @import './styles/app.scss';
 @import './styles/modal.scss';
 @import './styles/switch.scss';
+@import './styles/runner.scss';
 
 /* https://www.joshwcomeau.com/css/custom-css-reset/ */
 
@@ -58,7 +59,8 @@ p, h1, h2, h3, h4, h5, h6 {
 
 /* BASE STYLES */
 
-html { font-family: 'Inter', sans-serif; }
+html { font-family: 'Inter', sans-serif; font-size: 62.5%; }
 @supports (font-variation-settings: normal) {
   html { font-family: 'Inter var', sans-serif; }
 }
+body { font-size: 1.4rem; }

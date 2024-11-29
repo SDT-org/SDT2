@@ -26,6 +26,7 @@ from config import app_version
 
 dev_frontend_host = "http://localhost:5173"
 is_compiled = "__compiled__" in globals()
+is_macos = platform.system() == "Darwin"
 temp_dir = tempfile.TemporaryDirectory()
 
 default_window_title = "Sequence Demarcation Tool 2 Beta"
@@ -539,6 +540,8 @@ if __name__ == "__main__":
         height=900,
         min_size=(640, 480),
         confirm_close=False,
+        # frameless=True,
+        # easy_drag=False,
         # maximized=True
     )
 

@@ -29,7 +29,7 @@ export interface HeatmapSettings {
   color: string;
   showscale: boolean;
   cbar_shrink: number;
-  cbar_pad: string;
+  cbar_pad: number;
   cbar_aspect: number;
   axis_labels: boolean;
   axlabel_xrotation: number;

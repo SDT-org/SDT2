@@ -1,34 +1,33 @@
 .react-aria-Switch {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.8rem;
   color: var(--foreground-color);
   font-weight: 600;
 
   .indicator {
-    width: 2rem;
-    height: 1.1rem;
+    width: 3.4rem;
+    height: 1.8rem;
     border: 0.1rem solid var(--switch-border-color);
     background: var(--border-color);
-    border-radius: 1rem;
+    border-radius: 1.2rem;
     transition: all 200ms outline 0ms;
 
     &:before {
       content: "";
       display: block;
-      margin: 0.05rem;
-      width: 0.9rem;
-      height: 0.9rem;
+      width: 1.6rem;
+      height: 1.6rem;
       background: var(--background-color);
-      border-radius: 1.6rem;
+      border-radius: 1.2rem;
       transition: all 200ms outline 0ms;
-      box-shadow: 0 0 1px var(--secondary-foreground-color);
+      box-shadow: 0 0 0.1rem var(--secondary-foreground-color);
     }
   }
 
   &[data-pressed] .indicator {
     &:before {
-      box-shadow: 0 0 1px var(--foreground-color);
+      box-shadow: 0 0 0.1rem var(--foreground-color);
       background: var(--pressed-color);
     }
   }
@@ -57,8 +56,12 @@
   }
 }
 
-.form label.react-aria-Switch {
-  font-weight: 600;
+.react-aria-Switch {
+  font-weight: 500;
+}
+
+.react-aria-Switch[data-split],
+.app-sidebar .react-aria-Switch {
   display: flex;
   flex-direction: row-reverse;
   justify-content: space-between;

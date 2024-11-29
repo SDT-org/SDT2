@@ -47,8 +47,8 @@ export const Viewer = ({
       color: "white",
       showscale: true,
       cbar_shrink: 1,
-      cbar_aspect: "25",
-      cbar_pad: "10",
+      cbar_aspect: 25,
+      cbar_pad: 10,
       axis_labels: false,
       axlabel_xrotation: 270,
       axlabel_xfontsize: 12,
@@ -148,23 +148,19 @@ export const Viewer = ({
         <div className="left">
           {mainMenu}
           <div className="run-info">
-            <strong>
-              {appState.sequences_count > 0 ? (
-                <>
-                  {appState.sequences_count} Sequence
-                  {appState.sequences_count === 1 ? "" : "s"}
-                </>
-              ) : null}
-            </strong>
+            {appState.sequences_count > 0 ? (
+              <>
+                {appState.sequences_count} Sequence
+                {appState.sequences_count === 1 ? "" : "s"}
+              </>
+            ) : null}
             <span className="filename">{appState.basename}</span>
           </div>
         </div>
-        <div>
-          <TabList className="data-view">
-            <Tab id="heatmap">Heatmap</Tab>
-            <Tab id="plot">Distribution</Tab>
-          </TabList>
-        </div>
+        <TabList>
+          <Tab id="heatmap">Heatmap</Tab>
+          <Tab id="plot">Distribution</Tab>
+        </TabList>
         <div className="right">
           <Button
             onPress={() =>

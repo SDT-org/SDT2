@@ -1,15 +1,25 @@
 import React from "react";
-import { AppState, SetAppState, clusterMethods } from "../appState";
+import {
+  AppState,
+  SetAppState,
+  clusterMethodDescriptions,
+  clusterMethods,
+} from "../appState";
 import messages from "../messages";
 import {
+  Button,
+  Input,
   Label,
   Meter,
+  Radio,
+  RadioGroup,
   Slider,
   SliderOutput,
   SliderThumb,
   SliderTrack,
 } from "react-aria-components";
 import { formatBytes } from "../helpers";
+import { Switch } from "./Switch";
 
 export type RunProcessDataArgs = Pick<
   AppState["client"],
@@ -41,15 +51,6 @@ const RunnerSettings = ({
   startProcessData: () => void;
 }) => {
   const [showOutputSelector, setShowOutputSelector] = React.useState(false);
-  const clusterOptionRefs = React.useRef<(HTMLLabelElement | null)[]>([]);
-
-  const handleClusterOptionFocus = (index: number) => {
-    clusterOptionRefs.current[index]?.setAttribute("data-focused", "true");
-  };
-
-  const handleClusterOptionBlur = (index: number) => {
-    clusterOptionRefs.current[index]?.removeAttribute("data-focused");
-  };
 
   const handleChangeClusterMethod = (
     value: typeof appState.client.cluster_method,
@@ -165,58 +166,104 @@ const RunnerSettings = ({
 
   return (
     <div className="form-wrapper runner-wrapper">
-      <div className="form">
+      <div className="form runner-form">
         <div className="field">
-          <label className="header">FASTA or SDT Matrix File</label>
-          <div className="input-with-button">
-            <input
+          <label className="header">
+            Data file{" "}
+            <span className="text-normal-weight">FASTA or SDT matrix</span>
+          </label>
+          <div className="setting input-with-button">
+            <Input
               type="text"
               readOnly
               value={appState.validation_error_id ? "" : fileName}
             />
-            <button
+            <Button
               type="button"
-              onClick={() => window.pywebview.api.open_file_dialog()}
+              onPress={() => {
+                window.pywebview.api.open_file_dialog();
+              }}
             >
-              Select file...
-            </button>
+              Select file&#8230;
+            </Button>
           </div>
         </div>
         {isFastaType && !appState.validation_error_id ? (
           <>
-            <div className="field runner-settings">
-              <label className="header">Clustering Method</label>
-              <div className="clustering-method">
-                {clusterMethods.map((value, index) => (
-                  <label
-                    className="radio"
-                    key={value}
-                    ref={(el) => (clusterOptionRefs.current[index] = el)}
-                    data-selected={appState.client.cluster_method === value}
-                  >
-                    <input
-                      key={value}
-                      type="radio"
-                      id={value}
-                      name="cluster-method"
-                      value={value}
-                      checked={appState.client.cluster_method === value}
-                      onChange={() => handleChangeClusterMethod(value)}
-                      onFocus={() => handleClusterOptionFocus(index)}
-                      onBlur={() => handleClusterOptionBlur(index)}
-                    />
-                    <span>{value}</span>
-                  </label>
-                ))}
+            <div className="field clustering">
+              <Switch
+                data-split
+                isSelected={appState.client.cluster_method !== "None"}
+                onChange={(value) =>
+                  handleChangeClusterMethod(value ? "Neighbor-Joining" : "None")
+                }
+              >
+                Clustering
+              </Switch>
+              <div
+                className="setting clustering-method"
+                data-hidden={appState.client.cluster_method === "None"}
+                aria-hidden={appState.client.cluster_method === "None"}
+              >
+                <RadioGroup
+                  onChange={(value) => handleChangeClusterMethod(value as any)}
+                >
+                  {[clusterMethods[0], clusterMethods[1]].map(
+                    (value, index) => (
+                      <Radio value={value} key={index}>
+                        <h4>{value} method</h4>
+                        <div className="description">
+                          {clusterMethodDescriptions[index]}
+                        </div>
+                      </Radio>
+                    ),
+                  )}
+                </RadioGroup>
               </div>
             </div>
 
-            <div className="field runner-settings performance">
+            <div className="field output">
+              <Switch
+                data-split
+                isSelected={showOutputSelector}
+                onChange={(value) => {
+                  setShowOutputSelector(value);
+                  if (!value) {
+                    setAppState((previous) => {
+                      return { ...previous, alignment_output_path: "" };
+                    });
+                  }
+                }}
+              >
+                Output alignments
+              </Switch>
+
+              {showOutputSelector ? (
+                <div className="setting">
+                  <div className="input-with-button">
+                    <input
+                      type="text"
+                      value={appState.alignment_output_path}
+                      readOnly
+                    />
+                    <Button
+                      onPress={() =>
+                        window.pywebview.api.select_alignment_output_path()
+                      }
+                    >
+                      Select folder&#8230;
+                    </Button>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="field performance">
               <label className="header" htmlFor="compute-cores">
                 Performance
               </label>
               {appState.compute_stats ? (
-                <div className="performance-settings col-2">
+                <div className="setting performance-settings col-2">
                   <div className="cores-used">
                     <Slider
                       id="compute-cores"
@@ -263,14 +310,16 @@ const RunnerSettings = ({
                     <Meter value={estimatedMemoryValue}>
                       {({ percentage }) => (
                         <>
-                          <Label>Memory</Label>
+                          <Label className="react-aria-Label header">
+                            Memory
+                          </Label>
                           <span className="value">
                             {formatBytes(estimatedMemory, 1)} /{" "}
                             {appState.compute_stats?.available_memory
                               ? `${formatBytes(
                                   appState.compute_stats?.available_memory || 0,
                                   0,
-                                )} Available`
+                                )}`
                               : null}
                           </span>
                           <div className="bar">
@@ -300,47 +349,14 @@ const RunnerSettings = ({
                         ) : null}
                       </span>
                       <span>
-                        {formatBytes(appState.platform.memory, 0)} Total
+                        {formatBytes(
+                          appState.compute_stats?.available_memory || 0,
+                          0,
+                        )}{" "}
+                        Available / {formatBytes(appState.platform.memory, 0)}{" "}
+                        Total
                       </span>
                     </small>
-                  </div>
-                </div>
-              ) : null}
-            </div>
-
-            <div className="advanced-settings">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={showOutputSelector}
-                  onChange={() => {
-                    setShowOutputSelector(!showOutputSelector);
-                    if (!showOutputSelector) {
-                      setAppState((previous) => {
-                        return { ...previous, alignment_output_path: "" };
-                      });
-                    }
-                  }}
-                />
-                Output alignments to folder
-              </label>
-
-              {showOutputSelector ? (
-                <div className="field">
-                  <div className="input-with-button">
-                    <input
-                      type="text"
-                      value={appState.alignment_output_path}
-                      readOnly
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        window.pywebview.api.select_alignment_output_path()
-                      }
-                    >
-                      Select folder...
-                    </button>
                   </div>
                 </div>
               ) : null}

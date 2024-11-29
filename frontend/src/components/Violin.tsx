@@ -8,6 +8,7 @@ import { ColorOptions } from "./ColorOptions";
 import { DataSets, DistributionState } from "../distributionState";
 import { ColorOption } from "../colors";
 import { Switch } from "./Switch";
+import { Label, Radio, RadioGroup } from "react-aria-components";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -253,41 +254,18 @@ export const Violin = ({
               </div>
             </div>
             <div className="group">
-              <div className="field">
-                <label>Plot Orientation</label>
-                <div className="col-2">
-                  <label>
-                    <input
-                      type="radio"
-                      name="orientation"
-                      value="vertical"
-                      checked={settings.plotOrientation === "vertical"}
-                      onChange={(e) =>
-                        updateSettings({
-                          plotOrientation: e.target
-                            .value as typeof settings.plotOrientation,
-                        })
-                      }
-                    />
-                    Vertical
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="orientation"
-                      value="horizontal"
-                      checked={settings.plotOrientation === "horizontal"}
-                      onChange={(e) =>
-                        updateSettings({
-                          plotOrientation: e.target
-                            .value as typeof settings.plotOrientation,
-                        })
-                      }
-                    />
-                    Horizontal
-                  </label>
-                </div>
-              </div>
+              <RadioGroup
+                value={settings.plotOrientation}
+                onChange={(value) =>
+                  updateSettings({
+                    plotOrientation: value as any,
+                  })
+                }
+              >
+                <Label>Plot Orientation</Label>
+                <Radio value="vertical">Vertical</Radio>
+                <Radio value="horizontal">Horizontal</Radio>
+              </RadioGroup>
             </div>
             <div className="group">
               <Switch

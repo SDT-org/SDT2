@@ -402,8 +402,8 @@ export const Heatmap = ({
                 ygap: settings.cellspace || 0.001,
                 colorbar: {
                   len: settings.cbar_shrink,
-                  thickness: parseInt(settings.cbar_aspect, 10),
-                  xpad: parseInt(settings.cbar_pad, 10),
+                  thickness: settings.cbar_aspect,
+                  xpad: settings.cbar_pad,
                 },
               },
               {
@@ -434,6 +434,8 @@ export const Heatmap = ({
               displaylogo: false,
             }}
             layout={{
+              plot_bgcolor: "rgba(0,0,0,0)",
+              paper_bgcolor: "rgba(0,0,0,0)",
               uirevision: "true",
               margin: {
                 l: 25,

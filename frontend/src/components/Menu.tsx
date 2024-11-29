@@ -1,4 +1,4 @@
-import React, { SVGProps } from "react";
+import React from "react";
 import {
   Menu,
   MenuTrigger,
@@ -79,7 +79,7 @@ export const MainMenu = ({
   onAbout,
   onExit,
 }: MainMenuProps) => (
-  <AppMenuButton label="☰ Menu">
+  <AppMenuButton label="☰">
     <AppMenuItem onAction={onNew}>New</AppMenuItem>
     <AppMenuItem onAction={onOpen}>Open...</AppMenuItem>
     {appState.view === "viewer" ? (
