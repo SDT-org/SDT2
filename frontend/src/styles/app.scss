@@ -10,13 +10,13 @@
   --secondary-border-color: #eaeaea;
   --pressed-color: #ececec;
   --focus-ring-color: SelectedItem;
-  --fill-color: var(--foreground-color);
+  --fill-color: #666;
+  --fill-blur-color: #acacac;
   --impact-extreme-color: red;
   --impact-high-color: orange;
   --impact-medium-color: gold;
-  --impact-low-color: var(--foreground-color);
+  --impact-low-color: green;
   --switch-border-color: #bbb;
-  --switch-blur-color: #acacac;
   --switch-blur-border-color: #777;
   --switch-pressed-color: #ccc;
   --switch-pressed-border-color: #888;
@@ -24,7 +24,8 @@
 
 // @media (prefers-color-scheme: dark) {
 //   :root {
-//     --background-color: #000;
+//     --canvas-color: #333;
+//     --background-color: #444;
 //     --foreground-color: #fff;
 //     --border-color: #222;
 //     --shadow-color: #444;
@@ -590,15 +591,8 @@ select option {
   }
 }
 
-.plotly {
-  .modebar {
-    display: flex;
-    flex-direction: row;
-  }
-
-  .modebar-group {
-    display: unset;
-  }
+.js-plotly-plot {
+  background: var(--background-color);
 }
 
 .error-modal {
@@ -655,7 +649,7 @@ select option {
 
 label.sublabel,
 .form .field label.sublabel {
-  font-weight: 400;
+  font-size: 0.85rem;
 }
 
 .number-input-group {
@@ -871,7 +865,7 @@ label.sublabel,
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      height: 8px;
+      height: 3px;
       border-radius: 5px;
     }
 
@@ -886,12 +880,13 @@ label.sublabel,
   }
 
   .react-aria-SliderThumb {
-    width: 20px;
-    height: 20px;
+    width: 16px;
+    height: 16px;
     border-radius: 50%;
-    background: var(--fill-color);
-    border: 2px solid var(--background-color);
+    background: var(--background-color);
+    //border: 1px solid var(--fill-color);
     forced-color-adjust: none;
+    box-shadow: 0 0 2px #666;
 
     &[data-focus-visible] {
       outline: 2px solid var(--focus-ring-color);
@@ -907,7 +902,6 @@ label.sublabel,
   grid-template-columns: 1fr auto;
   gap: 4px;
   width: 100;
-  color: var(--foreground-color);
 
   .react-aria-Label {
     font-size: 0.85rem;
@@ -929,7 +923,7 @@ label.sublabel,
   }
 
   .fill {
-    background: var(--foreground-color);
+    background: var(--fill-color);
     height: 100%;
     &[data-impact="extreme"] {
       background: var(--impact-extreme-color);
@@ -949,5 +943,15 @@ label.sublabel,
 @media (forced-colors: active) {
   .react-aria-Meter {
     --fill-color: Highlight;
+  }
+}
+
+body.blur {
+  .react-aria-SliderTrack .fill {
+    background: var(--fill-blur-color);
+  }
+  .react-aria-Switch[data-selected] .indicator {
+    background: var(--fill-blur-color);
+    border-color: var(--switch-blur-border-color);
   }
 }

@@ -36,7 +36,7 @@
   &[data-selected] {
     .indicator {
       border-color: var(--fill-color);
-      background: var(--secondary-foreground-color);
+      background: var(--fill-color);
 
       &:before {
         transform: translateX(100%);
@@ -62,11 +62,4 @@
   display: flex;
   flex-direction: row-reverse;
   justify-content: space-between;
-}
-
-body.blur {
-  .react-aria-Switch[data-selected] .indicator {
-    background: var(--switch-blur-color);
-    border-color: var(--switch-blur-border-color);
-  }
 }
