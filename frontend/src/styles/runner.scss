@@ -40,7 +40,7 @@
     }
 
     .react-aria-Switch {
-      font-weight: 600;
+      font-weight: 500;
     }
 
     &.inline-toggle {
@@ -85,17 +85,29 @@
     &.performance {
       .performance-settings {
         gap: 1.6rem;
+        display: grid;
+        grid-template-rows: 1fr;
 
-        .react-aria-Slider,
-        .react-aria-Meter {
-          border: 0.1rem solid var(--border-color);
-          border-radius: 0.4rem;
-          padding: 0.8rem;
-          margin-bottom: 0.4rem;
+        .inline {
+          display: grid;
+          grid-template-columns: 1fr 21.6rem;
+          place-content: center;
+          align-items: flex-start;
         }
 
-        small {
-          padding: 0 1rem;
+        .cores-used {
+          .react-aria-Slider {
+            grid-template-areas: "track" "label output";
+          }
+
+          .react-aria-Label {
+            display: block;
+          }
+
+          output {
+            font-size: 1.3rem;
+            font-weight: 500;
+          }
         }
 
         svg {
@@ -116,14 +128,26 @@
 
         .react-aria-Meter {
           gap: 6px;
+          font-weight: 500;
         }
 
         .react-aria-Meter + small {
-          display: flex;
-          justify-content: space-between;
+          display: block;
           margin-top: 0.8rem;
+          text-align: right;
+        }
+
+        .swap {
+          color: var(--impact-extreme-color);
+          font-weight: 500;
         }
       }
+    }
+  }
+  .actions {
+    padding-top: 0.8rem;
+    button {
+      max-width: 20.8rem;
     }
   }
 }

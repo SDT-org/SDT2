@@ -83,18 +83,20 @@ const RunnerSettings = ({
     };
   }, [appState.filename, appState.validation_error_id, startProcessData]);
 
+  const initialized = React.useRef(false);
   React.useEffect(() => {
-    if (!appState.compute_stats) {
+    if (!appState.compute_stats || initialized.current) {
       return;
     }
     updateClientState({
       compute_cores: appState.compute_stats.recommended_cores,
     });
+    initialized.current = true;
   }, [appState.compute_stats, updateClientState]);
 
   React.useEffect(() => {
     const id = setInterval(() => {
-      if (!appState.compute_stats) {
+      if (!appState.filename) {
         return;
       }
 
@@ -115,7 +117,7 @@ const RunnerSettings = ({
     }, 3000);
 
     return () => clearInterval(id);
-  }, [appState.compute_stats, setAppState]);
+  }, [appState.filename, setAppState]);
 
   const estimatedMemory =
     (appState.compute_stats?.required_memory || 1) *
@@ -157,7 +159,7 @@ const RunnerSettings = ({
               id="data-file"
               type="text"
               readOnly
-              value={appState.validation_error_id ? "" : (fileName ?? "")}
+              value={appState.validation_error_id ? "" : fileName ?? ""}
             />
             <Button
               type="button"
@@ -240,10 +242,17 @@ const RunnerSettings = ({
                 Performance
               </label>
               {appState.compute_stats ? (
-                <div className="setting performance-settings col-2">
-                  <div className="cores-used">
+                <div className="setting performance-settings">
+                  <div className="cores-used inline">
+                    <div>
+                      <Label id="compute-cores-label">Cores</Label>
+                      <small className="text-deemphasis">
+                        {appState.compute_stats.recommended_cores} Recommended /{" "}
+                        {appState.platform.cores} Total
+                      </small>
+                    </div>
                     <Slider
-                      id="compute-cores"
+                      aria-labelledby="compute-cores-label"
                       onChange={(value) =>
                         updateClientState({ compute_cores: value })
                       }
@@ -251,7 +260,6 @@ const RunnerSettings = ({
                       maxValue={appState.platform.cores}
                       value={appState.client.compute_cores}
                     >
-                      <Label>Cores</Label>
                       <SliderOutput data-impact={coresImpact}>
                         {({ state }) => (
                           <>
@@ -281,53 +289,65 @@ const RunnerSettings = ({
                         )}
                       </SliderTrack>
                     </Slider>
-                    <small className="text-deemphasis">
-                      Recommended: {appState.compute_stats.recommended_cores}
-                    </small>
                   </div>
-                  <div className="estimated-memory">
-                    <Meter value={estimatedMemoryValue}>
-                      {({ percentage }) => (
-                        <>
-                          <Label className="react-aria-Label header">
-                            Memory
-                          </Label>
-                          <span className="value">
-                            {formatBytes(estimatedMemory, 1)} /{" "}
-                            {appState.compute_stats?.available_memory
-                              ? `${formatBytes(
-                                  appState.compute_stats?.available_memory || 0,
-                                  0,
-                                )}`
-                              : null}
-                          </span>
-                          <div className="bar">
-                            <div
-                              className="fill"
-                              data-impact={impactName(percentage)}
-                              style={{
-                                width: `${percentage}%`,
-                                minWidth: "4px",
-                              }}
-                            />
-                          </div>
-                        </>
-                      )}
-                    </Meter>
-                    <small className="text-deemphasis">
-                      <span>
+                  <div className="inline">
+                    <div>
+                      <Label id="memory-label" htmlFor="meter">
+                        Memory
+                      </Label>
+                      <div>
+                        <small className="text-deemphasis">
+                          {appState.compute_stats?.available_memory
+                            ? `${formatBytes(
+                                appState.compute_stats?.available_memory || 0,
+                                0,
+                              )} Available`
+                            : null}{" "}
+                          / {formatBytes(appState.platform.memory)} Total
+                        </small>
+                      </div>
+                    </div>
+                    <div className="estimated-memory">
+                      <Meter value={estimatedMemoryValue}>
+                        {({ percentage }) => (
+                          <>
+                            <span className="value">
+                              {formatBytes(estimatedMemory, 1)} /{" "}
+                              {appState.compute_stats?.available_memory
+                                ? `${formatBytes(
+                                    appState.compute_stats?.available_memory ||
+                                      0,
+                                    1,
+                                  )}`
+                                : null}
+                            </span>
+                            <div className="bar">
+                              <div
+                                className="fill"
+                                data-impact={impactName(percentage)}
+                                style={{
+                                  width: `${percentage}%`,
+                                  minWidth: "4px",
+                                }}
+                              />
+                            </div>
+                          </>
+                        )}
+                      </Meter>
+                      <small className="swap">
                         {appState.compute_stats &&
                         estimatedMemoryValue > 100 ? (
                           <>
-                            Swap:{" "}
                             {formatBytes(
                               estimatedMemory -
                                 appState.compute_stats.available_memory,
-                            )}
+                              0,
+                            )}{" "}
+                            Swap
                           </>
                         ) : null}
-                      </span>
-                    </small>
+                      </small>
+                    </div>
                   </div>
                 </div>
               ) : null}
@@ -344,14 +364,14 @@ const RunnerSettings = ({
                 memory, it is recommended to limit cores used.
               </div>
             ) : null}
-
             <div className="actions">
               <Button
+                data-primary
                 type="button"
                 onPress={startProcessData}
                 isDisabled={Boolean(!fileName || appState.validation_error_id)}
               >
-                Run
+                Start Analysis
               </Button>
             </div>
           </>
