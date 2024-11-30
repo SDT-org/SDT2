@@ -1,53 +1,10 @@
-:root {
-  --canvas-color: #f5f5f5;
-  --background-color: #fff;
-  --foreground-color: #111;
-  --border-color: #ddd;
-  --shadow-color: #ccc;
-  --drop-shadow-color: #aaa;
-  --button-background-color: var(--background-color);
-  --button-background-pressed-color: #eee;
-  --button-shadow-one-color: #aaa;
-  --button-shadow-two-color: #ccc;
-  --secondary-background-color: #f8f8f8;
-  --secondary-foreground-color: #666;
-  --secondary-border-color: #eaeaea;
-  --pressed-color: #ececec;
-  --focus-ring-color: SelectedItem;
-  --fill-color: #666;
-  --fill-color: #444;
-  --fill-blur-color: #acacac;
-  --impact-extreme-color: red;
-  --impact-high-color: orange;
-  --impact-medium-color: gold;
-  --impact-low-color: green;
-  --switch-border-color: #bbb;
-  --switch-blur-border-color: #777;
-  --switch-pressed-color: #ccc;
-  --switch-pressed-border-color: #888;
+@import "variables.scss";
+@import "modal.scss";
+@import "switch.scss";
+@import "popover.scss";
+@import "select.scss";
 
-  --app-header-color: #fcfcfc;
-
-  --text-disabled-color: #777;
-  --text-deemphasis-color: #444;
-
-  --app-container-padding: 1.2rem;
-}
-
-// @media (prefers-color-scheme: dark) {
-//   :root {
-//     --canvas-color: #333;
-//     --background-color: #444;
-//     --foreground-color: #fff;
-//     --border-color: #222;
-//     --shadow-color: #444;
-//     --drop-shadow-color: #666;
-//     --secondary-background-color: #282828;
-//     --secondary-foreground-color: #666;
-//     --secondary-border-color: #3a3a3a;
-//     --pressed-color: #444;
-//   }
-// }
+@import "runner.scss";
 
 html,
 body {
@@ -138,16 +95,16 @@ body {
   }
 
   button {
-    max-height: 4rem;
+    // max-height: 4rem;
     min-width: 4.8rem;
-    background: #fff;
-    border-radius: 0.3rem;
-    border-color: transparent;
-    box-shadow: 0 0 2px 0 var(--drop-shadow-color);
+    //   background: #fff;
+    //   border-radius: 0.3rem;
+    //   border-color: transparent;
+    //   box-shadow: 0 0 2px 0 var(--drop-shadow-color);
 
-    &[data-pressed] {
-      background: var(--pressed-color);
-    }
+    //   &[data-pressed] {
+    //     background: var(--pressed-color);
+    //   }
   }
 }
 
@@ -222,6 +179,10 @@ select option {
   text-transform: capitalize;
 }
 
+small {
+  font-size: 1.3rem;
+}
+
 .form-wrapper {
   background: var(--background-color);
   border: 1px solid var(--border-color);
@@ -231,6 +192,7 @@ select option {
 
   &.runner-wrapper {
     max-width: 46.4rem;
+    // max-width: 51.2rem;
     width: 100%;
   }
 }
@@ -250,6 +212,7 @@ select option {
 
 .text-deemphasis {
   color: var(--text-deemphasis-color);
+  font-weight: 450;
 }
 
 .text-normal-weight {
@@ -337,6 +300,7 @@ select option {
 
       input[type="text"] {
         width: 100%;
+        text-overflow: ellipsis;
       }
 
       button {
@@ -803,7 +767,7 @@ label.sublabel,
 
   .value {
     grid-area: value;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
   }
 
   .bar {
@@ -888,10 +852,11 @@ label.sublabel,
 .react-aria-Button {
   background: var(--button-background-color);
   box-shadow:
-    0 0 1px 0 var(--button-shadow-one-color),
-    0 1px 1px 0 var(--button-shadow-two-color);
+    0 1px 1px 0 var(--button-shadow-bottom-color),
+    0 0 1px 1px var(--button-shadow-color);
   border: 0;
-  border-radius: 4px;
+  // border-top: 1px solid var(--button-shadow-two-color);
+  border-radius: 0.5rem;
   appearance: none;
   vertical-align: middle;
   text-align: center;
@@ -974,4 +939,7 @@ body.blur {
     background: var(--fill-blur-color);
     border-color: var(--switch-blur-border-color);
   }
+  // .react-aria-Button {
+  //   --button-shadow-bottom-color: transparent;
+  // }
 }

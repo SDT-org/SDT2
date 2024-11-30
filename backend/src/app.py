@@ -304,8 +304,8 @@ class Api:
         )
 
         alignment_output_path = get_state().alignment_output_path
-
-        if alignment_output_path:
+        if args.get("export_alignments") == "True" and alignment_output_path:
+            print("Saving alignments...", args.get("export_alignments"))
             settings["aln_out"] = str(alignment_output_path)
 
         if get_state().debug:

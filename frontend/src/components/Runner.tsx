@@ -1,8 +1,7 @@
 import React from "react";
-import {
+import useAppState, {
   AppState,
   SetAppState,
-  clusterMethodDescriptions,
   clusterMethods,
 } from "../appState";
 import messages from "../messages";
@@ -10,9 +9,8 @@ import {
   Button,
   Input,
   Label,
+  ListBoxItem,
   Meter,
-  Radio,
-  RadioGroup,
   Slider,
   SliderOutput,
   SliderThumb,
@@ -20,11 +18,12 @@ import {
 } from "react-aria-components";
 import { formatBytes } from "../helpers";
 import { Switch } from "./Switch";
+import { Select } from "./Select";
 
-export type RunProcessDataArgs = Pick<
-  AppState["client"],
-  "cluster_method" | "compute_cores"
->;
+export type RunProcessDataArgs = Pick<AppState["client"], "compute_cores"> & {
+  cluster_method: AppState["client"]["cluster_method"] | "None";
+  export_alignments: "True" | "False";
+};
 
 const WarningIcon = () => (
   <svg
@@ -42,25 +41,18 @@ const WarningIcon = () => (
 );
 
 const RunnerSettings = ({
-  appState,
-  setAppState,
   startProcessData,
 }: {
-  appState: AppState;
-  setAppState: SetAppState;
   startProcessData: () => void;
 }) => {
-  const [showOutputSelector, setShowOutputSelector] = React.useState(false);
-
-  const handleChangeClusterMethod = (
-    value: typeof appState.client.cluster_method,
-  ) =>
+  const { appState, setAppState } = useAppState();
+  const updateClientState = (value: Partial<typeof appState.client>) =>
     setAppState((previous) => {
       return {
         ...previous,
         client: {
           ...previous.client,
-          cluster_method: value,
+          ...value,
         },
       };
     });
@@ -176,7 +168,7 @@ const RunnerSettings = ({
             <Input
               type="text"
               readOnly
-              value={appState.validation_error_id ? "" : fileName}
+              value={appState.validation_error_id ? "" : fileName ?? ""}
             />
             <Button
               type="button"
@@ -190,55 +182,51 @@ const RunnerSettings = ({
         </div>
         {isFastaType && !appState.validation_error_id ? (
           <>
-            <div className="field clustering">
+            <div className="field clustering inline-toggle">
               <Switch
-                data-split
-                isSelected={appState.client.cluster_method !== "None"}
-                onChange={(value) =>
-                  handleChangeClusterMethod(value ? "Neighbor-Joining" : "None")
-                }
+                isSelected={appState.client.enableClustering}
+                onChange={(value) => {
+                  updateClientState({ enableClustering: value });
+                  console.log(appState.client.enableOutputAlignments);
+                }}
               >
-                Clustering
+                Cluster sequences
               </Switch>
               <div
                 className="setting clustering-method"
-                data-hidden={appState.client.cluster_method === "None"}
-                aria-hidden={appState.client.cluster_method === "None"}
+                data-hidden={!appState.client.enableClustering}
+                aria-hidden={!appState.client.enableClustering}
               >
-                <RadioGroup
-                  onChange={(value) => handleChangeClusterMethod(value as any)}
+                <Select
+                  selectedKey={appState.client.cluster_method}
+                  onSelectionChange={(value) => {
+                    updateClientState({
+                      cluster_method: value as (typeof clusterMethods)[number],
+                    });
+                  }}
+                  items={clusterMethods.map((name) => ({
+                    id: name,
+                    name,
+                  }))}
+                  label="Method"
                 >
-                  {[clusterMethods[0], clusterMethods[1]].map(
-                    (value, index) => (
-                      <Radio value={value} key={index}>
-                        <h4>{value} method</h4>
-                        <div className="description">
-                          {clusterMethodDescriptions[index]}
-                        </div>
-                      </Radio>
-                    ),
-                  )}
-                </RadioGroup>
+                  {(item) => <ListBoxItem>{item.name}</ListBoxItem>}
+                </Select>
               </div>
             </div>
 
-            <div className="field output">
+            <div className="field output inline-toggle">
               <Switch
-                data-split
-                isSelected={showOutputSelector}
+                isSelected={appState.client.enableOutputAlignments}
                 onChange={(value) => {
-                  setShowOutputSelector(value);
-                  if (!value) {
-                    setAppState((previous) => {
-                      return { ...previous, alignment_output_path: "" };
-                    });
-                  }
+                  console.log(value);
+                  updateClientState({ enableOutputAlignments: value });
                 }}
               >
-                Output alignments
+                Save alignments
               </Switch>
 
-              {showOutputSelector ? (
+              {appState.client.enableOutputAlignments ? (
                 <div className="setting">
                   <div className="input-with-button">
                     <input
@@ -251,7 +239,7 @@ const RunnerSettings = ({
                         window.pywebview.api.select_alignment_output_path()
                       }
                     >
-                      Select folder&#8230;
+                      Select&#8230;
                     </Button>
                   </div>
                 </div>
@@ -302,7 +290,7 @@ const RunnerSettings = ({
                         )}
                       </SliderTrack>
                     </Slider>
-                    <small>
+                    <small className="text-deemphasis">
                       Recommended: {appState.compute_stats.recommended_cores}
                     </small>
                   </div>
@@ -335,7 +323,7 @@ const RunnerSettings = ({
                         </>
                       )}
                     </Meter>
-                    <small>
+                    <small className="text-deemphasis">
                       <span>
                         {appState.compute_stats &&
                         estimatedMemoryValue > 100 ? (
@@ -347,14 +335,6 @@ const RunnerSettings = ({
                             )}
                           </>
                         ) : null}
-                      </span>
-                      <span>
-                        {formatBytes(
-                          appState.compute_stats?.available_memory || 0,
-                          0,
-                        )}{" "}
-                        Available / {formatBytes(appState.platform.memory, 0)}{" "}
-                        Total
                       </span>
                     </small>
                   </div>
@@ -375,13 +355,13 @@ const RunnerSettings = ({
             ) : null}
 
             <div className="actions">
-              <button
+              <Button
                 type="button"
-                onClick={startProcessData}
-                disabled={!fileName || appState.validation_error_id}
+                onPress={startProcessData}
+                isDisabled={Boolean(!fileName || appState.validation_error_id)}
               >
                 Run
-              </button>
+              </Button>
             </div>
           </>
         ) : null}
@@ -396,13 +376,9 @@ const RunnerSettings = ({
 };
 
 export const Runner = ({
-  appState,
-  setAppState,
   mainMenu,
   startProcessData,
 }: {
-  appState: AppState;
-  setAppState: SetAppState;
   mainMenu: React.ReactNode;
   startProcessData: () => void;
 }) => {
@@ -430,11 +406,7 @@ export const Runner = ({
     <div className="app-wrapper with-header with-footer">
       <div className="app-header runner">{mainMenu}</div>
       <div className="app-main centered runner">
-        <RunnerSettings
-          appState={appState}
-          setAppState={setAppState}
-          startProcessData={startProcessData}
-        />
+        <RunnerSettings startProcessData={startProcessData} />
       </div>
       <div className="app-footer centered">
         <div>{appConfig ? appConfig.appVersion : null}</div>

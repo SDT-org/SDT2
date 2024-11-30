@@ -62,10 +62,18 @@ export const App = () => {
   const [showDebugState, setShowDebugState] = React.useState(false);
 
   const startProcessData = React.useCallback(() => {
+    if (!confirm(`current value: ${appState.client.enableOutputAlignments}`)) {
+      return;
+    }
     window.pywebview.api
       .run_process_data({
-        cluster_method: appState.client.cluster_method,
+        cluster_method: appState.client.enableClustering
+          ? appState.client.cluster_method
+          : "None",
         compute_cores: appState.client.compute_cores,
+        export_alignments: appState.client.enableOutputAlignments
+          ? "True"
+          : "False",
       })
       .catch((e) => {
         if (e.toString().includes("PARASAIL_TRACEBACK")) {
@@ -79,7 +87,7 @@ export const App = () => {
           throw e;
         }
       });
-  }, [appState.client.cluster_method, appState.client.compute_cores]);
+  }, [appState]);
 
   const APP_VIEWS: { [K in AppState["view"]]: React.ReactElement } = {
     runner: <Runner {...commonViewProps} startProcessData={startProcessData} />,

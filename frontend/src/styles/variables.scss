@@ -1,0 +1,58 @@
+:root {
+  --canvas-color: #f5f5f5;
+  --background-color: #fff;
+  --foreground-color: #111;
+  --border-color: #ddd;
+  --shadow-color: #ccc;
+  --drop-shadow-color: #aaa;
+  --button-background-color: var(--background-color);
+  --button-background-pressed-color: #eee;
+  --button-shadow-color: #ddd;
+  --button-shadow-bottom-color: #aaa;
+  --secondary-background-color: #f8f8f8;
+  --secondary-foreground-color: #666;
+  --secondary-border-color: #eaeaea;
+  --pressed-color: #ececec;
+  --focus-ring-color: SelectedItem;
+  --fill-color: #444;
+  --fill-color: #125F9D;
+  --fill-text-color: var(--text-inverted-color);
+  --fill-blur-color: #acacac;
+  --impact-extreme-color: red;
+  --impact-high-color: orange;
+  --impact-medium-color: gold;
+  --impact-low-color: green;
+  --switch-border-color: #bbb;
+  --switch-blur-border-color: #777;
+  --switch-pressed-color: #ccc;
+  --switch-pressed-border-color: #888;
+
+  --app-header-color: #fcfcfc;
+
+  --text-color: var(--foreground-color);
+  --text-inverted-color: var(--background-color);
+  --text-disabled-color: #777;
+  --text-color-placeholder: var(--text-disabled-color);
+  --text-deemphasis-color: #666;
+
+  --highlight-background: var(--fill-color);
+  --highlight-foreground: var(--background-color);
+
+  --app-container-padding: 1.2rem;
+  --trigger-width: 9.6rem;
+}
+
+// @media (prefers-color-scheme: dark) {
+//   :root {
+//     --canvas-color: #333;
+//     --background-color: #444;
+//     --foreground-color: #fff;
+//     --border-color: #222;
+//     --shadow-color: #444;
+//     --drop-shadow-color: #666;
+//     --secondary-background-color: #282828;
+//     --secondary-foreground-color: #666;
+//     --secondary-border-color: #3a3a3a;
+//     --pressed-color: #444;
+//   }
+// }

@@ -1,7 +1,7 @@
 import React, { ErrorInfo } from "react";
 import messages from "./messages";
 
-export const clusterMethods = ["Neighbor-Joining", "UPGMA", "None"] as const;
+export const clusterMethods = ["Neighbor-Joining", "UPGMA"] as const;
 
 export const clusterMethodDescriptions = [
   "Unrooted phylogenetic tree for large datasets",
@@ -37,6 +37,8 @@ export type AppState = {
   };
   client: {
     dataView: "heatmap" | "plot";
+    enableClustering: boolean;
+    enableOutputAlignments: boolean;
     cluster_method: (typeof clusterMethods)[number];
     compute_cores: number;
     error?: Error | null;
@@ -61,6 +63,8 @@ export const initialAppState: AppState = {
   pair_count: 0,
   client: {
     dataView: "heatmap",
+    enableClustering: true,
+    enableOutputAlignments: false,
     cluster_method: "Neighbor-Joining",
     saveFormat: "svg",
     showExportModal: false,

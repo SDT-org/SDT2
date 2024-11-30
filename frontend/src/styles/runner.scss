@@ -1,4 +1,4 @@
-.runner-form {
+.form.runner-form {
   .field + .field {
     border-top: 0;
     margin: 0;
@@ -7,14 +7,8 @@
   .field {
     margin: 0;
 
-    &:not(:last-child) {
-      padding: var(--app-container-padding) 0;
-      border-bottom: 0.1rem solid var(--border-color);
-    }
-
-    // label.header {
-    //   font-weight: bold;
-    // }
+    padding: var(--app-container-padding) 0;
+    border-bottom: 0.1rem solid var(--border-color);
 
     &:first-child {
       padding-top: 0;
@@ -22,71 +16,81 @@
 
     .setting {
       margin: 1.2rem 0;
-    }
 
-    // .react-aria-Switch[data-selected] {
-    //   font-weight: 600;
-    // }
+      .react-aria-Select {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+
+        .react-aria-Label {
+          font-weight: 450;
+        }
+
+        .react-aria-Button {
+          display: flex;
+          padding: 0.4rem 10px;
+          width: 100%;
+        }
+      }
+    }
 
     .react-aria-Switch {
       font-weight: 600;
     }
 
+    &.inline-toggle {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      min-height: 5.4rem;
+
+      .react-aria-Switch {
+        flex-shrink: 0;
+      }
+
+      .setting {
+        margin: 0;
+      }
+    }
+
     &.clustering {
-      .clustering-method .react-aria-RadioGroup {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: 1fr;
-        gap: 0.8rem;
-
-        .react-aria-Radio {
-          border: 1px solid var(--border-color);
-          border-radius: 0.4rem;
-          padding: 0.4rem 0.6rem;
-          position: relative;
-          align-items: flex-start;
-          flex-direction: column;
-
-          &::before {
-            position: absolute;
-            top: 0.8rem;
-            right: 0.8rem;
-          }
-
-          &[data-selected="true"] {
-            border-color: var(--fill-color);
-          }
-
-          &[data-focused="true"] {
-            outline: 2px solid var(--focus-ring-color);
-          }
-
-          h4 {
-            display: inline-block;
-            font-weight: 500;
-          }
-
-          .description {
-            display: block;
-            font-size: 1.3rem;
-            font-weight: normal;
-          }
-        }
+      .clustering-method {
+        margin: 0;
       }
     }
 
     &.output {
+      .setting {
+        display: flex;
+        gap: 1.6rem;
+        align-items: center;
+      }
+
+      input[type="text"] {
+        max-width: 12.8rem;
+        font-size: 1.2rem;
+        direction: rtl;
+      }
+      button {
+        padding-top: 0.3rem;
+        padding-bottom: 0.3rem;
+      }
     }
 
     &.performance {
       .performance-settings {
-        grid-template-columns: 1fr 1fr;
         gap: 1.6rem;
 
-        > * {
+        .react-aria-Slider,
+        .react-aria-Meter {
           border: 0.1rem solid var(--border-color);
           border-radius: 0.4rem;
           padding: 0.8rem;
+          margin-bottom: 0.4rem;
+        }
+
+        small {
+          padding: 0 1rem;
         }
 
         svg {
@@ -113,11 +117,6 @@
           display: flex;
           justify-content: space-between;
           margin-top: 0.8rem;
-        }
-
-        .cores-used {
-          padding-right: 1.6rem;
-          border-right: 1px solid var(--border-color);
         }
       }
     }
