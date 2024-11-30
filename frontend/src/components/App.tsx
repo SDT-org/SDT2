@@ -1,11 +1,11 @@
 import * as React from "react";
-import { AppState, AppStateContext, initialAppState } from "../appState";
-import { Runner } from "./Runner";
-import { Loader } from "./Loader";
-import { Viewer } from "./Viewer";
+import { type AppState, AppStateContext, initialAppState } from "../appState";
 import { ErrorBoundary } from "./ErrorBoundary";
-import { MainMenu, MainMenuProps } from "./Menu";
 import { ExportModal } from "./ExportModal";
+import { Loader } from "./Loader";
+import { MainMenu, type MainMenuProps } from "./Menu";
+import { Runner } from "./Runner";
+import { Viewer } from "./Viewer";
 
 export const App = () => {
   const [appState, setAppState] = React.useState<AppState>(initialAppState);
@@ -62,9 +62,6 @@ export const App = () => {
   const [showDebugState, setShowDebugState] = React.useState(false);
 
   const startProcessData = React.useCallback(() => {
-    if (!confirm(`current value: ${appState.client.enableOutputAlignments}`)) {
-      return;
-    }
     window.pywebview.api
       .run_process_data({
         cluster_method: appState.client.enableClustering

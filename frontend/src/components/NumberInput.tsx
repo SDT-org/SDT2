@@ -5,7 +5,7 @@ import {
   Input,
   Label,
   NumberField,
-  NumberFieldProps,
+  type NumberFieldProps,
 } from "react-aria-components";
 
 export const NumberInput = ({

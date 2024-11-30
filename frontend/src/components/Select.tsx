@@ -4,18 +4,18 @@ import type {
   ValidationResult,
 } from "react-aria-components";
 import {
-  Select as RACSelect,
-  FieldError,
-  Text,
-  Label,
   Button,
-  SelectValue,
-  Popover,
+  FieldError,
+  Label,
   ListBox,
   ListBoxItem,
+  Popover,
+  Select as RACSelect,
+  SelectValue,
+  Text,
 } from "react-aria-components";
 
-import React from "react";
+import type React from "react";
 
 interface SelectProps<T extends object>
   extends Omit<RACSelectProps<T>, "children"> {

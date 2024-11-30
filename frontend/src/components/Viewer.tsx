@@ -1,22 +1,22 @@
 import React from "react";
-import { AppState, SetAppState } from "../appState";
-import {
-  HeatmapData,
-  HeatmapSettings,
-  DistributionData,
-  GetDataResponse,
-} from "../plotTypes";
-import { Heatmap } from "./Heatmap";
-import { Distribution } from "./Distribution";
 import {
   Button,
-  Key,
+  type Key,
   Tab,
   TabList,
   TabPanel,
   Tabs,
 } from "react-aria-components";
+import type { AppState, SetAppState } from "../appState";
 import { useDistributionState } from "../distributionState";
+import type {
+  DistributionData,
+  GetDataResponse,
+  HeatmapData,
+  HeatmapSettings,
+} from "../plotTypes";
+import { Distribution } from "./Distribution";
+import { Heatmap } from "./Heatmap";
 
 export const Viewer = ({
   appState,

@@ -1,9 +1,12 @@
-import React from "react";
-import { Modal, Button, Dialog, DialogTrigger } from "react-aria-components";
 import Plotly from "plotly.js-dist-min";
-import useAppState, { AppState, SaveableImageFormat } from "../appState";
-import { NumberInput } from "./NumberInput";
+import React from "react";
+import { Button, Dialog, DialogTrigger, Modal } from "react-aria-components";
+import useAppState, {
+  type AppState,
+  type SaveableImageFormat,
+} from "../appState";
 import { assertDefined } from "../helpers";
+import { NumberInput } from "./NumberInput";
 
 export const ExportModal = () => {
   const [exportState, setExportState] = React.useState<

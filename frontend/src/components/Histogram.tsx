@@ -1,12 +1,12 @@
-import React from "react";
 import Plotly from "plotly.js-dist-min";
+import type { Layout, PlotData } from "plotly.js-dist-min";
+import React from "react";
 import createPlotlyComponent from "react-plotly.js/factory";
-import { NumberInput } from "./NumberInput";
-import { Layout, PlotData } from "plotly.js-dist-min";
-import { DistributionData } from "../plotTypes";
+import type { ColorOption } from "../colors";
+import type { DataSets, DistributionState } from "../distributionState";
+import type { DistributionData } from "../plotTypes";
 import { ColorOptions } from "./ColorOptions";
-import { DataSets, DistributionState } from "../distributionState";
-import { ColorOption } from "../colors";
+import { NumberInput } from "./NumberInput";
 
 const Plot = createPlotlyComponent(Plotly);
 

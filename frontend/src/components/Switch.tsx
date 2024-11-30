@@ -1,5 +1,5 @@
-import React from "react";
-import { Switch as RACSwitch, SwitchProps } from "react-aria-components";
+import type React from "react";
+import { Switch as RACSwitch, type SwitchProps } from "react-aria-components";
 
 export const Switch = ({
   children,

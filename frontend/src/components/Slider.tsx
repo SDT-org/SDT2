@@ -1,10 +1,10 @@
 import {
-  SliderProps as RACSliderProps,
-  Slider as RACSlider,
   Label,
+  Slider as RACSlider,
+  type SliderProps as RACSliderProps,
   SliderOutput,
-  SliderTrack,
   SliderThumb,
+  SliderTrack,
 } from "react-aria-components";
 
 import React from "react";

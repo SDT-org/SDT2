@@ -1,4 +1,4 @@
-import { colorScales } from "./colorScales";
+import type { colorScales } from "./colorScales";
 
 export type Colorscale = keyof typeof colorScales;
 

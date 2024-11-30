@@ -1,13 +1,13 @@
-import React from "react";
-import { Histogram } from "./Histogram";
-import { Violin } from "./Violin";
-import { Raincloud } from "./Raincloud";
-import { DistributionData } from "../plotTypes";
-import {
+import type React from "react";
+import type {
   DataSets,
-  useDistributionState,
   Visualization,
+  useDistributionState,
 } from "../distributionState";
+import type { DistributionData } from "../plotTypes";
+import { Histogram } from "./Histogram";
+import { Raincloud } from "./Raincloud";
+import { Violin } from "./Violin";
 
 const VisualizationSwitcher = ({
   activeDataSet,

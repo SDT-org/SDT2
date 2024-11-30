@@ -1,16 +1,16 @@
 import React from "react";
 import {
+  Button,
   Menu,
-  MenuTrigger,
+  MenuItem,
   type MenuItemProps,
   type MenuProps,
+  MenuTrigger,
   type MenuTriggerProps,
-  MenuItem,
-  Button,
   Popover,
   Separator,
 } from "react-aria-components";
-import { AppState } from "../appState";
+import type { AppState } from "../appState";
 
 // AppMenuButton and AppMenuItem were derived from https://react-spectrum.adobe.com/react-aria/Menu.html#reusable-wrappers
 interface MyMenuButtonProps<T>
@@ -35,7 +35,7 @@ const AppMenuButton = <T extends object>({
 };
 
 const AppMenuItem = (props: MenuItemProps) => {
-  let textValue =
+  const textValue =
     props.textValue ||
     (typeof props.children === "string" ? props.children : "");
   return (

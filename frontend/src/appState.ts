@@ -1,5 +1,5 @@
-import React, { ErrorInfo } from "react";
-import messages from "./messages";
+import React, { type ErrorInfo } from "react";
+import type messages from "./messages";
 
 export const clusterMethods = ["Neighbor-Joining", "UPGMA"] as const;
 

@@ -5,6 +5,8 @@
   "description": "Sequence Demarcation Tool 2",
   "main": "index.js",
   "scripts": {
+    "format": "bunx biome format --write frontend",
+    "check": "bunx biome check --write frontend",
     "build": "bun run clean && bun run frontend:build && python build.py",
     "build:noclean": "bun run frontend:build && python build.py",
     "clean": "node -e \"['build', 'gui'].forEach(d => require('fs').rmSync(d, { recursive: true, force: true }));\"",
@@ -19,7 +21,7 @@
     "init:default": "virtualenv -p python3.11 venv-pywebview && ./venv-pywebview/bin/pip install Cython && ./venv-pywebview/bin/pip install -r requirements.txt",
     "init:qt5": "./venv-pywebview/bin/pip install pyqt5 pyqtwebengine -r requirements.txt",
     "init:gtk": "sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0 && ./venv-pywebview/bin/pip install pycairo pygobject -r requirements.txt",
-    "start": "concurrently --kill-others --success first --names \"frontend,backend\" \"bun run frontend:dev\" \"bun run backend\""
+    "start": "bun run check && concurrently --kill-others --success first --names \"frontend,backend\" \"bun run frontend:dev\" \"bun run backend\""
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.1",
@@ -32,6 +34,7 @@
     "vite": "^5.4.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
     "@types/plotly.js-dist-min": "^2.3.4",
     "@types/react": "^18.2.38",
     "@types/react-dom": "^18.2.17",

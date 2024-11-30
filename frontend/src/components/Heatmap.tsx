@@ -1,12 +1,12 @@
-import React from "react";
 import Plotly from "plotly.js-dist-min";
+import React from "react";
 import createPlotlyComponent from "react-plotly.js/factory";
-import { Colorscale, HeatmapData, HeatmapSettings } from "../plotTypes";
-import { NumberInput } from "./NumberInput";
-import { colorScales as defaultColorScales } from "../colorScales";
 import tinycolor from "tinycolor2";
-import { Switch } from "./Switch";
+import { colorScales as defaultColorScales } from "../colorScales";
+import type { Colorscale, HeatmapData, HeatmapSettings } from "../plotTypes";
+import { NumberInput } from "./NumberInput";
 import { Slider } from "./Slider";
+import { Switch } from "./Switch";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -48,7 +48,7 @@ export const Heatmap = ({
 
     const normalizedData = data
       .flat()
-      .map(parseFloat)
+      .map(Number.parseFloat)
       .filter((d) => d > 0);
 
     // https://stackoverflow.com/a/42623277
@@ -67,10 +67,12 @@ export const Heatmap = ({
         if (datum === null) {
           text.push("");
         } else {
-          text.push(parseFloat(datum).toFixed(settings.annotation_rounding));
+          text.push(
+            Number.parseFloat(datum).toFixed(settings.annotation_rounding),
+          );
         }
 
-        let parsedDatum = parseFloat(datum);
+        let parsedDatum = Number.parseFloat(datum);
         if (Number.isInteger(parsedDatum)) {
           parsedDatum = parsedDatum / 100;
         }
@@ -226,7 +228,7 @@ export const Heatmap = ({
                       value={settings.annotation_rounding}
                       onChange={(event) =>
                         updateSettings({
-                          annotation_rounding: parseInt(
+                          annotation_rounding: Number.parseInt(
                             event.target.value,
                           ) as HeatmapSettings["annotation_rounding"],
                         })

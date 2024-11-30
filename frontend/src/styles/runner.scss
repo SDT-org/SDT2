@@ -14,6 +14,11 @@
       padding-top: 0;
     }
 
+    &:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
     .setting {
       margin: 1.2rem 0;
 

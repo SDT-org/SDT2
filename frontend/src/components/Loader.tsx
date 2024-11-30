@@ -1,6 +1,6 @@
 import React from "react";
-import { AppState } from "../appState";
 import { Button, Label, ProgressBar } from "react-aria-components";
+import type { AppState } from "../appState";
 import { formatBytes } from "../helpers";
 
 export const Loader = ({

@@ -1,6 +1,6 @@
-import React, { ErrorInfo } from "react";
-import { AppState, SetAppState, initialAppState } from "../appState";
+import React, { type ErrorInfo } from "react";
 import { Dialog, Modal } from "react-aria-components";
+import { type AppState, type SetAppState, initialAppState } from "../appState";
 import { formatBytes } from "../helpers";
 
 interface Props {
@@ -127,11 +127,19 @@ export class ErrorBoundary extends React.Component<Props> {
               <h1>Something went wrong.</h1>
               <p>
                 Please{" "}
-                <a href={this.getMailTo(error, errorDetails)} target="_blank">
+                <a
+                  href={this.getMailTo(error, errorDetails)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   send us an email
                 </a>{" "}
                 with the error details, or{" "}
-                <a href={this.getIssueUrl(error, errorDetails)} target="_blank">
+                <a
+                  href={this.getIssueUrl(error, errorDetails)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
                   open an issue
                 </a>
                 .

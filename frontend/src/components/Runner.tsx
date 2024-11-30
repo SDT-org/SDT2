@@ -1,10 +1,4 @@
 import React from "react";
-import useAppState, {
-  AppState,
-  SetAppState,
-  clusterMethods,
-} from "../appState";
-import messages from "../messages";
 import {
   Button,
   Input,
@@ -16,9 +10,15 @@ import {
   SliderThumb,
   SliderTrack,
 } from "react-aria-components";
+import useAppState, {
+  type AppState,
+  SetAppState,
+  clusterMethods,
+} from "../appState";
 import { formatBytes } from "../helpers";
-import { Switch } from "./Switch";
+import messages from "../messages";
 import { Select } from "./Select";
+import { Switch } from "./Switch";
 
 export type RunProcessDataArgs = Pick<AppState["client"], "compute_cores"> & {
   cluster_method: AppState["client"]["cluster_method"] | "None";
@@ -168,7 +168,7 @@ const RunnerSettings = ({
             <Input
               type="text"
               readOnly
-              value={appState.validation_error_id ? "" : fileName ?? ""}
+              value={appState.validation_error_id ? "" : (fileName ?? "")}
             />
             <Button
               type="button"

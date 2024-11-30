@@ -1,14 +1,14 @@
-import React from "react";
 import Plotly from "plotly.js-dist-min";
-import createPlotlyComponent from "react-plotly.js/factory";
-import { NumberInput } from "./NumberInput";
-import { Layout, PlotData } from "plotly.js-dist-min";
-import { DistributionData } from "../plotTypes";
-import { ColorOptions } from "./ColorOptions";
-import { DataSets, DistributionState } from "../distributionState";
-import { ColorOption } from "../colors";
-import { Switch } from "./Switch";
+import type { Layout, PlotData } from "plotly.js-dist-min";
+import React from "react";
 import { Label, Radio, RadioGroup } from "react-aria-components";
+import createPlotlyComponent from "react-plotly.js/factory";
+import type { ColorOption } from "../colors";
+import type { DataSets, DistributionState } from "../distributionState";
+import type { DistributionData } from "../plotTypes";
+import { ColorOptions } from "./ColorOptions";
+import { NumberInput } from "./NumberInput";
+import { Switch } from "./Switch";
 
 const Plot = createPlotlyComponent(Plotly);
 

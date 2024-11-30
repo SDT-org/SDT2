@@ -1,6 +1,6 @@
-import { SaveableImageFormat } from "../appState";
-import { RunProcessDataArgs } from "../components/Runner";
-import { AppState } from "../src/appState";
+import type { SaveableImageFormat } from "../appState";
+import type { RunProcessDataArgs } from "../components/Runner";
+import type { AppState } from "../src/appState";
 
 declare global {
   interface Window {
@@ -37,5 +37,3 @@ declare global {
     syncAppState: (state: AppState) => void;
   }
 }
-
-export type {};
