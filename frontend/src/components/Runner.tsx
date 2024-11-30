@@ -199,9 +199,8 @@ const RunnerSettings = ({
                     id: name,
                     name,
                   }))}
-                  label="Method"
                 >
-                  {(item) => <ListBoxItem>{item.name}</ListBoxItem>}
+                  {(item) => <ListBoxItem>{item.name} method</ListBoxItem>}
                 </Select>
               </div>
             </div>
