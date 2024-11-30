@@ -25,7 +25,7 @@ declare global {
           format: AppState["client"]["saveFormat"];
         }) => Promise<void>;
         run_process_data: (args: RunProcessDataArgs) => Promise<void>;
-        processes_info: () => Promise<any>;
+        processes_info: () => Promise<string>;
         get_available_memory: () => Promise<number>;
         cancel_run: () => Promise<void>;
         get_data: () => Promise<string>;
@@ -35,5 +35,10 @@ declare global {
       };
     };
     syncAppState: (state: AppState) => void;
+    APP_STATE: AppState;
+    LAST_ERROR: {
+      error: Error;
+      errorInfo: React.ErrorInfo;
+    };
   }
 }

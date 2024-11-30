@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "lib": ["es2022", "dom", "dom.iterable"],
-    "jsx": "react",
+    "jsx": "react-jsx",
     "esModuleInterop": true,
     "target": "es2022",
     "allowJs": true,

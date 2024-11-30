@@ -57,7 +57,7 @@ export const Histogram = ({
         hovertemplate:
           "Percent Identity: %{x}<br>Percentage: %{y}<extra></extra>",
       }) as Partial<PlotData>,
-    [data, dataSetKey, settings],
+    [settings, dataSet],
   );
 
   const layout = React.useMemo(
@@ -96,7 +96,7 @@ export const Histogram = ({
         showlegend: true,
         margin: { l: 50, r: 50, t: 50, b: 50 },
       }) as Partial<Layout>,
-    [data, settings],
+    [settings],
   );
 
   return (
@@ -107,8 +107,11 @@ export const Histogram = ({
             {sidebarComponent}
             <div className="group">
               <div className="field">
-                <label className="header">Title</label>
+                <label htmlFor="plot-title" className="header">
+                  Title
+                </label>
                 <input
+                  id="plot-title"
                   type="text"
                   value={settings.plotTitle}
                   onChange={(e) =>

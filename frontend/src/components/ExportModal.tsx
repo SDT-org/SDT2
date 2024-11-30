@@ -1,12 +1,21 @@
 import Plotly from "plotly.js-dist-min";
 import React from "react";
-import { Button, Dialog, DialogTrigger, Modal } from "react-aria-components";
+import { Button, Dialog, Modal } from "react-aria-components";
 import useAppState, {
   type AppState,
   type SaveableImageFormat,
 } from "../appState";
 import { assertDefined } from "../helpers";
 import { NumberInput } from "./NumberInput";
+
+const getPlotlyElement = () =>
+  assertDefined(
+    (
+      document.getElementsByClassName(
+        "js-plotly-plot",
+      ) as HTMLCollectionOf<HTMLElement>
+    )[0],
+  );
 
 export const ExportModal = () => {
   const [exportState, setExportState] = React.useState<
@@ -16,27 +25,21 @@ export const ExportModal = () => {
   const [outputCluster, setOutputCluster] = React.useState(false);
   const [thresholds, setThresholds] = React.useState({ one: 79, two: 0 });
 
-  const swapDataView = (view: AppState["client"]["dataView"]) =>
-    setAppState((previous) => {
-      return {
-        ...previous,
-        client: {
-          ...previous.client,
-          dataView: view,
-        },
-      };
-    });
+  const swapDataView = React.useCallback(
+    (view: AppState["client"]["dataView"]) =>
+      setAppState((previous) => {
+        return {
+          ...previous,
+          client: {
+            ...previous.client,
+            dataView: view,
+          },
+        };
+      }),
+    [setAppState],
+  );
 
-  const getPlotlyElement = () =>
-    assertDefined(
-      (
-        document.getElementsByClassName(
-          "js-plotly-plot",
-        ) as HTMLCollectionOf<HTMLElement>
-      )[0],
-    );
-
-  const getImages = async () => {
+  const getImages = React.useCallback(async () => {
     const previousDataView = appState.client.dataView;
     swapDataView("heatmap");
 
@@ -60,13 +63,10 @@ export const ExportModal = () => {
 
     swapDataView(previousDataView);
     return { heatmapImage, distributionImage };
-  };
+  }, [appState, swapDataView]);
 
-  React.useEffect(() => {
-    if (exportState !== "exporting") {
-      return;
-    }
-
+  const doExport = React.useCallback(() => {
+    setExportState("exporting");
     getImages().then((images) => {
       window.pywebview.api
         .export_data({
@@ -81,7 +81,7 @@ export const ExportModal = () => {
           result ? setExportState("success") : setExportState("idle"),
         );
     });
-  }, [exportState]);
+  }, [getImages, appState, outputCluster, thresholds]);
 
   return (
     <Modal
@@ -104,8 +104,15 @@ export const ExportModal = () => {
               <h1>Export Images & Data</h1>
               <div className="group">
                 <div className="field">
-                  <label className="header">Output Folder</label>
-                  <input type="text" readOnly value={appState.export_path} />
+                  <label htmlFor="export-path" className="header">
+                    Output Folder
+                  </label>
+                  <input
+                    id="export-path"
+                    type="text"
+                    readOnly
+                    value={appState.export_path}
+                  />
                   <button
                     type="button"
                     disabled={exportState === "exporting"}
@@ -199,7 +206,7 @@ export const ExportModal = () => {
                   isDisabled={
                     exportState === "exporting" || !appState.export_path
                   }
-                  onPress={() => setExportState("exporting")}
+                  onPress={doExport}
                 >
                   {exportState === "exporting" ? "Exporting..." : "Export"}
                 </Button>

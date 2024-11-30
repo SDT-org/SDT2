@@ -39,6 +39,10 @@ export const Raincloud = ({
   const minDataValue = Math.min(...dataSet);
   const maxDataValue = Math.max(...dataSet);
 
+  const [showPoints, setShowPoints] = React.useState(false);
+
+  console.log(setShowPoints);
+
   const rainCloudTrace = React.useMemo(
     () =>
       ({
@@ -46,7 +50,7 @@ export const Raincloud = ({
         name: "",
         x: dataSet,
         side: "negative",
-        points: settings.points !== "None" ? settings.points : false,
+        points: showPoints ? settings.points : false,
         line: {
           color: settings.lineColor,
           width: settings.lineWidth,
@@ -70,7 +74,7 @@ export const Raincloud = ({
           (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}`,
         ),
       }) as Partial<PlotData>,
-    [data, dataSetKey, settings],
+    [data.identity_combos, dataSet, settings, showPoints],
   );
 
   const layout = React.useMemo(() => {
@@ -103,7 +107,7 @@ export const Raincloud = ({
       showlegend: false,
       margin: { l: 50, r: 50, t: 50, b: 50 },
     } as Partial<Layout>;
-  }, [data, dataSetKey, settings]);
+  }, [settings, minDataValue, maxDataValue]);
 
   return (
     <>
@@ -113,8 +117,11 @@ export const Raincloud = ({
             {sidebarComponent}
             <div className="group">
               <div className="field">
-                <label className="header">Title</label>
+                <label htmlFor="plot-title" className="header">
+                  Title
+                </label>
                 <input
+                  id="plot-title"
                   type="text"
                   value={settings.plotTitle}
                   onChange={(e) =>

@@ -79,7 +79,7 @@ export const Violin = ({
           (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}`,
         ),
       }) as Partial<PlotData>,
-    [data, dataSetKey, settings],
+    [data, dataSet, settings],
   );
   const boxTrace = React.useMemo(
     () =>
@@ -106,7 +106,7 @@ export const Violin = ({
         hovertemplate:
           "Percent Identity: %{x}<br>Percent Identity: %{y}<extra></extra>",
       }) as Partial<PlotData>,
-    [dataSetKey, settings],
+    [dataSet, settings],
   );
 
   const layout = React.useMemo(() => {
@@ -163,7 +163,7 @@ export const Violin = ({
       boxgap: settings.boxWidth,
       margin: { l: 50, r: 50, t: 50, b: 50 },
     } as Partial<Layout>;
-  }, [data, dataSetKey, settings]);
+  }, [settings, minDataValue, maxDataValue]);
 
   return (
     <>
@@ -174,8 +174,11 @@ export const Violin = ({
 
             <div className="group">
               <div className="field">
-                <label className="header">Title</label>
+                <label htmlFor="plot-title" className="header">
+                  Title
+                </label>
                 <input
+                  id="plot-title"
                   type="text"
                   value={settings.plotTitle}
                   onChange={(e) =>
@@ -258,7 +261,7 @@ export const Violin = ({
                 value={settings.plotOrientation}
                 onChange={(value) =>
                   updateSettings({
-                    plotOrientation: value as any,
+                    plotOrientation: value as typeof settings.plotOrientation,
                   })
                 }
               >
@@ -440,10 +443,11 @@ export const Violin = ({
             </div>
             <div className="group">
               <div className="field">
-                <label>Show Points</label>
+                <label htmlFor="show-points">Show Points</label>
                 <div className="col-3">
                   <label>
                     <input
+                      id="show-points"
                       type="radio"
                       name="pointOrientation"
                       value="Violin"
@@ -490,7 +494,7 @@ export const Violin = ({
                 </div>
               </div>
               <div className="field">
-                <label>Show Mean</label>
+                <label htmlFor="show-mean">Show Mean</label>
                 <div className="col-3">
                   <label>
                     <input

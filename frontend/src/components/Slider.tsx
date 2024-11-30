@@ -7,8 +7,6 @@ import {
   SliderTrack,
 } from "react-aria-components";
 
-import React from "react";
-
 interface SliderProps<T> extends RACSliderProps<T> {
   label?: string;
   labelClassName?: string;
@@ -37,12 +35,12 @@ export const Slider = <T extends number | number[]>({
             <div
               className="fill"
               style={{
-                width: state.getThumbPercent(0) * 100 + "%",
+                width: `${state.getThumbPercent(0) * 100}%`,
               }}
             />
-            {state.values.map((_, i) => (
+            {state.values.map((value, i) => (
               <SliderThumb
-                key={i}
+                key={`thumb-${value}`}
                 index={i}
                 aria-label={thumbLabels?.[i] ?? ""}
               />

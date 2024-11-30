@@ -67,7 +67,7 @@ export const Viewer = ({
     updateViolin,
   } = useDistributionState();
 
-  const getData = () => {
+  const getData = React.useCallback(() => {
     setLoading(true);
 
     window.pywebview.api
@@ -112,11 +112,11 @@ export const Viewer = ({
       .finally(() => {
         setLoading(false);
       });
-  };
+  }, [appState.sequences_count]);
 
   React.useEffect(() => {
     getData();
-  }, [appState.basename]);
+  }, [getData]);
 
   const updateHeatmapState = (newState: Partial<HeatmapSettings>) => {
     setHeatmapSettings((previous) => {
@@ -199,7 +199,7 @@ export const Viewer = ({
           />
         ) : null}
       </TabPanel>
-      {loading ? <div className="api-loader"></div> : null}
+      {loading ? <div className="api-loader" /> : null}
     </Tabs>
   );
 };

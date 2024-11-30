@@ -1,5 +1,5 @@
 import React, { type ErrorInfo } from "react";
-import { Dialog, Modal } from "react-aria-components";
+import { Button, Dialog, Modal } from "react-aria-components";
 import { type AppState, type SetAppState, initialAppState } from "../appState";
 import { formatBytes } from "../helpers";
 
@@ -38,7 +38,7 @@ export class ErrorBoundary extends React.Component<Props> {
       };
     });
 
-    (window as any).lastError = {
+    window.LAST_ERROR = {
       error,
       errorInfo,
     };
@@ -58,7 +58,7 @@ export class ErrorBoundary extends React.Component<Props> {
   }
 
   getMailTo(error?: Error, details = "") {
-    let mailTo = `mailto:SDT_admin@proton.me?subject=SDT2%20Issue`;
+    let mailTo = "mailto:SDT_admin@proton.me?subject=SDT2%20Issue";
 
     if (error) {
       mailTo = `${mailTo}:%20${error.message}&body=${encodeURI(details)}`;
@@ -86,7 +86,7 @@ export class ErrorBoundary extends React.Component<Props> {
     const errorInfo = this.props.appState.client.errorInfo;
     const platform = this.props.appState.platform;
     const stats = this.props.appState.compute_stats;
-    const objectToHuman = (obj?: Object) =>
+    const objectToHuman = (obj?: unknown) =>
       Object.entries(obj ?? {})
         .map((v) => `${v[0].toUpperCase()}: ${v[1]}`)
         .join("\n");
@@ -154,8 +154,8 @@ export class ErrorBoundary extends React.Component<Props> {
               </details>
             </div>
             <div className="actions space-between">
-              <button onClick={resetApp}>Reset</button>
-              <button onClick={resetAppError}>Continue</button>
+              <Button onPress={resetApp}>Reset</Button>
+              <Button onPress={resetAppError}>Continue</Button>
             </div>
           </Dialog>
         </Modal>

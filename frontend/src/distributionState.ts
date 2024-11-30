@@ -147,7 +147,7 @@ export const useDistributionState = () => {
 
   React.useEffect(() => {
     localStorage.setItem(key, JSON.stringify(state));
-  }, [state, setState]);
+  }, [state]);
 
   const updateVisualization =
     (key: DistributionState["visualization"]) =>

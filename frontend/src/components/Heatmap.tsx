@@ -23,22 +23,28 @@ export const Heatmap = ({
   tickText: string[];
   footer?: React.ReactNode;
 }) => {
-  const discreteColorScale: Array<[number, string]> = [
-    [0, "#CDF0FF"],
-    [Math.max(0, settings.cutoff_2 / 100 - 0.01), "#20B9FF"],
-    [settings.cutoff_2 / 100, "#C3E8D3"],
-    [settings.cutoff_1 / 100, "#009942"],
-    [Math.min(1, settings.cutoff_1 / 100 + 0.01), "#FFDCDD"],
-  ];
+  const discreteColorScale: Array<[number, string]> = React.useMemo(
+    () => [
+      [0, "#CDF0FF"],
+      [Math.max(0, settings.cutoff_2 / 100 - 0.01), "#20B9FF"],
+      [settings.cutoff_2 / 100, "#C3E8D3"],
+      [settings.cutoff_1 / 100, "#009942"],
+      [Math.min(1, settings.cutoff_1 / 100 + 0.01), "#FFDCDD"],
+    ],
+    [settings],
+  );
 
   if (settings.cutoff_1 < 100) {
     discreteColorScale.push([1, "#FF6167"]);
   }
 
-  const colorScales = {
-    ...defaultColorScales,
-    Discrete: discreteColorScale,
-  };
+  const colorScales = React.useMemo(
+    () => ({
+      ...defaultColorScales,
+      Discrete: discreteColorScale,
+    }),
+    [discreteColorScale],
+  );
 
   const annotations = React.useMemo(() => {
     const x: number[] = [];
@@ -111,7 +117,7 @@ export const Heatmap = ({
       text,
       textColors,
     };
-  }, [tickText, settings]);
+  }, [settings, colorScales, data]);
 
   return (
     <>
@@ -178,7 +184,6 @@ export const Heatmap = ({
                 <>
                   <div className="col-2">
                     <div className="field">
-                      <div></div>
                       <NumberInput
                         label="Cutoff 1"
                         field="cutoff_1"

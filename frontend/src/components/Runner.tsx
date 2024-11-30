@@ -10,11 +10,7 @@ import {
   SliderThumb,
   SliderTrack,
 } from "react-aria-components";
-import useAppState, {
-  type AppState,
-  SetAppState,
-  clusterMethods,
-} from "../appState";
+import useAppState, { type AppState, clusterMethods } from "../appState";
 import { formatBytes } from "../helpers";
 import messages from "../messages";
 import { Select } from "./Select";
@@ -27,6 +23,7 @@ export type RunProcessDataArgs = Pick<AppState["client"], "compute_cores"> & {
 
 const WarningIcon = () => (
   <svg
+    aria-hidden="true"
     xmlns="http://www.w3.org/2000/svg"
     fillRule="evenodd"
     clipRule="evenodd"
@@ -46,29 +43,19 @@ const RunnerSettings = ({
   startProcessData: () => void;
 }) => {
   const { appState, setAppState } = useAppState();
-  const updateClientState = (value: Partial<typeof appState.client>) =>
-    setAppState((previous) => {
-      return {
-        ...previous,
-        client: {
-          ...previous.client,
-          ...value,
-        },
-      };
-    });
-
-  const handleChangeComputeCores = (
-    value: typeof appState.client.compute_cores,
-  ) =>
-    setAppState((previous) => {
-      return {
-        ...previous,
-        client: {
-          ...previous.client,
-          compute_cores: value,
-        },
-      };
-    });
+  const updateClientState = React.useCallback(
+    (value: Partial<typeof appState.client>) =>
+      setAppState((previous) => {
+        return {
+          ...previous,
+          client: {
+            ...previous.client,
+            ...value,
+          },
+        };
+      }),
+    [setAppState],
+  );
 
   const fileName =
     appState.filename?.length && appState.filename[0]
@@ -94,15 +81,16 @@ const RunnerSettings = ({
     return () => {
       document.removeEventListener("keydown", handleEnter);
     };
-  }, []);
+  }, [appState.filename, appState.validation_error_id, startProcessData]);
 
   React.useEffect(() => {
     if (!appState.compute_stats) {
       return;
     }
-    const stats = appState.compute_stats;
-    handleChangeComputeCores(stats.recommended_cores);
-  }, [appState.compute_stats?.recommended_cores]);
+    updateClientState({
+      compute_cores: appState.compute_stats.recommended_cores,
+    });
+  }, [appState.compute_stats, updateClientState]);
 
   React.useEffect(() => {
     const id = setInterval(() => {
@@ -127,7 +115,7 @@ const RunnerSettings = ({
     }, 3000);
 
     return () => clearInterval(id);
-  }, [appState.compute_stats]);
+  }, [appState.compute_stats, setAppState]);
 
   const estimatedMemory =
     (appState.compute_stats?.required_memory || 1) *
@@ -160,12 +148,13 @@ const RunnerSettings = ({
     <div className="form-wrapper runner-wrapper">
       <div className="form runner-form">
         <div className="field">
-          <label className="header">
+          <label htmlFor="data-file" className="header">
             Data file{" "}
             <span className="text-normal-weight">FASTA or SDT matrix</span>
           </label>
           <div className="setting input-with-button">
             <Input
+              id="data-file"
               type="text"
               readOnly
               value={appState.validation_error_id ? "" : (fileName ?? "")}
@@ -255,7 +244,9 @@ const RunnerSettings = ({
                   <div className="cores-used">
                     <Slider
                       id="compute-cores"
-                      onChange={handleChangeComputeCores}
+                      onChange={(value) =>
+                        updateClientState({ compute_cores: value })
+                      }
                       minValue={1}
                       maxValue={appState.platform.cores}
                       value={appState.client.compute_cores}
@@ -282,7 +273,7 @@ const RunnerSettings = ({
                             <div
                               className="fill"
                               style={{
-                                width: state.getThumbPercent(0) * 100 + "%",
+                                width: `${state.getThumbPercent(0) * 100}%`,
                               }}
                             />
                             <SliderThumb />
@@ -315,7 +306,7 @@ const RunnerSettings = ({
                               className="fill"
                               data-impact={impactName(percentage)}
                               style={{
-                                width: percentage + "%",
+                                width: `${percentage}%`,
                                 minWidth: "4px",
                               }}
                             />
@@ -383,11 +374,11 @@ export const Runner = ({
   startProcessData: () => void;
 }) => {
   const [appConfig, setAppConfig] = React.useState<{ appVersion: string }>();
-  const fetchAppConfig = () => {
+  const fetchAppConfig = React.useCallback(() => {
     window.pywebview.api
       .app_config()
       .then((result) => setAppConfig(JSON.parse(result)));
-  };
+  }, []);
 
   React.useEffect(() => {
     const waitForPywebview = () =>
@@ -400,7 +391,7 @@ export const Runner = ({
       });
 
     waitForPywebview().then(() => fetchAppConfig());
-  }, []);
+  }, [fetchAppConfig]);
 
   return (
     <div className="app-wrapper with-header with-footer">

@@ -106,7 +106,7 @@ export const App = () => {
         setShowDebugState(!showDebugState);
       }
     });
-    (window as any).APP_STATE = appState;
+    window.APP_STATE = appState;
   }
 
   React.useEffect(() => {
@@ -127,7 +127,7 @@ export const App = () => {
     setDebugState(JSON.stringify(appState, null, 2));
   }, [appState]);
 
-  const fetchAppState = () => {
+  const fetchAppState = React.useCallback(() => {
     setLoading(true);
     window.pywebview.api.get_state().then((data) =>
       setAppState((prev) => {
@@ -135,7 +135,7 @@ export const App = () => {
       }),
     );
     setLoading(false);
-  };
+  }, []);
 
   React.useEffect(() => {
     const waitForPywebview = () =>
@@ -148,7 +148,7 @@ export const App = () => {
       });
 
     waitForPywebview().then(() => fetchAppState());
-  }, []);
+  }, [fetchAppState]);
 
   React.useEffect(() => {
     const addBlur = () => {

@@ -53,7 +53,7 @@ export const Loader = ({
       500,
     );
     return () => clearInterval(id);
-  }, []);
+  }, [debug]);
 
   return (
     <div className="app-wrapper with-header loader">
@@ -71,7 +71,7 @@ export const Loader = ({
               <div className="bar">
                 <div
                   className="fill"
-                  style={{ width: percentage + "%" }}
+                  style={{ width: `${percentage}%` }}
                   data-animation={estimated_time && estimated_time > 10}
                 />
               </div>
