@@ -41,6 +41,7 @@ export const Raincloud = ({
 
   const [showPoints, setShowPoints] = React.useState(false);
 
+  // TODO: use Switch
   console.log(setShowPoints);
 
   const rainCloudTrace = React.useMemo(

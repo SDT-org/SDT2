@@ -1,6 +1,11 @@
 import multiprocessing
 import os
 import sys
+
+current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
+sys.path.append(os.path.join(current_file_path, "../../"))
+sys.path.append(os.path.join(current_file_path, "."))
+
 import platform
 from Bio import SeqIO
 import psutil
@@ -20,8 +25,6 @@ from app_state import create_app_state
 from validations import validate_fasta
 from process_data import process_data
 from multiprocessing import Lock, Manager, Pool, cpu_count
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
 
 dev_frontend_host = "http://localhost:5173"
@@ -509,9 +512,11 @@ def get_html_path(filename="index.html"):
         return f"{dev_frontend_host}/{filename}"
 
 
-def update_client_state(window: webview.Window):
-    js_app_state = json.dumps(get_state()._asdict())
-    window.evaluate_js(f"syncAppState({js_app_state})")
+def push_backend_state(window: webview.Window):
+    js_app_state = json.dumps(dict(state=get_state()._asdict()))
+    window.evaluate_js(
+        f"document.dispatchEvent(new CustomEvent('sync-state', {{ detail: {js_app_state} }}))"
+    )
 
 
 def on_closed():
@@ -555,7 +560,7 @@ if __name__ == "__main__":
             cores=multiprocessing.cpu_count(),
             memory=psutil.virtual_memory().total,
         ),
-        on_update=lambda _: update_client_state(window),
+        on_update=lambda _: push_backend_state(window),
     )
 
     webview.start(debug=get_state().debug, private_mode=False)

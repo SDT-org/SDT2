@@ -1,5 +1,10 @@
-import * as React from "react";
-import { type AppState, AppStateContext, initialAppState } from "../appState";
+import React from "react";
+import {
+  type AppState,
+  AppStateContext,
+  type SyncStateEvent,
+  initialAppState,
+} from "../appState";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { ExportModal } from "./ExportModal";
 import { Loader } from "./Loader";
@@ -10,7 +15,6 @@ import { Viewer } from "./Viewer";
 export const App = () => {
   const [appState, setAppState] = React.useState<AppState>(initialAppState);
   const [loading, setLoading] = React.useState(true);
-  const [debugState, setDebugState] = React.useState("");
   const mainMenuCallbacks: MainMenuProps = {
     appState,
     onNew: () => {
@@ -37,7 +41,7 @@ export const App = () => {
         return;
       }
 
-      window.pywebview.api.open_file_dialog();
+      window.pywebview.api.open_file_dialog().then();
     },
     onExport: () =>
       setAppState((previous) => {
@@ -59,7 +63,6 @@ export const App = () => {
     setAppState,
     mainMenu: <MainMenu {...mainMenuCallbacks} />,
   };
-  const [showDebugState, setShowDebugState] = React.useState(false);
 
   const startProcessData = React.useCallback(() => {
     window.pywebview.api
@@ -87,27 +90,24 @@ export const App = () => {
   }, [appState]);
 
   const APP_VIEWS: { [K in AppState["view"]]: React.ReactElement } = {
-    runner: <Runner {...commonViewProps} startProcessData={startProcessData} />,
+    runner: (
+      <Runner
+        {...commonViewProps}
+        startProcessData={startProcessData}
+        appState={appState}
+      />
+    ),
     loader: <Loader {...commonViewProps} />,
     viewer: <Viewer {...commonViewProps} />,
   };
 
-  if (typeof window.syncAppState !== "function") {
-    window.syncAppState = (state: AppState) => {
-      setAppState((previous) => {
-        return { ...previous, ...state };
-      });
+  React.useEffect(() => {
+    const handler = (event: SyncStateEvent) => {
+      setAppState(prev => ({...prev, ...event.detail.state }));
     };
-  }
-
-  if (appState.debug) {
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "d") {
-        setShowDebugState(!showDebugState);
-      }
-    });
-    window.APP_STATE = appState;
-  }
+    document.addEventListener("sync-state", handler);
+    return () => document.removeEventListener("sync-state", handler);
+  }, []);
 
   React.useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
@@ -118,23 +118,7 @@ export const App = () => {
     };
     document.addEventListener("keydown", handleKeydown);
 
-    return () => {
-      document.removeEventListener("keydown", handleKeydown);
-    };
-  }, []);
-
-  React.useEffect(() => {
-    setDebugState(JSON.stringify(appState, null, 2));
-  }, [appState]);
-
-  const fetchAppState = React.useCallback(() => {
-    setLoading(true);
-    window.pywebview.api.get_state().then((data) =>
-      setAppState((prev) => {
-        return { ...prev, ...data, client: { ...prev.client } };
-      }),
-    );
-    setLoading(false);
+    return () => document.removeEventListener("keydown", handleKeydown);
   }, []);
 
   React.useEffect(() => {
@@ -147,8 +131,18 @@ export const App = () => {
         }
       });
 
-    waitForPywebview().then(() => fetchAppState());
-  }, [fetchAppState]);
+    waitForPywebview().then(() => {
+      setLoading(true);
+      window.pywebview.api.get_state().then((data) =>
+        setAppState((prev) => ({
+          ...prev,
+          ...data,
+          client: { ...prev.client },
+        })),
+      );
+      setLoading(false);
+    });
+  }, []);
 
   React.useEffect(() => {
     const addBlur = () => {
@@ -173,7 +167,6 @@ export const App = () => {
       <AppStateContext.Provider value={{ appState, setAppState }}>
         {!loading ? APP_VIEWS[appState?.view || "viewer"] : null}
         <ExportModal />
-        {showDebugState ? <pre>AppState {debugState}</pre> : null}
       </AppStateContext.Provider>
     </ErrorBoundary>
   );

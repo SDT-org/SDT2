@@ -102,7 +102,7 @@ export const Loader = ({
           </details>
         ) : null}
         <Button
-          className="cancel-run"
+          className="react-aria-Button cancel-run"
           onPress={() => {
             if (
               window.confirm(

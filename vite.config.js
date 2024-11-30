@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   root: 'frontend/src',
   plugins: [
     react(),
@@ -11,5 +11,5 @@ export default defineConfig({
     chunkSizeWarningLimit: 5000,
     emptyOutDir: true,
   },
-  publicDir: "../../docs"
-});
+  publicDir: "../../docs",
+}));

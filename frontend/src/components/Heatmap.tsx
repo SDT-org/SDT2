@@ -23,30 +23,29 @@ export const Heatmap = ({
   tickText: string[];
   footer?: React.ReactNode;
 }) => {
-  const discreteColorScale: Array<[number, string]> = React.useMemo(
-    () => [
+  const discreteColorScale: Array<[number, string]> = React.useMemo(() => {
+    const scales = [
       [0, "#CDF0FF"],
       [Math.max(0, settings.cutoff_2 / 100 - 0.01), "#20B9FF"],
       [settings.cutoff_2 / 100, "#C3E8D3"],
       [settings.cutoff_1 / 100, "#009942"],
       [Math.min(1, settings.cutoff_1 / 100 + 0.01), "#FFDCDD"],
-    ],
-    [settings],
-  );
+    ];
+    if (settings.cutoff_1 < 100) {
+      scales.push([1, "#FF6167"]);
+    }
+    return scales as Array<[number, string]>;
+  }, [settings.cutoff_1, settings.cutoff_2]);
 
-  if (settings.cutoff_1 < 100) {
-    discreteColorScale.push([1, "#FF6167"]);
-  }
-
-  const colorScales = React.useMemo(
-    () => ({
+  const colorScales = React.useMemo(() => {
+    return {
       ...defaultColorScales,
       Discrete: discreteColorScale,
-    }),
-    [discreteColorScale],
-  );
+    };
+  }, [discreteColorScale]);
 
   const annotations = React.useMemo(() => {
+    console.log("annotations");
     const x: number[] = [];
     const y: number[] = [];
     const text: string[] = [];
@@ -117,7 +116,13 @@ export const Heatmap = ({
       text,
       textColors,
     };
-  }, [settings, colorScales, data]);
+  }, [
+    settings.reverse,
+    settings.colorscale,
+    settings.annotation_rounding,
+    colorScales,
+    data,
+  ]);
 
   return (
     <>
@@ -339,9 +344,7 @@ export const Heatmap = ({
                       step={0.1}
                       value={settings.cbar_shrink}
                       onChange={(value) =>
-                        updateSettings({
-                          cbar_shrink: value,
-                        })
+                        updateSettings({ cbar_shrink: value })
                       }
                     />
                   </div>

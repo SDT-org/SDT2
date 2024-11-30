@@ -5,6 +5,7 @@ from scipy.sparse.csgraph import connected_components
 import pandas as pd
 from collections import defaultdict
 
+
 def process_groups(threshold, data, index):
     # create adjacensy matrix to id which cells are related by the threshold marking as binary with (1) for related or (0) for not meeting the threshold
     adjacency_matrix = (data >= threshold).astype(int)
@@ -36,7 +37,7 @@ def cluster_by_identity(clusters, nodes):
     subgroup_counters = {group: 1 for group in clusters.keys()}
 
     # Iterate through nodes to determine the subgroup_number within each group_number
-    for node_key, node_list in nodes.items():
+    for _, node_list in nodes.items():
         if node_list:
             first_value = node_list[0]
             if first_value in reverse_clusters:
@@ -50,7 +51,6 @@ def cluster_by_identity(clusters, nodes):
     return output
 
 
-
 def export(matrix_path, threshold_1=79, threshold_2=0):
     output_dir = os.path.dirname(matrix_path)
     file_name = os.path.basename(matrix_path)
@@ -60,11 +60,13 @@ def export(matrix_path, threshold_1=79, threshold_2=0):
 
     # https://stackoverflow.com/a/57824142
     # SDT1 matrix CSVs do not have padding for columns
-    with open(matrix_path, 'r') as temp_f:
-        col_count = [ len(l.split(",")) for l in temp_f.readlines() ]
+    with open(matrix_path, "r") as temp_f:
+        col_count = [len(l.split(",")) for l in temp_f.readlines()]
         column_names = [i for i in range(0, max(col_count))]
 
-    df = pd.read_csv(matrix_path, delimiter=",", index_col=0, header=None, names=column_names)
+    df = pd.read_csv(
+        matrix_path, delimiter=",", index_col=0, header=None, names=column_names
+    )
     # extract index
     index = df.index.tolist()
     # convert df to np array

@@ -12,6 +12,7 @@
 
     &:first-child {
       padding-top: 0;
+      padding-bottom: 0.55rem;
     }
 
     &:last-child {
@@ -67,18 +68,29 @@
     &.output {
       .setting {
         display: flex;
-        gap: 1.6rem;
-        align-items: center;
-      }
+        gap: 0.8rem;
 
-      input[type="text"] {
-        max-width: 12.8rem;
-        font-size: 1.2rem;
-        direction: rtl;
-      }
-      button {
-        padding-top: 0.3rem;
-        padding-bottom: 0.3rem;
+        .folder {
+          display: flex;
+          user-select: text;
+          align-items: center;
+          border: 0.1rem solid var(--border-color);
+          border-radius: 0.2rem;
+          max-width: 19.2rem;
+          font-size: 1.2rem;
+          padding: 0.2rem 0.6rem;
+
+          > * {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            direction: rtl;
+          }
+        }
+
+        button {
+          padding-top: 0.3rem;
+          padding-bottom: 0.3rem;
+        }
       }
     }
 
@@ -107,6 +119,19 @@
           output {
             font-size: 1.3rem;
             font-weight: 500;
+          }
+        }
+
+        .cores-used,
+        .memory-used {
+          output,
+          .value {
+            margin-top: 0.2rem;
+            margin-bottom: 0.4rem;
+          }
+
+          small {
+            font-size: 1.25rem;
           }
         }
 

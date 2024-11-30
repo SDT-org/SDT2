@@ -3,7 +3,6 @@ import {
   Button,
   Input,
   Label,
-  ListBoxItem,
   Meter,
   Slider,
   SliderOutput,
@@ -13,7 +12,7 @@ import {
 import useAppState, { type AppState, clusterMethods } from "../appState";
 import { formatBytes } from "../helpers";
 import messages from "../messages";
-import { Select } from "./Select";
+import { Select, SelectItem } from "./Select";
 import { Switch } from "./Switch";
 
 export type RunProcessDataArgs = Pick<AppState["client"], "compute_cores"> & {
@@ -159,7 +158,7 @@ const RunnerSettings = ({
               id="data-file"
               type="text"
               readOnly
-              value={appState.validation_error_id ? "" : fileName ?? ""}
+              value={appState.validation_error_id ? "" : (fileName ?? "")}
             />
             <Button
               type="button"
@@ -199,7 +198,11 @@ const RunnerSettings = ({
                     name,
                   }))}
                 >
-                  {(item) => <ListBoxItem>{item.name} method</ListBoxItem>}
+                  {(item) => (
+                    <SelectItem textValue={item.name}>
+                      {item.name} method
+                    </SelectItem>
+                  )}
                 </Select>
               </div>
             </div>
@@ -216,20 +219,18 @@ const RunnerSettings = ({
 
               {appState.client.enableOutputAlignments ? (
                 <div className="setting">
-                  <div className="input-with-button">
-                    <input
-                      type="text"
-                      value={appState.alignment_output_path}
-                      readOnly
-                    />
-                    <Button
-                      onPress={() =>
-                        window.pywebview.api.select_alignment_output_path()
-                      }
-                    >
-                      Select&#8230;
-                    </Button>
+                  <div aria-live="polite" className="folder">
+                    <span>
+                      {appState.alignment_output_path.replace("/", "")}
+                    </span>
                   </div>
+                  <Button
+                    onPress={() =>
+                      window.pywebview.api.select_alignment_output_path()
+                    }
+                  >
+                    Set folder&#8230;
+                  </Button>
                 </div>
               ) : null}
             </div>
@@ -287,9 +288,9 @@ const RunnerSettings = ({
                       </SliderTrack>
                     </Slider>
                   </div>
-                  <div className="inline">
+                  <div className="memory-used inline">
                     <div>
-                      <Label id="memory-label" htmlFor="meter">
+                      <Label id="memory-used-label" htmlFor="meter">
                         Memory
                       </Label>
                       <div>
@@ -305,7 +306,10 @@ const RunnerSettings = ({
                       </div>
                     </div>
                     <div className="estimated-memory">
-                      <Meter value={estimatedMemoryValue}>
+                      <Meter
+                        value={estimatedMemoryValue}
+                        aria-labelledby="memory-used-label"
+                      >
                         {({ percentage }) => (
                           <>
                             <span className="value">
@@ -387,6 +391,7 @@ export const Runner = ({
   mainMenu,
   startProcessData,
 }: {
+  appState: AppState;
   mainMenu: React.ReactNode;
   startProcessData: () => void;
 }) => {

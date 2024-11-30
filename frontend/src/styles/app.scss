@@ -111,7 +111,7 @@ body {
 
 .app-panel {
   display: grid;
-  grid-template-columns: 20rem 1fr;
+  grid-template-columns: 22.4rem 1fr;
   grid-template-areas: "sidebar main";
   overflow: hidden;
 }
@@ -281,7 +281,7 @@ small {
     margin-top: 0.8rem;
     background: #fdfdff;
     padding: 0.8rem;
-    margin: 0.8rem -0.8rem -0.8rem;
+    margin: 0.8rem calc(-1 * var(--app-container-padding)) calc(-1 * var(--app-container-padding));
     border-top: 1px solid var(--secondary-border-color);
   }
 
@@ -353,7 +353,7 @@ small {
   }
 
   .range-group {
-    margin-bottom: 0.6rem;
+    margin-bottom: 0.8rem;
 
     .field {
       margin-bottom: 0;
@@ -409,6 +409,10 @@ small {
   label input:not([type="text"]) {
     width: auto;
     margin-right: 0.4rem;
+  }
+
+  .form .field label {
+   font-size: 1.3rem;
   }
 
   input[type="range"] {
@@ -723,7 +727,7 @@ label.sublabel,
   .react-aria-SliderTrack {
     grid-area: track;
     position: relative;
-    margin: 1rem 0.2rem;
+    margin: 0.8rem 0;
 
     .track,
     .fill {
@@ -731,7 +735,7 @@ label.sublabel,
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      height: 0.3rem;
+      height: 0.4rem;
       border-radius: 0.5rem;
     }
 

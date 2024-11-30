@@ -1,4 +1,4 @@
-import type { SaveableImageFormat } from "../appState";
+import type { SaveableImageFormat, SyncStateEvent } from "../appState";
 import type { RunProcessDataArgs } from "../components/Runner";
 import type { AppState } from "../src/appState";
 
@@ -40,5 +40,9 @@ declare global {
       error: Error;
       errorInfo: React.ErrorInfo;
     };
+  }
+
+  interface GlobalEventHandlersEventMap {
+    "sync-state": SyncStateEvent;
   }
 }

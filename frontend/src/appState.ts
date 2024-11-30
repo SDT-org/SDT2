@@ -78,13 +78,16 @@ export const initialAppState: AppState = {
 };
 
 export type SetAppState = React.Dispatch<React.SetStateAction<AppState>>;
+export type SyncStateEvent = CustomEvent<{ state: AppState }>;
 
 export const AppStateContext = React.createContext<{
   appState: AppState;
   setAppState: SetAppState;
 }>({
   appState: initialAppState,
-  setAppState: () => undefined,
+  setAppState: () => {
+    throw new Error("setAppState must be initialized");
+  },
 });
 
 export const useAppState = () => {

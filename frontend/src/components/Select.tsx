@@ -71,7 +71,7 @@ export function SelectItem(props: ListBoxItemProps) {
     <ListBoxItem
       {...props}
       className={({ isFocused, isSelected }) =>
-        `my-item ${isFocused ? "focused" : ""} ${isSelected ? "selected" : ""}`
+        `react-aria-ListBoxItem ${isFocused ? "focused" : ""} ${isSelected ? "selected" : ""}`
       }
     />
   );
