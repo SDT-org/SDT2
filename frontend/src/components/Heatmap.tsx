@@ -5,6 +5,7 @@ import tinycolor from "tinycolor2";
 import { colorScales as defaultColorScales } from "../colorScales";
 import type { Colorscale, HeatmapData, HeatmapSettings } from "../plotTypes";
 import { NumberInput } from "./NumberInput";
+import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";
 import { Switch } from "./Switch";
 
@@ -37,15 +38,15 @@ export const Heatmap = ({
     return scales as Array<[number, string]>;
   }, [settings.cutoff_1, settings.cutoff_2]);
 
-  const colorScales = React.useMemo(() => {
-    return {
+  const colorScales = React.useMemo(
+    () => ({
       ...defaultColorScales,
       Discrete: discreteColorScale,
-    };
-  }, [discreteColorScale]);
+    }),
+    [discreteColorScale],
+  );
 
   const annotations = React.useMemo(() => {
-    console.log("annotations");
     const x: number[] = [];
     const y: number[] = [];
     const text: string[] = [];
@@ -130,59 +131,63 @@ export const Heatmap = ({
         <div className="app-sidebar-toolbar">
           <div className="form">
             <div className="group">
-              <div className="field col-2-1">
-                <label
-                  className="header"
-                  htmlFor="colorscale"
-                  style={{ gridArea: "left" }}
-                >
-                  Colorscale
-                </label>
-                <div className="subfield compact" style={{ gridArea: "right" }}>
-                  <label htmlFor="reverse">
-                    <input
-                      type="checkbox"
-                      name="reverse"
-                      id="reverse"
-                      defaultChecked={settings.reverse}
-                      onChange={() =>
-                        updateSettings({
-                          reverse: !settings.reverse,
-                        })
-                      }
-                    />
-                    Reverse
+              <div className="field">
+                <div className="col-2 aligned">
+                  <label className="header" htmlFor="colorscale">
+                    Colorscale
                   </label>
-                </div>
-                <div className="field" style={{ gridArea: "row" }}>
-                  <select
+
+                  <Select
                     id="colorscale"
-                    value={settings.colorscale}
-                    onChange={(e) =>
+                    items={Object.keys(colorScales).map((name) => ({
+                      id: name,
+                      name,
+                    }))}
+                    selectedKey={settings.colorscale}
+                    onSelectionChange={(value) => {
                       updateSettings({
-                        colorscale: e.target.value as Colorscale,
-                      })
-                    }
+                        colorscale: value as Colorscale,
+                      });
+                    }}
+                    wide
                   >
-                    {Object.keys(colorScales).map((value) => (
-                      <option key={value} value={value}>
-                        {value}
-                      </option>
-                    ))}
-                  </select>
+                    {(item) => (
+                      <SelectItem key={item.name} textValue={item.name}>
+                        {item.name}
+                      </SelectItem>
+                    )}
+                  </Select>
                 </div>
               </div>
 
-              <div className="field">
-                <Slider
-                  label="Cell Spacing"
-                  labelClassName="sublabel"
-                  id="cellspace"
-                  onChange={(value) => updateSettings({ cellspace: value })}
-                  minValue={0}
-                  maxValue={20}
-                  value={settings.cellspace}
-                />
+              <div className="subgroup">
+                <div className="field col-2">
+                  <label htmlFor="reverse">Reversed</label>
+                  <input
+                    style={{ alignSelf: "center" }}
+                    type="checkbox"
+                    name="reverse"
+                    id="reverse"
+                    defaultChecked={settings.reverse}
+                    onChange={() =>
+                      updateSettings({
+                        reverse: !settings.reverse,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="field">
+                  <Slider
+                    label="Cell Spacing"
+                    labelClassName="sublabel"
+                    id="cellspace"
+                    onChange={(value) => updateSettings({ cellspace: value })}
+                    minValue={0}
+                    maxValue={20}
+                    value={settings.cellspace}
+                  />
+                </div>
               </div>
 
               {settings.colorscale === "Discrete" ? (

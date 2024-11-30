@@ -2,6 +2,19 @@
   color: var(--text-color);
   display: flex;
 
+  .react-aria-Button {
+    display: flex;
+  }
+
+  &.wide .react-aria-Button {
+    width: 100%;
+
+    .react-aria-SelectValue {
+      flex-grow: 1;
+      text-align: left;
+    }
+  }
+
   .react-aria-SelectValue {
     &[data-placeholder] {
       font-style: italic;

@@ -23,6 +23,7 @@ interface SelectProps<T extends object>
   description?: string;
   errorMessage?: string | ((validation: ValidationResult) => string);
   items?: Iterable<T>;
+  wide?: boolean;
   children: React.ReactNode | ((item: T) => React.ReactNode);
 }
 
@@ -32,10 +33,11 @@ export function Select<T extends object>({
   errorMessage,
   children,
   items,
+  wide,
   ...props
 }: SelectProps<T>) {
   return (
-    <RACSelect {...props}>
+    <RACSelect {...props} className={`react-aria-Select${wide ? " wide" : ""}`}>
       <Label>{label}</Label>
       <Button>
         <SelectValue />

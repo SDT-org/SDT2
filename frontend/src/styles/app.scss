@@ -243,6 +243,10 @@ small {
     &:last-child {
       margin-bottom: 0;
     }
+
+    &.aligned {
+      align-items: center;
+    }
   }
 
   .col-3 {
@@ -257,20 +261,6 @@ small {
     }
   }
 
-  .col-2-1,
-  .col-2-1.field {
-    display: grid;
-    grid-template-areas: "left right" "row row";
-    grid-template-columns: 1fr auto;
-
-    label.header {
-      margin: 0;
-    }
-    .field {
-      margin-top: 0.4rem;
-    }
-  }
-
   .row {
     & + .row {
       margin-top: 0.8rem;
@@ -281,7 +271,8 @@ small {
     margin-top: 0.8rem;
     background: #fdfdff;
     padding: 0.8rem;
-    margin: 0.8rem calc(-1 * var(--app-container-padding)) calc(-1 * var(--app-container-padding));
+    margin: 0.8rem calc(-1 * var(--app-container-padding))
+      calc(-1 * var(--app-container-padding));
     border-top: 1px solid var(--secondary-border-color);
   }
 
@@ -320,6 +311,7 @@ small {
 
       &.header {
         display: block;
+        font-size: 1.4rem;
         font-weight: 600;
         margin-bottom: 0.2rem;
         display: flex;
@@ -402,7 +394,8 @@ small {
   flex-grow: 1;
 
   input,
-  select {
+  select,
+  .react-aria-Select {
     width: 100%;
   }
 
@@ -411,8 +404,8 @@ small {
     margin-right: 0.4rem;
   }
 
-  .form .field label {
-   font-size: 1.3rem;
+  .form .field label:not(.header) {
+    font-size: 1.3rem;
   }
 
   input[type="range"] {
