@@ -178,7 +178,6 @@ const RunnerSettings = ({
                 isSelected={appState.client.enableClustering}
                 onChange={(value) => {
                   updateClientState({ enableClustering: value });
-                  console.log(appState.client.enableOutputAlignments);
                 }}
               >
                 Cluster sequences
@@ -209,7 +208,6 @@ const RunnerSettings = ({
               <Switch
                 isSelected={appState.client.enableOutputAlignments}
                 onChange={(value) => {
-                  console.log(value);
                   updateClientState({ enableOutputAlignments: value });
                 }}
               >
