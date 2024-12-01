@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Button,
   Menu,
@@ -26,7 +25,37 @@ const AppMenuButton = <T extends object>({
 }: MyMenuButtonProps<T>) => {
   return (
     <MenuTrigger {...props}>
-      <Button>{label}</Button>
+      <Button
+        className="react-aria-Button main-menu-button"
+        aria-label="Application Menu"
+      >
+        <svg
+          height="16"
+          width="16"
+          aria-hidden="true"
+          enable-background="new 0 0 24 24"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <g
+            style={{
+              fill: "none",
+              stroke: "#000",
+              strokeWidth: 2,
+              strokeLinecap: "round",
+              strokeLinejoin: "round",
+              strokeMiterlimit: "10",
+            }}
+          >
+            <path d="m3 5h18" />
+            <path d="m3 12h18" />
+            <path d="m3 19h18" />
+            <path d="m3 5h18" />
+            <path d="m3 12h18" />
+            <path d="m3 19h18" />
+          </g>
+        </svg>
+      </Button>
       <Popover>
         <Menu {...props}>{children}</Menu>
       </Popover>

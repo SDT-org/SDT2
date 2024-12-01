@@ -8,6 +8,7 @@ import type { DataSets, DistributionState } from "../distributionState";
 import type { DistributionData } from "../plotTypes";
 import { ColorOptions } from "./ColorOptions";
 import { NumberInput } from "./NumberInput";
+import { Slider } from "./Slider";
 import { Switch } from "./Switch";
 
 const Plot = createPlotlyComponent(Plotly);

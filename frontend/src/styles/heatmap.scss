@@ -1,0 +1,28 @@
+.heatmap-sidebar {
+  .form .field .colorscale-setting.col-2 {
+    grid-template-columns: min-content 1fr;
+
+    .controls {
+      display: flex;
+      justify-self: flex-end;
+      gap: 0.4rem;
+    }
+
+    .react-aria-Select .react-aria-Button {
+      padding-left: 0.6rem;
+      padding-right: 0.6rem;
+      font-weight: 450;
+    }
+
+    .react-aria-ToggleButton {
+      width: 3.4rem;
+      padding: 0.9rem;
+      flex-shrink: 0;
+
+      &:not([data-hovered]):not([data-selected]) {
+        color: rgba(0, 0, 0, 0.75);
+      }
+    }
+  }
+
+}

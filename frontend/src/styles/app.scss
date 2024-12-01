@@ -3,8 +3,12 @@
 @import "switch.scss";
 @import "popover.scss";
 @import "select.scss";
+@import "toggle.scss";
+@import "toggle.scss";
+@import "tooltip.scss";
 
 @import "runner.scss";
+@import "heatmap.scss";
 
 html,
 body {
@@ -56,13 +60,23 @@ body {
   grid-template-columns: 1fr auto 1fr;
   align-content: center;
   background: var(--app-header-color);
-  border-top: 1px solid #ddd;
-  border-bottom: 1px solid #ddd;
+  border-top: 1px solid var(--app-header-border-color);
+  border-bottom: 1px solid var(--app-header-border-color);
 
+  button {
+    max-height: 3.1rem;
+  }
+
+  .main-menu-button {
+    width: 3.6rem;
+    max-height: 3.6rem;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+  }
   &.runner,
   &.loader {
     grid-template-columns: min-content;
-    box-shadow: none;
   }
 
   .left,
@@ -94,24 +108,11 @@ body {
       display: none;
     }
   }
-
-  button {
-    // max-height: 4rem;
-    min-width: 4.8rem;
-    //   background: #fff;
-    //   border-radius: 0.3rem;
-    //   border-color: transparent;
-    //   box-shadow: 0 0 2px 0 var(--drop-shadow-color);
-
-    //   &[data-pressed] {
-    //     background: var(--pressed-color);
-    //   }
-  }
 }
 
 .app-panel {
   display: grid;
-  grid-template-columns: 22.4rem 1fr;
+  grid-template-columns: var(--app-sidebar-width) 1fr;
   grid-template-areas: "sidebar main";
   overflow: hidden;
 }
@@ -267,13 +268,27 @@ small {
     }
   }
 
-  .react-aria-Switch + .row {
-    margin-top: 0.8rem;
-    background: #fdfdff;
-    padding: 0.8rem;
-    margin: 0.8rem calc(-1 * var(--app-container-padding))
+  .drawer {
+    margin-top: var(--app-container-padding);
+    background: var(--drawer-color);
+    padding: 0.8rem var(--app-container-padding) 1.2rem;
+    margin: var(--app-container-padding) calc(-1 * var(--app-container-padding))
       calc(-1 * var(--app-container-padding));
     border-top: 1px solid var(--secondary-border-color);
+
+    label {
+      font-size: 1.3rem;
+      font-weight: 525;
+      color: var(--text-secondary-color);
+    }
+
+    .react-aria-Slider + .react-aria-Slider {
+      margin-top: 0.8rem;
+    }
+
+    * + .col-2 {
+      margin-top: 0.8rem;
+    }
   }
 
   .field {
@@ -306,23 +321,6 @@ small {
       margin-bottom: 0;
     }
 
-    label {
-      font-weight: 500;
-
-      &.header {
-        display: block;
-        font-size: 1.4rem;
-        font-weight: 600;
-        margin-bottom: 0.2rem;
-        display: flex;
-        gap: 0.8rem;
-      }
-      &.radio {
-        display: block;
-        font-weight: normal;
-      }
-    }
-
     input + * {
       margin-left: 0.8rem;
     }
@@ -337,6 +335,26 @@ small {
 
     &[data-invalid-value="true"] input {
       color: red;
+    }
+  }
+
+  label {
+    font-weight: 500;
+
+    &.header {
+      display: block;
+      font-size: 1.4rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+      display: flex;
+      gap: 0.8rem;
+    }
+    &.subtle {
+      font-weight: 500;
+    }
+    &.radio {
+      display: block;
+      font-weight: normal;
     }
   }
 
@@ -394,8 +412,7 @@ small {
   flex-grow: 1;
 
   input,
-  select,
-  .react-aria-Select {
+  select {
     width: 100%;
   }
 
@@ -404,11 +421,8 @@ small {
     margin-right: 0.4rem;
   }
 
-  .form .field label:not(.header) {
-    font-size: 1.3rem;
-  }
-
-  input[type="range"] {
+  label.react-aria-Switch {
+    font-weight: 600;
   }
 }
 

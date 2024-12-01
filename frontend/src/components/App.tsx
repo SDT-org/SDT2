@@ -103,7 +103,7 @@ export const App = () => {
 
   React.useEffect(() => {
     const handler = (event: SyncStateEvent) => {
-      setAppState(prev => ({...prev, ...event.detail.state }));
+      setAppState((prev) => ({ ...prev, ...event.detail.state }));
     };
     document.addEventListener("sync-state", handler);
     return () => document.removeEventListener("sync-state", handler);

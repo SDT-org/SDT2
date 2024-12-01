@@ -1,6 +1,7 @@
 .react-aria-Select {
   color: var(--text-color);
   display: flex;
+  flex-shrink: 0;
 
   .react-aria-Button {
     display: flex;
@@ -23,12 +24,11 @@
   }
 
   .caret {
-    margin-right: -0.3rem;
+    margin: 0 -0.3rem 0 0.3rem;
     align-self: center;
     forced-color-adjust: none;
-    border-radius: 0.6rem;
-    font-size: 1rem;
     color: var(--fill-color);
+    flex-shrink: 0;
   }
 }
 

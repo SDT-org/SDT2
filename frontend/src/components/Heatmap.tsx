@@ -1,5 +1,6 @@
 import Plotly from "plotly.js-dist-min";
 import React from "react";
+import { ToggleButton } from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
 import tinycolor from "tinycolor2";
 import { colorScales as defaultColorScales } from "../colorScales";
@@ -8,6 +9,7 @@ import { NumberInput } from "./NumberInput";
 import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";
 import { Switch } from "./Switch";
+import { Tooltip } from "./Tooltip";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -127,71 +129,83 @@ export const Heatmap = ({
 
   return (
     <>
-      <div className="app-sidebar">
+      <div className="app-sidebar heatmap-sidebar">
         <div className="app-sidebar-toolbar">
           <div className="form">
             <div className="group">
               <div className="field">
-                <div className="col-2 aligned">
+                <div className="col-2 aligned colorscale-setting">
                   <label className="header" htmlFor="colorscale">
                     Colorscale
                   </label>
-
-                  <Select
-                    id="colorscale"
-                    items={Object.keys(colorScales).map((name) => ({
-                      id: name,
-                      name,
-                    }))}
-                    selectedKey={settings.colorscale}
-                    onSelectionChange={(value) => {
-                      updateSettings({
-                        colorscale: value as Colorscale,
-                      });
-                    }}
-                    wide
-                  >
-                    {(item) => (
-                      <SelectItem key={item.name} textValue={item.name}>
-                        {item.name}
-                      </SelectItem>
-                    )}
-                  </Select>
+                  <div className="controls">
+                    <Tooltip tooltip="Reverse colorscale" delay={600}>
+                      <ToggleButton
+                        aria-label="Toggle reverse colorscale"
+                        id="reverse"
+                        isSelected={settings.reverse}
+                        onChange={() =>
+                          updateSettings({
+                            reverse: !settings.reverse,
+                          })
+                        }
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          aria-hidden="true"
+                        >
+                          <g
+                            style={{
+                              fill: "none",
+                              stroke: "currentcolor",
+                              strokeWidth: 2,
+                              strokeLinecap: "round",
+                              strokeLinejoin: "round",
+                              strokeMiterlimit: 10,
+                            }}
+                          >
+                            <path d="m15 1 5 5-5 5M9 23l-5-5 5-5" />
+                            <path d="M4 18h13a6 6 0 0 0 6-6v-1M20 6H7a6 6 0 0 0-6 6v1" />
+                          </g>
+                        </svg>
+                      </ToggleButton>
+                    </Tooltip>
+                    <Select
+                      id="colorscale"
+                      items={Object.keys(colorScales).map((name) => ({
+                        id: name,
+                        name,
+                      }))}
+                      selectedKey={settings.colorscale}
+                      onSelectionChange={(value) => {
+                        updateSettings({
+                          colorscale: value as Colorscale,
+                        });
+                      }}
+                    >
+                      {(item) => (
+                        <SelectItem key={item.name} textValue={item.name}>
+                          {item.name}
+                        </SelectItem>
+                      )}
+                    </Select>
+                  </div>
                 </div>
               </div>
 
-              <div className="subgroup">
-                <div className="field col-2">
-                  <label htmlFor="reverse">Reversed</label>
-                  <input
-                    style={{ alignSelf: "center" }}
-                    type="checkbox"
-                    name="reverse"
-                    id="reverse"
-                    defaultChecked={settings.reverse}
-                    onChange={() =>
-                      updateSettings({
-                        reverse: !settings.reverse,
-                      })
-                    }
-                  />
-                </div>
+              <div className="drawer">
+                <Slider
+                  label="Cell Spacing"
+                  labelClassName="sublabel"
+                  id="cellspace"
+                  onChange={(value) => updateSettings({ cellspace: value })}
+                  minValue={0}
+                  maxValue={20}
+                  value={settings.cellspace}
+                />
 
-                <div className="field">
-                  <Slider
-                    label="Cell Spacing"
-                    labelClassName="sublabel"
-                    id="cellspace"
-                    onChange={(value) => updateSettings({ cellspace: value })}
-                    minValue={0}
-                    maxValue={20}
-                    value={settings.cellspace}
-                  />
-                </div>
-              </div>
-
-              {settings.colorscale === "Discrete" ? (
-                <>
+                {settings.colorscale === "Discrete" ? (
                   <div className="col-2">
                     <div className="field">
                       <NumberInput
@@ -216,8 +230,8 @@ export const Heatmap = ({
                       />
                     </div>
                   </div>
-                </>
-              ) : null}
+                ) : null}
+              </div>
             </div>
             <div className="group">
               <Switch
@@ -231,7 +245,7 @@ export const Heatmap = ({
                 Percent Identities
               </Switch>
               <div
-                className="row"
+                className="drawer"
                 data-hidden={!settings.annotation}
                 aria-hidden={!settings.annotation}
               >
@@ -280,7 +294,7 @@ export const Heatmap = ({
                 Axis Labels
               </Switch>
               <div
-                className="row"
+                className="drawer"
                 data-hidden={!settings.axis_labels}
                 aria-hidden={!settings.axis_labels}
               >
@@ -336,23 +350,19 @@ export const Heatmap = ({
                 Scale Bar
               </Switch>
               <div
-                className="row"
+                className="drawer"
                 data-hidden={!settings.showscale}
                 aria-hidden={!settings.showscale}
               >
                 <div className="range-group">
-                  <div className="field">
-                    <Slider
-                      label="Height"
-                      minValue={0.1}
-                      maxValue={1}
-                      step={0.1}
-                      value={settings.cbar_shrink}
-                      onChange={(value) =>
-                        updateSettings({ cbar_shrink: value })
-                      }
-                    />
-                  </div>
+                  <Slider
+                    label="Height"
+                    minValue={0.1}
+                    maxValue={1}
+                    step={0.1}
+                    value={settings.cbar_shrink}
+                    onChange={(value) => updateSettings({ cbar_shrink: value })}
+                  />
                   <Slider
                     label="Width"
                     id="cbar-aspect"
