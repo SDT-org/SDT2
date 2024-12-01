@@ -1,5 +1,5 @@
 import React from "react";
-import { ColorOption } from "./colors";
+import { type ColorString, Colors } from "./colors";
 
 export type Visualization = "histogram" | "violin" | "raincloud";
 type DataSet = number[];
@@ -11,7 +11,7 @@ export type DataSets = {
 
 type VisualizationBase = {
   plotTitle: string;
-  lineColor: ColorOption;
+  lineColor: ColorString;
   lineWidth: number;
   showGrid: boolean;
   showTickLabels: boolean;
@@ -22,19 +22,19 @@ export type DistributionState = {
   visualization: Visualization;
   dataSet: keyof DataSets;
   histogram: VisualizationBase & {
-    barColor: ColorOption;
+    barColor: ColorString;
     binSize: number;
     histOutlineWidth: number;
     histnorm: "probability" | "percent";
     showHistogram: boolean;
     showLine: boolean;
-    histlineColor: ColorOption;
+    histlineColor: ColorString;
   };
   raincloud: VisualizationBase & {
     bandwidth: number;
-    fillColor: ColorOption;
+    fillColor: ColorString;
     jitter: number;
-    markerColor: ColorOption;
+    markerColor: ColorString;
     markerSize: number;
     pointOpacity: number;
     pointPos: number;
@@ -49,12 +49,12 @@ export type DistributionState = {
     bandwidth: number;
     boxOpacity: number;
     boxWidth: number;
-    boxfillColor: ColorOption;
-    boxlineColor: ColorOption;
+    boxfillColor: ColorString;
+    boxlineColor: ColorString;
     boxlineWidth: number;
-    fillColor: ColorOption;
+    fillColor: ColorString;
     jitter: number;
-    markerColor: ColorOption;
+    markerColor: ColorString;
     markerSize: number;
     pointOpacity: number;
     pointOrientation: "Violin" | "Box" | "None";
@@ -74,7 +74,7 @@ export type DistributionState = {
 
 const visualizationDefaults = {
   plotTitle: "Distribution of Percent Identities",
-  lineColor: ColorOption.Tomato,
+  lineColor: Colors.Tomato,
   lineWidth: 3,
   showAxisLabels: true,
   showGrid: true,
@@ -86,10 +86,10 @@ const initialDistributionState: DistributionState = {
   dataSet: "scores",
   histogram: {
     ...visualizationDefaults,
-    barColor: ColorOption.Light_Blue,
+    barColor: Colors.LightBlue,
     binSize: 1,
     histOutlineWidth: 1,
-    histlineColor: ColorOption.Tomato,
+    histlineColor: Colors.Tomato,
     histnorm: "probability",
     showHistogram: true,
     showLine: true,
@@ -98,7 +98,7 @@ const initialDistributionState: DistributionState = {
     ...visualizationDefaults,
     bandwidth: 8,
     jitter: 0.5,
-    markerColor: ColorOption.Tomato,
+    markerColor: Colors.Tomato,
     markerSize: 7,
     plotOrientation: "horizontal",
     pointOpacity: 0.5,
@@ -108,19 +108,19 @@ const initialDistributionState: DistributionState = {
     showPoints: true,
     showZeroLine: false,
     violinOpacity: 0.5,
-    fillColor: ColorOption.Light_Blue,
+    fillColor: Colors.LightBlue,
   },
   violin: {
     ...visualizationDefaults,
     bandwidth: 5,
     boxOpacity: 0.5,
     boxWidth: 0.95,
-    boxfillColor: ColorOption.Light_Blue,
-    boxlineColor: ColorOption.Tomato,
+    boxfillColor: Colors.LightBlue,
+    boxlineColor: Colors.Tomato,
     boxlineWidth: 3,
-    fillColor: ColorOption.Light_Blue,
+    fillColor: Colors.LightBlue,
     jitter: 0.5,
-    markerColor: ColorOption.Tomato,
+    markerColor: Colors.Tomato,
     markerSize: 7,
     plotOrientation: "vertical",
     pointOpacity: 0.5,

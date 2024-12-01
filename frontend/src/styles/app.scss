@@ -6,6 +6,8 @@
 @import "toggle.scss";
 @import "toggle.scss";
 @import "tooltip.scss";
+@import "dialog.scss";
+@import "color-picker.scss";
 
 @import "runner.scss";
 @import "heatmap.scss";
@@ -58,21 +60,25 @@ body {
   z-index: 1;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
-  align-content: center;
+  align-items: center;
   background: var(--app-header-color);
   border-top: 1px solid var(--app-header-border-color);
   border-bottom: 1px solid var(--app-header-border-color);
 
-  button {
-    max-height: 3.1rem;
+  button,
+  .react-aria-Tab {
+    height: 3rem;
   }
 
-  .main-menu-button {
-    width: 3.6rem;
-    max-height: 3.6rem;
-    height: 100%;
-    align-items: center;
-    justify-content: center;
+  // .react-aria-Tab {
+  //   height: 3rem;
+  // }
+
+  .react-aria-Button.main-menu-button {
+    padding: 0 1rem;
+    width: 3.4rem;
+    // background: 0;
+    // box-shadow: none;
   }
   &.runner,
   &.loader {
@@ -108,6 +114,11 @@ body {
       display: none;
     }
   }
+}
+
+.app-panels {
+  display: grid;
+  overflow: hidden;
 }
 
 .app-panel {
@@ -278,15 +289,13 @@ small {
 
     label {
       font-size: 1.3rem;
-      font-weight: 525;
-      color: var(--text-secondary-color);
     }
 
     .react-aria-Slider + .react-aria-Slider {
       margin-top: 0.8rem;
     }
 
-    * + .col-2 {
+    *:not(.header) + .col-2 {
       margin-top: 0.8rem;
     }
   }
@@ -423,6 +432,33 @@ small {
 
   label.react-aria-Switch {
     font-weight: 600;
+  }
+
+  .has-color {
+    margin: 0.8rem 0;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    justify-content: space-between;
+    gap: 3.2rem;
+    align-items: flex-start;
+
+    .react-aria-Slider {
+      .react-aria-SliderTrack {
+        margin: 1rem 0;
+      }
+    }
+
+    .color-picker {
+      align-items: flex-start;
+      justify-items: flex-start;
+      gap: 0.1rem;
+      flex-direction: column-reverse;
+    }
+
+    .react-aria-ColorSwatch {
+      width: 3.4rem;
+      height: 1.6rem;
+    }
   }
 }
 
@@ -822,7 +858,7 @@ label.sublabel,
 }
 
 .react-aria-TabList {
-  border: 1px solid var(--border-color);
+  box-shadow: 0 0 0 1px var(--border-color);
   border-radius: 6px;
   display: flex;
   background: var(--secondary-border-color);
@@ -879,15 +915,25 @@ label.sublabel,
     0 1px 1px 0 var(--button-shadow-bottom-color),
     0 0 1px 1px var(--button-shadow-color);
   border: 0;
-  // border-top: 1px solid var(--button-shadow-two-color);
   border-radius: 0.5rem;
   appearance: none;
   vertical-align: middle;
   text-align: center;
   margin: 0;
   outline: none;
-  padding: 6px 10px;
   text-decoration: none;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  padding: 0.6rem 1.6rem;
+
+  &.compact {
+    padding: 0 0.8rem;
+  }
+
+  &.icon {
+    padding: 0;
+  }
 
   &[data-pressed] {
     background: var(--button-background-pressed-color);

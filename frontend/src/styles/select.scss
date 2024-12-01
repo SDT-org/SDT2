@@ -41,9 +41,10 @@
     max-height: inherit;
     min-height: unset;
     border: none;
+    overflow: auto;
 
     .react-aria-Header {
-      padding-left: 1.571rem;
+      padding-left: 1.6rem;
     }
   }
 

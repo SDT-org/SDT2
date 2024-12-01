@@ -1,12 +1,19 @@
 import Plotly from "plotly.js-dist-min";
 import type { Layout, PlotData } from "plotly.js-dist-min";
 import React from "react";
-import { Label, Radio, RadioGroup } from "react-aria-components";
+import {
+  Label,
+  Radio,
+  RadioGroup,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
-import type { ColorOption } from "../colors";
+import type { ColorString, Colors } from "../colors";
 import type { DataSets, DistributionState } from "../distributionState";
 import type { DistributionData } from "../plotTypes";
 import { ColorOptions } from "./ColorOptions";
+import { ColorPicker } from "./ColorPicker";
 import { NumberInput } from "./NumberInput";
 import { Slider } from "./Slider";
 import { Switch } from "./Switch";
@@ -276,70 +283,56 @@ export const Violin = ({
                 isSelected={settings.showViolin}
                 onChange={(value) => updateSettings({ showViolin: value })}
               >
-                Violin Plot
+                Violin
               </Switch>
               <div
-                className="row"
+                className="drawer"
                 data-hidden={!settings.showViolin}
                 aria-hidden={!settings.showViolin}
               >
-                <div className="col-2">
-                  <div className="field">
-                    <label htmlFor="fill-color">Fill Color</label>
-                    <select
-                      id="fill-color"
-                      value={settings.fillColor}
-                      disabled={!settings.showViolin}
-                      onChange={(e) =>
-                        updateSettings({
-                          fillColor: e.target.value as ColorOption,
-                        })
-                      }
-                    >
-                      <ColorOptions />
-                    </select>
-                  </div>
-                  <div className="field">
-                    <NumberInput
-                      label="Band Width"
-                      field="bandwidth"
-                      value={settings.bandwidth}
-                      isDisabled={!settings.showViolin}
-                      updateValue={updateSettings}
-                      min={0}
-                      max={20}
-                      step={1}
-                    />
-                  </div>
+                <Label className="header">Band</Label>
+                <div className="field col-2 has-color">
+                  <Slider
+                    label="Width"
+                    defaultValue={settings.bandwidth}
+                    isDisabled={!settings.showViolin}
+                    onChangeEnd={(value) =>
+                      updateSettings({ bandwidth: value })
+                    }
+                    minValue={0}
+                    maxValue={20}
+                    step={1}
+                  />
+                  <ColorPicker
+                    label="Color"
+                    value={settings.fillColor}
+                    onChange={(value) => {
+                      updateSettings({
+                        fillColor: value.toString() as ColorString,
+                      });
+                    }}
+                  />
                 </div>
-                <div className="col-2">
-                  <div className="field">
-                    <label htmlFor="line-color">Line Color</label>
-                    <select
-                      id="line-color"
-                      value={settings.lineColor}
-                      disabled={!settings.showViolin}
-                      onChange={(e) =>
-                        updateSettings({
-                          lineColor: e.target.value as ColorOption,
-                        })
-                      }
-                    >
-                      <ColorOptions />
-                    </select>
-                  </div>
-                  <div className="field">
-                    <NumberInput
-                      label="Line Width"
-                      field="lineWidth"
-                      value={settings.lineWidth}
-                      isDisabled={!settings.showViolin}
-                      updateValue={updateSettings}
-                      min={0}
-                      max={20}
-                      step={1}
-                    />
-                  </div>
+                <Label className="header">Line</Label>
+                <div className="field col-2 has-color">
+                  <Slider
+                    label="Width"
+                    value={settings.lineWidth}
+                    isDisabled={!settings.showViolin}
+                    onChange={(value) => updateSettings({ lineWidth: value })}
+                    minValue={0}
+                    maxValue={20}
+                    step={1}
+                  />
+                  <ColorPicker
+                    label="Color"
+                    value={settings.lineColor}
+                    onChange={(value) =>
+                      updateSettings({
+                        lineColor: value.toString() as ColorString,
+                      })
+                    }
+                  />
                 </div>
               </div>
             </div>
@@ -348,7 +341,7 @@ export const Violin = ({
                 isSelected={settings.showBox}
                 onChange={(value) => updateSettings({ showBox: value })}
               >
-                Box Plot
+                Box
               </Switch>
               <div
                 className="row"
@@ -443,8 +436,23 @@ export const Violin = ({
               </div>
             </div>
             <div className="group">
-              <div className="field">
-                <label htmlFor="show-points">Show Points</label>
+              <Switch
+                isSelected={settings.showPoints}
+                onChange={(value) => updateSettings({ showPoints: value })}
+              >
+                Points
+              </Switch>
+              <div
+                className="drawer"
+                data-hidden={!settings.showPoints}
+                aria-hidden={!settings.showPoints}
+              >
+                <ToggleButtonGroup
+                  defaultSelectedKeys={[settings.pointOrientation]}
+                >
+                  <ToggleButton id="Violin">Violin</ToggleButton>
+                  <ToggleButton id="Box">Box</ToggleButton>
+                </ToggleButtonGroup>
                 <div className="col-3">
                   <label>
                     <input
@@ -493,95 +501,38 @@ export const Violin = ({
                     None
                   </label>
                 </div>
-              </div>
-              <div className="field">
-                <label htmlFor="show-mean">Show Mean</label>
-                <div className="col-3">
-                  <label>
-                    <input
-                      type="radio"
-                      name="showMeanline"
-                      value="Violin"
-                      checked={settings.showMeanline === "Violin"}
-                      onChange={(e) =>
-                        updateSettings({
-                          showMeanline: e.target
-                            .value as typeof settings.showMeanline,
-                        })
-                      }
-                    />
-                    Violin
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="showMeanline"
-                      value="Box"
-                      checked={settings.showMeanline === "Box"}
-                      onChange={(e) =>
-                        updateSettings({
-                          showMeanline: e.target
-                            .value as typeof settings.showMeanline,
-                        })
-                      }
-                    />
-                    Box
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="showMeanline"
-                      value="None"
-                      checked={settings.showMeanline === "None"}
-                      onChange={(e) =>
-                        updateSettings({
-                          showMeanline: e.target
-                            .value as typeof settings.showMeanline,
-                        })
-                      }
-                    />
-                    None
-                  </label>
-                </div>
-              </div>
-              <div className="row">
-                <div className="col-2">
-                  <div className="field">
-                    <NumberInput
-                      label="Point Position"
-                      field="pointPos"
-                      value={settings.pointPos}
-                      type="float"
-                      updateValue={updateSettings}
-                      min={-2}
-                      max={2}
-                      step={0.1}
-                    />
-                  </div>
-                  <div className="field">
-                    <label htmlFor="points">Points</label>
-                    <select
-                      id="points"
-                      value={settings.points.toString()}
-                      disabled={!settings.showPoints}
-                      onChange={(e) =>
-                        updateSettings({
-                          points: e.target.value as typeof settings.points,
-                        })
-                      }
-                    >
-                      {["all", "outliers", "suspectedoutliers", false].map(
-                        (value) => (
-                          <option
-                            key={value.toString()}
-                            value={value.toString()}
-                          >
-                            {value === false ? "None" : value}
-                          </option>
-                        ),
-                      )}
-                    </select>
-                  </div>
+
+                <NumberInput
+                  label="Point Position"
+                  field="pointPos"
+                  value={settings.pointPos}
+                  type="float"
+                  updateValue={updateSettings}
+                  min={-2}
+                  max={2}
+                  step={0.1}
+                />
+
+                <div className="field">
+                  <label htmlFor="points">Visibility</label>
+                  <select
+                    id="points"
+                    value={settings.points.toString()}
+                    disabled={!settings.showPoints}
+                    onChange={(e) =>
+                      updateSettings({
+                        points: e.target.value as typeof settings.points,
+                      })
+                    }
+                  >
+                    {["all", "outliers", "suspectedoutliers", false].map(
+                      (value) => (
+                        <option key={value.toString()} value={value.toString()}>
+                          {value === false ? "None" : value}
+                        </option>
+                      ),
+                    )}
+                  </select>
                 </div>
                 <div className="col-2">
                   <div className="field">
@@ -640,6 +591,57 @@ export const Violin = ({
                         step={0.1}
                       />
                     </div>
+                  </div>
+                </div>
+
+                <div className="field">
+                  <label htmlFor="show-mean">Show Mean</label>
+                  <div className="col-3">
+                    <label>
+                      <input
+                        type="radio"
+                        name="showMeanline"
+                        value="Violin"
+                        checked={settings.showMeanline === "Violin"}
+                        onChange={(e) =>
+                          updateSettings({
+                            showMeanline: e.target
+                              .value as typeof settings.showMeanline,
+                          })
+                        }
+                      />
+                      Violin
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="showMeanline"
+                        value="Box"
+                        checked={settings.showMeanline === "Box"}
+                        onChange={(e) =>
+                          updateSettings({
+                            showMeanline: e.target
+                              .value as typeof settings.showMeanline,
+                          })
+                        }
+                      />
+                      Box
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        name="showMeanline"
+                        value="None"
+                        checked={settings.showMeanline === "None"}
+                        onChange={(e) =>
+                          updateSettings({
+                            showMeanline: e.target
+                              .value as typeof settings.showMeanline,
+                          })
+                        }
+                      />
+                      None
+                    </label>
                   </div>
                 </div>
               </div>

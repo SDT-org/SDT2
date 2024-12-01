@@ -139,11 +139,7 @@ export const Viewer = ({
     });
 
   return (
-    <Tabs
-      className="app-wrapper with-header"
-      selectedKey={appState.client.dataView}
-      onSelectionChange={setDataView}
-    >
+    <div className="app-wrapper with-header">
       <div className="app-header">
         <div className="left">
           {mainMenu}
@@ -157,10 +153,15 @@ export const Viewer = ({
             <span className="filename">{appState.basename}</span>
           </div>
         </div>
-        <TabList>
-          <Tab id="heatmap">Heatmap</Tab>
-          <Tab id="plot">Distribution</Tab>
-        </TabList>
+        <Tabs
+          selectedKey={appState.client.dataView}
+          onSelectionChange={setDataView}
+        >
+          <TabList>
+            <Tab id="heatmap">Heatmap</Tab>
+            <Tab id="plot">Distribution</Tab>
+          </TabList>
+        </Tabs>
         <div className="right">
           <Button
             onPress={() =>
@@ -176,30 +177,35 @@ export const Viewer = ({
           </Button>
         </div>
       </div>
-
-      <TabPanel id="heatmap" className="app-panel">
-        {heatmapData ? (
-          <Heatmap
-            data={heatmapData}
-            settings={heatmapSettings}
-            updateSettings={updateHeatmapState}
-            tickText={tickText}
-          />
-        ) : null}
-      </TabPanel>
-      <TabPanel id="plot" className="app-panel">
-        {distributionData ? (
-          <Distribution
-            data={distributionData}
-            state={distributionState}
-            setState={setDistributionState}
-            updateHistogram={updateHistogram}
-            updateRaincloud={updateRaincloud}
-            updateViolin={updateViolin}
-          />
-        ) : null}
-      </TabPanel>
+      <Tabs
+        className={"app-panels"}
+        selectedKey={appState.client.dataView}
+        onSelectionChange={setDataView}
+      >
+        <TabPanel id="heatmap" className="app-panel">
+          {appState.client.dataView === "heatmap" && heatmapData ? (
+            <Heatmap
+              data={heatmapData}
+              settings={heatmapSettings}
+              updateSettings={updateHeatmapState}
+              tickText={tickText}
+            />
+          ) : null}
+        </TabPanel>
+        <TabPanel id="plot" className="app-panel">
+          {distributionData ? (
+            <Distribution
+              data={distributionData}
+              state={distributionState}
+              setState={setDistributionState}
+              updateHistogram={updateHistogram}
+              updateRaincloud={updateRaincloud}
+              updateViolin={updateViolin}
+            />
+          ) : null}
+        </TabPanel>
+      </Tabs>
       {loading ? <div className="api-loader" /> : null}
-    </Tabs>
+    </div>
   );
 };

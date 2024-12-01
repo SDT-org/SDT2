@@ -33,7 +33,7 @@ const AppMenuButton = <T extends object>({
           height="16"
           width="16"
           aria-hidden="true"
-          enable-background="new 0 0 24 24"
+          enableBackground="new 0 0 24 24"
           viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -114,7 +114,6 @@ export const MainMenu = ({
     {appState.view === "viewer" ? (
       <AppMenuItem onAction={onExport}>Export images and data...</AppMenuItem>
     ) : null}
-    <Separator />
     <AppMenuItem onAction={onManual}>Manual</AppMenuItem>
     <AppMenuItem onAction={onAbout}>About</AppMenuItem>
     <Separator />

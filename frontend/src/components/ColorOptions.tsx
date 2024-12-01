@@ -1,9 +1,9 @@
 import React from "react";
-import { ColorOption } from "../colors";
+import { Colors } from "../colors";
 import { formatTitle } from "../helpers";
 
 export const ColorOptions = () =>
-  Object.entries(ColorOption).map(([key, value]) => (
+  Object.entries(Colors).map(([key, value]) => (
     <option key={key} value={value}>
       {formatTitle(key)}
     </option>

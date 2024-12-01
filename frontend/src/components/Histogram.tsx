@@ -2,7 +2,7 @@ import Plotly from "plotly.js-dist-min";
 import type { Layout, PlotData } from "plotly.js-dist-min";
 import React from "react";
 import createPlotlyComponent from "react-plotly.js/factory";
-import type { ColorOption } from "../colors";
+import type { Colors } from "../colors";
 import type { DataSets, DistributionState } from "../distributionState";
 import type { DistributionData } from "../plotTypes";
 import { ColorOptions } from "./ColorOptions";
