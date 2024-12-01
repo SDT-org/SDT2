@@ -6,12 +6,14 @@
       display: flex;
       justify-self: flex-end;
       gap: 0.4rem;
+      flex-direction: row-reverse;
     }
 
     .react-aria-Select .react-aria-Button {
       padding-left: 0.6rem;
       padding-right: 0.6rem;
       font-weight: 450;
+      width: 100%;
     }
 
     .react-aria-ToggleButton {

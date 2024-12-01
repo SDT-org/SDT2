@@ -36,11 +36,12 @@ const AppMenuButton = <T extends object>({
           enableBackground="new 0 0 24 24"
           viewBox="0 0 24 24"
           xmlns="http://www.w3.org/2000/svg"
+          color="currentcolor"
         >
           <g
             style={{
               fill: "none",
-              stroke: "#000",
+              stroke: "currentcolor",
               strokeWidth: 2,
               strokeLinecap: "round",
               strokeLinejoin: "round",

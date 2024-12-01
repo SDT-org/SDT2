@@ -17,6 +17,7 @@ import { ColorPicker } from "./ColorPicker";
 import { NumberInput } from "./NumberInput";
 import { Slider } from "./Slider";
 import { Switch } from "./Switch";
+import { Tooltip } from "./Tooltip";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -63,10 +64,10 @@ export const Violin = ({
         fillcolor: settings.fillColor,
         opacity: settings.violinOpacity,
         meanline: {
-          visible: settings.showMeanline === "Violin",
+          visible: settings.showMeanline,
         },
         points:
-          settings.pointOrientation === "Violin"
+          settings.showPoints && settings.pointOrientation === "Violin"
             ? settings.points === false
               ? false
               : settings.points
@@ -95,8 +96,11 @@ export const Violin = ({
         type: "box",
         name: "",
         [settings.plotOrientation === "vertical" ? "y" : "x"]: dataSet,
-        boxmean: settings.showMeanline === "Box",
-        boxpoints: settings.pointOrientation === "Box" && settings.points,
+        boxmean: settings.showMeanline,
+        boxpoints:
+          settings.showPoints &&
+          settings.pointOrientation === "Box" &&
+          settings.points,
         pointpos: settings.pointPos,
         jitter: settings.jitter,
         line: {
@@ -179,104 +183,148 @@ export const Violin = ({
         <div className="app-sidebar-toolbar">
           <div className="form">
             {sidebarComponent}
-
             <div className="group">
-              <div className="field">
-                <label htmlFor="plot-title" className="header">
-                  Title
-                </label>
-                <input
-                  id="plot-title"
-                  type="text"
-                  value={settings.plotTitle}
-                  onChange={(e) =>
-                    updateSettings({ plotTitle: e.target.value })
+              <div className="drawer">
+                <ToggleButtonGroup
+                  data-icon-only
+                  selectionMode="multiple"
+                  selectedKeys={Object.keys(settings).filter(
+                    (key) =>
+                      [
+                        "showGrid",
+                        "showTickLabels",
+                        "showAxisLines",
+                        "showAxisLabels",
+                      ].includes(key) && settings[key as keyof typeof settings],
+                  )}
+                  onSelectionChange={(value) =>
+                    updateSettings({
+                      showGrid: value.has("showGrid"),
+                      showTickLabels: value.has("showTickLabels"),
+                      showAxisLines: value.has("showAxisLines"),
+                      showAxisLabels: value.has("showAxisLabels"),
+                    })
                   }
-                />
-              </div>
+                >
+                  <Tooltip tooltip="Toggle grid">
+                    <ToggleButton id="showGrid" aria-label="Toggle grid">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <g
+                          style={{
+                            fill: "none",
+                            stroke: "currentcolor",
+                            strokeWidth: 2,
+                            strokeLinecap: "round",
+                            strokeLinejoin: "round",
+                            strokeMiterlimit: 10,
+                          }}
+                        >
+                          <path d="M9 3v18M15 3v18M3 15h18M21 9H3M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2z" />
+                        </g>
+                      </svg>
+                    </ToggleButton>
+                  </Tooltip>
+                  <Tooltip tooltip="Toggle axis lines">
+                    <ToggleButton
+                      id="showAxisLines"
+                      aria-label="Toggle axis lines"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <g
+                          style={{
+                            fill: "none",
+                            stroke: "currentcolor",
+                            strokeWidth: 2,
+                            strokeLinecap: "round",
+                            strokeLinejoin: "round",
+                            strokeMiterlimit: 10,
+                          }}
+                        >
+                          <path d="M1 1v22h22" />
+                          <path d="m7 17 5-6 5 1 6-7" />
+                        </g>
+                      </svg>
+                    </ToggleButton>
+                  </Tooltip>
+                  <Tooltip tooltip="Toggle axis labels">
+                    <ToggleButton
+                      id="showAxisLabels"
+                      aria-label="Toggle axis labels"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <g
+                          style={{
+                            fill: "none",
+                            stroke: "currentcolor",
+                            strokeWidth: 2,
+                            strokeLinecap: "round",
+                            strokeLinejoin: "round",
+                            strokeMiterlimit: 10,
+                          }}
+                        >
+                          <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4zM9 7v10M6 9l3-2" />
+                          <path d="M15.5 17a2.5 2.5 0 0 1-2.5-2.5v-5a2.5 2.5 0 1 1 5 0v5a2.5 2.5 0 0 1-2.5 2.5z" />
+                        </g>
+                      </svg>
+                    </ToggleButton>
+                  </Tooltip>
+                  <Tooltip tooltip="Toggle axis title">
+                    <ToggleButton
+                      id="showTickLabels"
+                      aria-label="Toggle axis title"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <g
+                          style={{
+                            fill: "none",
+                            stroke: "currentcolor",
+                            strokeWidth: 2,
+                            strokeLinecap: "round",
+                            strokeLinejoin: "round",
+                            strokeMiterlimit: 10,
+                          }}
+                        >
+                          <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4z" />
+                          <path d="M8 17v-6a4 4 0 0 1 8 0v6M8 13h8" />
+                        </g>
+                      </svg>
+                    </ToggleButton>
+                  </Tooltip>
+                </ToggleButtonGroup>
 
-              <div className="row">
-                <div className="col-2">
-                  <div className="field">
-                    <label htmlFor="showGrid">
-                      <input
-                        type="checkbox"
-                        name="showGrid"
-                        id="showGrid"
-                        checked={settings.showGrid}
-                        onChange={() =>
-                          updateSettings({ showGrid: !settings.showGrid })
-                        }
-                      />
-                      Grid
-                    </label>
-                  </div>
-                  <div className="field">
-                    <label htmlFor="showTickLabels">
-                      <input
-                        type="checkbox"
-                        name="showTickLabels"
-                        id="showTickLabels"
-                        checked={settings.showTickLabels}
-                        onChange={() =>
-                          updateSettings({
-                            showTickLabels: !settings.showTickLabels,
-                          })
-                        }
-                      />
-                      Labels
-                    </label>
-                  </div>
-                </div>
-                <div className="col-2">
-                  <div className="field">
-                    <label htmlFor="showAxisLines">
-                      <input
-                        type="checkbox"
-                        name="showAxisLines"
-                        id="showAxisLines"
-                        checked={settings.showAxisLines}
-                        onChange={() =>
-                          updateSettings({
-                            showAxisLines: !settings.showAxisLines,
-                          })
-                        }
-                      />
-                      Axis Lines
-                    </label>
-                  </div>
-                  <div className="field">
-                    <label htmlFor="showAxisLabels">
-                      <input
-                        type="checkbox"
-                        name="showAxisLabels"
-                        id="showAxisLabels"
-                        checked={settings.showAxisLabels}
-                        onChange={() =>
-                          updateSettings({
-                            showAxisLabels: !settings.showAxisLabels,
-                          })
-                        }
-                      />
-                      Axis Title
-                    </label>
-                  </div>
-                </div>
+                <Label>Orientation</Label>
+                <ToggleButtonGroup
+                  data-compact
+                  selectionMode="single"
+                  disallowEmptySelection={true}
+                  selectedKeys={[settings.plotOrientation]}
+                  onSelectionChange={(value) =>
+                    updateSettings({
+                      plotOrientation: value.values().next()
+                        .value as typeof settings.plotOrientation,
+                    })
+                  }
+                >
+                  <ToggleButton id="vertical">Vertical</ToggleButton>
+                  <ToggleButton id="horizontal">Horizontal</ToggleButton>
+                </ToggleButtonGroup>
               </div>
-            </div>
-            <div className="group">
-              <RadioGroup
-                value={settings.plotOrientation}
-                onChange={(value) =>
-                  updateSettings({
-                    plotOrientation: value as typeof settings.plotOrientation,
-                  })
-                }
-              >
-                <Label>Plot Orientation</Label>
-                <Radio value="vertical">Vertical</Radio>
-                <Radio value="horizontal">Horizontal</Radio>
-              </RadioGroup>
             </div>
             <div className="group">
               <Switch
@@ -292,6 +340,15 @@ export const Violin = ({
               >
                 <Label className="header">Band</Label>
                 <div className="field col-2 has-color">
+                  <ColorPicker
+                    label="Color"
+                    value={settings.fillColor}
+                    onChange={(value) => {
+                      updateSettings({
+                        fillColor: value.toString() as ColorString,
+                      });
+                    }}
+                  />
                   <Slider
                     label="Width"
                     defaultValue={settings.bandwidth}
@@ -303,27 +360,9 @@ export const Violin = ({
                     maxValue={20}
                     step={1}
                   />
-                  <ColorPicker
-                    label="Color"
-                    value={settings.fillColor}
-                    onChange={(value) => {
-                      updateSettings({
-                        fillColor: value.toString() as ColorString,
-                      });
-                    }}
-                  />
                 </div>
                 <Label className="header">Line</Label>
                 <div className="field col-2 has-color">
-                  <Slider
-                    label="Width"
-                    value={settings.lineWidth}
-                    isDisabled={!settings.showViolin}
-                    onChange={(value) => updateSettings({ lineWidth: value })}
-                    minValue={0}
-                    maxValue={20}
-                    step={1}
-                  />
                   <ColorPicker
                     label="Color"
                     value={settings.lineColor}
@@ -332,6 +371,15 @@ export const Violin = ({
                         lineColor: value.toString() as ColorString,
                       })
                     }
+                  />
+                  <Slider
+                    label="Width"
+                    value={settings.lineWidth}
+                    isDisabled={!settings.showViolin}
+                    onChange={(value) => updateSettings({ lineWidth: value })}
+                    minValue={0}
+                    maxValue={20}
+                    step={1}
                   />
                 </div>
               </div>
@@ -344,7 +392,7 @@ export const Violin = ({
                 Box
               </Switch>
               <div
-                className="row"
+                className="drawer"
                 data-hidden={!settings.showBox}
                 aria-hidden={!settings.showBox}
               >
@@ -448,68 +496,30 @@ export const Violin = ({
                 aria-hidden={!settings.showPoints}
               >
                 <ToggleButtonGroup
-                  defaultSelectedKeys={[settings.pointOrientation]}
+                  data-compact
+                  selectionMode="single"
+                  disallowEmptySelection={true}
+                  selectedKeys={[settings.pointOrientation]}
+                  onSelectionChange={(value) =>
+                    updateSettings({
+                      pointOrientation: value.values().next()
+                        .value as typeof settings.pointOrientation,
+                    })
+                  }
                 >
                   <ToggleButton id="Violin">Violin</ToggleButton>
-                  <ToggleButton id="Box">Box</ToggleButton>
-                </ToggleButtonGroup>
-                <div className="col-3">
-                  <label>
-                    <input
-                      id="show-points"
-                      type="radio"
-                      name="pointOrientation"
-                      value="Violin"
-                      checked={settings.pointOrientation === "Violin"}
-                      onChange={(e) =>
-                        updateSettings({
-                          pointOrientation: e.target
-                            .value as typeof settings.pointOrientation,
-                        })
-                      }
-                    />
-                    Violin
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="pointOrientation"
-                      value="Box"
-                      checked={settings.pointOrientation === "Box"}
-                      onChange={(e) =>
-                        updateSettings({
-                          pointOrientation: e.target
-                            .value as typeof settings.pointOrientation,
-                        })
-                      }
-                    />
+                  <ToggleButton id="Box" isDisabled={!settings.showBox}>
                     Box
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name="pointOrientation"
-                      value="None"
-                      checked={settings.pointOrientation === "None"}
-                      onChange={(e) =>
-                        updateSettings({
-                          pointOrientation: e.target
-                            .value as typeof settings.pointOrientation,
-                        })
-                      }
-                    />
-                    None
-                  </label>
-                </div>
+                  </ToggleButton>
+                </ToggleButtonGroup>
 
-                <NumberInput
-                  label="Point Position"
-                  field="pointPos"
+                <Slider
+                  label="Position"
                   value={settings.pointPos}
-                  type="float"
-                  updateValue={updateSettings}
-                  min={-2}
-                  max={2}
+                  isDisabled={!settings.showViolin}
+                  onChange={(value) => updateSettings({ pointPos: value })}
+                  minValue={-2}
+                  maxValue={2}
                   step={0.1}
                 />
 
@@ -593,57 +603,15 @@ export const Violin = ({
                     </div>
                   </div>
                 </div>
+              </div>
 
-                <div className="field">
-                  <label htmlFor="show-mean">Show Mean</label>
-                  <div className="col-3">
-                    <label>
-                      <input
-                        type="radio"
-                        name="showMeanline"
-                        value="Violin"
-                        checked={settings.showMeanline === "Violin"}
-                        onChange={(e) =>
-                          updateSettings({
-                            showMeanline: e.target
-                              .value as typeof settings.showMeanline,
-                          })
-                        }
-                      />
-                      Violin
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="showMeanline"
-                        value="Box"
-                        checked={settings.showMeanline === "Box"}
-                        onChange={(e) =>
-                          updateSettings({
-                            showMeanline: e.target
-                              .value as typeof settings.showMeanline,
-                          })
-                        }
-                      />
-                      Box
-                    </label>
-                    <label>
-                      <input
-                        type="radio"
-                        name="showMeanline"
-                        value="None"
-                        checked={settings.showMeanline === "None"}
-                        onChange={(e) =>
-                          updateSettings({
-                            showMeanline: e.target
-                              .value as typeof settings.showMeanline,
-                          })
-                        }
-                      />
-                      None
-                    </label>
-                  </div>
-                </div>
+              <div className="group">
+                <Switch
+                  isSelected={settings.showMeanline}
+                  onChange={(value) => updateSettings({ showMeanline: value })}
+                >
+                  Mean
+                </Switch>
               </div>
             </div>
           </div>

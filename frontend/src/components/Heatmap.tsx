@@ -133,7 +133,7 @@ export const Heatmap = ({
         <div className="app-sidebar-toolbar">
           <div className="form">
             <div className="group">
-              <div className="field">
+              <div className="field padded flush">
                 <div className="col-2 aligned colorscale-setting">
                   <label className="header" htmlFor="colorscale">
                     Colorscale

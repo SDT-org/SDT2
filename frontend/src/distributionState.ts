@@ -57,12 +57,12 @@ export type DistributionState = {
     markerColor: ColorString;
     markerSize: number;
     pointOpacity: number;
-    pointOrientation: "Violin" | "Box" | "None";
+    pointOrientation: "Violin" | "Box";
     pointPos: number;
     points: "all" | "outliers" | "suspectedoutliers" | false;
     showAxisLines: boolean;
     showBox: boolean;
-    showMeanline: "Violin" | "Box" | "None";
+    showMeanline: boolean;
     showPoints: boolean;
     showViolin: boolean;
     showZeroLine: boolean;
@@ -129,7 +129,7 @@ const initialDistributionState: DistributionState = {
     points: "all",
     showAxisLines: true,
     showBox: true,
-    showMeanline: "Violin",
+    showMeanline: true,
     showPoints: true,
     showViolin: true,
     showZeroLine: false,
