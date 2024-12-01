@@ -273,8 +273,8 @@ export const Violin = ({
                             strokeMiterlimit: 10,
                           }}
                         >
-                          <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4zM9 7v10M6 9l3-2" />
-                          <path d="M15.5 17a2.5 2.5 0 0 1-2.5-2.5v-5a2.5 2.5 0 1 1 5 0v5a2.5 2.5 0 0 1-2.5 2.5z" />
+                          <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4z" />
+                          <path d="M8 17v-6a4 4 0 0 1 8 0v6M8 13h8" />
                         </g>
                       </svg>
                     </ToggleButton>
@@ -299,8 +299,8 @@ export const Violin = ({
                             strokeMiterlimit: 10,
                           }}
                         >
-                          <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4z" />
-                          <path d="M8 17v-6a4 4 0 0 1 8 0v6M8 13h8" />
+                          <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4zM9 7v10M6 9l3-2" />
+                          <path d="M15.5 17a2.5 2.5 0 0 1-2.5-2.5v-5a2.5 2.5 0 1 1 5 0v5a2.5 2.5 0 0 1-2.5 2.5z" />
                         </g>
                       </svg>
                     </ToggleButton>
