@@ -57,7 +57,6 @@ export const Raincloud = ({
           width: settings.lineWidth,
         },
         fillcolor: settings.fillColor,
-        opacity: settings.violinOpacity,
         pointpos: settings.pointPos,
         jitter: settings.jitter,
         bandwidth: settings.bandwidth,

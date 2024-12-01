@@ -65,7 +65,6 @@ export type DistributionState = {
     showPoints: boolean;
     showViolin: boolean;
     showZeroLine: boolean;
-    violinOpacity: number;
     whiskerWidth: number;
     plotOrientation: "horizontal" | "vertical";
   };

@@ -62,7 +62,6 @@ export const Violin = ({
           width: settings.lineWidth,
         },
         fillcolor: settings.fillColor,
-        opacity: settings.violinOpacity,
         meanline: {
           visible: settings.showMeanline,
         },
