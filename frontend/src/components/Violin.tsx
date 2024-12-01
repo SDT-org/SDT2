@@ -340,7 +340,6 @@ export const Violin = ({
                 <Label className="header">Band</Label>
                 <div className="field col-2 has-color">
                   <ColorPicker
-                    label="Color"
                     value={settings.fillColor}
                     onChange={(value) => {
                       updateSettings({
@@ -363,7 +362,6 @@ export const Violin = ({
                 <Label className="header">Line</Label>
                 <div className="field col-2 has-color">
                   <ColorPicker
-                    label="Color"
                     value={settings.lineColor}
                     onChange={(value) =>
                       updateSettings({
