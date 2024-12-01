@@ -42,7 +42,6 @@ export type DistributionState = {
     showAxisLines: boolean;
     showPoints: boolean;
     showZeroLine: boolean;
-    violinOpacity: number;
     plotOrientation: "horizontal" | "vertical";
   };
   violin: VisualizationBase & {
@@ -107,7 +106,6 @@ const initialDistributionState: DistributionState = {
     showAxisLines: true,
     showPoints: true,
     showZeroLine: false,
-    violinOpacity: 0.5,
     fillColor: Colors.LightBlue,
   },
   violin: {
@@ -133,7 +131,6 @@ const initialDistributionState: DistributionState = {
     showPoints: true,
     showViolin: true,
     showZeroLine: false,
-    violinOpacity: 0.5,
     whiskerWidth: 0.2,
   },
 };
