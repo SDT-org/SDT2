@@ -22,7 +22,7 @@ export type DistributionState = {
   visualization: Visualization;
   dataSet: keyof DataSets;
   histogram: VisualizationBase & {
-    barColor: ColorString;
+    binColor: ColorString;
     binSize: number;
     histOutlineWidth: number;
     histnorm: "probability" | "percent";
@@ -32,6 +32,8 @@ export type DistributionState = {
   };
   raincloud: VisualizationBase & {
     bandwidth: number;
+    showMeanline: boolean;
+    side: "positive";
     fillColor: ColorString;
     jitter: number;
     markerColor: ColorString;

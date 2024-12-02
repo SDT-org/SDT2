@@ -1,13 +1,16 @@
 import Plotly from "plotly.js-dist-min";
 import type { Layout, PlotData } from "plotly.js-dist-min";
 import React from "react";
+import { Label, ToggleButton, ToggleButtonGroup } from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
-import type { Colors } from "../colors";
+import type { ColorString } from "../colors";
 import type { DataSets, DistributionState } from "../distributionState";
-import { formatTitle } from "../helpers";
 import type { DistributionData } from "../plotTypes";
-import { ColorOptions } from "./ColorOptions";
-import { NumberInput } from "./NumberInput";
+import { ColorPicker } from "./ColorPicker";
+import { Select, SelectItem } from "./Select";
+import { Slider } from "./Slider";
+import { Switch } from "./Switch";
+import { Tooltip } from "./Tooltip";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -39,19 +42,15 @@ export const Raincloud = ({
   const minDataValue = Math.min(...dataSet);
   const maxDataValue = Math.max(...dataSet);
 
-  const [showPoints, setShowPoints] = React.useState(false);
-
-  // TODO: use Switch
-  console.log(setShowPoints);
-
   const rainCloudTrace = React.useMemo(
     () =>
       ({
         type: "violin",
         name: "",
         x: dataSet,
-        side: "negative",
-        points: showPoints ? settings.points : false,
+        side: "positive",
+        points: settings.showPoints ? settings.points : false,
+        showPoints:true,
         line: {
           color: settings.lineColor,
           width: settings.lineWidth,
@@ -67,19 +66,19 @@ export const Raincloud = ({
           opacity: settings.pointOpacity,
         },
         meanline: {
-          visible: true,
+          visible: settings.showMeanline,
         },
         hovertemplate: "%{text}<br> <br>Percent Identity: %{x}<extra></extra>",
         text: data.identity_combos.map(
           (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}`,
         ),
       }) as Partial<PlotData>,
-    [data.identity_combos, dataSet, settings, showPoints],
+    [data.identity_combos, dataSet, settings],
   );
 
   const layout = React.useMemo(() => {
     return {
-      title: settings.plotTitle,
+      title: "",
       uirevision: "true",
       xaxis: {
         side: "left",
@@ -116,250 +115,263 @@ export const Raincloud = ({
           <div className="form">
             {sidebarComponent}
             <div className="group">
-              <div className="field">
-                <label htmlFor="plot-title" className="header">
-                  Title
-                </label>
-                <input
-                  id="plot-title"
-                  type="text"
-                  value={settings.plotTitle}
-                  onChange={(e) =>
-                    updateSettings({ plotTitle: e.target.value })
+              <div className="drawer">
+                <ToggleButtonGroup
+                  data-icon-only
+                  selectionMode="multiple"
+                  selectedKeys={Object.keys(settings).filter(
+                    (key) =>
+                      [
+                        "showGrid",
+                        "showTickLabels",
+                        "showAxisLines",
+                        "showAxisLabels",
+                      ].includes(key) && settings[key as keyof typeof settings],
+                  )}
+                  onSelectionChange={(value) =>
+                    updateSettings({
+                      showGrid: value.has("showGrid"),
+                      showTickLabels: value.has("showTickLabels"),
+                      showAxisLines: value.has("showAxisLines"),
+                      showAxisLabels: value.has("showAxisLabels"),
+                    })
                   }
+                >
+                  <Tooltip tooltip="Toggle grid">
+                    <ToggleButton id="showGrid" aria-label="Toggle grid">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <g
+                          style={{
+                            fill: "none",
+                            stroke: "currentcolor",
+                            strokeWidth: 2,
+                            strokeLinecap: "round",
+                            strokeLinejoin: "round",
+                            strokeMiterlimit: 10,
+                          }}
+                        >
+                          <path d="M9 3v18M15 3v18M3 15h18M21 9H3M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2z" />
+                        </g>
+                      </svg>
+                    </ToggleButton>
+                  </Tooltip>
+                  <Tooltip tooltip="Toggle axis lines">
+                    <ToggleButton
+                      id="showAxisLines"
+                      aria-label="Toggle axis lines"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <g
+                          style={{
+                            fill: "none",
+                            stroke: "currentcolor",
+                            strokeWidth: 2,
+                            strokeLinecap: "round",
+                            strokeLinejoin: "round",
+                            strokeMiterlimit: 10,
+                          }}
+                        >
+                          <path d="M1 1v22h22" />
+                          <path d="m7 17 5-6 5 1 6-7" />
+                        </g>
+                      </svg>
+                    </ToggleButton>
+                  </Tooltip>
+                  <Tooltip tooltip="Toggle axis labels">
+                    <ToggleButton
+                      id="showAxisLabels"
+                      aria-label="Toggle axis labels"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <g
+                          style={{
+                            fill: "none",
+                            stroke: "currentcolor",
+                            strokeWidth: 2,
+                            strokeLinecap: "round",
+                            strokeLinejoin: "round",
+                            strokeMiterlimit: 10,
+                          }}
+                        >
+                          <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4z" />
+                          <path d="M8 17v-6a4 4 0 0 1 8 0v6M8 13h8" />
+                        </g>
+                      </svg>
+                    </ToggleButton>
+                  </Tooltip>
+                  <Tooltip tooltip="Toggle axis title">
+                    <ToggleButton
+                      id="showTickLabels"
+                      aria-label="Toggle axis title"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <g
+                          style={{
+                            fill: "none",
+                            stroke: "currentcolor",
+                            strokeWidth: 2,
+                            strokeLinecap: "round",
+                            strokeLinejoin: "round",
+                            strokeMiterlimit: 10,
+                          }}
+                        >
+                          <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4zM9 7v10M6 9l3-2" />
+                          <path d="M15.5 17a2.5 2.5 0 0 1-2.5-2.5v-5a2.5 2.5 0 1 1 5 0v5a2.5 2.5 0 0 1-2.5 2.5z" />
+                        </g>
+                      </svg>
+                    </ToggleButton>
+                  </Tooltip>
+                </ToggleButtonGroup>
+              </div>
+            </div>
+            <div className="group">
+              <Label className="header">Band</Label>
+              <div className="col-2 auto-onefr">
+                <ColorPicker
+                  value={settings.fillColor}
+                  onChange={(value) => {
+                    updateSettings({
+                      fillColor: value.toString() as ColorString,
+                    });
+                  }}
+                />
+                <Slider
+                  label="Bandwidth"
+                  defaultValue={settings.bandwidth}
+                  onChange={(value) => updateSettings({ bandwidth: value })}
+                  minValue={0}
+                  maxValue={20}
+                  step={1}
                 />
               </div>
-              <div className="row">
-                <div className="col-2">
-                  <div className="field">
-                    <label htmlFor="showGrid">
-                      <input
-                        type="checkbox"
-                        name="showGrid"
-                        id="showGrid"
-                        checked={settings.showGrid}
-                        onChange={() =>
-                          updateSettings({ showGrid: !settings.showGrid })
-                        }
-                      />
-                      Grid
-                    </label>
-                  </div>
-                  <div className="field">
-                    <label htmlFor="showTickLabels">
-                      <input
-                        type="checkbox"
-                        name="showTickLabels"
-                        id="showTickLabels"
-                        checked={settings.showTickLabels}
-                        onChange={() =>
-                          updateSettings({
-                            showTickLabels: !settings.showTickLabels,
-                          })
-                        }
-                      />
-                      Tick Labels
-                    </label>
-                  </div>
+              <Label className="header">Line</Label>
+              <div className="col-2 auto-onefr">
+                <ColorPicker
+                  value={settings.lineColor}
+                  onChange={(value) =>
+                    updateSettings({
+                      lineColor: value.toString() as ColorString,
+                    })
+                  }
+                />
+                <Slider
+                  label="Width"
+                  value={settings.lineWidth}
+                  onChange={(value) => updateSettings({ lineWidth: value })}
+                  minValue={0}
+                  maxValue={20}
+                  step={1}
+                />
+              </div>
+            </div>
+            <div className="group">
+              <div
+                className="drawer"
+                data-hidden={!settings.showPoints}
+                aria-hidden={!settings.showPoints}
+              >
+                <div className="col-2 auto-onefr align-items-center">
+                  <Label htmlFor="points-type">Type</Label>
+                  <Select
+                    data-compact
+                    id="points-type"
+                    selectedKey={settings.points}
+                    onSelectionChange={(value) => {
+                      updateSettings({
+                        points: value as typeof settings.points,
+                      });
+                    }}
+                    items={Object.entries({
+                      all: "All",
+                      outliers: "Outliers",
+                      suspectedoutliers: "Suspected Outliers",
+                    }).map(([id, name]) => ({
+                      id,
+                      name,
+                    }))}
+                  >
+                    {(item) => (
+                      <SelectItem textValue={item.name}>{item.name}</SelectItem>
+                    )}
+                  </Select>
                 </div>
-                <div className="col-2">
-                  <div className="field">
-                    <label htmlFor="showAxisLines">
-                      <input
-                        type="checkbox"
-                        name="showAxisLines"
-                        id="showAxisLines"
-                        checked={settings.showAxisLines}
-                        onChange={() =>
-                          updateSettings({
-                            showAxisLines: !settings.showAxisLines,
-                          })
-                        }
-                      />
-                      Axis Lines
-                    </label>
-                  </div>
-                  <div className="field">
-                    <label htmlFor="showAxisLabels">
-                      <input
-                        type="checkbox"
-                        name="showAxisLabels"
-                        id="showAxisLabels"
-                        checked={settings.showAxisLabels}
-                        onChange={() =>
-                          updateSettings({
-                            showAxisLabels: !settings.showAxisLabels,
-                          })
-                        }
-                      />
-                      Axis Title
-                    </label>
-                  </div>
+
+                <Slider
+                  label="Position"
+                  value={settings.pointPos}
+                  onChange={(value) => updateSettings({ pointPos: value })}
+                  minValue={-2}
+                  maxValue={2}
+                  step={0.1}
+                />
+
+                <Slider
+                  label="Jitter"
+                  value={settings.jitter}
+                  onChange={(value) => updateSettings({ jitter: value })}
+                  minValue={0}
+                  maxValue={1}
+                  step={0.1}
+                />
+
+                <Slider
+                  label="Size"
+                  value={settings.markerSize}
+                  onChange={(value) => updateSettings({ markerSize: value })}
+                  minValue={0}
+                  maxValue={20}
+                  step={1}
+                />
+
+                <Slider
+                  label="Opacity"
+                  value={settings.pointOpacity}
+                  onChange={(value) => updateSettings({ pointOpacity: value })}
+                  minValue={0}
+                  maxValue={1}
+                  step={0.1}
+                />
+
+                <div className="col-2 onefr-auto small-color align-items-center">
+                  <Label>Color</Label>
+                  <ColorPicker
+                    value={settings.markerColor}
+                    onChange={(value) => {
+                      updateSettings({
+                        markerColor: value.toString() as ColorString,
+                      });
+                    }}
+                  />
                 </div>
               </div>
             </div>
             <div className="group">
-              <h4>Cloud</h4>
-              <div className="row">
-                <div className="col-2">
-                  <div className="field">
-                    <label htmlFor="fill-color">Fill Color</label>
-                    <select
-                      id="fill-color"
-                      value={settings.fillColor}
-                      onChange={(e) =>
-                        updateSettings({
-                          fillColor: e.target.value as ColorOption,
-                        })
-                      }
-                    >
-                      <ColorOptions />
-                    </select>
-                  </div>
-                  <div className="field">
-                    <NumberInput
-                      label="Band Width"
-                      field="bandwidth"
-                      value={settings.bandwidth}
-                      updateValue={updateSettings}
-                      min={0}
-                      max={20}
-                      step={1}
-                    />
-                  </div>
-                </div>
-                <div className="col-2">
-                  <div className="field">
-                    <label htmlFor="line-color">Line Color</label>
-                    <select
-                      id="line-color"
-                      value={settings.lineColor}
-                      onChange={(e) =>
-                        updateSettings({
-                          lineColor: e.target.value as ColorOption,
-                        })
-                      }
-                    >
-                      <ColorOptions />
-                    </select>
-                  </div>
-                  <div className="field">
-                    <NumberInput
-                      label="Line Width"
-                      field="lineWidth"
-                      value={settings.lineWidth}
-                      updateValue={updateSettings}
-                      min={0}
-                      max={20}
-                      step={1}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="group">
-              <h4>Points</h4>
-              <div className="row">
-                <div className="col-2">
-                  <div className="field">
-                    <label htmlFor="points">Display</label>
-                    <select
-                      id="points"
-                      value={settings.points.toString()}
-                      onChange={(e) =>
-                        updateSettings({
-                          points: e.target.value as
-                            | "all"
-                            | "outliers"
-                            | "suspectedoutliers"
-                            | false,
-                        })
-                      }
-                    >
-                      {["all", "outliers", "suspectedoutliers", "None"].map(
-                        (value) => (
-                          <option key={value} value={value}>
-                            {value === "None" ? "None" : formatTitle(value)}
-                          </option>
-                        ),
-                      )}
-                    </select>
-                  </div>
-                  <div className="field">
-                    <NumberInput
-                      label="Position"
-                      field="pointPos"
-                      value={settings.pointPos}
-                      type="float"
-                      updateValue={updateSettings}
-                      min={-2}
-                      max={-1}
-                      step={0.1}
-                    />
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-2">
-                    <div className="field">
-                      <label htmlFor="markerColor">Color</label>
-                      <select
-                        id="markerColor"
-                        value={settings.markerColor}
-                        onChange={(e) =>
-                          updateSettings({
-                            markerColor: e.target.value as ColorOption,
-                          })
-                        }
-                      >
-                        <ColorOptions />
-                      </select>
-                    </div>
-                    <div className="field">
-                      <NumberInput
-                        label="Size"
-                        field="markerSize"
-                        value={settings.markerSize}
-                        updateValue={updateSettings}
-                        min={0}
-                        max={20}
-                        step={1}
-                      />
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-2">
-                      <div className="field">
-                        <NumberInput
-                          label="Opacity"
-                          field="pointOpacity"
-                          type="float"
-                          value={settings.pointOpacity}
-                          updateValue={updateSettings}
-                          min={0}
-                          max={1}
-                          step={0.1}
-                        />
-                      </div>
-                      <div className="field">
-                        <NumberInput
-                          label="Jitter"
-                          field="jitter"
-                          value={settings.jitter}
-                          type="float"
-                          updateValue={updateSettings}
-                          min={0}
-                          max={1}
-                          step={0.1}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <Switch
+                isSelected={settings.showMeanline}
+                onChange={(value) => updateSettings({ showMeanline: value })}
+              >
+                Mean
+              </Switch>
             </div>
           </div>
-          {footer ? <div className="app-sidebar-footer">{footer}</div> : null}
         </div>
+        {footer ? <div className="app-sidebar-footer">{footer}</div> : null}
       </div>
       <div className="app-main">
         <Plot
@@ -367,9 +379,10 @@ export const Raincloud = ({
           layout={layout}
           config={{
             responsive: true,
-            displayModeBar: false,
+            displayModeBar: true,
             scrollZoom: true,
             displaylogo: false,
+            editable: true,
           }}
           style={{ width: "100%", height: "100%" }}
         />

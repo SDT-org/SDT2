@@ -1,12 +1,15 @@
 import Plotly from "plotly.js-dist-min";
 import type { Layout, PlotData } from "plotly.js-dist-min";
 import React from "react";
+import { Label, ToggleButton, ToggleButtonGroup } from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
-import type { Colors } from "../colors";
+import type { ColorString } from "../colors";
 import type { DataSets, DistributionState } from "../distributionState";
 import type { DistributionData } from "../plotTypes";
-import { ColorOptions } from "./ColorOptions";
-import { NumberInput } from "./NumberInput";
+import { ColorPicker } from "./ColorPicker";
+import { Slider } from "./Slider";
+import { Switch } from "./Switch";
+import { Tooltip } from "./Tooltip";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -44,7 +47,7 @@ export const Histogram = ({
         x: dataSet,
         histnorm: "percent",
         marker: {
-          color: settings.barColor,
+          color: settings.binColor,
           line: {
             width: settings.histOutlineWidth,
             color: settings.histlineColor,
@@ -63,19 +66,17 @@ export const Histogram = ({
   const layout = React.useMemo(
     () =>
       ({
-        title: settings.plotTitle,
+        title: "",
         uirevision: "true",
         xaxis: {
           title: settings.showAxisLabels ? "Percent Pairwise Identity" : "",
           side: "bottom",
           rangemode: "normal",
           fixedrange: true,
-          // dtick: settings.showTickLabels ? 1 : undefined,
-          showline: settings.showLine,
-          zeroline: settings.showLine,
+          zeroline: false,
           showgrid: settings.showGrid,
           showticklabels: settings.showTickLabels,
-          // automargin: true,
+          showline: settings.showLine,
         },
         yaxis: {
           title: settings.showAxisLabels
@@ -84,13 +85,11 @@ export const Histogram = ({
           side: "left",
           rangemode: "tozero",
           fixedrange: true,
-          showline: settings.showLine,
-          zeroline: settings.showLine,
+          zeroline: false,
           showgrid: settings.showGrid,
           showticklabels: settings.showTickLabels,
-          // automargin: true,
+          showline: settings.showLine,
         },
-
         dragmode: "pan",
         barmode: "overlay",
         showlegend: true,
@@ -106,142 +105,173 @@ export const Histogram = ({
           <div className="form">
             {sidebarComponent}
             <div className="group">
-              <div className="field">
-                <label htmlFor="plot-title" className="header">
-                  Title
-                </label>
-                <input
-                  id="plot-title"
-                  type="text"
-                  value={settings.plotTitle}
-                  onChange={(e) =>
-                    updateSettings({ plotTitle: e.target.value })
+              <div className="drawer">
+                <ToggleButtonGroup
+                  data-icon-only
+                  selectionMode="multiple"
+                  selectedKeys={Object.keys(settings).filter(
+                    (key) =>
+                      [
+                        "showGrid",
+                        "showTickLabels",
+                        "showLine",
+                        "showAxisLabels",
+                      ].includes(key) && settings[key as keyof typeof settings],
+                  )}
+                  onSelectionChange={(value) =>
+                    updateSettings({
+                      showGrid: value.has("showGrid"),
+                      showTickLabels: value.has("showTickLabels"),
+                      showLine: value.has("showLine"),
+                      showAxisLabels: value.has("showAxisLabels"),
+                    })
                   }
-                />
-              </div>
-              <div className="row">
-                <div className="col-2">
-                  <div className="field">
-                    <label htmlFor="showGrid">
-                      <input
-                        type="checkbox"
-                        name="showGrid"
-                        id="showGrid"
-                        checked={settings.showGrid}
-                        onChange={() =>
-                          updateSettings({
-                            showGrid: !settings.showGrid,
-                          })
-                        }
-                      />
-                      Grid
-                    </label>
-                  </div>
-                  <div className="field">
-                    <label htmlFor="showTickLabels">
-                      <input
-                        type="checkbox"
-                        name="showTickLabels"
-                        id="showTickLabels"
-                        checked={settings.showTickLabels}
-                        onChange={() =>
-                          updateSettings({
-                            showTickLabels: !settings.showTickLabels,
-                          })
-                        }
-                      />
-                      Tick Labels
-                    </label>
-                  </div>
-                </div>
-              </div>
-              <div className="col-2">
-                <div className="field">
-                  <label htmlFor="showLine">
-                    <input
-                      type="checkbox"
-                      name="showLine"
-                      id="showLine"
-                      checked={settings.showLine}
-                      onChange={() =>
-                        updateSettings({
-                          showLine: !settings.showLine,
-                        })
-                      }
-                    />
-                    Axis Lines
-                  </label>
-                </div>
-                <div className="field">
-                  <label htmlFor="showAxisLabels">
-                    <input
-                      type="checkbox"
-                      name="showAxisLabels"
+                >
+                  <Tooltip tooltip="Toggle grid">
+                    <ToggleButton id="showGrid" aria-label="Toggle grid">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <g
+                          style={{
+                            fill: "none",
+                            stroke: "currentcolor",
+                            strokeWidth: 2,
+                            strokeLinecap: "round",
+                            strokeLinejoin: "round",
+                            strokeMiterlimit: 10,
+                          }}
+                        >
+                          <path d="M9 3v18M15 3v18M3 15h18M21 9H3M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2z" />
+                        </g>
+                      </svg>
+                    </ToggleButton>
+                  </Tooltip>
+                  <Tooltip tooltip="Toggle axis lines">
+                    <ToggleButton id="showLine" aria-label="Toggle axis lines">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <g
+                          style={{
+                            fill: "none",
+                            stroke: "currentcolor",
+                            strokeWidth: 2,
+                            strokeLinecap: "round",
+                            strokeLinejoin: "round",
+                            strokeMiterlimit: 10,
+                          }}
+                        >
+                          <path d="M1 1v22h22" />
+                          <path d="m7 17 5-6 5 1 6-7" />
+                        </g>
+                      </svg>
+                    </ToggleButton>
+                  </Tooltip>
+                  <Tooltip tooltip="Toggle axis labels">
+                    <ToggleButton
                       id="showAxisLabels"
-                      checked={settings.showAxisLabels}
-                      onChange={() =>
-                        updateSettings({
-                          showAxisLabels: !settings.showAxisLabels,
-                        })
-                      }
-                    />
-                    Axis Title
-                  </label>
-                </div>
+                      aria-label="Toggle axis labels"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <g
+                          style={{
+                            fill: "none",
+                            stroke: "currentcolor",
+                            strokeWidth: 2,
+                            strokeLinecap: "round",
+                            strokeLinejoin: "round",
+                            strokeMiterlimit: 10,
+                          }}
+                        >
+                          <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4z" />
+                          <path d="M8 17v-6a4 4 0 0 1 8 0v6M8 13h8" />
+                        </g>
+                      </svg>
+                    </ToggleButton>
+                  </Tooltip>
+                  <Tooltip tooltip="Toggle axis title">
+                    <ToggleButton
+                      id="showTickLabels"
+                      aria-label="Toggle axis title"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <g
+                          style={{
+                            fill: "none",
+                            stroke: "currentcolor",
+                            strokeWidth: 2,
+                            strokeLinecap: "round",
+                            strokeLinejoin: "round",
+                            strokeMiterlimit: 10,
+                          }}
+                        >
+                          <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4zM9 7v10M6 9l3-2" />
+                          <path d="M15.5 17a2.5 2.5 0 0 1-2.5-2.5v-5a2.5 2.5 0 1 1 5 0v5a2.5 2.5 0 0 1-2.5 2.5z" />
+                        </g>
+                      </svg>
+                    </ToggleButton>
+                  </Tooltip>
+                </ToggleButtonGroup>
               </div>
             </div>
             <div className="group">
               <div className="row">
                 <div className="col-2">
-                  <div className="field">
-                    <label htmlFor="bin-color">Bin Color</label>
-                    <select
-                      id="bin-color"
-                      value={settings.barColor}
-                      onChange={(e) =>
+                  <Label className="header">Bins</Label>
+                  <div className="auto-onefr">
+                    <ColorPicker
+                      value={settings.binColor}
+                      onChange={(value) => {
                         updateSettings({
-                          barColor: e.target.value as ColorOption,
-                        })
-                      }
-                    >
-                      <ColorOptions />
-                    </select>
+                          binColor: value.toString() as ColorString,
+                        });
+                      }}
+                    />
+                    <Slider
+                      label="Width"
+                      defaultValue={settings.binSize}
+                      onChange={(value) => updateSettings({ binSize: value })}
+                      minValue={0}
+                      maxValue={5}
+                      step={0.5}
+                    />
                   </div>
-                  <NumberInput
-                    label="Bin Size"
-                    field="binSize"
-                    value={settings.binSize}
-                    updateValue={updateSettings}
-                    type="float"
-                    min={0.5}
-                    max={5}
-                    step={0.5}
-                  />
                 </div>
                 <div className="col-2">
-                  <div className="field">
-                    <label htmlFor="hist-line-color">Outline Color</label>
-                    <select
-                      id="hist-line-color"
+                  <Label className="header">Outline</Label>
+                  <div className="auto-onefr">
+                    <ColorPicker
                       value={settings.histlineColor}
-                      onChange={(e) =>
+                      onChange={(value) => {
                         updateSettings({
-                          histlineColor: e.target.value as ColorOption,
-                        })
+                          histlineColor: value.toString() as ColorString,
+                        });
+                      }}
+                    />
+                    <Slider
+                      label="Width"
+                      defaultValue={settings.histOutlineWidth}
+                      onChange={(value) =>
+                        updateSettings({ histOutlineWidth: value })
                       }
-                    >
-                      <ColorOptions />
-                    </select>
+                      minValue={0}
+                      maxValue={15}
+                      step={1}
+                    />
                   </div>
-                  <NumberInput
-                    label="Outline Width"
-                    field="histOutlineWidth"
-                    value={settings.histOutlineWidth}
-                    updateValue={updateSettings}
-                    min={0}
-                    max={15}
-                    step={1}
-                  />
                 </div>
               </div>
             </div>
