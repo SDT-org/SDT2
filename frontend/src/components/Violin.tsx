@@ -514,7 +514,7 @@ export const Violin = ({
                 />
 
                 <Slider
-                  label="Point Size"
+                  label="Size"
                   value={settings.markerSize}
                   isDisabled={!settings.showPoints}
                   onChange={(value) => updateSettings({ markerSize: value })}
@@ -524,7 +524,7 @@ export const Violin = ({
                 />
 
                 <div className="col-2 onefr-auto small-color align-items-center">
-                  <Label>Point Color</Label>
+                  <Label>Color</Label>
                   <ColorPicker
                     value={settings.boxlineColor}
                     onChange={(value) => {
