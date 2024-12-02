@@ -338,7 +338,7 @@ export const Violin = ({
                 aria-hidden={!settings.showViolin}
               >
                 <Label className="header">Band</Label>
-                <div className="field col-2 has-color">
+                <div className="col-2 auto-onefr">
                   <ColorPicker
                     value={settings.fillColor}
                     onChange={(value) => {
@@ -358,7 +358,7 @@ export const Violin = ({
                   />
                 </div>
                 <Label className="header">Line</Label>
-                <div className="field col-2 has-color">
+                <div className="col-2 auto-onefr">
                   <ColorPicker
                     value={settings.lineColor}
                     onChange={(value) =>
@@ -391,91 +391,57 @@ export const Violin = ({
                 data-hidden={!settings.showBox}
                 aria-hidden={!settings.showBox}
               >
-                <div className="col-2">
-                  <div className="field">
-                    <label htmlFor="box-fill-color">Fill Color</label>
-                    <select
-                      id="box-fill-color"
-                      value={settings.boxfillColor}
-                      disabled={!settings.showBox}
-                      onChange={(e) =>
-                        updateSettings({
-                          boxfillColor: e.target.value as ColorOption,
-                        })
-                      }
-                    >
-                      <ColorOptions />
-                    </select>
-                  </div>
-                  <div className="field">
-                    <NumberInput
-                      label="Box Width"
-                      field="boxWidth"
-                      value={settings.boxWidth}
-                      isDisabled={!settings.showBox}
-                      updateValue={updateSettings}
-                      min={0.5}
-                      max={1}
-                      step={0.05}
-                      type="float"
-                    />
-                  </div>
+                <div className="col-2 onefr-auto">
+                  <Slider
+                    label="Fill Width"
+                    value={settings.boxWidth}
+                    isDisabled={!settings.showBox}
+                    onChange={(value) => updateSettings({ boxWidth: value })}
+                    minValue={0.5}
+                    maxValue={1}
+                    step={0.05}
+                  />
+                  <ColorPicker
+                    value={settings.boxfillColor}
+                    onChange={(value) => {
+                      updateSettings({
+                        boxfillColor: value.toString() as ColorString,
+                      });
+                    }}
+                  />
                 </div>
-                <div className="col-2">
-                  <div className="field">
-                    <label htmlFor="box-line-color">Line Color</label>
-                    <select
-                      id="box-line-color"
-                      value={settings.boxlineColor}
-                      disabled={!settings.showBox}
-                      onChange={(e) =>
-                        updateSettings({
-                          boxlineColor: e.target.value as ColorOption,
-                        })
-                      }
-                    >
-                      <ColorOptions />
-                    </select>
-                  </div>
-                  <div className="field">
-                    <NumberInput
-                      label="Line Width"
-                      field="boxlineWidth"
-                      value={settings.boxlineWidth}
-                      isDisabled={!settings.showBox}
-                      updateValue={updateSettings}
-                      min={0}
-                      max={20}
-                      step={1}
-                    />
-                  </div>
+
+                <div className="col-2 onefr-auto">
+                  <Slider
+                    label="Line Thickness"
+                    value={settings.boxlineWidth}
+                    isDisabled={!settings.showBox}
+                    onChange={(value) =>
+                      updateSettings({ boxlineWidth: value })
+                    }
+                    minValue={0}
+                    maxValue={20}
+                    step={1}
+                  />
+                  <ColorPicker
+                    value={settings.boxlineColor}
+                    onChange={(value) => {
+                      updateSettings({
+                        boxlineColor: value.toString() as ColorString,
+                      });
+                    }}
+                  />
                 </div>
-                <div className="row">
-                  <div className="col-2">
-                    <NumberInput
-                      label="Box Opacity"
-                      field="boxOpacity"
-                      type="float"
-                      value={settings.boxOpacity}
-                      isDisabled={!settings.showBox}
-                      updateValue={updateSettings}
-                      min={0}
-                      max={1}
-                      step={0.1}
-                    />
-                    <NumberInput
-                      label="Whiskers"
-                      field="whiskerWidth"
-                      value={settings.whiskerWidth}
-                      type="float"
-                      isDisabled={!settings.showBox}
-                      updateValue={updateSettings}
-                      min={0}
-                      max={1}
-                      step={0.1}
-                    />
-                  </div>
-                </div>
+                <hr />
+                <Slider
+                  label="Whiskers"
+                  value={settings.whiskerWidth}
+                  isDisabled={!settings.showBox}
+                  onChange={(value) => updateSettings({ whiskerWidth: value })}
+                  minValue={0}
+                  maxValue={1}
+                  step={0.1}
+                />
               </div>
             </div>
             <div className="group">

@@ -452,6 +452,13 @@ small {
     }
   }
 
+  hr {
+    border: 0;
+    border-top: 0.1rem solid var(--border-color);
+    height: 0.1rem;
+    margin: 1.6rem 0;
+  }
+
   .react-aria-Switch,
   .drawer {
     padding: var(--app-container-padding);
@@ -474,20 +481,20 @@ small {
     }
   }
 
-  .has-color {
-    margin: 0.8rem 0;
-    display: grid;
+  .auto-onefr {
     grid-template-columns: auto 1fr;
     justify-content: space-between;
     gap: 1.6rem;
-    align-items: center;
+  }
 
-    .color-picker {
-      align-items: flex-start;
-      justify-items: flex-start;
-      gap: 0.1rem;
-      flex-direction: column-reverse;
-    }
+  .onefr-auto {
+    grid-template-columns: 1fr auto;
+    justify-content: space-between;
+    gap: 1.6rem;
+  }
+
+  .color-picker {
+    gap: 0;
   }
 }
 
