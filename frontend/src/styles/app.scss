@@ -493,8 +493,30 @@ small {
     gap: 1.6rem;
   }
 
+  .align-items-center {
+    align-items: center;
+  }
+
   .color-picker {
     gap: 0;
+  }
+  .small-color .react-aria-ColorSwatch {
+    width: 2.4rem;
+    height: 2.4rem;
+    border-radius: 0.5rem;
+  }
+
+  .col-2 .react-aria-Select {
+    justify-self: flex-end;
+
+    &[data-compact] {
+      .react-aria-Button {
+        font-size: 1.3rem;
+        padding-left: 0.8rem;
+        padding-right: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+    }
   }
 }
 

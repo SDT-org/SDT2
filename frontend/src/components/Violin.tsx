@@ -1,20 +1,13 @@
 import Plotly from "plotly.js-dist-min";
 import type { Layout, PlotData } from "plotly.js-dist-min";
 import React from "react";
-import {
-  Label,
-  Radio,
-  RadioGroup,
-  ToggleButton,
-  ToggleButtonGroup,
-} from "react-aria-components";
+import { Label, ToggleButton, ToggleButtonGroup } from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
-import type { ColorString, Colors } from "../colors";
+import type { ColorString } from "../colors";
 import type { DataSets, DistributionState } from "../distributionState";
 import type { DistributionData } from "../plotTypes";
-import { ColorOptions } from "./ColorOptions";
 import { ColorPicker } from "./ColorPicker";
-import { NumberInput } from "./NumberInput";
+import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";
 import { Switch } from "./Switch";
 import { Tooltip } from "./Tooltip";
@@ -474,6 +467,32 @@ export const Violin = ({
                   </ToggleButton>
                 </ToggleButtonGroup>
 
+                <div className="col-2 auto-onefr align-items-center">
+                  <Label htmlFor="points-type">Type</Label>
+                  <Select
+                    data-compact
+                    id="points-type"
+                    selectedKey={settings.points}
+                    onSelectionChange={(value) => {
+                      updateSettings({
+                        points: value as typeof settings.points,
+                      });
+                    }}
+                    items={Object.entries({
+                      all: "All",
+                      outliers: "Outliers",
+                      suspectedoutliers: "Suspected Outliers",
+                    }).map(([id, name]) => ({
+                      id,
+                      name,
+                    }))}
+                  >
+                    {(item) => (
+                      <SelectItem textValue={item.name}>{item.name}</SelectItem>
+                    )}
+                  </Select>
+                </div>
+
                 <Slider
                   label="Position"
                   value={settings.pointPos}
@@ -484,85 +503,36 @@ export const Violin = ({
                   step={0.1}
                 />
 
-                <div className="field">
-                  <label htmlFor="points">Visibility</label>
-                  <select
-                    id="points"
-                    value={settings.points.toString()}
-                    disabled={!settings.showPoints}
-                    onChange={(e) =>
+                <Slider
+                  label="Jitter"
+                  value={settings.jitter}
+                  isDisabled={!settings.showPoints}
+                  onChange={(value) => updateSettings({ jitter: value })}
+                  minValue={0}
+                  maxValue={1}
+                  step={0.1}
+                />
+
+                <Slider
+                  label="Point Size"
+                  value={settings.markerSize}
+                  isDisabled={!settings.showPoints}
+                  onChange={(value) => updateSettings({ markerSize: value })}
+                  minValue={0}
+                  maxValue={20}
+                  step={1}
+                />
+
+                <div className="col-2 onefr-auto small-color align-items-center">
+                  <Label>Point Color</Label>
+                  <ColorPicker
+                    value={settings.boxlineColor}
+                    onChange={(value) => {
                       updateSettings({
-                        points: e.target.value as typeof settings.points,
-                      })
-                    }
-                  >
-                    {["all", "outliers", "suspectedoutliers", false].map(
-                      (value) => (
-                        <option key={value.toString()} value={value.toString()}>
-                          {value === false ? "None" : value}
-                        </option>
-                      ),
-                    )}
-                  </select>
-                </div>
-                <div className="col-2">
-                  <div className="field">
-                    <label htmlFor="markerColor">Point Color</label>
-                    <select
-                      id="markerColor"
-                      value={settings.markerColor}
-                      disabled={!settings.showPoints}
-                      onChange={(e) =>
-                        updateSettings({
-                          markerColor: e.target.value as ColorOption,
-                        })
-                      }
-                    >
-                      <ColorOptions />
-                    </select>
-                  </div>
-                  <div className="field">
-                    <NumberInput
-                      label="Point Size"
-                      field="markerSize"
-                      value={settings.markerSize}
-                      isDisabled={!settings.showPoints}
-                      updateValue={updateSettings}
-                      min={0}
-                      max={20}
-                      step={1}
-                    />
-                  </div>
-                </div>
-                <div className="row">
-                  <div className="col-2">
-                    <div className="field">
-                      <NumberInput
-                        label="Point Opacity"
-                        field="pointOpacity"
-                        type="float"
-                        value={settings.pointOpacity}
-                        isDisabled={!settings.showPoints}
-                        updateValue={updateSettings}
-                        min={0}
-                        max={1}
-                        step={0.1}
-                      />
-                    </div>
-                    <div className="field">
-                      <NumberInput
-                        label="Jitter"
-                        field="jitter"
-                        value={settings.jitter}
-                        type="float"
-                        isDisabled={!settings.showPoints}
-                        updateValue={updateSettings}
-                        min={0}
-                        max={1}
-                        step={0.1}
-                      />
-                    </div>
-                  </div>
+                        boxlineColor: value.toString() as ColorString,
+                      });
+                    }}
+                  />
                 </div>
               </div>
             </div>
