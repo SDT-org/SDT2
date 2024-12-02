@@ -601,19 +601,18 @@ export const Violin = ({
                   </div>
                 </div>
               </div>
-
-              <div className="group">
-                <Switch
-                  isSelected={settings.showMeanline}
-                  onChange={(value) => updateSettings({ showMeanline: value })}
-                >
-                  Mean
-                </Switch>
-              </div>
+            </div>
+            <div className="group">
+              <Switch
+                isSelected={settings.showMeanline}
+                onChange={(value) => updateSettings({ showMeanline: value })}
+              >
+                Mean
+              </Switch>
             </div>
           </div>
-          {footer ? <div className="app-sidebar-footer">{footer}</div> : null}
         </div>
+        {footer ? <div className="app-sidebar-footer">{footer}</div> : null}
       </div>
       <div className="app-main">
         <Plot

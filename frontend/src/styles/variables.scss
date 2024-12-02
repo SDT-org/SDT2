@@ -5,15 +5,6 @@
   --border-color: #dadada;
   --shadow-color: #ccc;
   --drop-shadow-color: #aaa;
-  --button-background-color: var(--background-color);
-  --button-background-pressed-color: #f2f2f2;
-  --button-shadow-color: #ddd;
-  --button-shadow-bottom-color: #aaa;
-  --button-primary-background-color: #226fad;
-  --button-primary-pressed-background-color: #125f9d;
-  --button-primary-background-color: var(--fill-color);
-  --button-primary-pressed-background-color: #024f8d;
-  --button-primary-text-color: #fefefe;
   --secondary-background-color: #f8f8f8;
   --secondary-foreground-color: #5c5c5c;
   --secondary-border-color: #eaeaea;
@@ -27,6 +18,18 @@
   --impact-high-color: orange;
   --impact-medium-color: gold;
   --impact-low-color: green;
+
+  --button-background-color: var(--background-color);
+  --button-background-pressed-color: #f2f2f2;
+  --button-shadow-color: #ddd;
+  --button-shadow-bottom-color: #aaa;
+  --button-primary-background-color: #226fad;
+  --button-primary-pressed-background-color: #125f9d;
+  --button-primary-background-color: var(--fill-color);
+  --button-primary-pressed-background-color: #024f8d;
+  --button-primary-text-color: #fefefe;
+  --button-toggle-background-color: #f3f3f3;
+
   --switch-border-color: #bbb;
   --switch-blur-border-color: #777;
   --switch-pressed-color: #ccc;

@@ -21,6 +21,7 @@
     background: var(--highlight-background);
     border-color: var(--highlight-background);
     color: var(--highlight-foreground);
+    box-shadow: 0 0 0 0.1rem var(--border-color);
 
     &[data-pressed] {
       background: var(--highlight-background-pressed);
@@ -40,6 +41,7 @@
 
 .react-aria-ToggleButtonGroup {
   display: flex;
+  background: var(--button-toggle-background-color);
 
   > button {
     border-radius: 0;
@@ -62,9 +64,16 @@
   }
 
   &[data-icon-only] .react-aria-ToggleButton {
-    padding: 0.3rem 1.6rem;
+    padding: 0.3rem 0;
     font-size: 1.3rem;
     font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    svg {
+      width: 1.7rem;
+    }
   }
 }
 

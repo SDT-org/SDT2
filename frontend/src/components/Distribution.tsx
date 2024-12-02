@@ -6,6 +6,7 @@ import type {
 import type { DistributionData } from "../plotTypes";
 import { Histogram } from "./Histogram";
 import { Raincloud } from "./Raincloud";
+import { Select, SelectItem } from "./Select";
 import { Violin } from "./Violin";
 
 const VisualizationSwitcher = ({
@@ -20,33 +21,55 @@ const VisualizationSwitcher = ({
   setVisualization: React.Dispatch<Visualization>;
 }) => (
   <>
-    <div className="group">
+    <div className="group padded">
       <div className="row">
         <div className="field">
           <label htmlFor="visualization">Visualization</label>
-          <select
+          <Select
             id="visualization"
-            value={visualization}
-            onChange={(e) => setVisualization(e.target.value as Visualization)}
+            wide
+            selectedKey={visualization}
+            onSelectionChange={(value) =>
+              setVisualization(value as Visualization)
+            }
+            items={Object.entries({
+              histogram: "Histogram",
+              violin: "Violin",
+              raincloud: "Raincloud",
+            }).map(([id, name]) => ({
+              id,
+              name,
+            }))}
           >
-            <option value="histogram">Histogram</option>
-            <option value="violin">Violin</option>
-            <option value="raincloud">Raincloud</option>
-          </select>
+            {(item) => (
+              <SelectItem textValue={item.name}>{item.name}</SelectItem>
+            )}
+          </Select>
         </div>
       </div>
       <div className="row">
         <div className="field">
-          <label htmlFor="data-source">Data Set</label>
-          <select
+          <label htmlFor="data-set">Data Set</label>
+          <Select
             id="data-set"
-            value={activeDataSet}
-            onChange={(e) => setActiveDataSet(e.target.value as keyof DataSets)}
+            wide
+            selectedKey={activeDataSet}
+            onSelectionChange={(value) =>
+              setActiveDataSet(value as keyof DataSets)
+            }
+            items={Object.entries({
+              scores: "Scores",
+              gc: "GC",
+              length: "Length",
+            }).map(([id, name]) => ({
+              id,
+              name,
+            }))}
           >
-            <option value="scores">Scores</option>
-            <option value="gc">GC</option>
-            <option value="length">Length</option>
-          </select>
+            {(item) => (
+              <SelectItem textValue={item.name}>{item.name}</SelectItem>
+            )}
+          </Select>
         </div>
       </div>
     </div>
