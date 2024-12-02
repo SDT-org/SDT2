@@ -351,9 +351,7 @@ export const Violin = ({
                     label="Width"
                     defaultValue={settings.bandwidth}
                     isDisabled={!settings.showViolin}
-                    onChangeEnd={(value) =>
-                      updateSettings({ bandwidth: value })
-                    }
+                    onChange={(value) => updateSettings({ bandwidth: value })}
                     minValue={0}
                     maxValue={20}
                     step={1}

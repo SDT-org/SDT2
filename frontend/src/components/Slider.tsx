@@ -19,14 +19,11 @@ export const Slider = <T extends number | number[]>({
   labelClassName,
   ...props
 }: SliderProps<T>) => {
-  // TODO: .fill Doesn't work with multiple values yet
   return (
     <RACSlider {...props}>
       {label && <Label className={labelClassName}>{label}</Label>}
       <SliderOutput>
-        {({ state }) =>
-          state.values.map((_, i) => state.getThumbValueLabel(i)).join(" – ")
-        }
+        {({ state }) => <>{state.getThumbValueLabel(0)}</>}
       </SliderOutput>
       <SliderTrack>
         {({ state }) => (
@@ -38,13 +35,7 @@ export const Slider = <T extends number | number[]>({
                 width: `${state.getThumbPercent(0) * 100}%`,
               }}
             />
-            {state.values.map((value, i) => (
-              <SliderThumb
-                key={`thumb-${value}`}
-                index={i}
-                aria-label={thumbLabels?.[i] ?? ""}
-              />
-            ))}
+            <SliderThumb />
           </>
         )}
       </SliderTrack>
