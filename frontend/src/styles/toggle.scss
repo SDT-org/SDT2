@@ -31,6 +31,10 @@
 
   &[data-disabled] {
     color: var(--text-disabled-color);
+
+    &[data-selected] {
+      background: var(--highlight-background-disabled);
+    }
   }
 
   &[data-focus-visible] {

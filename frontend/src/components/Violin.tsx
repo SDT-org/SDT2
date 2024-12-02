@@ -321,7 +321,13 @@ export const Violin = ({
             <div className="group">
               <Switch
                 isSelected={settings.showViolin}
-                onChange={(value) => updateSettings({ showViolin: value })}
+                onChange={(value) =>
+                  updateSettings({
+                    showViolin: value,
+                    pointOrientation:
+                      !settings.showBox && value ? "Violin" : "Box",
+                  })
+                }
               >
                 Violin
               </Switch>
@@ -375,7 +381,13 @@ export const Violin = ({
             <div className="group">
               <Switch
                 isSelected={settings.showBox}
-                onChange={(value) => updateSettings({ showBox: value })}
+                onChange={(value) => {
+                  updateSettings({
+                    showBox: value,
+                    pointOrientation:
+                      !settings.showViolin && value ? "Box" : "Violin",
+                  });
+                }}
               >
                 Box
               </Switch>
@@ -453,7 +465,11 @@ export const Violin = ({
                   data-compact
                   selectionMode="single"
                   disallowEmptySelection={true}
-                  selectedKeys={[settings.pointOrientation]}
+                  selectedKeys={
+                    settings.showViolin || settings.showBox
+                      ? [settings.pointOrientation]
+                      : []
+                  }
                   onSelectionChange={(value) =>
                     updateSettings({
                       pointOrientation: value.values().next()
@@ -461,7 +477,9 @@ export const Violin = ({
                     })
                   }
                 >
-                  <ToggleButton id="Violin">Violin</ToggleButton>
+                  <ToggleButton id="Violin" isDisabled={!settings.showViolin}>
+                    Violin
+                  </ToggleButton>
                   <ToggleButton id="Box" isDisabled={!settings.showBox}>
                     Box
                   </ToggleButton>
@@ -496,7 +514,7 @@ export const Violin = ({
                 <Slider
                   label="Position"
                   value={settings.pointPos}
-                  isDisabled={!settings.showViolin}
+                  isDisabled={!settings.showViolin && !settings.showBox}
                   onChange={(value) => updateSettings({ pointPos: value })}
                   minValue={-2}
                   maxValue={2}
