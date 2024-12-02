@@ -457,6 +457,9 @@ export const Heatmap = ({
               scrollZoom: true,
               modeBarButtonsToRemove: ["sendDataToCloud", "toImage"],
               displaylogo: false,
+              editable: true,
+              // showLink: true, 
+              // plotlyServerURL: "https://chart-studio.plotly.com", 
             }}
             layout={{
               plot_bgcolor: "rgba(0,0,0,0)",

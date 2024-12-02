@@ -71,7 +71,6 @@ export const Violin = ({
           visible: settings.showPoints,
           color: settings.markerColor,
           size: settings.markerSize,
-          opacity: settings.pointOpacity,
         },
         hoveron: "points",
         scalemode: "width",
@@ -99,12 +98,10 @@ export const Violin = ({
           color: settings.boxlineColor,
           width: settings.boxlineWidth,
         },
-        opacity: settings.boxOpacity,
         whiskerwidth: settings.whiskerWidth,
         marker: {
           visible: settings.showBox,
           color: settings.markerColor,
-          opacity: settings.pointOpacity,
         },
         fillcolor: settings.boxfillColor,
         hovertemplate:
@@ -117,8 +114,8 @@ export const Violin = ({
     const isVertical = settings.plotOrientation === "vertical";
 
     return {
-      title: settings.plotTitle,
-      uirevision: "true",
+      title: "",
+      uirevision: settings.plotOrientation,
       xaxis: isVertical
         ? {
             fixedrange: true,
@@ -398,7 +395,7 @@ export const Violin = ({
               >
                 <div className="col-2 onefr-auto">
                   <Slider
-                    label="Fill Width"
+                    label="Box Width"
                     value={settings.boxWidth}
                     isDisabled={!settings.showBox}
                     onChange={(value) => updateSettings({ boxWidth: value })}
@@ -576,9 +573,10 @@ export const Violin = ({
           layout={layout}
           config={{
             responsive: true,
-            displayModeBar: false,
+            displayModeBar: true,
             scrollZoom: true,
             displaylogo: false,
+            editable: true,
           }}
           style={{ width: "100%", height: "100%" }}
         />
