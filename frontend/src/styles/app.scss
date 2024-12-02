@@ -8,6 +8,7 @@
 @import "tooltip.scss";
 @import "dialog.scss";
 @import "color-picker.scss";
+@import "slider.scss";
 
 @import "runner.scss";
 @import "heatmap.scss";
@@ -408,6 +409,7 @@ small {
   z-index: 1;
   overflow: auto;
   flex-grow: 1;
+  padding-bottom: 3.2rem;
 
   input,
   select {
@@ -766,71 +768,6 @@ label.sublabel,
     height: 0.1rem;
     background: var(--border-color);
     margin: 0.4rem 0;
-  }
-}
-
-.react-aria-Slider {
-  display: grid;
-  grid-template-areas:
-    "label output"
-    "track track";
-  grid-template-columns: 1fr auto;
-  max-width: 100%;
-
-  label.react-aria-Label {
-    grid-area: label;
-    font-size: 1.3rem;
-    font-weight: 600;
-  }
-
-  .react-aria-SliderOutput {
-    grid-area: output;
-    font-size: 1.2rem;
-    border-radius: 4px;
-    text-align: center;
-    position: relative;
-    display: flex;
-    align-items: flex-end;
-    gap: 5px;
-  }
-
-  .react-aria-SliderTrack {
-    grid-area: track;
-    position: relative;
-    margin: 0.8rem 0;
-
-    .track,
-    .fill {
-      display: block;
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      height: 0.4rem;
-      border-radius: 0.5rem;
-    }
-
-    .track {
-      background: var(--border-color);
-      width: 100%;
-    }
-
-    .fill {
-      background: var(--fill-color);
-    }
-  }
-
-  .react-aria-SliderThumb {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--background-color);
-    //border: 1px solid var(--fill-color);
-    forced-color-adjust: none;
-    box-shadow: 0 0 2px #666;
-
-    &[data-focus-visible] {
-      outline: 2px solid var(--focus-ring-color);
-    }
   }
 }
 
