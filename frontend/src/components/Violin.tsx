@@ -102,6 +102,7 @@ export const Violin = ({
         marker: {
           visible: settings.showBox,
           color: settings.markerColor,
+          size: settings.markerSize,
         },
         fillcolor: settings.boxfillColor,
         hovertemplate:
@@ -541,10 +542,10 @@ export const Violin = ({
                 <div className="col-2 onefr-auto small-color align-items-center">
                   <Label>Color</Label>
                   <ColorPicker
-                    value={settings.boxlineColor}
+                    value={settings.markerColor}
                     onChange={(value) => {
                       updateSettings({
-                        boxlineColor: value.toString() as ColorString,
+                        markerColor: value.toString() as ColorString,
                       });
                     }}
                   />
@@ -568,7 +569,6 @@ export const Violin = ({
           data={[
             settings.showViolin ? violinTrace : {},
             settings.showBox ? boxTrace : {},
-            // settings. ? scatterPlotTrace : {},
           ]}
           layout={layout}
           config={{
