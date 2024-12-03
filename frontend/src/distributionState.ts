@@ -40,7 +40,7 @@ export type DistributionState = {
     markerSize: number;
     pointOpacity: number;
     pointPos: number;
-    points: "all" | "outliers" | "suspectedoutliers" | false;
+    points: "all" | "outliers" | "suspectedoutliers";
     showAxisLines: boolean;
     showPoints: boolean;
     showZeroLine: boolean;

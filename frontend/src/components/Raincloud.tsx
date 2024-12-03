@@ -50,7 +50,7 @@ export const Raincloud = ({
         x: dataSet,
         side: "positive",
         points: settings.showPoints ? settings.points : false,
-        showPoints:true,
+        showPoints: true,
         line: {
           color: settings.lineColor,
           width: settings.lineWidth,
@@ -114,6 +114,7 @@ export const Raincloud = ({
         <div className="app-sidebar-toolbar">
           <div className="form">
             {sidebarComponent}
+
             <div className="group">
               <div className="drawer">
                 <ToggleButtonGroup
@@ -238,49 +239,49 @@ export const Raincloud = ({
                     </ToggleButton>
                   </Tooltip>
                 </ToggleButtonGroup>
+
+                <Label className="header">Band</Label>
+                <div className="col-2 auto-onefr">
+                  <ColorPicker
+                    value={settings.fillColor}
+                    onChange={(value) => {
+                      updateSettings({
+                        fillColor: value.toString() as ColorString,
+                      });
+                    }}
+                  />
+                  <Slider
+                    label="Bandwidth"
+                    defaultValue={settings.bandwidth}
+                    onChange={(value) => updateSettings({ bandwidth: value })}
+                    minValue={0}
+                    maxValue={20}
+                    step={1}
+                  />
+                </div>
+                <Label className="header">Line</Label>
+                <div className="col-2 auto-onefr">
+                  <ColorPicker
+                    value={settings.lineColor}
+                    onChange={(value) =>
+                      updateSettings({
+                        lineColor: value.toString() as ColorString,
+                      })
+                    }
+                  />
+                  <Slider
+                    label="Width"
+                    value={settings.lineWidth}
+                    onChange={(value) => updateSettings({ lineWidth: value })}
+                    minValue={0}
+                    maxValue={20}
+                    step={1}
+                  />
+                </div>
               </div>
             </div>
             <div className="group">
-              <Label className="header">Band</Label>
-              <div className="col-2 auto-onefr">
-                <ColorPicker
-                  value={settings.fillColor}
-                  onChange={(value) => {
-                    updateSettings({
-                      fillColor: value.toString() as ColorString,
-                    });
-                  }}
-                />
-                <Slider
-                  label="Bandwidth"
-                  defaultValue={settings.bandwidth}
-                  onChange={(value) => updateSettings({ bandwidth: value })}
-                  minValue={0}
-                  maxValue={20}
-                  step={1}
-                />
-              </div>
-              <Label className="header">Line</Label>
-              <div className="col-2 auto-onefr">
-                <ColorPicker
-                  value={settings.lineColor}
-                  onChange={(value) =>
-                    updateSettings({
-                      lineColor: value.toString() as ColorString,
-                    })
-                  }
-                />
-                <Slider
-                  label="Width"
-                  value={settings.lineWidth}
-                  onChange={(value) => updateSettings({ lineWidth: value })}
-                  minValue={0}
-                  maxValue={20}
-                  step={1}
-                />
-              </div>
-            </div>
-            <div className="group">
+              <h4 className="setting-header">Points</h4>
               <div
                 className="drawer"
                 data-hidden={!settings.showPoints}
@@ -372,7 +373,7 @@ export const Raincloud = ({
           </div>
         </div>
         {footer ? <div className="app-sidebar-footer">{footer}</div> : null}
-      </div>
+      </div >
       <div className="app-main">
         <Plot
           data={[rainCloudTrace]}

@@ -460,7 +460,8 @@ small {
   }
 
   .react-aria-Switch,
-  .drawer {
+  .drawer,
+  .setting-header {
     padding: var(--app-container-padding);
   }
 
@@ -469,8 +470,12 @@ small {
     margin-right: 0.4rem;
   }
 
-  label.react-aria-Switch {
+  label.react-aria-Switch, .setting-header {
     font-weight: 600;
+  }
+
+  .section-header {
+    border-bottom: 0.1rem solid var(--border-color);
   }
 
   .react-aria-ToggleButtonGroup {
