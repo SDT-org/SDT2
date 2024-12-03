@@ -4,6 +4,7 @@ import { ToggleButton } from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
 import tinycolor from "tinycolor2";
 import { colorScales as defaultColorScales } from "../colorScales";
+import { plotFont } from "../constants";
 import type { Colorscale, HeatmapData, HeatmapSettings } from "../plotTypes";
 import { NumberInput } from "./NumberInput";
 import { Select, SelectItem } from "./Select";
@@ -437,7 +438,7 @@ export const Heatmap = ({
                 // @ts-ignore
                 scrollZoom: true,
                 textfont: {
-                  family: "Arial",
+                  ...plotFont,
                   size: settings.annotation_font_size,
                   color: annotations?.textColors ?? "white",
                 },
@@ -462,6 +463,7 @@ export const Heatmap = ({
               // plotlyServerURL: "https://chart-studio.plotly.com",
             }}
             layout={{
+              font: plotFont,
               plot_bgcolor: "rgba(0,0,0,0)",
               paper_bgcolor: "rgba(0,0,0,0)",
               uirevision: "true",
@@ -481,7 +483,7 @@ export const Heatmap = ({
                 maxallowed: tickText.length + 2,
                 automargin: true,
                 tickfont: {
-                  family: "Arial, sans-serif",
+                  ...plotFont,
                   size: settings.axlabel_xfontsize,
                   color: "black",
                 },
@@ -501,7 +503,6 @@ export const Heatmap = ({
                 maxallowed: tickText.length + 2,
                 automargin: true,
                 tickfont: {
-                  family: "Arial, sans-serif",
                   size: settings.axlabel_yfontsize,
                   color: "black",
                 },

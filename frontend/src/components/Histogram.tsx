@@ -4,6 +4,7 @@ import React from "react";
 import { Label, ToggleButton, ToggleButtonGroup } from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
 import type { ColorString } from "../colors";
+import { plotFont } from "../constants";
 import type { DataSets, DistributionState } from "../distributionState";
 import type { DistributionData } from "../plotTypes";
 import { ColorPicker } from "./ColorPicker";
@@ -67,6 +68,7 @@ export const Histogram = ({
       ({
         title: "",
         uirevision: "true",
+        font: plotFont,
         xaxis: {
           title: settings.showAxisLabels ? "Percent Pairwise Identity" : "",
           side: "bottom",
