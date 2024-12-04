@@ -475,13 +475,13 @@ export const Heatmap = ({
                 pad: 5,
               },
               autosize: true,
-              scaleanchor: true,
               dragmode: "pan",
               hovermode: "closest",
               xaxis: {
                 minallowed: -2,
                 maxallowed: tickText.length + 2,
                 automargin: true,
+                scaleanchor: 'y',
                 tickfont: {
                   ...plotFont,
                   size: settings.axlabel_xfontsize,
@@ -502,6 +502,9 @@ export const Heatmap = ({
                 minallowed: -2,
                 maxallowed: tickText.length + 2,
                 automargin: true,
+                scaleanchor: 'x',
+                range: [tickText.length - 1, 0], 
+                autorange: false, 
                 tickfont: {
                   size: settings.axlabel_yfontsize,
                   color: "black",
@@ -512,12 +515,12 @@ export const Heatmap = ({
                 showticklabels: settings.axis_labels,
                 // @ts-ignore
                 ticks: settings.axis_labels ? false : "",
-                autorange: "reversed",
                 showline: false,
                 zeroline: false,
                 showgrid: false,
               },
             }}
+            
             style={{ width: "100%", height: "100%" }}
           />
         ) : null}

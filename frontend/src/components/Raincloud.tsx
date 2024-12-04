@@ -375,7 +375,7 @@ export const Raincloud = ({
           </div>
         </div>
         {footer ? <div className="app-sidebar-footer">{footer}</div> : null}
-      </div >
+      </div>
       <div className="app-main">
         <Plot
           data={[rainCloudTrace]}
