@@ -17,7 +17,9 @@ type VisualizationBase = {
   showGrid: boolean;
   showTickLabels: boolean;
   showAxisLabels: boolean;
+  showAxisLines?: boolean;
   makeEditable?: boolean;
+  showMeanline?: boolean;
 };
 
 export type DistributionState = {

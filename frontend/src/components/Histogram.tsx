@@ -77,7 +77,7 @@ export const Histogram = ({
           zeroline: false,
           showgrid: settings.showGrid,
           showticklabels: settings.showTickLabels,
-          showline: settings.showLine,
+          showline: settings.showAxisLines,
         },
         yaxis: {
           title: settings.showAxisLabels
@@ -89,7 +89,7 @@ export const Histogram = ({
           zeroline: false,
           showgrid: settings.showGrid,
           showticklabels: settings.showTickLabels,
-          showline: settings.showLine,
+          showline: settings.showAxisLines,
         },
         dragmode: "pan",
         barmode: "overlay",
