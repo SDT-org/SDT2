@@ -2,20 +2,6 @@ import type { colorScales } from "./colorScales";
 
 export type Colorscale = keyof typeof colorScales;
 
-export enum LineColor {
-  White = "white",
-  Black = "black",
-  Red = "red",
-  Blue = "blue",
-  Green = "green",
-}
-export enum DistributionPlots {
-  Bar = "Bar Plot",
-  Scatter = "Scatter PLot",
-  Box = "Box Plot",
-  Violin = "Violin Plot",
-  Contour = "Contour Plot",
-}
 export interface HeatmapSettings {
   colorscale: Colorscale | "Discrete";
   reverse: boolean;

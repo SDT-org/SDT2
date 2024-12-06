@@ -14,6 +14,9 @@
   --fill-color: #125F9D;
   --fill-text-color: var(--text-inverted-color);
   --fill-blur-color: #acacac;
+
+  --success-color: #1B9D12;
+
   --impact-extreme-color: red;
   --impact-high-color: orange;
   --impact-medium-color: gold;
@@ -29,6 +32,8 @@
   --button-primary-pressed-background-color: #024f8d;
   --button-primary-text-color: #fefefe;
   --button-toggle-background-color: #f3f3f3;
+  --button-disabled-background-color: #f5f5f5;
+  --button-disabled-foreground-color: #bbb;
 
   --switch-border-color: #bbb;
   --switch-blur-border-color: #777;
@@ -39,6 +44,7 @@
   // --app-header-color: #e5e5e5;
   --app-header-border-color: #ddd;
   --drawer-color: #fcfcfc;
+  --app-modal-overlay-color: 239, 239, 239;
 
   --text-color: var(--foreground-color);
   --text-inverted-color: var(--background-color);
@@ -56,6 +62,8 @@
   --app-sidebar-width: 24rem;
   --app-container-padding: 1.2rem;
   --trigger-width: 9.6rem;
+
+  --app-loader-delay: 1s;
 }
 
 // @media (prefers-color-scheme: dark) {

@@ -16,6 +16,20 @@
     }
   }
 
+  &[data-compact] {
+    .react-aria-Button {
+      font-size: 1.3rem;
+      padding: 0.4rem 0.8rem;
+    }
+  }
+
+  &[data-flat] {
+    .react-aria-Button {
+      padding-top: 0.4rem;
+      padding-bottom: 0.4rem;
+    }
+  }
+
   .react-aria-SelectValue {
     &[data-placeholder] {
       font-style: italic;

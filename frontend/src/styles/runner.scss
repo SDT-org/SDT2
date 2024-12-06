@@ -20,6 +20,13 @@
       border-bottom: 0;
     }
 
+
+    button {
+      &[data-primary] {
+        min-width: 24rem;
+      }
+    }
+
     .setting {
       margin: 1.2rem 0;
 
@@ -30,7 +37,7 @@
 
         .react-aria-Label {
           font-weight: 450;
-        }
+        }y
 
         .react-aria-Button {
           display: flex;

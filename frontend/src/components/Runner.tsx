@@ -11,6 +11,7 @@ import {
 } from "react-aria-components";
 import useAppState, { type AppState, clusterMethods } from "../appState";
 import { formatBytes } from "../helpers";
+import { useWaitForPywebview } from "../hooks/usePywebviewReadyEvent";
 import messages from "../messages";
 import { Select, SelectItem } from "./Select";
 import { Switch } from "./Switch";
@@ -163,7 +164,14 @@ const RunnerSettings = ({
             <Button
               type="button"
               onPress={() => {
-                window.pywebview.api.open_file_dialog();
+                window.pywebview.api
+                  .open_file_dialog(appState.client.lastDataFilePath)
+                  .then((data) =>
+                    setAppState((prev) => ({
+                      ...prev,
+                      client: { ...prev.client, lastDataFilePath: data },
+                    })),
+                  );
               }}
             >
               Select file&#8230;
@@ -221,13 +229,26 @@ const RunnerSettings = ({
                 <div className="setting">
                   <div aria-live="polite" className="folder">
                     <span>
-                      {appState.alignment_output_path.replace("/", "")}
+                      {appState.client.alignmentExportPath.replace("/", "")}
                     </span>
                   </div>
                   <Button
-                    onPress={() =>
-                      window.pywebview.api.select_alignment_output_path()
-                    }
+                    onPress={() => {
+                      window.pywebview.api
+                        .select_path_dialog(appState.client.alignmentExportPath)
+                        .then((result) => {
+                          if (!result) {
+                            return;
+                          }
+                          setAppState((prev) => ({
+                            ...prev,
+                            client: {
+                              ...prev.client,
+                              alignmentExportPath: result,
+                            },
+                          }));
+                        });
+                    }}
                   >
                     Set folder&#8230;
                   </Button>
@@ -402,18 +423,7 @@ export const Runner = ({
       .then((result) => setAppConfig(JSON.parse(result)));
   }, []);
 
-  React.useEffect(() => {
-    const waitForPywebview = () =>
-      new Promise((resolve) => {
-        if (!window.pywebview) {
-          setTimeout(waitForPywebview, 10);
-        } else {
-          resolve(true);
-        }
-      });
-
-    waitForPywebview().then(() => fetchAppConfig());
-  }, [fetchAppConfig]);
+  useWaitForPywebview(fetchAppConfig);
 
   return (
     <div className="app-wrapper with-header with-footer">

@@ -194,10 +194,15 @@ class Api:
             destination=save_path,
         )
 
-    def open_file_dialog(self):
+    def open_file_dialog(self, filepath: str | None = None):
+        if filepath is None:
+            filepath = ''
+
+        print('open_file_dialog', filepath)
         result = webview.windows[0].create_file_dialog(
             webview.OPEN_DIALOG,
             allow_multiple=False,
+            directory=os.path.dirname(filepath),
             file_types=(
                 "Compatible file (*.fasta;*.fas;*.faa;*.fnt;*.fa;*.csv;*.txt)",
                 "FASTA file (*.fasta;*.fas;*.faa;*.fnt;*.fa)",
@@ -206,7 +211,7 @@ class Api:
             ),
         )
         if not result:
-            return False
+            return ''
 
         if isinstance(result, str):
             basename = os.path.basename(result)
@@ -245,6 +250,7 @@ class Api:
                     tempdir_path=temp_dir.name,
                     compute_stats=compute_stats,
                 )
+                return str(result[0])
             else:
                 set_state(
                     view="runner",
@@ -255,25 +261,18 @@ class Api:
                     compute_stats=None,
                 )
 
-    def select_alignment_output_path(self):
-        result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG)
+    def select_path_dialog(self, directory: str | None = None):
+        if directory is None:
+            directory = ''
+        print('select_path_dialog', directory)
+        result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG, directory=directory)
+        output_path = None
         if result:
             if isinstance(result, str):
-                set_state(alignment_output_path=result)
+                output_path = result
             else:
-                set_state(alignment_output_path=result[0])
-        else:
-            return False
-
-    def select_export_path(self):
-        result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG)
-        if result:
-            if isinstance(result, str):
-                set_state(export_path=result)
-            else:
-                set_state(export_path=result[0])
-        else:
-            return False
+                output_path=result[0]
+        return output_path
 
     def get_state(self):
         return get_state()._asdict()
@@ -306,10 +305,10 @@ class Api:
             min(compute_cores, multiprocessing.cpu_count()), 1
         )
 
-        alignment_output_path = get_state().alignment_output_path
-        if args.get("export_alignments") == "True" and alignment_output_path:
+        alignment_export_path = args.get("alignment_export_path")
+        if args.get("export_alignments") == "True" and alignment_export_path:
             print("Saving alignments...", args.get("export_alignments"))
-            settings["aln_out"] = str(alignment_output_path)
+            settings["aln_out"] = str(alignment_export_path)
 
         if get_state().debug:
             print("\nRun settings:", settings)
@@ -375,6 +374,7 @@ class Api:
     def export_data(self, args: dict):
         state = get_state()
         matrix_path = get_matrix_path()
+        export_path = args['export_path']
 
         if state.filetype == "text/fasta":
             prefix = os.path.splitext(state.basename)[0]
@@ -397,50 +397,38 @@ class Api:
         if image_format not in saveable_formats:
             raise Exception(f"Expected image_format to be one of {saveable_formats}")
 
-        heatmap_image_filename = (
-            os.path.basename(os.path.splitext(state.basename)[0]).removesuffix("_fasta")
-            + "_heatmap."
-            + image_format
-        )
-        distribution_image_filename = (
-            os.path.basename(os.path.splitext(state.basename)[0]).removesuffix("_fasta")
-            + "_distribution."
-            + image_format
-        )
-        heatmap_image_destination = os.path.join(
-            state.export_path, heatmap_image_filename
-        )
-        distribution_image_destination = os.path.join(
-            state.export_path, distribution_image_filename
-        )
+        base_filename = os.path.basename(os.path.splitext(state.basename)[0]).removesuffix("_fasta")
+        image_types = ["heatmap", "histogram", "violin", "raincloud"]
+        image_filenames = {
+            img_type: f"{base_filename}_{img_type}.{image_format}" for img_type in image_types
+        }
+
+        image_destinations = {
+            img_type: os.path.join(export_path, filename)
+            for img_type, filename in image_filenames.items()
+        }
 
         destination_files = [
-            os.path.join(state.export_path, entry.name)
+            os.path.join(export_path, entry.name)
             for entry in find_source_files(prefix, suffixes)
         ]
-        destination_files.extend(
-            [heatmap_image_destination, distribution_image_destination]
-        )
+        destination_files.extend(image_destinations.values())
 
         if not self.confirm_overwrite(destination_files):
             return False
 
         for entry in find_source_files(prefix, suffixes):
-            destination_path = os.path.join(state.export_path, entry.name)
+            destination_path = os.path.join(export_path, entry.name)
             temp_destination_path = destination_path + ".tmp"
             shutil.copy2(entry.path, temp_destination_path)
             os.replace(temp_destination_path, destination_path)
 
-        save_image_from_api(
-            data=args["heatmap_image_data"],
-            format=image_format,
-            destination=heatmap_image_destination,
-        )
-        save_image_from_api(
-            data=args["distribution_image_data"],
-            format=image_format,
-            destination=distribution_image_destination,
-        )
+        for img_type in image_types:
+            save_image_from_api(
+                data=args[f"{img_type}_image_data"],
+                format=image_format,
+                destination=image_destinations[img_type],
+            )
 
         return True
 

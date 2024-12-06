@@ -8,12 +8,10 @@ import {
   Tabs,
 } from "react-aria-components";
 import type { AppState, SetAppState } from "../appState";
-import { useDistributionState } from "../distributionState";
 import type {
   DistributionData,
   GetDataResponse,
   HeatmapData,
-  HeatmapSettings,
 } from "../plotTypes";
 import { Distribution } from "./Distribution";
 import { Heatmap } from "./Heatmap";
@@ -32,40 +30,6 @@ export const Viewer = ({
   const [heatmapData, setHeatmapData] = React.useState<HeatmapData>();
   const [distributionData, setDistributionData] =
     React.useState<DistributionData>();
-
-  const [heatmapSettings, setHeatmapSettings] = React.useState<HeatmapSettings>(
-    {
-      colorscale: "Portland",
-      reverse: false,
-      vmax: 100,
-      vmin: 65,
-      cellspace: 1,
-      annotation: false,
-      annotation_font_size: 10,
-      annotation_rounding: 0,
-      annotation_alpha: "0",
-      color: "white",
-      showscale: true,
-      cbar_shrink: 1,
-      cbar_aspect: 25,
-      cbar_pad: 10,
-      axis_labels: false,
-      axlabel_xrotation: 270,
-      axlabel_xfontsize: 12,
-      axlabel_yrotation: 360,
-      axlabel_yfontsize: 12,
-      cutoff_1: 95,
-      cutoff_2: 75,
-    },
-  );
-
-  const {
-    state: distributionState,
-    setState: setDistributionState,
-    updateHistogram,
-    updateRaincloud,
-    updateViolin,
-  } = useDistributionState();
 
   const getData = React.useCallback(() => {
     setLoading(true);
@@ -93,13 +57,20 @@ export const Viewer = ({
           identity_combos: identity_scores.map((i) => [i[0], i[1]]),
         });
 
-        updateHeatmapState({
-          vmin: metadata.minVal,
-          ...(appState.sequences_count > 99 && {
-            axis_labels: false,
-            cellspace: 0,
-          }),
-        });
+        setAppState((prev) => ({
+          ...prev,
+          client: {
+            ...prev.client,
+            heatmap: {
+              ...prev.client.heatmap,
+              vmin: metadata.minVal,
+              ...(appState.sequences_count > 99 && {
+                axis_labels: false,
+                cellspace: 0,
+              }),
+            },
+          },
+        }));
       })
       .catch((e) => {
         setLoading(false);
@@ -112,20 +83,11 @@ export const Viewer = ({
       .finally(() => {
         setLoading(false);
       });
-  }, [appState.sequences_count]);
+  }, [appState.sequences_count, setAppState]);
 
   React.useEffect(() => {
     getData();
   }, [getData]);
-
-  const updateHeatmapState = (newState: Partial<HeatmapSettings>) => {
-    setHeatmapSettings((previous) => {
-      return {
-        ...previous,
-        ...newState,
-      };
-    });
-  };
 
   const setDataView = (newValue: Key) =>
     setAppState((previous) => {
@@ -159,7 +121,7 @@ export const Viewer = ({
         >
           <TabList>
             <Tab id="heatmap">Heatmap</Tab>
-            <Tab id="plot">Distribution</Tab>
+            <Tab id="distribution">Distribution</Tab>
           </TabList>
         </Tabs>
         <div className="right">
@@ -184,28 +146,14 @@ export const Viewer = ({
       >
         <TabPanel id="heatmap" className="app-panel">
           {appState.client.dataView === "heatmap" && heatmapData ? (
-            <Heatmap
-              data={heatmapData}
-              settings={heatmapSettings}
-              updateSettings={updateHeatmapState}
-              tickText={tickText}
-            />
+            <Heatmap data={heatmapData} tickText={tickText} />
           ) : null}
         </TabPanel>
-        <TabPanel id="plot" className="app-panel">
-          {distributionData ? (
-            <Distribution
-              data={distributionData}
-              state={distributionState}
-              setState={setDistributionState}
-              updateHistogram={updateHistogram}
-              updateRaincloud={updateRaincloud}
-              updateViolin={updateViolin}
-            />
-          ) : null}
+        <TabPanel id="distribution" className="app-panel">
+          {distributionData ? <Distribution data={distributionData} /> : null}
         </TabPanel>
       </Tabs>
-      {loading ? <div className="api-loader" /> : null}
+      {loading ? <div className="app-overlay app-loader" /> : null}
     </div>
   );
 };

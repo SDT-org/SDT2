@@ -9,18 +9,21 @@ declare global {
         app_config: () => Promise<string>;
         get_state: () => Promise<AppState>;
         reset_state: () => Promise<void>;
-        open_file_dialog: () => Promise<void>;
-        select_alignment_output_path: () => Promise<void>;
-        select_export_path: () => Promise<void>;
+        open_file_dialog: (lastDataFilepath?: string) => Promise<string>;
+        select_path_dialog: (defaultDirectory?: string) => Promise<string>;
         export_data: (args: {
+          export_path: string;
           output_cluster: boolean;
           cluster_threshold_one: number;
           cluster_threshold_two: number;
           heatmap_image_data: string;
-          distribution_image_data: string;
+          histogram_image_data: string;
+          violin_image_data: string;
+          raincloud_image_data: string;
           image_format: SaveableImageFormat;
         }) => Promise<boolean>;
         save_image: (args: {
+          export_path: string;
           data: string;
           format: AppState["client"]["saveFormat"];
         }) => Promise<void>;

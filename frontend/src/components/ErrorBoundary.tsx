@@ -45,6 +45,10 @@ export class ErrorBoundary extends React.Component<Props> {
   }
 
   handlePromiseRejection(e: PromiseRejectionEvent) {
+    if (e.reason?.stack?.includes("plotly.js")) {
+      e.preventDefault();
+      return;
+    }
     this.props.setAppState((previous) => {
       return {
         ...previous,
@@ -117,7 +121,14 @@ export class ErrorBoundary extends React.Component<Props> {
         };
       });
 
-    const resetApp = () => this.props.setAppState(initialAppState);
+    const resetApp = () => {
+      localStorage.clear();
+      this.props.setAppState(initialAppState);
+    };
+
+    if (error) {
+      console.error(error);
+    }
 
     if (error) {
       return (
@@ -145,7 +156,7 @@ export class ErrorBoundary extends React.Component<Props> {
                 .
               </p>
               <details open={true}>
-                <summary>{error?.message.toString()}</summary>
+                <summary>{error?.message?.toString()}</summary>
                 <pre>{errorDetails}</pre>
               </details>
               <details>

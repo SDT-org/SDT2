@@ -7,15 +7,25 @@
   display: grid;
   place-content: center;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(var(--app-modal-overlay-color), 0.75);
+  // backdrop-filter: blur(0.2rem);
   z-index: 10;
+  transition: all 200ms;
+
+  &.export-modal-overlay {
+    &.exporting {
+      background: rgba(var(--app-modal-overlay-color), 1);
+    }
+    &.success {
+    }
+  }
 }
 
 .react-aria-Modal {
   z-index: 11;
   background: white;
   border-radius: 0.4rem;
-  box-shadow: 0 .2rem 1rem rgba(0, 0, 0, 0.1);
+  box-shadow: 0 .25rem 1rem rgba(0, 0, 0, 0.5);
   padding: 1.6rem;
 
   .actions {
@@ -30,10 +40,84 @@
   }
 }
 
-.export-modal {
-  max-width: 30rem;
+.export-modal:not(.success) {
+  padding: 0;
+  display: flex;
+  max-width: 40rem;
+
+  .react-aria-Dialog {
+    width: 100vw;
+    padding: 0;
+  }
+
+  h2 {
+    margin-bottom: 1.6rem;
+    font-size: 1.5rem;
+    background-color: var(--app-header-color);
+    border-bottom: 0.1rem solid var(--app-header-border-color);
+    color: var(--text-secondary-color);
+    border-radius: 0.5rem 0.5rem 0 0;
+  }
+
+  h2, .form {
+    padding: 1.6rem 2.4rem;
+    margin: 0;
+  }
 
   .form {
-    gap: 0.8rem;
+    label.header {
+      font-weight: 500;
+    }
+
+    .col-2 {
+      margin: 0;
+    }
+  }
+
+  .group, .form .actions {
+    align-items: center;
+    padding: 0.8rem 0;
+    margin: 0;
+    min-height: 4.6rem;
+    place-content: center;
+  }
+
+  .header + .group {
+    padding-top: 0;
+  }
+
+  .group {
+    border-bottom: 0.1rem solid var(--border-color);
+  }
+
+  .col-2.subfield {
+    gap: 1.6rem;
+
+    > * {
+      margin: 1.6rem 0 1.2rem;
+      padding: 0.8rem;
+      border: 0.1rem solid var(--secondary-border-color);
+      border-radius: 0.5rem;
+      background: var(--secondary-background-color);
+    }
+    > .react-aria-Slider label {
+      font-size: 1.3rem;
+    }
+  }
+
+  .filename {
+    font-size: 1.3rem;
+    color: var(--text-secondary-color);
+  }
+
+  .form .actions {
+    margin: 1.6rem 0 0;
+  }
+}
+
+.export-modal.success {
+  h2 {
+    font-size: 1.8rem;
+    color: var(--text-secondary-color);
   }
 }

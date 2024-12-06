@@ -1,4 +1,5 @@
 import React from "react";
+import type { AppState, SetAppState } from "./appState";
 import { type ColorString, Colors } from "./colors";
 
 export type Visualization = "histogram" | "violin" | "raincloud";
@@ -81,7 +82,7 @@ const visualizationDefaults = {
   showTickLabels: true,
 };
 
-const initialDistributionState: DistributionState = {
+export const initialDistributionState: DistributionState = {
   visualization: "histogram",
   dataSet: "scores",
   histogram: {
@@ -136,28 +137,44 @@ const initialDistributionState: DistributionState = {
   },
 };
 
-export const useDistributionState = () => {
-  const key = "distribution-state";
-  const saved = localStorage.getItem(key);
-  const [state, setState] = React.useState<DistributionState>(
-    saved ? JSON.parse(saved) : initialDistributionState,
-  );
-
-  React.useEffect(() => {
-    localStorage.setItem(key, JSON.stringify(state));
-  }, [state]);
+export const useDistributionState = (
+  appState: AppState,
+  setAppState: SetAppState,
+) => {
+  const updateDistributionState = (values: Partial<DistributionState>) =>
+    setAppState((prev) => ({
+      ...prev,
+      client: {
+        ...prev.client,
+        distribution: {
+          ...prev.client.distribution,
+          ...values,
+        },
+      },
+    }));
 
   const updateVisualization =
     (key: DistributionState["visualization"]) =>
-    (values: Partial<DistributionState["histogram"]>) =>
-      setState((prev) => ({
+    (
+      values: Partial<DistributionState["histogram" | "violin" | "raincloud"]>,
+    ) =>
+      setAppState((prev) => ({
         ...prev,
-        [key]: { ...prev[key], ...values },
+        client: {
+          ...prev.client,
+          distribution: {
+            ...prev.client.distribution,
+            [key]: {
+              ...prev.client.distribution[key],
+              ...values,
+            },
+          },
+        },
       }));
 
   return {
-    state,
-    setState,
+    distributionState: appState.client.distribution,
+    updateDistributionState,
     updateHistogram: updateVisualization("histogram"),
     updateRaincloud: updateVisualization("raincloud"),
     updateViolin: updateVisualization("violin"),

@@ -71,6 +71,11 @@ body {
     height: 3rem;
   }
 
+  button {
+    font-weight: 500;
+    font-size: 1.3rem;
+  }
+
   .react-aria-Tab {
     padding-top: 0;
     padding-bottom: 0;
@@ -223,28 +228,6 @@ small {
   }
 }
 
-[data-hidden] {
-  opacity: 1;
-  height: auto;
-  transition: height 0.3s ease-out;
-}
-[data-hidden="true"] {
-  height: 0;
-  opacity: 0;
-  overflow: hidden;
-  visibility: hidden;
-  position: absolute;
-}
-
-.text-deemphasis {
-  color: var(--text-deemphasis-color);
-  font-weight: 450;
-}
-
-.text-normal-weight {
-  font-weight: normal;
-}
-
 .form {
   display: grid;
   grid-template-rows: 1fr;
@@ -257,9 +240,7 @@ small {
   }
 
   .col-2 {
-    display: grid;
     grid-template-rows: 1fr;
-    grid-template-columns: 1fr 1fr;
     grid-gap: 0.8rem;
     margin-bottom: 0.8rem;
 
@@ -376,16 +357,6 @@ small {
 
     button {
       width: 100%;
-      &[data-primary] {
-        min-width: 24rem;
-        background-color: var(--button-primary-background-color);
-        color: var(--button-primary-text-color);
-        font-weight: bold;
-
-        &[data-pressed] {
-          background-color: var(--button-primary-pressed-background-color);
-        }
-      }
     }
   }
 
@@ -399,12 +370,6 @@ small {
   }
 }
 
-.export-form {
-  label {
-    display: block;
-  }
-}
-
 .app-sidebar-toolbar {
   z-index: 1;
   overflow: auto;
@@ -414,6 +379,10 @@ small {
   input,
   select {
     width: 100%;
+  }
+
+  .col-2 {
+    gap: 1.6rem;
   }
 
   .drawer {
@@ -486,22 +455,6 @@ small {
     }
   }
 
-  .auto-onefr {
-    grid-template-columns: auto 1fr;
-    justify-content: space-between;
-    gap: 1.6rem;
-  }
-
-  .onefr-auto {
-    grid-template-columns: 1fr auto;
-    justify-content: space-between;
-    gap: 1.6rem;
-  }
-
-  .align-items-center {
-    align-items: center;
-  }
-
   .color-picker {
     gap: 0;
   }
@@ -513,15 +466,6 @@ small {
 
   .col-2 .react-aria-Select {
     justify-self: flex-end;
-
-    &[data-compact] {
-      .react-aria-Button {
-        font-size: 1.3rem;
-        padding-left: 0.8rem;
-        padding-right: 0.8rem;
-        padding: 0.4rem 0.8rem;
-    }
-    }
   }
 }
 
@@ -537,18 +481,53 @@ small {
   }
 }
 
-.api-loader {
+.app-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-items: center;
+  gap: 1.6rem;
+}
+
+.app-loader {
   border: 5px solid #f3f3f3;
   border-top: 5px solid #3498db;
   border-radius: 50%;
   width: 40px;
   height: 40px;
   animation: spin 2s linear infinite;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10;
+}
+
+.app-loader.delay {
+  animation: reveal 0s linear var(--app-loader-delay) forwards;
+  opacity: 0;
+}
+
+@keyframes reveal {
+  to {
+    opacity: 1;
+  }
+}
+
+.app-message {
+  width: 20rem;
+  height: 12rem;
+  display: flex;
+  flex-direction: column;
+  place-items: center;
+  justify-content: center;
+  gap: 1.6rem;
+}
+
+.app-success {
+  width: 4rem;
+  height: 4rem;
+  color: var(--success-color);
 }
 
 @keyframes spin {
@@ -941,6 +920,21 @@ label.sublabel,
     outline: 2px solid var(--focus-ring-color);
     outline-offset: -1px;
   }
+
+  &[data-primary] {
+    background-color: var(--button-primary-background-color);
+    color: var(--button-primary-text-color);
+    font-weight: bold;
+
+    &[data-pressed] {
+      background-color: var(--button-primary-pressed-background-color);
+    }
+  }
+
+  &[data-disabled] {
+    background: var(--button-disabled-background-color);
+    color: var(--button-disabled-foreground-color);
+  }
 }
 
 .react-aria-RadioGroup {
@@ -992,6 +986,51 @@ label.sublabel,
     outline-offset: 2px;
   }
 }
+
+[data-hidden] {
+  opacity: 1;
+  height: auto;
+  transition: height 0.3s ease-out;
+}
+[data-hidden="true"] {
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  visibility: hidden;
+  position: absolute;
+}
+
+.col-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.auto-onefr {
+  grid-template-columns: auto 1fr;
+  justify-content: space-between;
+  gap: 1.6rem;
+}
+
+.onefr-auto {
+  grid-template-columns: 1fr auto;
+  justify-content: space-between;
+  gap: 1.6rem;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.text-deemphasis {
+  color: var(--text-deemphasis-color);
+  font-weight: 450;
+}
+
+.text-normal-weight {
+  font-weight: normal;
+}
+
+
 
 body.blur {
   .react-aria-SliderTrack .fill {

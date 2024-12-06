@@ -3,6 +3,7 @@ import React from "react";
 import { ToggleButton } from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
 import tinycolor from "tinycolor2";
+import useAppState, { type AppState } from "../appState";
 import { colorScales as defaultColorScales } from "../colorScales";
 import { plotFont } from "../constants";
 import type { Colorscale, HeatmapData, HeatmapSettings } from "../plotTypes";
@@ -15,18 +16,33 @@ import { Tooltip } from "./Tooltip";
 const Plot = createPlotlyComponent(Plotly);
 
 export const Heatmap = ({
-  settings,
-  updateSettings,
   data,
   tickText,
   footer,
 }: {
-  settings: HeatmapSettings;
-  updateSettings: (_: Partial<HeatmapSettings>) => void;
   data: HeatmapData;
   tickText: string[];
   footer?: React.ReactNode;
 }) => {
+  const {
+    appState: {
+      client: { heatmap: settings },
+    },
+    setAppState,
+  } = useAppState();
+
+  const updateSettings = (values: Partial<AppState["client"]["heatmap"]>) =>
+    setAppState((prev) => ({
+      ...prev,
+      client: {
+        ...prev.client,
+        heatmap: {
+          ...prev.client.heatmap,
+          ...values,
+        },
+      },
+    }));
+
   const discreteColorScale: Array<[number, string]> = React.useMemo(() => {
     const scales = [
       [0, "#CDF0FF"],

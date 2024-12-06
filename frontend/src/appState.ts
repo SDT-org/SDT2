@@ -1,5 +1,10 @@
 import React, { type ErrorInfo } from "react";
+import {
+  type DistributionState,
+  initialDistributionState,
+} from "./distributionState";
 import type messages from "./messages";
+import type { HeatmapSettings } from "./plotTypes";
 
 export const clusterMethods = ["Neighbor-Joining", "UPGMA"] as const;
 
@@ -18,8 +23,6 @@ export type AppState = {
   progress: number;
   debug: boolean;
   sequences_count: number;
-  alignment_output_path: string;
-  export_path: string;
   stage: string;
   pair_progress: number;
   pair_count: number;
@@ -36,7 +39,7 @@ export type AppState = {
     platform: string;
   };
   client: {
-    dataView: "heatmap" | "plot";
+    dataView: "heatmap" | "distribution";
     enableClustering: boolean;
     enableOutputAlignments: boolean;
     cluster_method: (typeof clusterMethods)[number];
@@ -45,6 +48,11 @@ export type AppState = {
     errorInfo?: ErrorInfo | PromiseRejectionEvent["reason"] | null;
     saveFormat: SaveableImageFormat;
     showExportModal: boolean;
+    alignmentExportPath: string;
+    dataExportPath: string;
+    lastDataFilePath: string;
+    distribution: DistributionState;
+    heatmap: HeatmapSettings;
   };
 };
 
@@ -56,19 +64,44 @@ export const initialAppState: AppState = {
   progress: 0,
   debug: false,
   sequences_count: 0,
-  alignment_output_path: "",
-  export_path: "",
   stage: "Preprocessing",
   pair_progress: 0,
   pair_count: 0,
   client: {
     dataView: "heatmap",
+    dataExportPath: "",
+    alignmentExportPath: "",
+    lastDataFilePath: "",
     enableClustering: true,
     enableOutputAlignments: false,
     cluster_method: "Neighbor-Joining",
     saveFormat: "svg",
     showExportModal: false,
     compute_cores: 1,
+    distribution: initialDistributionState,
+    heatmap: {
+      colorscale: "Portland",
+      reverse: false,
+      vmax: 100,
+      vmin: 65,
+      cellspace: 1,
+      annotation: false,
+      annotation_font_size: 10,
+      annotation_rounding: 0,
+      annotation_alpha: "0",
+      color: "white",
+      showscale: true,
+      cbar_shrink: 1,
+      cbar_aspect: 25,
+      cbar_pad: 10,
+      axis_labels: false,
+      axlabel_xrotation: 270,
+      axlabel_xfontsize: 12,
+      axlabel_yrotation: 360,
+      axlabel_yfontsize: 12,
+      cutoff_1: 95,
+      cutoff_2: 75,
+    },
   },
   platform: {
     cores: 1,
@@ -76,6 +109,8 @@ export const initialAppState: AppState = {
     platform: "unknown",
   },
 };
+
+export const clientStateKey = "app-client-state";
 
 export type SetAppState = React.Dispatch<React.SetStateAction<AppState>>;
 export type SyncStateEvent = CustomEvent<{ state: AppState }>;

@@ -5,6 +5,7 @@
     "track track";
   grid-template-columns: 1fr auto;
   max-width: 100%;
+  align-items: baseline;
 
   label.react-aria-Label {
     grid-area: label;
@@ -60,5 +61,18 @@
     &[data-focus-visible] {
       outline: 2px solid var(--focus-ring-color);
     }
+  }
+
+  .react-aria-Input {
+    color: var(--text-secondary-color);
+    margin-bottom: 0.4rem;
+    font-size: 1.3rem;
+    border-radius: 0.5rem;
+    width: calc(3ch + (0.3rem * 2));
+    padding: 0.1rem 0.3rem;
+    line-height: 0;
+    text-align: center;
+    font-feature-settings: "tnum";
+    letter-spacing: -0.1rem;
   }
 }

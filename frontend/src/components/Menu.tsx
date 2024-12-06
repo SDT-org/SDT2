@@ -9,7 +9,7 @@ import {
   Popover,
   Separator,
 } from "react-aria-components";
-import type { AppState } from "../appState";
+import { type AppState, useAppState } from "../appState";
 
 // AppMenuButton and AppMenuItem were derived from https://react-spectrum.adobe.com/react-aria/Menu.html#reusable-wrappers
 interface MyMenuButtonProps<T>
@@ -100,24 +100,64 @@ export type MainMenuProps = {
   onExit: () => void;
 };
 
-export const MainMenu = ({
-  appState,
-  onNew,
-  onOpen,
-  onExport,
-  onManual,
-  onAbout,
-  onExit,
-}: MainMenuProps) => (
-  <AppMenuButton label="☰">
-    <AppMenuItem onAction={onNew}>New</AppMenuItem>
-    <AppMenuItem onAction={onOpen}>Open...</AppMenuItem>
-    {appState.view === "viewer" ? (
-      <AppMenuItem onAction={onExport}>Export images and data...</AppMenuItem>
-    ) : null}
-    <AppMenuItem onAction={onManual}>Manual</AppMenuItem>
-    <AppMenuItem onAction={onAbout}>About</AppMenuItem>
-    <Separator />
-    <AppMenuItem onAction={onExit}>Exit</AppMenuItem>
-  </AppMenuButton>
-);
+export const MainMenu = () => {
+  const { appState, setAppState } = useAppState();
+  const onNew = () => {
+    if (
+      !(
+        appState.view !== "runner" &&
+        confirm("Are you sure? Current results will be cleared.")
+      )
+    ) {
+      return;
+    }
+
+    window.pywebview.api.reset_state();
+  };
+
+  const onOpen = () => {
+    if (
+      appState.view !== "runner" &&
+      !confirm("Are you sure? Current results will be cleared.")
+    ) {
+      return;
+    }
+
+    window.pywebview.api
+      .open_file_dialog(appState.client.lastDataFilePath)
+      .then((data) =>
+        setAppState((prev) => ({
+          ...prev,
+          client: { ...prev.client, lastDataFilePath: data },
+        })),
+      );
+  };
+
+  const onExport = () =>
+    setAppState((previous) => ({
+      ...previous,
+      client: { ...previous.client, showExportModal: true },
+    }));
+
+  const onAbout = () => window.pywebview.api.show_about();
+  const onManual = () => window.pywebview.api.show_manual();
+  const onExit = () => {
+    if (confirm("Are you sure you want to exit?")) {
+      window.pywebview.api.close_app();
+    }
+  };
+
+  return (
+    <AppMenuButton label="☰">
+      <AppMenuItem onAction={onNew}>New</AppMenuItem>
+      <AppMenuItem onAction={onOpen}>Open...</AppMenuItem>
+      {appState.view === "viewer" ? (
+        <AppMenuItem onAction={onExport}>Export images and data...</AppMenuItem>
+      ) : null}
+      <AppMenuItem onAction={onManual}>Manual</AppMenuItem>
+      <AppMenuItem onAction={onAbout}>About</AppMenuItem>
+      <Separator />
+      <AppMenuItem onAction={onExit}>Exit</AppMenuItem>
+    </AppMenuButton>
+  );
+};
