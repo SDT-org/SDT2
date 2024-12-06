@@ -449,7 +449,7 @@ export const Heatmap = ({
                 },
               },
               {
-                type: "scattergl",
+                type: "scatter",
                 mode: "text",
                 // @ts-ignore
                 scrollZoom: true,
@@ -497,7 +497,7 @@ export const Heatmap = ({
                 minallowed: -2,
                 maxallowed: tickText.length + 2,
                 automargin: true,
-                scaleanchor: 'y',
+                scaleanchor: "y",
                 tickfont: {
                   ...plotFont,
                   size: settings.axlabel_xfontsize,
@@ -518,9 +518,9 @@ export const Heatmap = ({
                 minallowed: -2,
                 maxallowed: tickText.length + 2,
                 automargin: true,
-                scaleanchor: 'x',
-                range: [tickText.length - 1, 0], 
-                autorange: false, 
+                scaleanchor: "x",
+                range: [tickText.length - 1, 0],
+                autorange: false,
                 tickfont: {
                   size: settings.axlabel_yfontsize,
                   color: "black",
@@ -536,7 +536,6 @@ export const Heatmap = ({
                 showgrid: false,
               },
             }}
-            
             style={{ width: "100%", height: "100%" }}
           />
         ) : null}

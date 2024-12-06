@@ -17,6 +17,7 @@ type VisualizationBase = {
   showGrid: boolean;
   showTickLabels: boolean;
   showAxisLabels: boolean;
+  makeEditable?: boolean;
 };
 
 export type DistributionState = {
@@ -46,6 +47,7 @@ export type DistributionState = {
     showPoints: boolean;
     showZeroLine: boolean;
     plotOrientation: "horizontal" | "vertical";
+    editable: boolean;
   };
   violin: VisualizationBase & {
     bandwidth: number;
@@ -87,7 +89,7 @@ export const initialDistributionState: DistributionState = {
   dataSet: "scores",
   histogram: {
     ...visualizationDefaults,
-    barColor: Colors.LightBlue,
+    binColor: Colors.LightBlue,
     binSize: 1,
     histOutlineWidth: 1,
     histlineColor: Colors.Tomato,
@@ -109,6 +111,9 @@ export const initialDistributionState: DistributionState = {
     showPoints: true,
     showZeroLine: false,
     fillColor: Colors.LightBlue,
+    editable: false,
+    side: "positive",
+    showMeanline: true,
   },
   violin: {
     ...visualizationDefaults,

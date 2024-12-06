@@ -93,7 +93,6 @@ export const Histogram = ({
         },
         dragmode: "pan",
         barmode: "overlay",
-        showlegend: true,
         margin: { l: 50, r: 50, t: 50, b: 50 },
       }) as Partial<Layout>,
     [settings],
@@ -114,16 +113,20 @@ export const Histogram = ({
                     [
                       "showGrid",
                       "showTickLabels",
-                      "showLine",
+                      "showAxisLines",
                       "showAxisLabels",
+                      "makeEditable",
+                      "showMeanline",
                     ].includes(key) && settings[key as keyof typeof settings],
                 )}
                 onSelectionChange={(value) =>
                   updateSettings({
                     showGrid: value.has("showGrid"),
                     showTickLabels: value.has("showTickLabels"),
-                    showLine: value.has("showLine"),
+                    showAxisLines: value.has("showAxisLines"),
                     showAxisLabels: value.has("showAxisLabels"),
+                    makeEditable: value.has("makeEditable"),
+                    showMeanline: value.has("showMeanline"),
                   })
                 }
               >
@@ -150,7 +153,10 @@ export const Histogram = ({
                   </ToggleButton>
                 </Tooltip>
                 <Tooltip tooltip="Toggle axis lines">
-                  <ToggleButton id="showLine" aria-label="Toggle axis lines">
+                  <ToggleButton
+                    id="showAxisLines"
+                    aria-label="Toggle axis lines"
+                  >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
@@ -166,8 +172,9 @@ export const Histogram = ({
                           strokeMiterlimit: 10,
                         }}
                       >
-                        <path d="M1 1v22h22" />
-                        <path d="m7 17 5-6 5 1 6-7" />
+                        <path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z" />
+                        <path d="M3 10h18" />
+                        <path d="M10 3v18" />
                       </g>
                     </svg>
                   </ToggleButton>
@@ -198,10 +205,10 @@ export const Histogram = ({
                     </svg>
                   </ToggleButton>
                 </Tooltip>
-                <Tooltip tooltip="Toggle axis title">
+                <Tooltip tooltip="Toggle axis tick values">
                   <ToggleButton
                     id="showTickLabels"
-                    aria-label="Toggle axis title"
+                    aria-label="Toggle axis tick values"
                   >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -224,8 +231,33 @@ export const Histogram = ({
                     </svg>
                   </ToggleButton>
                 </Tooltip>
+                <Tooltip tooltip="Toggle editable mode">
+                  <ToggleButton
+                    id="makeEditable"
+                    aria-label="Toggle editable mode"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                    >
+                      <g
+                        style={{
+                          fill: "none",
+                          stroke: "currentcolor",
+                          strokeWidth: 2,
+                          strokeLinecap: "round",
+                          strokeLinejoin: "round",
+                          strokeMiterlimit: 10,
+                        }}
+                      >
+                        <path d="M14 2 L18 6 L7 17 H3 V13 Z" />
+                        <path d="M3 22 L21 22" />
+                      </g>
+                    </svg>
+                  </ToggleButton>
+                </Tooltip>
               </ToggleButtonGroup>
-
               <Label className="header">Bins</Label>
               <div className="col-2 auto-onefr">
                 <ColorPicker
@@ -240,7 +272,7 @@ export const Histogram = ({
                   label="Width"
                   defaultValue={settings.binSize}
                   onChange={(value) => updateSettings({ binSize: value })}
-                  minValue={0}
+                  minValue={0.5}
                   maxValue={5}
                   step={0.5}
                 />
@@ -280,7 +312,7 @@ export const Histogram = ({
             displayModeBar: false,
             scrollZoom: true,
             displaylogo: false,
-            editable: true,
+            editable: !!settings.makeEditable,
           }}
           style={{ width: "100%", height: "100%" }}
         />

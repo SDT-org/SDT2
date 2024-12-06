@@ -117,6 +117,7 @@ export const Violin = ({
 
     return {
       title: "",
+      subtitle: "",
       uirevision: settings.plotOrientation,
       font: plotFont,
       xaxis: isVertical
@@ -135,9 +136,7 @@ export const Violin = ({
             showgrid: settings.showGrid,
             showline: settings.showAxisLines,
             showticklabels: settings.showTickLabels,
-            title: settings.showAxisLabels
-              ? "Percent Pairwise Identity"
-              : undefined,
+
             range: [minDataValue - 20, maxDataValue + 20],
           },
       yaxis: isVertical
@@ -149,9 +148,6 @@ export const Violin = ({
             showgrid: settings.showGrid,
             showline: settings.showAxisLines,
             showticklabels: settings.showTickLabels,
-            title: settings.showAxisLabels
-              ? "Percent Pairwise Identity"
-              : undefined,
             range: [minDataValue - 20, maxDataValue + 20],
           }
         : {
@@ -187,6 +183,8 @@ export const Violin = ({
                         "showTickLabels",
                         "showAxisLines",
                         "showAxisLabels",
+                        "makeEditable",
+                        "showMeanline",
                       ].includes(key) && settings[key as keyof typeof settings],
                   )}
                   onSelectionChange={(value) =>
@@ -195,6 +193,8 @@ export const Violin = ({
                       showTickLabels: value.has("showTickLabels"),
                       showAxisLines: value.has("showAxisLines"),
                       showAxisLabels: value.has("showAxisLabels"),
+                      makeEditable: value.has("makeEditable"),
+                      showMeanline: value.has("showMeanline"),
                     })
                   }
                 >
@@ -240,34 +240,9 @@ export const Violin = ({
                             strokeMiterlimit: 10,
                           }}
                         >
-                          <path d="M1 1v22h22" />
-                          <path d="m7 17 5-6 5 1 6-7" />
-                        </g>
-                      </svg>
-                    </ToggleButton>
-                  </Tooltip>
-                  <Tooltip tooltip="Toggle axis labels">
-                    <ToggleButton
-                      id="showAxisLabels"
-                      aria-label="Toggle axis labels"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
-                        <g
-                          style={{
-                            fill: "none",
-                            stroke: "currentcolor",
-                            strokeWidth: 2,
-                            strokeLinecap: "round",
-                            strokeLinejoin: "round",
-                            strokeMiterlimit: 10,
-                          }}
-                        >
-                          <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4z" />
-                          <path d="M8 17v-6a4 4 0 0 1 8 0v6M8 13h8" />
+                          <path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z" />
+                          <path d="M3 10h18" />
+                          <path d="M10 3v18" />
                         </g>
                       </svg>
                     </ToggleButton>
@@ -298,8 +273,60 @@ export const Violin = ({
                       </svg>
                     </ToggleButton>
                   </Tooltip>
+                  <Tooltip tooltip="Edit title and axis labels">
+                    <ToggleButton
+                      id="makeEditable"
+                      aria-label="Edit title and axis labels"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <g
+                          style={{
+                            fill: "none",
+                            stroke: "currentcolor",
+                            strokeWidth: 2,
+                            strokeLinecap: "round",
+                            strokeLinejoin: "round",
+                            strokeMiterlimit: 10,
+                          }}
+                        >
+                          <path d="M14 2 L18 6 L7 17 H3 V13 Z" />
+                          <path d="M3 22 L21 22" />
+                        </g>
+                      </svg>
+                    </ToggleButton>
+                  </Tooltip>
+                  <Tooltip tooltip="Toggle mean line">
+                    <ToggleButton
+                      id="showMeanline"
+                      aria-label="Toggle mean line"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <g
+                          style={{
+                            fill: "none",
+                            stroke: "currentcolor",
+                            strokeWidth: 2,
+                            strokeLinecap: "round",
+                            strokeLinejoin: "round",
+                            strokeMiterlimit: 10,
+                          }}
+                        >
+                          <path d="M5 12h2" />
+                          <path d="M17 12h2" />
+                          <path d="M11 12h2" />
+                        </g>
+                      </svg>
+                    </ToggleButton>
+                  </Tooltip>
                 </ToggleButtonGroup>
-
                 <Label>Orientation</Label>
                 <ToggleButtonGroup
                   data-compact
@@ -554,14 +581,6 @@ export const Violin = ({
                 </div>
               </div>
             </div>
-            <div className="group">
-              <Switch
-                isSelected={settings.showMeanline}
-                onChange={(value) => updateSettings({ showMeanline: value })}
-              >
-                Mean
-              </Switch>
-            </div>
           </div>
         </div>
         {footer ? <div className="app-sidebar-footer">{footer}</div> : null}
@@ -575,10 +594,10 @@ export const Violin = ({
           layout={layout}
           config={{
             responsive: true,
-            displayModeBar: true,
+            displayModeBar: false,
             scrollZoom: true,
             displaylogo: false,
-            editable: true,
+            editable: !!settings.makeEditable,
           }}
           style={{ width: "100%", height: "100%" }}
         />
