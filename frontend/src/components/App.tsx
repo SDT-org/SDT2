@@ -1,16 +1,12 @@
 import React from "react";
-import {
-  type AppState,
-  AppStateContext,
-  clientStateKey,
-  initialAppState,
-} from "../appState";
+import { type AppState, AppStateContext, initialAppState } from "../appState";
 import { useAppBlur } from "../hooks/appBlur";
 import { useWaitForPywebview } from "../hooks/usePywebviewReadyEvent";
 import { useSaveState } from "../hooks/useSaveState";
 import { useShortcutKeys } from "../hooks/useShortcutKeys";
 import { useStartProcessData } from "../hooks/useStartProcessData";
 import { useSyncState } from "../hooks/useSyncState";
+import { restoreClientState } from "../restoreClientState";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { ExportModal } from "./ExportModal";
 import { Loader } from "./Loader";
@@ -21,16 +17,12 @@ import { Viewer } from "./Viewer";
 export const App = () => {
   const restoreInitialState = React.useCallback(() => {
     setLoading(true);
-    const savedClient = localStorage.getItem(clientStateKey);
 
     window.pywebview.api.get_state().then((data) => {
       setAppState((prev) => ({
         ...data,
-        client: {
-          ...prev.client,
-          ...(savedClient ? JSON.parse(savedClient) : {}),
-          showExportModal: false,
-        },
+        client: restoreClientState(prev.client),
+        showExportModal: false,
       }));
       setLoading(false);
       setInitialized(true);

@@ -1,6 +1,6 @@
-import React from "react";
+import { z } from "zod";
 import type { AppState, SetAppState } from "./appState";
-import { type ColorString, Colors } from "./colors";
+import { type ColorString, ColorStringSchema, Colors } from "./colors";
 
 export type Visualization = "histogram" | "violin" | "raincloud";
 type DataSet = number[];
@@ -17,9 +17,9 @@ type VisualizationBase = {
   showGrid: boolean;
   showTickLabels: boolean;
   showAxisLabels: boolean;
-  showAxisLines?: boolean;
-  makeEditable?: boolean;
-  showMeanline?: boolean;
+  showAxisLines: boolean;
+  makeEditable: boolean;
+  showMeanline: boolean;
 };
 
 export type DistributionState = {
@@ -77,6 +77,73 @@ export type DistributionState = {
   };
 };
 
+const VisualizationBaseSchema = z.object({
+  plotTitle: z.string(),
+  lineColor: ColorStringSchema,
+  lineWidth: z.number(),
+  showGrid: z.boolean(),
+  showTickLabels: z.boolean(),
+  showAxisLabels: z.boolean(),
+  showAxisLines: z.boolean(),
+  makeEditable: z.boolean(),
+  showMeanline: z.boolean(),
+});
+
+export const DistributionStateSchema = z.object({
+  visualization: z.enum(["histogram", "violin", "raincloud"]),
+  dataSet: z.enum(["scores", "gc", "length"]),
+  histogram: VisualizationBaseSchema.extend({
+    binColor: ColorStringSchema,
+    binSize: z.number(),
+    histOutlineWidth: z.number(),
+    histnorm: z.enum(["probability", "percent"]),
+    showHistogram: z.boolean(),
+    showLine: z.boolean(),
+    histlineColor: ColorStringSchema,
+  }),
+  raincloud: VisualizationBaseSchema.extend({
+    bandwidth: z.number(),
+    showMeanline: z.boolean(),
+    side: z.literal("positive"),
+    fillColor: ColorStringSchema,
+    jitter: z.number(),
+    markerColor: ColorStringSchema,
+    markerSize: z.number(),
+    pointOpacity: z.number(),
+    pointPos: z.number(),
+    points: z.enum(["all", "outliers", "suspectedoutliers"]),
+    showAxisLines: z.boolean(),
+    showPoints: z.boolean(),
+    showZeroLine: z.boolean(),
+    plotOrientation: z.enum(["horizontal", "vertical"]),
+    editable: z.boolean(),
+  }),
+  violin: VisualizationBaseSchema.extend({
+    bandwidth: z.number(),
+    boxOpacity: z.number(),
+    boxWidth: z.number(),
+    boxfillColor: ColorStringSchema,
+    boxlineColor: ColorStringSchema,
+    boxlineWidth: z.number(),
+    fillColor: ColorStringSchema,
+    jitter: z.number(),
+    markerColor: ColorStringSchema,
+    markerSize: z.number(),
+    pointOpacity: z.number(),
+    pointOrientation: z.enum(["Violin", "Box"]),
+    pointPos: z.number(),
+    points: z.enum(["all", "outliers", "suspectedoutliers"]),
+    showAxisLines: z.boolean(),
+    showBox: z.boolean(),
+    showMeanline: z.boolean(),
+    showPoints: z.boolean(),
+    showViolin: z.boolean(),
+    showZeroLine: z.boolean(),
+    whiskerWidth: z.number(),
+    plotOrientation: z.enum(["horizontal", "vertical"]),
+  }),
+});
+
 const visualizationDefaults = {
   plotTitle: "Distribution of Percent Identities",
   lineColor: Colors.Tomato,
@@ -98,6 +165,9 @@ export const initialDistributionState: DistributionState = {
     histnorm: "probability",
     showHistogram: true,
     showLine: true,
+    makeEditable: true,
+    showAxisLines: true,
+    showMeanline: true,
   },
   raincloud: {
     ...visualizationDefaults,
@@ -116,6 +186,7 @@ export const initialDistributionState: DistributionState = {
     editable: false,
     side: "positive",
     showMeanline: true,
+    makeEditable: true,
   },
   violin: {
     ...visualizationDefaults,
@@ -137,6 +208,7 @@ export const initialDistributionState: DistributionState = {
     showAxisLines: true,
     showBox: true,
     showMeanline: true,
+    makeEditable: true,
     showPoints: true,
     showViolin: true,
     showZeroLine: false,

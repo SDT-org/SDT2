@@ -312,7 +312,7 @@ export const Histogram = ({
             displayModeBar: false,
             scrollZoom: true,
             displaylogo: false,
-            editable: !!settings.makeEditable,
+            editable: settings.makeEditable,
           }}
           style={{ width: "100%", height: "100%" }}
         />

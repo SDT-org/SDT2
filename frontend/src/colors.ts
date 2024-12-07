@@ -1,6 +1,19 @@
+import tinycolor from "tinycolor2";
+import { z } from "zod";
+
 export type ColorString =
   | `hsl(${number}, ${number}%, ${number}%)`
   | `hsla(${number}, ${number}%, ${number}%, ${number})`;
+
+export const ColorStringSchema = z
+  .string()
+  .refine(
+    (color): color is ColorString =>
+      tinycolor(color).isValid() && /^hsl/.test(color),
+    {
+      message: "Invalid HSL or HSLA color string",
+    },
+  );
 
 type ColorName =
   | "White"

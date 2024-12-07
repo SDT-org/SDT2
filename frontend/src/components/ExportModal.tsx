@@ -8,6 +8,7 @@ import {
   ModalOverlay,
 } from "react-aria-components";
 import useAppState, {
+  saveableImageFormats,
   type AppState,
   type SaveableImageFormat,
 } from "../appState";
@@ -245,14 +246,12 @@ export const ExportModal = () => {
                             },
                           }))
                         }
-                        items={Object.entries({
-                          svg: "SVG",
-                          png: "PNG",
-                          jpeg: "JPEG",
-                        }).map(([id, name]) => ({
-                          id,
-                          name,
-                        }))}
+                        items={Object.entries(saveableImageFormats).map(
+                          ([id, name]) => ({
+                            id,
+                            name,
+                          }),
+                        )}
                       >
                         {(item) => (
                           <SelectItem textValue={item.name}>

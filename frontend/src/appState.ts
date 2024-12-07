@@ -1,11 +1,12 @@
 import React, { type ErrorInfo } from "react";
+import { z } from "zod";
 import {
   type DistributionState,
+  DistributionStateSchema,
   initialDistributionState,
 } from "./distributionState";
 import type messages from "./messages";
-import type { HeatmapSettings } from "./plotTypes";
-
+import { type HeatmapSettings, HeatmapSettingsSchema } from "./plotTypes";
 export const clusterMethods = ["Neighbor-Joining", "UPGMA"] as const;
 
 export const clusterMethodDescriptions = [
@@ -13,7 +14,13 @@ export const clusterMethodDescriptions = [
   "Rooted phylogenetic tree ideal for ultra-metric datasets",
 ];
 
-export type SaveableImageFormat = "png" | "jpeg" | "svg";
+export const saveableImageFormats = {
+  svg: "SVG",
+  png: "PNG",
+  jpeg: "JPEG",
+};
+export type SaveableImageFormat = keyof typeof saveableImageFormats;
+const saveableImageFormatKeys = ["svg", "png", "jpeg"] as const;
 
 export type AppState = {
   view: "runner" | "loader" | "viewer";
@@ -55,6 +62,23 @@ export type AppState = {
     heatmap: HeatmapSettings;
   };
 };
+
+export const clientStateSchema = z.object({
+  dataView: z.enum(["heatmap", "distribution"]),
+  enableClustering: z.boolean(),
+  enableOutputAlignments: z.boolean(),
+  cluster_method: z.enum(clusterMethods),
+  compute_cores: z.number(),
+  error: z.instanceof(Error).nullable(),
+  errorInfo: z.null(),
+  saveFormat: z.enum(saveableImageFormatKeys),
+  showExportModal: z.boolean(),
+  alignmentExportPath: z.string(),
+  dataExportPath: z.string(),
+  lastDataFilePath: z.string(),
+  distribution: DistributionStateSchema,
+  heatmap: HeatmapSettingsSchema,
+});
 
 export const initialAppState: AppState = {
   view: "runner",

@@ -59,12 +59,7 @@ export const Violin = ({
         meanline: {
           visible: settings.showMeanline,
         },
-        points:
-          settings.showPoints && settings.pointOrientation === "Violin"
-            ? settings.points === false
-              ? false
-              : settings.points
-            : false,
+        points: settings.showPoints && settings.pointOrientation === "Violin",
         pointpos: settings.pointPos,
         jitter: settings.jitter,
         bandwidth: settings.bandwidth,

@@ -1,5 +1,4 @@
 import type {
-  Color,
   ColorPickerProps as RACColorPickerProps,
   ColorSliderProps as RACColorSliderProps,
 } from "react-aria-components";
@@ -16,7 +15,6 @@ import {
   ColorSlider as RACColorSlider,
   SliderOutput,
   SliderTrack,
-  parseColor,
 } from "react-aria-components";
 
 interface ColorSliderProps extends RACColorSliderProps {
