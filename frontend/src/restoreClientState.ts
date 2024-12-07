@@ -15,7 +15,6 @@ export const restoreClientState = (baseClientState: AppState["client"]) => {
       parsedState.errorInfo = null;
       const parsedClient = partialSafeParse(clientStateSchema, parsedState);
       const validData = parsedClient.validData;
-      console.debug(parsedClient.error);
       const merged: AppState["client"] = {
         ...baseClientState,
         ...parsedClient.validData,
@@ -43,7 +42,6 @@ export const restoreClientState = (baseClientState: AppState["client"]) => {
       return merged;
     }
   } catch (e) {
-    console.error(e);
     return initialAppState.client;
   }
   return initialAppState.client;
