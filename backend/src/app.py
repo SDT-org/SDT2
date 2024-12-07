@@ -197,8 +197,6 @@ class Api:
     def open_file_dialog(self, filepath: str | None = None):
         if filepath is None:
             filepath = ''
-
-        print('open_file_dialog', filepath)
         result = webview.windows[0].create_file_dialog(
             webview.OPEN_DIALOG,
             allow_multiple=False,

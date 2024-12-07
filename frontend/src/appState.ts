@@ -113,7 +113,6 @@ export const initialAppState: AppState = {
       annotation_font_size: 10,
       annotation_rounding: 0,
       annotation_alpha: "0",
-      color: "white",
       showscale: true,
       cbar_shrink: 1,
       cbar_aspect: 25,

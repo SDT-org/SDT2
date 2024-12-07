@@ -1,6 +1,5 @@
 import { z } from "zod";
 import type { colorScales } from "./colorScales";
-import { ColorStringSchema } from "./colors";
 
 export type Colorscale = keyof typeof colorScales;
 
@@ -14,7 +13,6 @@ export interface HeatmapSettings {
   annotation_font_size: number;
   annotation_rounding: 0 | 1 | 2;
   annotation_alpha: string;
-  color: string;
   showscale: boolean;
   cbar_shrink: number;
   cbar_pad: number;
@@ -58,7 +56,6 @@ export const HeatmapSettingsSchema = z.object({
   annotation_font_size: z.number(),
   annotation_rounding: z.union([z.literal(0), z.literal(1), z.literal(2)]),
   annotation_alpha: z.string(),
-  color: ColorStringSchema,
   showscale: z.boolean(),
   cbar_shrink: z.number(),
   cbar_pad: z.number(),
