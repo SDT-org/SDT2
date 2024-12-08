@@ -6,7 +6,8 @@ import createPlotlyComponent from "react-plotly.js/factory";
 import type { ColorString } from "../colors";
 import { plotFont } from "../constants";
 import type { DataSets, DistributionState } from "../distributionState";
-import type { DistributionData } from "../plotTypes";
+import { arrayMinMax } from "../helpers";
+import type { DistributionData, MetaData } from "../plotTypes";
 import { ColorPicker } from "./ColorPicker";
 import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";
@@ -27,6 +28,7 @@ export const Violin = ({
   data: DistributionData | undefined;
   dataSets: DataSets;
   dataSetKey: keyof DataSets;
+  metaData?: MetaData;
   footer?: React.ReactNode;
   sidebarComponent?: React.ReactNode;
   settings: DistributionState["violin"];
@@ -41,8 +43,7 @@ export const Violin = ({
   }
 
   const dataSet = dataSets[dataSetKey];
-  const minDataValue = Math.min(...dataSet);
-  const maxDataValue = Math.max(...dataSet);
+  const [minDataValue, maxDataValue] = arrayMinMax(dataSet);
 
   const violinTrace = React.useMemo(
     () =>

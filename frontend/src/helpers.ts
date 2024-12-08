@@ -29,3 +29,10 @@ export const formatBytes = (bytes: number, decimals = 2) => {
 };
 
 export const formatTitle = (key: string) => key.replaceAll("_", " ");
+
+// https://stackoverflow.com/a/42623277
+export const arrayMinMax = (arr: number[]): [number, number] =>
+  arr.reduce(
+    ([min, max], val) => [Math.min(min, val), Math.max(max, val)],
+    [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY],
+  );
