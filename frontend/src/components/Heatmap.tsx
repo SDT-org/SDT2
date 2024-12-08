@@ -74,6 +74,24 @@ export const Heatmap = ({
     settings.annotation_rounding,
   );
 
+  const [textScale, setTextScale] = React.useState(0);
+
+  const handleRelayout = React.useCallback(
+    (event: Plotly.PlotRelayoutEvent) => {
+      const earlyRamp = 10;
+      const initialRange = -2;
+      const x0 = event["xaxis.range[0]"] || initialRange;
+      const x1 = event["xaxis.range[1]"] || initialRange;
+      const length = data.length + 2 + earlyRamp;
+      const scale = Math.max(
+        1,
+        Math.min(4, Number((length / ((x1 - x0) * 1.5)).toFixed(1))),
+      );
+      setTextScale(scale);
+    },
+    [data.length],
+  );
+
   return (
     <>
       <div className="app-sidebar heatmap-sidebar">
@@ -352,6 +370,7 @@ export const Heatmap = ({
         {data ? (
           <Plot
             id="plot"
+            onRelayout={handleRelayout}
             data={[
               {
                 z: data,
@@ -386,7 +405,7 @@ export const Heatmap = ({
                 scrollZoom: true,
                 textfont: {
                   ...plotFont,
-                  size: settings.annotation_font_size,
+                  size: settings.annotation_font_size * textScale,
                   color: annotations?.textColors ?? "white",
                 },
                 hoverinfo: "skip",
