@@ -72,5 +72,9 @@ test("restores valid state", () => {
   };
   localStorage.setItem(clientStateKey, JSON.stringify(state));
   const restored = restoreClientState(initialAppState.client);
-  expect(restored).toEqual(initialAppState.client);
+  expect(restored).toEqual({
+    ...initialAppState.client,
+    error: null,
+    errorInfo: null,
+  });
 });

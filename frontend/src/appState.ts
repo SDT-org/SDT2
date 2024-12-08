@@ -104,7 +104,7 @@ export const initialAppState: AppState = {
     compute_cores: 1,
     distribution: initialDistributionState,
     heatmap: {
-      colorscale: "Portland",
+      colorScaleKey: "Portland",
       reverse: false,
       vmax: 100,
       vmin: 65,

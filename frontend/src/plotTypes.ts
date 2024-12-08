@@ -1,10 +1,10 @@
 import { z } from "zod";
 import type { colorScales } from "./colorScales";
 
-export type Colorscale = keyof typeof colorScales;
+export type ColorScaleKey = keyof typeof colorScales;
 
 export interface HeatmapSettings {
-  colorscale: Colorscale | "Discrete";
+  colorScaleKey: ColorScaleKey | "Discrete";
   reverse: boolean;
   vmax: number;
   vmin: number;
@@ -27,7 +27,7 @@ export interface HeatmapSettings {
 }
 
 export const HeatmapSettingsSchema = z.object({
-  colorscale: z.enum([
+  colorScaleKey: z.enum([
     "Greys",
     "YlGnBu",
     "Greens",
@@ -69,7 +69,8 @@ export const HeatmapSettingsSchema = z.object({
   cutoff_2: z.number(),
 });
 
-export type HeatmapData = string[][];
+export type HeatmapData = GetDataResponse["data"];
+export type MetaData = GetDataResponse["metadata"];
 
 export type GetDataResponse = {
   data: string[][];
@@ -82,9 +83,10 @@ export type GetDataResponse = {
   identity_scores: [string, string, number][];
 };
 
+// TODO: make this file about heatmap
 export type DistributionData = Omit<
   GetDataResponse,
-  "data" | "identity_scores"
+  "data" | "identity_scores" | "metadata"
 > & {
   raw_mat: number[];
   identity_combos: [string, string][];

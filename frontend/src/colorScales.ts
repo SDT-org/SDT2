@@ -1,4 +1,4 @@
-type scaleNames =
+type ColorScaleKey =
   | "Greys"
   | "YlGnBu"
   | "Greens"
@@ -20,7 +20,7 @@ type scaleNames =
 
 // https://github.com/plotly/plotly.js/blob/482802bd31cbf2638040357fcc4ff3bafa3292f8/src/components/colorscale/scales.js
 export const colorScales: {
-  [K in scaleNames]: [[number, string], ...[number, string][]];
+  [K in ColorScaleKey]: [[number, string], ...[number, string][]];
 } = {
   Greys: [
     [0, "rgb(0,0,0)"],

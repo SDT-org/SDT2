@@ -1,3 +1,4 @@
+import Color from "colorjs.io";
 import tinycolor from "tinycolor2";
 import { z } from "zod";
 
@@ -14,6 +15,64 @@ export const ColorStringSchema = z
       message: "Invalid HSL or HSLA color string",
     },
   );
+
+export type ColorScaleArray = Array<[number, string]>;
+
+export const findScaleLower = (colorScale: ColorScaleArray, value: number) =>
+  colorScale
+    .filter((curr) => curr[0] <= value)
+    .reduce((prev, curr) => (curr[0] > prev[0] ? curr : prev));
+
+export const findScaleUpper = (colorScale: ColorScaleArray, value: number) =>
+  colorScale
+    .filter((curr) => curr[0] >= value)
+    .reduce((prev, curr) => (curr[0] < prev[0] ? curr : prev));
+
+export const originalRgbFormat = {
+  name: "rgb",
+  commas: true,
+  noAlpha: true,
+  coords: ["<number>[0, 255]", "<number>[0, 255]", "<number>[0, 255]"],
+};
+
+export const interpolateColor = (
+  colorScale: ColorScaleArray,
+  value: number,
+  format?: {
+    name: string;
+    commas: boolean;
+    noAlpha: boolean;
+    coords: string[];
+  },
+): {
+  value: ColorScaleArray[number];
+  upper: ColorScaleArray[number];
+  lower: ColorScaleArray[number];
+} => {
+  const lower = findScaleLower(colorScale, value);
+  const upper = findScaleUpper(colorScale, value);
+
+  const ratio =
+    lower[0] === upper[0] ? 0 : (value - lower[0]) / (upper[0] - lower[0]);
+  const lowerColor = new Color(lower[1]);
+  const upperColor = new Color(upper[1]);
+  const interpolator = lowerColor.range(upperColor, {
+    space: "srgb",
+    outputSpace: "srgb",
+  });
+  const interpolatedColor =
+    ratio === 0
+      ? value === lower[0]
+        ? lower[1]
+        : upper[1]
+      : interpolator(ratio).toString({ format, precision: 0 });
+
+  return {
+    value: [ratio, interpolatedColor],
+    lower,
+    upper,
+  };
+};
 
 type ColorName =
   | "White"

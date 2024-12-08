@@ -1,12 +1,12 @@
-import Plotly from "plotly.js-dist-min";
+import Plotly, { type ColorScale } from "plotly.js-dist-min";
 import React from "react";
 import { ToggleButton } from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
-import tinycolor from "tinycolor2";
 import useAppState, { type AppState } from "../appState";
 import { colorScales as defaultColorScales } from "../colorScales";
 import { plotFont } from "../constants";
-import type { Colorscale, HeatmapData, HeatmapSettings } from "../plotTypes";
+import { useAnnotations } from "../hooks/useAnnotations";
+import type { ColorScaleKey, HeatmapData, HeatmapSettings } from "../plotTypes";
 import { NumberInput } from "./NumberInput";
 import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";
@@ -43,7 +43,7 @@ export const Heatmap = ({
       },
     }));
 
-  const discreteColorScale: Array<[number, string]> = React.useMemo(() => {
+  const discreteColorScale: ColorScale = React.useMemo(() => {
     const scales = [
       [0, "#CDF0FF"],
       [Math.max(0, settings.cutoff_2 / 100 - 0.01), "#20B9FF"],
@@ -65,84 +65,14 @@ export const Heatmap = ({
     [discreteColorScale],
   );
 
-  const annotations = React.useMemo(() => {
-    const x: number[] = [];
-    const y: number[] = [];
-    const text: string[] = [];
-    const textColors: (string | null)[] = [];
-
-    const normalizedData = data
-      .flat()
-      .map(Number.parseFloat)
-      .filter((d) => d > 0);
-
-    // https://stackoverflow.com/a/42623277
-    const [dataMin, dataMax] = normalizedData.reduce(
-      ([min, max], val) => [Math.min(min, val), Math.max(max, val)],
-      [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY],
-    );
-
-    const dataDiff = dataMax - dataMin;
-
-    data.forEach((row, rowIndex) => {
-      row.forEach((datum, columnIndex) => {
-        x.push(columnIndex);
-        y.push(rowIndex);
-
-        if (datum === null) {
-          text.push("");
-        } else {
-          text.push(
-            Number.parseFloat(datum).toFixed(settings.annotation_rounding),
-          );
-        }
-
-        let parsedDatum = Number.parseFloat(datum);
-        if (Number.isInteger(parsedDatum)) {
-          parsedDatum = parsedDatum / 100;
-        }
-
-        const normalizedDatum = Math.max(0, (parsedDatum - dataMin) / dataDiff);
-
-        let scale: (typeof colorScales)[Colorscale] | [number, string][] =
-          colorScales[settings.colorscale];
-
-        if (settings.reverse) {
-          scale = [...scale]
-            .reverse()
-            .map((data, i) => [(scale[i] || scale[0])[0], data[1]]);
-        }
-
-        const match = scale.reduce((previous, current) =>
-          Math.abs(current[0] - normalizedDatum) <=
-          Math.abs(previous[0] - normalizedDatum)
-            ? current
-            : previous,
-        );
-
-        if (datum === null) {
-          textColors.push(null);
-        } else if (tinycolor(match[1]).isLight()) {
-          textColors.push("black");
-        } else {
-          textColors.push("white");
-        }
-      });
-    });
-
-    return {
-      x,
-      y,
-      text,
-      textColors,
-    };
-  }, [
-    settings.reverse,
-    settings.colorscale,
-    settings.annotation_rounding,
-    colorScales,
+  const annotations = useAnnotations(
     data,
-  ]);
+    settings.vmin,
+    settings.vmax,
+    colorScales[settings.colorScaleKey],
+    settings.reverse,
+    settings.annotation_rounding,
+  );
 
   return (
     <>
@@ -194,10 +124,10 @@ export const Heatmap = ({
                         id: name,
                         name,
                       }))}
-                      selectedKey={settings.colorscale}
+                      selectedKey={settings.colorScaleKey}
                       onSelectionChange={(value) => {
                         updateSettings({
-                          colorscale: value as Colorscale,
+                          colorScaleKey: value as ColorScaleKey,
                         });
                       }}
                     >
@@ -222,7 +152,7 @@ export const Heatmap = ({
                   value={settings.cellspace}
                 />
 
-                {settings.colorscale === "Discrete" ? (
+                {settings.colorScaleKey === "Discrete" ? (
                   <div className="col-2">
                     <div className="field">
                       <NumberInput
@@ -399,7 +329,7 @@ export const Heatmap = ({
                     min={1}
                     max={settings.vmax - 1}
                     step={1}
-                    isDisabled={settings.colorscale === "Discrete"}
+                    isDisabled={settings.colorScaleKey === "Discrete"}
                   />
                   <NumberInput
                     label="Max"
@@ -409,7 +339,7 @@ export const Heatmap = ({
                     min={settings.vmin + 1}
                     max={100}
                     step={1}
-                    isDisabled={settings.colorscale === "Discrete"}
+                    isDisabled={settings.colorScaleKey === "Discrete"}
                   />
                 </div>
               </div>
@@ -425,7 +355,7 @@ export const Heatmap = ({
             data={[
               {
                 z: data,
-                colorscale: colorScales[settings.colorscale],
+                colorscale: colorScales[settings.colorScaleKey],
                 reversescale: settings.reverse,
                 type: "heatmap",
                 hovertemplate:
@@ -437,8 +367,9 @@ export const Heatmap = ({
                 autosize: true,
                 set_aspect: 3,
                 showscale: settings.showscale,
-                zmin: settings.colorscale === "Discrete" ? 0 : settings.vmin,
-                zmax: settings.colorscale === "Discrete" ? 100 : settings.vmax,
+                zmin: settings.colorScaleKey === "Discrete" ? 0 : settings.vmin,
+                zmax:
+                  settings.colorScaleKey === "Discrete" ? 100 : settings.vmax,
                 // Gap between columns of cells. Actual 0 values cause blurriness on macOS
                 xgap: settings.cellspace || 0.001,
                 ygap: settings.cellspace || 0.001,

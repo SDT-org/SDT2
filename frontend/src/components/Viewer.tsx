@@ -30,6 +30,9 @@ export const Viewer = ({
   const [heatmapData, setHeatmapData] = React.useState<HeatmapData>();
   const [distributionData, setDistributionData] =
     React.useState<DistributionData>();
+  const [metaData, setMetaData] = React.useState<
+    GetDataResponse["metadata"] | undefined
+  >();
 
   const getData = React.useCallback(() => {
     setLoading(true);
@@ -37,25 +40,23 @@ export const Viewer = ({
     window.pywebview.api
       .get_data()
       .then((rawData) => {
-        const {
-          data,
-          metadata,
-          identity_scores,
-          gc_stats,
-          length_stats,
-        }: GetDataResponse = JSON.parse(rawData.replace(/\bNaN\b/g, "null"));
+        const parsedResponse: GetDataResponse = JSON.parse(
+          rawData.replace(/\bNaN\b/g, "null"),
+        );
+        const { data, metadata, identity_scores, gc_stats, length_stats } =
+          parsedResponse;
 
         const [tickText, ...parsedData] = data;
 
         setTickText(tickText as string[]);
         setHeatmapData(parsedData);
         setDistributionData({
-          metadata,
           gc_stats,
           length_stats,
           raw_mat: identity_scores.map((i) => i[2]),
           identity_combos: identity_scores.map((i) => [i[0], i[1]]),
         });
+        setMetaData(metadata);
 
         setAppState((prev) => ({
           ...prev,
@@ -145,7 +146,7 @@ export const Viewer = ({
         onSelectionChange={setDataView}
       >
         <TabPanel id="heatmap" className="app-panel">
-          {appState.client.dataView === "heatmap" && heatmapData ? (
+          {appState.client.dataView === "heatmap" && heatmapData && metaData ? (
             <Heatmap data={heatmapData} tickText={tickText} />
           ) : null}
         </TabPanel>
