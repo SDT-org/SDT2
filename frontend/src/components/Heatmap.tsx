@@ -428,7 +428,6 @@ export const Heatmap = ({
                 minallowed: -2,
                 maxallowed: tickText.length + 2,
                 automargin: true,
-                scaleanchor: "y",
                 tickfont: {
                   ...plotFont,
                   size: settings.axlabel_xfontsize,

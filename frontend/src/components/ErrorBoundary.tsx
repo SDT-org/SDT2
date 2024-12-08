@@ -45,7 +45,8 @@ export class ErrorBoundary extends React.Component<Props> {
   }
 
   handlePromiseRejection(e: PromiseRejectionEvent) {
-    if (e.reason?.stack?.includes("plotly.js")) {
+    if (e.reason?.stack?.split("\n")[0].includes("plotly")) {
+      console.error("Ignoring Plotly error:", e.reason);
       e.preventDefault();
       return;
     }
