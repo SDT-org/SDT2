@@ -7,7 +7,7 @@ import {
   TabPanel,
   Tabs,
 } from "react-aria-components";
-import type { AppState, SetAppState } from "../appState";
+import { type AppState, type SetAppState, initialAppState } from "../appState";
 import type {
   DistributionData,
   GetDataResponse,
@@ -33,6 +33,17 @@ export const Viewer = ({
   const [metaData, setMetaData] = React.useState<
     GetDataResponse["metadata"] | undefined
   >();
+
+  const getScaledFontSize = React.useCallback(
+    (base: number, count: number) =>
+      Math.min(
+        14,
+        count < 20
+          ? base * (base / count)
+          : Math.max(5, base / (1 + count / 90)),
+      ),
+    [],
+  );
 
   const getData = React.useCallback(() => {
     setLoading(true);
@@ -69,6 +80,10 @@ export const Viewer = ({
                 axis_labels: false,
                 cellspace: 0,
               }),
+              annotation_font_size: getScaledFontSize(
+                initialAppState.client.heatmap.annotation_font_size,
+                appState.sequences_count,
+              ),
             },
           },
         }));
@@ -84,7 +99,7 @@ export const Viewer = ({
       .finally(() => {
         setLoading(false);
       });
-  }, [appState.sequences_count, setAppState]);
+  }, [appState.sequences_count, setAppState, getScaledFontSize]);
 
   React.useEffect(() => {
     getData();

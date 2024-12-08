@@ -74,11 +74,11 @@ export const Heatmap = ({
     settings.annotation_rounding,
   );
 
-  const [textScale, setTextScale] = React.useState(0);
+  const [textScale, setTextScale] = React.useState(1);
 
   const handleRelayout = React.useCallback(
     (event: Plotly.PlotRelayoutEvent) => {
-      const earlyRamp = 10;
+      const earlyRamp = data.length < 10 ? 0 : data.length < 50 ? 10 : 0;
       const initialRange = -2;
       const x0 = event["xaxis.range[0]"] || initialRange;
       const x1 = event["xaxis.range[1]"] || initialRange;

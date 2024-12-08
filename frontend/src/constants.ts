@@ -1,4 +1,4 @@
 export const plotFont = {
-  family: '"Inter var", "Inter", sans-serif',
+  family: '"Roboto Mono", monospace',
   weight: 500,
 };
