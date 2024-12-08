@@ -4,7 +4,7 @@ import {
   type Visualization,
   useDistributionState,
 } from "../distributionState";
-import type { DistributionData } from "../plotTypes";
+import type { DistributionData, MetaData } from "../plotTypes";
 import { Histogram } from "./Histogram";
 import { Raincloud } from "./Raincloud";
 import { Select, SelectItem } from "./Select";
@@ -79,8 +79,10 @@ const VisualizationSwitcher = ({
 
 export const Distribution = ({
   data,
+  metaData,
 }: {
   data: DistributionData | undefined;
+  metaData: MetaData;
   footer?: React.ReactNode;
 }) => {
   if (!data) {
@@ -120,6 +122,7 @@ export const Distribution = ({
 
   const commonProps = {
     data,
+    metaData,
     dataSets,
     dataSetKey: distributionState.dataSet,
     sidebarComponent,

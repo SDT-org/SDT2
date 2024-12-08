@@ -6,7 +6,7 @@ import createPlotlyComponent from "react-plotly.js/factory";
 import type { ColorString } from "../colors";
 import { plotFont } from "../constants";
 import type { DataSets, DistributionState } from "../distributionState";
-import type { DistributionData } from "../plotTypes";
+import type { DistributionData, MetaData } from "../plotTypes";
 import { ColorPicker } from "./ColorPicker";
 import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";
@@ -18,6 +18,7 @@ export const Raincloud = ({
   data,
   dataSets,
   dataSetKey,
+  metaData,
   footer,
   sidebarComponent,
   settings,
@@ -26,6 +27,7 @@ export const Raincloud = ({
   data: DistributionData | undefined;
   dataSets: DataSets;
   dataSetKey: keyof DataSets;
+  metaData: MetaData;
   footer?: React.ReactNode;
   sidebarComponent?: React.ReactNode;
   settings: DistributionState["raincloud"];
@@ -39,8 +41,8 @@ export const Raincloud = ({
     );
   }
   const dataSet = dataSets[dataSetKey];
-  const minDataValue = Math.min(...dataSet);
-  const maxDataValue = Math.max(...dataSet);
+  const minDataValue = metaData.minVal;
+  const maxDataValue = metaData.maxVal;
 
   const rainCloudTrace = React.useMemo(
     () =>

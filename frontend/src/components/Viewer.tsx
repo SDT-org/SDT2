@@ -166,7 +166,9 @@ export const Viewer = ({
           ) : null}
         </TabPanel>
         <TabPanel id="distribution" className="app-panel">
-          {distributionData ? <Distribution data={distributionData} /> : null}
+          {distributionData && metaData ? (
+            <Distribution data={distributionData} metaData={metaData} />
+          ) : null}
         </TabPanel>
       </Tabs>
       {loading ? <div className="app-overlay app-loader" /> : null}
