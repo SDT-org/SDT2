@@ -42,18 +42,26 @@ interface ColorPickerProps extends RACColorPickerProps {
   label?: string;
   children?: React.ReactNode;
   value: string;
+  className?: string;
+  "aria-label"?: string;
 }
 
 export const ColorPicker = ({
   label,
   children,
   value,
+  className,
   ...props
 }: ColorPickerProps) => {
   return (
     <RACColorPicker {...props}>
       <DialogTrigger>
-        <Button className="color-picker">
+        <Button
+          className={`color-picker ${className || ""}`.trimEnd()}
+          {...(props["aria-label"]
+            ? { "aria-label": props["aria-label"] }
+            : {})}
+        >
           <ColorSwatch color={value} />
           <span>{label}</span>
         </Button>

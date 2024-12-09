@@ -242,14 +242,17 @@ small {
   .col-2 {
     grid-template-rows: 1fr;
     grid-gap: 0.8rem;
+
+    &.aligned {
+      align-items: center;
+    }
+  }
+
+  .col-2, .flex-2 {
     margin-bottom: 0.8rem;
 
     &:last-child {
       margin-bottom: 0;
-    }
-
-    &.aligned {
-      align-items: center;
     }
   }
 
@@ -381,7 +384,7 @@ small {
     width: 100%;
   }
 
-  .col-2 {
+  .col-2, .flex-2 {
     gap: 1.6rem;
   }
 
@@ -426,6 +429,10 @@ small {
     border-top: 0.1rem solid var(--border-color);
     height: 0.1rem;
     margin: 1.6rem 0;
+
+    &.compact {
+      margin: 1.2rem 0;
+    }
   }
 
   .react-aria-Switch,
@@ -457,11 +464,24 @@ small {
 
   .color-picker {
     gap: 0;
+    button span {
+      // TODO: merge rules with .form label and sidebar label
+      font-size: 1.3rem;
+      font-weight: 500;
+    }
+  }
+  .medium-color .react-aria-ColorSwatch {
+    width: 3.1rem;
+    height: 3.1rem;
+    border-radius: 0.5rem;
   }
   .small-color .react-aria-ColorSwatch {
     width: 2.4rem;
     height: 2.4rem;
     border-radius: 0.5rem;
+  }
+  .col-2.color-slider-gap {
+    gap: 1.1rem;
   }
 
   .col-2 .react-aria-Select {
@@ -1005,6 +1025,12 @@ label.sublabel,
   grid-template-columns: 1fr 1fr;
 }
 
+.flex-2 {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
 .auto-onefr {
   grid-template-columns: auto 1fr;
   justify-content: space-between;
@@ -1019,6 +1045,22 @@ label.sublabel,
 
 .align-items-center {
   align-items: center;
+}
+.align-items-flex-start{
+  align-items: flex-start;
+}
+
+.col-2-reverse {
+  > :first-child {
+   order: 1;
+  }
+}
+
+.flex-column-reverse {
+  flex-direction: column-reverse;
+}
+.flex-row-reverse {
+  flex-direction: row-reverse;
 }
 
 .text-deemphasis {

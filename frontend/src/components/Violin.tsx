@@ -359,9 +359,9 @@ export const Violin = ({
                 data-hidden={!settings.showViolin}
                 aria-hidden={!settings.showViolin}
               >
-                <Label className="header">Band</Label>
-                <div className="col-2 auto-onefr">
+                <div className="col-2 auto-onefr align-items-center color-slider-gap">
                   <ColorPicker
+                    className="medium-color"
                     value={settings.fillColor}
                     onChange={(value) => {
                       updateSettings({
@@ -370,7 +370,7 @@ export const Violin = ({
                     }}
                   />
                   <Slider
-                    label="Width"
+                    label="Band Width"
                     defaultValue={settings.bandwidth}
                     isDisabled={!settings.showViolin}
                     onChange={(value) => updateSettings({ bandwidth: value })}
@@ -379,9 +379,10 @@ export const Violin = ({
                     step={1}
                   />
                 </div>
-                <Label className="header">Line</Label>
-                <div className="col-2 auto-onefr">
+                <hr className="compact" />
+                <div className="col-2 auto-onefr align-items-center color-slider-gap">
                   <ColorPicker
+                    className="medium-color"
                     value={settings.lineColor}
                     onChange={(value) =>
                       updateSettings({
@@ -390,7 +391,7 @@ export const Violin = ({
                     }
                   />
                   <Slider
-                    label="Width"
+                    label="Line Width"
                     value={settings.lineWidth}
                     isDisabled={!settings.showViolin}
                     onChange={(value) => updateSettings({ lineWidth: value })}
@@ -419,7 +420,16 @@ export const Violin = ({
                 data-hidden={!settings.showBox}
                 aria-hidden={!settings.showBox}
               >
-                <div className="col-2 onefr-auto">
+                <div className="col-2 auto-onefr align-items-center color-slider-gap">
+                  <ColorPicker
+                    className="medium-color"
+                    value={settings.boxfillColor}
+                    onChange={(value) => {
+                      updateSettings({
+                        boxfillColor: value.toString() as ColorString,
+                      });
+                    }}
+                  />
                   <Slider
                     label="Box Width"
                     value={settings.boxWidth}
@@ -429,19 +439,20 @@ export const Violin = ({
                     maxValue={1}
                     step={0.05}
                   />
+                </div>
+                <hr className="compact" />
+                <div className="col-2 auto-onefr align-items-center color-slider-gap">
                   <ColorPicker
-                    value={settings.boxfillColor}
+                    className="medium-color"
+                    value={settings.boxlineColor}
                     onChange={(value) => {
                       updateSettings({
-                        boxfillColor: value.toString() as ColorString,
+                        boxlineColor: value.toString() as ColorString,
                       });
                     }}
                   />
-                </div>
-
-                <div className="col-2 onefr-auto">
                   <Slider
-                    label="Line Thickness"
+                    label="Line Width"
                     value={settings.boxlineWidth}
                     isDisabled={!settings.showBox}
                     onChange={(value) =>
@@ -451,16 +462,8 @@ export const Violin = ({
                     maxValue={20}
                     step={1}
                   />
-                  <ColorPicker
-                    value={settings.boxlineColor}
-                    onChange={(value) => {
-                      updateSettings({
-                        boxlineColor: value.toString() as ColorString,
-                      });
-                    }}
-                  />
                 </div>
-                <hr />
+                <hr className="compact" />
                 <Slider
                   label="Whiskers"
                   value={settings.whiskerWidth}

@@ -270,8 +270,8 @@ export const Raincloud = ({
                     </ToggleButton>
                   </Tooltip>
                 </ToggleButtonGroup>
-                <Label className="header">Band</Label>
-                <div className="col-2 auto-onefr">
+                <hr className="compact" />
+                <div className="col-2 auto-onefr align-items-center color-slider-gap">
                   <ColorPicker
                     value={settings.fillColor}
                     onChange={(value) => {
@@ -289,8 +289,8 @@ export const Raincloud = ({
                     step={1}
                   />
                 </div>
-                <Label className="header">Line</Label>
-                <div className="col-2 auto-onefr">
+                <hr className="compact" />
+                <div className="col-2 auto-onefr align-items-center color-slider-gap">
                   <ColorPicker
                     value={settings.lineColor}
                     onChange={(value) =>

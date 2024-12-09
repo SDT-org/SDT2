@@ -258,8 +258,8 @@ export const Histogram = ({
                   </ToggleButton>
                 </Tooltip>
               </ToggleButtonGroup>
-              <Label className="header">Bins</Label>
-              <div className="col-2 auto-onefr">
+              <hr className="compact" />
+              <div className="col-2 auto-onefr align-items-center color-slider-gap">
                 <ColorPicker
                   value={settings.binColor}
                   onChange={(value) => {
@@ -269,7 +269,7 @@ export const Histogram = ({
                   }}
                 />
                 <Slider
-                  label="Width"
+                  label="Bin Width"
                   defaultValue={settings.binSize}
                   onChange={(value) => updateSettings({ binSize: value })}
                   minValue={0.5}
@@ -277,8 +277,8 @@ export const Histogram = ({
                   step={0.5}
                 />
               </div>
-              <Label className="header">Outline</Label>
-              <div className="col-2 auto-onefr">
+              <hr className="compact" />
+              <div className="col-2 auto-onefr align-items-center color-slider-gap">
                 <ColorPicker
                   value={settings.histlineColor}
                   onChange={(value) => {
@@ -288,7 +288,7 @@ export const Histogram = ({
                   }}
                 />
                 <Slider
-                  label="Width"
+                  label="Outline Width"
                   defaultValue={settings.histOutlineWidth}
                   onChange={(value) =>
                     updateSettings({ histOutlineWidth: value })
