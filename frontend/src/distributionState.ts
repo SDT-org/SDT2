@@ -42,7 +42,6 @@ export type DistributionState = {
     jitter: number;
     markerColor: ColorString;
     markerSize: number;
-    pointOpacity: number;
     pointPos: number;
     points: "all" | "outliers" | "suspectedoutliers";
     showAxisLines: boolean;
@@ -53,7 +52,6 @@ export type DistributionState = {
   };
   violin: VisualizationBase & {
     bandwidth: number;
-    boxOpacity: number;
     boxWidth: number;
     boxfillColor: ColorString;
     boxlineColor: ColorString;
@@ -62,7 +60,6 @@ export type DistributionState = {
     jitter: number;
     markerColor: ColorString;
     markerSize: number;
-    pointOpacity: number;
     pointOrientation: "Violin" | "Box";
     pointPos: number;
     points: "all" | "outliers" | "suspectedoutliers";
@@ -176,7 +173,6 @@ export const initialDistributionState: DistributionState = {
     markerColor: Colors.Tomato,
     markerSize: 7,
     plotOrientation: "horizontal",
-    pointOpacity: 0.5,
     pointPos: -1.5,
     points: "all",
     showAxisLines: true,
@@ -191,7 +187,6 @@ export const initialDistributionState: DistributionState = {
   violin: {
     ...visualizationDefaults,
     bandwidth: 5,
-    boxOpacity: 0.5,
     boxWidth: 0.95,
     boxfillColor: Colors.LightBlue,
     boxlineColor: Colors.Tomato,
@@ -201,7 +196,6 @@ export const initialDistributionState: DistributionState = {
     markerColor: Colors.Tomato,
     markerSize: 7,
     plotOrientation: "vertical",
-    pointOpacity: 0.5,
     pointOrientation: "Violin",
     pointPos: 0,
     points: "all",

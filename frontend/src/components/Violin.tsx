@@ -60,7 +60,10 @@ export const Violin = ({
         meanline: {
           visible: settings.showMeanline,
         },
-        points: settings.showPoints && settings.pointOrientation === "Violin",
+        points:
+          settings.showPoints &&
+          settings.pointOrientation === "Violin" &&
+          settings.points,
         pointpos: settings.pointPos,
         jitter: settings.jitter,
         bandwidth: settings.bandwidth,
@@ -538,6 +541,16 @@ export const Violin = ({
                 </div>
 
                 <Slider
+                  label="Size"
+                  value={settings.markerSize}
+                  isDisabled={!settings.showPoints}
+                  onChange={(value) => updateSettings({ markerSize: value })}
+                  minValue={1}
+                  maxValue={20}
+                  step={1}
+                />
+
+                <Slider
                   label="Position"
                   value={settings.pointPos}
                   isDisabled={!settings.showViolin && !settings.showBox}
@@ -552,19 +565,9 @@ export const Violin = ({
                   value={settings.jitter}
                   isDisabled={!settings.showPoints}
                   onChange={(value) => updateSettings({ jitter: value })}
-                  minValue={0}
+                  minValue={0.1}
                   maxValue={1}
                   step={0.1}
-                />
-
-                <Slider
-                  label="Size"
-                  value={settings.markerSize}
-                  isDisabled={!settings.showPoints}
-                  onChange={(value) => updateSettings({ markerSize: value })}
-                  minValue={0}
-                  maxValue={20}
-                  step={1}
                 />
 
                 <div className="col-2 onefr-auto small-color align-items-center">

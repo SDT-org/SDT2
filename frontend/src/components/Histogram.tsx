@@ -293,7 +293,7 @@ export const Histogram = ({
                   onChange={(value) =>
                     updateSettings({ histOutlineWidth: value })
                   }
-                  minValue={0}
+                  minValue={1}
                   maxValue={15}
                   step={1}
                 />

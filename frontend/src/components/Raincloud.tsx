@@ -64,7 +64,6 @@ export const Raincloud = ({
           visible: true,
           color: settings.markerColor,
           size: settings.markerSize,
-          opacity: settings.pointOpacity,
         },
         meanline: {
           visible: settings.showMeanline,
@@ -284,7 +283,7 @@ export const Raincloud = ({
                     label="Bandwidth"
                     defaultValue={settings.bandwidth}
                     onChange={(value) => updateSettings({ bandwidth: value })}
-                    minValue={0}
+                    minValue={1}
                     maxValue={20}
                     step={1}
                   />
@@ -303,7 +302,7 @@ export const Raincloud = ({
                     label="Width"
                     value={settings.lineWidth}
                     onChange={(value) => updateSettings({ lineWidth: value })}
-                    minValue={0}
+                    minValue={1}
                     maxValue={20}
                     step={1}
                   />
@@ -344,6 +343,15 @@ export const Raincloud = ({
                 </div>
 
                 <Slider
+                  label="Size"
+                  value={settings.markerSize}
+                  onChange={(value) => updateSettings({ markerSize: value })}
+                  minValue={1}
+                  maxValue={20}
+                  step={1}
+                />
+
+                <Slider
                   label="Position"
                   value={settings.pointPos}
                   onChange={(value) => updateSettings({ pointPos: value })}
@@ -356,25 +364,7 @@ export const Raincloud = ({
                   label="Jitter"
                   value={settings.jitter}
                   onChange={(value) => updateSettings({ jitter: value })}
-                  minValue={0}
-                  maxValue={1}
-                  step={0.1}
-                />
-
-                <Slider
-                  label="Size"
-                  value={settings.markerSize}
-                  onChange={(value) => updateSettings({ markerSize: value })}
-                  minValue={0}
-                  maxValue={20}
-                  step={1}
-                />
-
-                <Slider
-                  label="Opacity"
-                  value={settings.pointOpacity}
-                  onChange={(value) => updateSettings({ pointOpacity: value })}
-                  minValue={0}
+                  minValue={0.1}
                   maxValue={1}
                   step={0.1}
                 />
