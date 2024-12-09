@@ -78,7 +78,7 @@ export const Viewer = ({
               }),
               annotation_font_size: getScaledFontSize(
                 initialAppState.client.heatmap.annotation_font_size,
-                appState.sequences_count,
+                parsedData.length,
               ),
             },
           },
