@@ -18,7 +18,6 @@ import {
   SliderOutput,
   SliderTrack,
 } from "react-aria-components";
-import { Colors } from "../colors";
 
 interface ColorSliderProps extends RACColorSliderProps {
   label?: string;
