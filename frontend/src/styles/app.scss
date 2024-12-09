@@ -49,10 +49,6 @@ body {
       "main"
       "footer";
   }
-
-  &.loader {
-    background: var(--background-color);
-  }
 }
 
 .app-header {
@@ -89,8 +85,7 @@ body {
     width: 3.4rem;
     color: var(--text-secondary-color);
   }
-  &.runner,
-  &.loader {
+  &.runner {
     grid-template-columns: min-content;
   }
 
@@ -559,6 +554,26 @@ small {
   }
 }
 
+.loader-loading-animation  {
+  display: inline-flex;
+  margin-right: 0.5ch;
+  height: 1.5ch;
+}
+@keyframes fadeIn {
+  from {
+    fill-opacity: 0;
+    stroke-opacity: 0;
+  }
+  to {
+    fill-opacity: 1;
+    stroke-opacity: 1;
+  }
+}
+
+.loader-loading-animation rect {
+  animation: fadeIn var(--app-loader-delay) ease-in-out;
+}
+
 .js-plotly-plot {
   background: var(--background-color);
 }
@@ -694,7 +709,8 @@ label.sublabel,
   }
 
   .fill {
-    background: black;
+    background: var(--fill-color);
+    background: var(--foreground-color);
     height: 100%;
 
     &[data-animation="true"] {
@@ -704,6 +720,23 @@ label.sublabel,
 }
 
 .loader {
+  .loader-loading-animation {
+    height: 2rem;
+  }
+
+  .loader-wrapper {
+    margin-top: calc(var(--app-header-height) * -1);
+    padding: 2rem;
+    width: 100%;
+    max-width: 40rem;
+    height: 11.2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--drawer-color);
+  }
+
   .react-aria-ProgressBar {
     max-width: 38.4rem;
     font-weight: 600;
@@ -711,6 +744,7 @@ label.sublabel,
     .bar {
       height: 1.6rem;
       border-radius: 1.6rem;
+      margin: 0.8rem 0;
     }
 
     .estimate,
@@ -951,6 +985,17 @@ label.sublabel,
     }
   }
 
+  &[data-warning] {
+    background-color: var(--button-warning-background-color);
+    color: var(--button-warning-text-color);
+    font-weight: bold;
+
+    &[data-pressed] {
+      background-color: var(--button-warning-pressed-background-color);
+    }
+  }
+
+
   &[data-disabled] {
     background: var(--button-disabled-background-color);
     color: var(--button-disabled-foreground-color);
@@ -1066,6 +1111,10 @@ label.sublabel,
 .text-deemphasis {
   color: var(--text-deemphasis-color);
   font-weight: 450;
+}
+
+.text-secondary {
+  color: var(--text-secondary-color);
 }
 
 .text-normal-weight {

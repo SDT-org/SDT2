@@ -34,6 +34,9 @@
   --button-toggle-background-color: #f3f3f3;
   --button-disabled-background-color: #f5f5f5;
   --button-disabled-foreground-color: #bbb;
+  --button-warning-background-color: #f2af55;
+  --button-warning-pressed-background-color: #e29f45;
+  --button-warning-text-color: #fefefe;
 
   --switch-border-color: #bbb;
   --switch-blur-border-color: #777;
@@ -59,6 +62,7 @@
   --highlight-background-pressed: #024F8D;
   --highlight-background-disabled: #ccc;
 
+  --app-header-height: 4.8rem;
   --app-sidebar-width: 24rem;
   --app-container-padding: 1.2rem;
   --trigger-width: 9.6rem;
