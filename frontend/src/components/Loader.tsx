@@ -64,7 +64,7 @@ export const Loader = ({
         <div className="right" />
       </div>
       <div className="app-main centered loader">
-        <div className="form-wrapper loader-wrapper">
+        <div className="loader-wrapper">
           <ProgressBar value={progress}>
             {({ percentage, valueText }) => (
               <>
