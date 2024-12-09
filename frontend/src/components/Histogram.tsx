@@ -1,7 +1,7 @@
 import Plotly from "plotly.js-dist-min";
 import type { Layout, PlotData } from "plotly.js-dist-min";
 import React from "react";
-import { Label, ToggleButton, ToggleButtonGroup } from "react-aria-components";
+import { ToggleButton, ToggleButtonGroup } from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
 import type { ColorString } from "../colors";
 import { plotFont } from "../constants";
