@@ -14,13 +14,7 @@ export const restoreClientState = (baseClientState: AppState["client"]) => {
       parsedState.error = null;
       parsedState.errorInfo = null;
       const parsedClient = partialSafeParse(clientStateSchema, parsedState);
-      const validData = {
-        ...parsedClient.validData,
-        heatmap: {
-          ...parsedClient.validData.heatmap,
-          annotation_font_size: undefined,
-        },
-      };
+      const validData = parsedClient.validData;
       const merged: AppState["client"] = {
         ...baseClientState,
         ...parsedClient.validData,

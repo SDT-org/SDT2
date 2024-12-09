@@ -37,10 +37,13 @@ export const Viewer = ({
   const getScaledFontSize = React.useCallback(
     (base: number, count: number) =>
       Math.min(
-        14,
-        count < 20
-          ? base * (base / count)
-          : Math.max(5, base / (1 + count / 90)),
+        16,
+        Math.max(
+          5,
+          count < 20
+            ? base * (base / count)
+            : Math.max(5, base / (1 + count / 90)),
+        ),
       ),
     [],
   );
