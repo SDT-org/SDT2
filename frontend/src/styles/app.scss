@@ -744,7 +744,8 @@ label.sublabel,
     .bar {
       height: 1.6rem;
       border-radius: 1.6rem;
-      margin: 0.8rem 0;
+      margin: 0.1rem 0 0.4rem;
+      background: var(--background-color);
     }
 
     .estimate,
