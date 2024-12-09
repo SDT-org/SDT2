@@ -6,6 +6,8 @@ import {
   Button,
   ColorArea,
   ColorSwatch,
+  ColorSwatchPicker,
+  ColorSwatchPickerItem,
   ColorThumb,
   Dialog,
   DialogTrigger,
@@ -16,6 +18,7 @@ import {
   SliderOutput,
   SliderTrack,
 } from "react-aria-components";
+import { Colors } from "../colors";
 
 interface ColorSliderProps extends RACColorSliderProps {
   label?: string;
@@ -79,6 +82,40 @@ export const ColorPicker = ({
                 </ColorArea>
                 <ColorSlider colorSpace="hsl" channel="hue" value={value} />
                 <ColorSlider colorSpace="hsl" channel="alpha" value={value} />
+                <ColorSwatchPicker>
+                  <ColorSwatchPickerItem color="#3a5975">
+                    <ColorSwatch />
+                  </ColorSwatchPickerItem>
+                  <ColorSwatchPickerItem color="#467588">
+                    <ColorSwatch />
+                  </ColorSwatchPickerItem>
+                  <ColorSwatchPickerItem color="#519398">
+                    <ColorSwatch />
+                  </ColorSwatchPickerItem>
+                  <ColorSwatchPickerItem color="#5bb3a1">
+                    <ColorSwatch />
+                  </ColorSwatchPickerItem>
+                  <ColorSwatchPickerItem color="#62d49e">
+                    <ColorSwatch />
+                  </ColorSwatchPickerItem>
+                </ColorSwatchPicker>
+                <ColorSwatchPicker>
+                  <ColorSwatchPickerItem color="#e8960a">
+                    <ColorSwatch />
+                  </ColorSwatchPickerItem>
+                  <ColorSwatchPickerItem color="#d18813">
+                    <ColorSwatch />
+                  </ColorSwatchPickerItem>
+                  <ColorSwatchPickerItem color="#df6056">
+                    <ColorSwatch />
+                  </ColorSwatchPickerItem>
+                  <ColorSwatchPickerItem color="#da3f42">
+                    <ColorSwatch />
+                  </ColorSwatchPickerItem>
+                  <ColorSwatchPickerItem color="#d20c31">
+                    <ColorSwatch />
+                  </ColorSwatchPickerItem>
+                </ColorSwatchPicker>
               </>
             )}
           </Dialog>
