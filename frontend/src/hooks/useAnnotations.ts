@@ -5,6 +5,7 @@ import { interpolateColor, originalRgbFormat } from "../colors";
 import type { HeatmapData } from "../plotTypes";
 
 export const useAnnotations = (
+  enabled: boolean,
   data: HeatmapData,
   vmin: number,
   vmax: number,
@@ -13,6 +14,15 @@ export const useAnnotations = (
   roundTo: AppState["client"]["heatmap"]["annotation_rounding"],
 ) =>
   React.useMemo(() => {
+    if (!enabled) {
+      return {
+        x: [],
+        y: [],
+        text: [],
+        textColors: [],
+      };
+    }
+
     const x: number[] = [];
     const y: number[] = [];
     const text: string[] = [];
@@ -73,4 +83,4 @@ export const useAnnotations = (
       text,
       textColors,
     };
-  }, [data, vmin, vmax, _colorScale, reverse, roundTo]);
+  }, [enabled, data, vmin, vmax, _colorScale, reverse, roundTo]);

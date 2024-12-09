@@ -36,15 +36,7 @@ export const Viewer = ({
 
   const getScaledFontSize = React.useCallback(
     (base: number, count: number) =>
-      Math.min(
-        16,
-        Math.max(
-          5,
-          count < 20
-            ? base * (base / count)
-            : Math.max(5, base / (1 + count / 90)),
-        ),
-      ),
+      count < 20 ? 16 : Math.min(16, Math.max(5, base / (1 + count / 90))),
     [],
   );
 
@@ -80,6 +72,7 @@ export const Viewer = ({
               ...prev.client.heatmap,
               vmin: metadata.minVal,
               ...(appState.sequences_count > 99 && {
+                annotation: false,
                 axis_labels: false,
                 cellspace: 0,
               }),
@@ -164,7 +157,10 @@ export const Viewer = ({
         onSelectionChange={setDataView}
       >
         <TabPanel id="heatmap" className="app-panel">
-          {appState.client.dataView === "heatmap" && heatmapData && metaData ? (
+          {appState.client.dataView === "heatmap" &&
+          !loading &&
+          heatmapData &&
+          metaData ? (
             <Heatmap data={heatmapData} tickText={tickText} />
           ) : null}
         </TabPanel>

@@ -66,6 +66,7 @@ export const Heatmap = ({
   );
 
   const annotations = useAnnotations(
+    settings.annotation,
     data,
     settings.vmin,
     settings.vmax,
