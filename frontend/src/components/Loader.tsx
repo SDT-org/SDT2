@@ -61,9 +61,6 @@ export const Loader = ({
     <div className="app-wrapper with-header loader">
       <div className="app-header loader">
         <div className="left">{mainMenu}</div>
-        {Date.now() - startTime.current > 3000 && estimated_time ? (
-          <LoadingAnimation className="loader-loading-animation" />
-        ) : null}
         <div className="right" />
       </div>
       <div className="app-main centered loader">
@@ -71,7 +68,17 @@ export const Loader = ({
           <ProgressBar value={progress}>
             {({ percentage, valueText }) => (
               <>
-                <Label>{stage ? <>{stage}...</> : null}</Label>
+                <Label>
+                  {stage ? (
+                    <>
+                      {stage}
+                      {Date.now() - startTime.current > 3000 &&
+                      estimated_time ? (
+                        <LoadingAnimation className="loader-loading-animation" />
+                      ) : null}
+                    </>
+                  ) : null}
+                </Label>
                 <span className="value">
                   {stage === "Analyzing" && valueText}
                 </span>
