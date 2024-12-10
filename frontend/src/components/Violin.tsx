@@ -105,6 +105,7 @@ export const Violin = ({
           size: settings.markerSize,
         },
         fillcolor: settings.boxfillColor,
+        hovermode: "closest",
         hovertemplate:
           "Percent Identity: %{x}<br>Percent Identity: %{y}<extra></extra>",
       }) as Partial<PlotData>,
@@ -116,8 +117,8 @@ export const Violin = ({
 
     return {
       title: settings.showAxisLabels
-          ? "Distribution of Pairwise Identities"
-          : "",
+        ? "Distribution of Pairwise Identities"
+        : "",
       subtitle: settings.showAxisLabels ? "Histogram" : "",
       uirevision: settings.plotOrientation,
       font: plotFont,
@@ -437,12 +438,15 @@ export const Violin = ({
                   />
                   <Slider
                     label="Box Width"
-                    value={settings.boxWidth}
+                    value={(1 - settings.boxWidth) * 10}
                     isDisabled={!settings.showBox}
-                    onChange={(value) => updateSettings({ boxWidth: value })}
-                    minValue={0.5}
-                    maxValue={1}
-                    step={0.05}
+                    onChange={(sliderValue) => {
+                      const newBoxWidth = 1 - sliderValue / 10; // needed to reverse the transformation
+                      updateSettings({ boxWidth: newBoxWidth });
+                    }}
+                    minValue={0.1}
+                    maxValue={10}
+                    step={0.1}
                   />
                 </div>
                 <hr className="compact" />
@@ -553,14 +557,14 @@ export const Violin = ({
                     }}
                   />
                   <Slider
-                  label="Size"
-                  value={settings.markerSize}
-                  isDisabled={!settings.showPoints}
-                  onChange={(value) => updateSettings({ markerSize: value })}
-                  minValue={1}
-                  maxValue={20}
-                  step={1}
-                />
+                    label="Size"
+                    value={settings.markerSize}
+                    isDisabled={!settings.showPoints}
+                    onChange={(value) => updateSettings({ markerSize: value })}
+                    minValue={1}
+                    maxValue={20}
+                    step={1}
+                  />
                 </div>
 
                 <Slider

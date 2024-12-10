@@ -193,7 +193,7 @@ export const initialDistributionState: DistributionState = {
   violin: {
     ...visualizationDefaults,
     bandwidth: 5,
-    boxWidth: 0.95,
+    boxWidth: 5,
     boxfillColor: Colors.LightBlue,
     boxlineColor: Colors.Tomato,
     boxlineWidth: 3,
