@@ -115,8 +115,10 @@ export const Violin = ({
     const isVertical = settings.plotOrientation === "vertical";
 
     return {
-      title: "",
-      subtitle: "",
+      title: settings.showAxisLabels
+          ? "Distribution of Pairwise Identities"
+          : "",
+      subtitle: settings.showAxisLabels ? "Histogram" : "",
       uirevision: settings.plotOrientation,
       font: plotFont,
       xaxis: isVertical
@@ -377,7 +379,7 @@ export const Violin = ({
                     defaultValue={settings.bandwidth}
                     isDisabled={!settings.showViolin}
                     onChange={(value) => updateSettings({ bandwidth: value })}
-                    minValue={0}
+                    minValue={1}
                     maxValue={20}
                     step={1}
                   />
@@ -398,7 +400,7 @@ export const Violin = ({
                     value={settings.lineWidth}
                     isDisabled={!settings.showViolin}
                     onChange={(value) => updateSettings({ lineWidth: value })}
-                    minValue={0}
+                    minValue={1}
                     maxValue={20}
                     step={1}
                   />
@@ -461,7 +463,7 @@ export const Violin = ({
                     onChange={(value) =>
                       updateSettings({ boxlineWidth: value })
                     }
-                    minValue={0}
+                    minValue={1}
                     maxValue={20}
                     step={1}
                   />
@@ -472,7 +474,7 @@ export const Violin = ({
                   value={settings.whiskerWidth}
                   isDisabled={!settings.showBox}
                   onChange={(value) => updateSettings({ whiskerWidth: value })}
-                  minValue={0}
+                  minValue={0.1}
                   maxValue={1}
                   step={0.1}
                 />
@@ -540,7 +542,17 @@ export const Violin = ({
                   </Select>
                 </div>
 
-                <Slider
+                <div className="col-2 auto-onefr align-items-center color-slider-gap">
+                  <ColorPicker
+                    className="medium-color"
+                    value={settings.markerColor}
+                    onChange={(value) => {
+                      updateSettings({
+                        markerColor: value.toString() as ColorString,
+                      });
+                    }}
+                  />
+                  <Slider
                   label="Size"
                   value={settings.markerSize}
                   isDisabled={!settings.showPoints}
@@ -549,6 +561,7 @@ export const Violin = ({
                   maxValue={20}
                   step={1}
                 />
+                </div>
 
                 <Slider
                   label="Position"
@@ -569,18 +582,6 @@ export const Violin = ({
                   maxValue={1}
                   step={0.1}
                 />
-
-                <div className="col-2 onefr-auto small-color align-items-center">
-                  <Label>Color</Label>
-                  <ColorPicker
-                    value={settings.markerColor}
-                    onChange={(value) => {
-                      updateSettings({
-                        markerColor: value.toString() as ColorString,
-                      });
-                    }}
-                  />
-                </div>
               </div>
             </div>
           </div>

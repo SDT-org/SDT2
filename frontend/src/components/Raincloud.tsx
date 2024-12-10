@@ -86,6 +86,7 @@ export const Raincloud = ({
         rangemode: "tozero",
         fixedrange: true,
         zeroline: false,
+        dtick:5,
         showgrid: settings.showGrid,
         showline: settings.showAxisLines,
         showticklabels: settings.showTickLabels,

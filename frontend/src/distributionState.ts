@@ -33,6 +33,8 @@ export type DistributionState = {
     showHistogram: boolean;
     showLine: boolean;
     histlineColor: ColorString;
+    dtickx: number;
+    dticky: number;
   };
   raincloud: VisualizationBase & {
     bandwidth: number;
@@ -49,6 +51,7 @@ export type DistributionState = {
     showZeroLine: boolean;
     plotOrientation: "horizontal" | "vertical";
     editable: boolean;
+    dticks: number;
   };
   violin: VisualizationBase & {
     bandwidth: number;
@@ -97,6 +100,8 @@ export const DistributionStateSchema = z.object({
     showHistogram: z.boolean(),
     showLine: z.boolean(),
     histlineColor: ColorStringSchema,
+    dtickx: z.number(),
+    dticky: z.number(),
   }),
   raincloud: VisualizationBaseSchema.extend({
     bandwidth: z.number(),
@@ -106,7 +111,6 @@ export const DistributionStateSchema = z.object({
     jitter: z.number(),
     markerColor: ColorStringSchema,
     markerSize: z.number(),
-    pointOpacity: z.number(),
     pointPos: z.number(),
     points: z.enum(["all", "outliers", "suspectedoutliers"]),
     showAxisLines: z.boolean(),
@@ -114,10 +118,10 @@ export const DistributionStateSchema = z.object({
     showZeroLine: z.boolean(),
     plotOrientation: z.enum(["horizontal", "vertical"]),
     editable: z.boolean(),
+    dticks: z.number(),
   }),
   violin: VisualizationBaseSchema.extend({
     bandwidth: z.number(),
-    boxOpacity: z.number(),
     boxWidth: z.number(),
     boxfillColor: ColorStringSchema,
     boxlineColor: ColorStringSchema,
@@ -126,7 +130,6 @@ export const DistributionStateSchema = z.object({
     jitter: z.number(),
     markerColor: ColorStringSchema,
     markerSize: z.number(),
-    pointOpacity: z.number(),
     pointOrientation: z.enum(["Violin", "Box"]),
     pointPos: z.number(),
     points: z.enum(["all", "outliers", "suspectedoutliers"]),
@@ -165,6 +168,8 @@ export const initialDistributionState: DistributionState = {
     makeEditable: true,
     showAxisLines: true,
     showMeanline: true,
+    dtickx: 5,
+    dticky: 1,
   },
   raincloud: {
     ...visualizationDefaults,
@@ -183,6 +188,7 @@ export const initialDistributionState: DistributionState = {
     side: "positive",
     showMeanline: true,
     makeEditable: true,
+    dticks: 5,
   },
   violin: {
     ...visualizationDefaults,

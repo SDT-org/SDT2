@@ -45,7 +45,7 @@ export const Histogram = ({
       ({
         type: "histogram",
         x: dataSet,
-        histnorm: "percent",
+        histnorm: "percent", // may add option to change this later
         marker: {
           color: settings.binColor,
           line: {
@@ -66,7 +66,10 @@ export const Histogram = ({
   const layout = React.useMemo(
     () =>
       ({
-        title: "",
+        title: settings.showAxisLabels
+          ? "Distribution of Pairwise Identities"
+          : "",
+        subtitle: settings.showAxisLabels ? "Histogram" : "",
         uirevision: "true",
         font: plotFont,
         xaxis: {
@@ -78,6 +81,7 @@ export const Histogram = ({
           showgrid: settings.showGrid,
           showticklabels: settings.showTickLabels,
           showline: settings.showAxisLines,
+          dtick: settings.dtickx,
         },
         yaxis: {
           title: settings.showAxisLabels
@@ -90,6 +94,7 @@ export const Histogram = ({
           showgrid: settings.showGrid,
           showticklabels: settings.showTickLabels,
           showline: settings.showAxisLines,
+          dtick: settings.dticky,
         },
         dragmode: "pan",
         barmode: "overlay",
@@ -258,6 +263,22 @@ export const Histogram = ({
                   </ToggleButton>
                 </Tooltip>
               </ToggleButtonGroup>
+              <Slider
+                label="X axis tick interval"
+                defaultValue={settings.dtickx}
+                onChange={(value) => updateSettings({ dtickx: value })}
+                minValue={1}
+                maxValue={15}
+                step={1}
+              />
+              <Slider
+                label="Y axis tick interval"
+                defaultValue={settings.dticky}
+                onChange={(value) => updateSettings({ dticky: value })}
+                minValue={1}
+                maxValue={15}
+                step={1}
+              />
               <hr className="compact" />
               <div className="col-2 auto-onefr align-items-center color-slider-gap">
                 <ColorPicker
