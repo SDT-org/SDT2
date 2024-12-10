@@ -162,7 +162,7 @@ export const Violin = ({
       dragmode: "pan",
       barmode: "overlay",
       showlegend: false,
-      boxgap: settings.boxWidth,
+      boxgap: settings.boxWidth/10,
       margin: { l: 50, r: 50, t: 50, b: 50 },
     } as Partial<Layout>;
   }, [settings, minDataValue, maxDataValue]);
@@ -438,16 +438,14 @@ export const Violin = ({
                   />
                   <Slider
                     label="Box Width"
-                    value={(1 - settings.boxWidth) * 10}
+                    value={settings.boxWidth}
                     isDisabled={!settings.showBox}
-                    onChange={(sliderValue) => {
-                      const newBoxWidth = 1 - sliderValue / 10; // needed to reverse the transformation
-                      updateSettings({ boxWidth: newBoxWidth });
-                    }}
-                    minValue={0.1}
+                    onChange={(value) => updateSettings({ boxWidth: value })}
+                    minValue={1}
                     maxValue={10}
-                    step={0.1}
+                    step={0.5}
                   />
+                  
                 </div>
                 <hr className="compact" />
                 <div className="col-2 auto-onefr align-items-center color-slider-gap">
