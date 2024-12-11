@@ -59,8 +59,8 @@ export const Heatmap = ({
 
   const colorScales = React.useMemo(
     () => ({
-      ...defaultColorScales,
       Discrete: discreteColorScale,
+      ...defaultColorScales,
     }),
     [discreteColorScale],
   );

@@ -28,3 +28,18 @@
   }
 
 }
+
+.react-aria-Popover .react-aria-ListBox [data-key="Discrete"] {
+  position: relative;
+
+  &::after {
+    content: "";
+    display: block;
+    border-bottom: 0.1rem solid var(--border-color);
+    position: absolute;
+    margin-bottom: 0.1rem;
+    bottom: -0.2rem;
+    left: 0.4rem;
+    right: 0.4rem;
+  }
+}
