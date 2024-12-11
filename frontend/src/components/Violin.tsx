@@ -138,7 +138,8 @@ export const Violin = ({
             showgrid: settings.showGrid,
             showline: settings.showAxisLines,
             showticklabels: settings.showTickLabels,
-
+            tickmode: "auto",
+            autotick: true,
             range: [minDataValue - 20, maxDataValue + 20],
           },
       yaxis: isVertical
@@ -150,6 +151,8 @@ export const Violin = ({
             showgrid: settings.showGrid,
             showline: settings.showAxisLines,
             showticklabels: settings.showTickLabels,
+            tickmode: "auto",
+            autotick: true,
             range: [minDataValue - 20, maxDataValue + 20],
           }
         : {
@@ -401,7 +404,7 @@ export const Violin = ({
                     value={settings.lineWidth}
                     isDisabled={!settings.showViolin}
                     onChange={(value) => updateSettings({ lineWidth: value })}
-                    minValue={1}
+                    minValue={0}
                     maxValue={20}
                     step={1}
                   />
@@ -464,7 +467,7 @@ export const Violin = ({
                     onChange={(value) =>
                       updateSettings({ boxlineWidth: value })
                     }
-                    minValue={1}
+                    minValue={0}
                     maxValue={20}
                     step={1}
                   />

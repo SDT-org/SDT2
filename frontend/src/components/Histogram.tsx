@@ -39,6 +39,9 @@ export const Histogram = ({
   }
 
   const dataSet = dataSets[dataSetKey];
+  console.log(dataSet);
+  console.log(dataSets);
+  console.log(dataSetKey);
 
   const histogramTrace = React.useMemo(
     () =>
@@ -66,14 +69,20 @@ export const Histogram = ({
   const layout = React.useMemo(
     () =>
       ({
-        title: settings.showAxisLabels
-          ? "Distribution of Pairwise Identities"
-          : "",
-        subtitle: settings.showAxisLabels ? "Histogram" : "",
+        title: {
+          // text:settings.showAxisLabels
+          // ? "Distribution of Pairwise Identities"
+          // : "",
+          // subtitle: {
+          //   text:settings.showAxisLabels ? "Histogram" : "",
+          // }
+        },
         uirevision: "true",
         font: plotFont,
         xaxis: {
-          title: settings.showAxisLabels ? "Percent Pairwise Identity" : "",
+          // title: {
+          //   text: settings.showAxisLabels ? "Percent Pairwise Identity" : "",
+          // },
           side: "bottom",
           rangemode: "normal",
           fixedrange: true,
@@ -81,12 +90,14 @@ export const Histogram = ({
           showgrid: settings.showGrid,
           showticklabels: settings.showTickLabels,
           showline: settings.showAxisLines,
-          dtick: settings.dtickx,
+          // dtick: dataSetKey === "length" ? 25 : 1,
+          tickmode: "auto",
+          autotick: true
         },
         yaxis: {
-          title: settings.showAxisLabels
-            ? "Proportion of Pairwise Identities"
-            : "",
+          // title: settings.showAxisLabels
+          //   ? "Proportion of Pairwise Identities"
+          //   : "",
           side: "left",
           rangemode: "tozero",
           fixedrange: true,
@@ -94,7 +105,8 @@ export const Histogram = ({
           showgrid: settings.showGrid,
           showticklabels: settings.showTickLabels,
           showline: settings.showAxisLines,
-          dtick: settings.dticky,
+          tickmode: "auto",
+          autotick: true
         },
         dragmode: "pan",
         barmode: "overlay",
@@ -263,22 +275,6 @@ export const Histogram = ({
                   </ToggleButton>
                 </Tooltip>
               </ToggleButtonGroup>
-              <Slider
-                label="X axis tick interval"
-                defaultValue={settings.dtickx}
-                onChange={(value) => updateSettings({ dtickx: value })}
-                minValue={1}
-                maxValue={15}
-                step={1}
-              />
-              <Slider
-                label="Y axis tick interval"
-                defaultValue={settings.dticky}
-                onChange={(value) => updateSettings({ dticky: value })}
-                minValue={1}
-                maxValue={15}
-                step={1}
-              />
               <hr className="compact" />
               <div className="col-2 auto-onefr align-items-center color-slider-gap">
                 <ColorPicker

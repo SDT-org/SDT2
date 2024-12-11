@@ -79,8 +79,12 @@ export const Heatmap = ({
 
   const handleRelayout = React.useCallback(
     (event: Plotly.PlotRelayoutEvent) => {
+      console.log("Relayout event:", event);
       if (event["xaxis.autorange"]) {
         setTextScale(1);
+        return;
+      }
+      if (!event["xaxis.range[0]"]) {
         return;
       }
       const earlyRamp = data.length < 10 ? 0 : data.length < 50 ? 10 : 0;
@@ -416,10 +420,10 @@ export const Heatmap = ({
                 hoverinfo: "skip",
                 ...(settings.annotation
                   ? {
-                      x: annotations.x,
-                      y: annotations.y,
-                      text: annotations.text,
-                    }
+                    x: annotations.x,
+                    y: annotations.y,
+                    text: annotations.text,
+                  }
                   : {}),
               },
             ]}
