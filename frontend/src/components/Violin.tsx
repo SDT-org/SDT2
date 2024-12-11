@@ -162,7 +162,7 @@ export const Violin = ({
       dragmode: "pan",
       barmode: "overlay",
       showlegend: false,
-      boxgap: settings.boxWidth/10,
+      boxgap: (1 - settings.boxWidth) / 10,
       margin: { l: 50, r: 50, t: 50, b: 50 },
     } as Partial<Layout>;
   }, [settings, minDataValue, maxDataValue]);
@@ -445,7 +445,6 @@ export const Violin = ({
                     maxValue={10}
                     step={0.5}
                   />
-                  
                 </div>
                 <hr className="compact" />
                 <div className="col-2 auto-onefr align-items-center color-slider-gap">
