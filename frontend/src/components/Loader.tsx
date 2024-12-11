@@ -72,8 +72,7 @@ export const Loader = ({
                   {stage ? (
                     <>
                       {stage}
-                      {Date.now() - startTime.current > 3000 &&
-                      estimated_time ? (
+                      {Date.now() - startTime.current > 3000 ? (
                         <LoadingAnimation className="loader-loading-animation" />
                       ) : null}
                     </>
