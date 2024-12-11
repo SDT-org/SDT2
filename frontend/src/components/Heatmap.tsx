@@ -79,6 +79,10 @@ export const Heatmap = ({
 
   const handleRelayout = React.useCallback(
     (event: Plotly.PlotRelayoutEvent) => {
+      if (event["xaxis.autorange"]) {
+        setTextScale(1);
+        return;
+      }
       const earlyRamp = data.length < 10 ? 0 : data.length < 50 ? 10 : 0;
       const initialRange = -2;
       const x0 = event["xaxis.range[0]"] || initialRange;
