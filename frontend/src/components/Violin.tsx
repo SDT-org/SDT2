@@ -162,7 +162,7 @@ export const Violin = ({
       dragmode: "pan",
       barmode: "overlay",
       showlegend: false,
-      boxgap: (1 - settings.boxWidth) / 10,
+      boxgap: 1 - settings.boxWidth,
       margin: { l: 50, r: 50, t: 50, b: 50 },
     } as Partial<Layout>;
   }, [settings, minDataValue, maxDataValue]);
@@ -441,9 +441,9 @@ export const Violin = ({
                     value={settings.boxWidth}
                     isDisabled={!settings.showBox}
                     onChange={(value) => updateSettings({ boxWidth: value })}
-                    minValue={1}
-                    maxValue={10}
-                    step={0.5}
+                    minValue={0.1}
+                    maxValue={1}
+                    step={0.1}
                   />
                 </div>
                 <hr className="compact" />
