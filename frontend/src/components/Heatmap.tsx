@@ -1,4 +1,3 @@
-import { Lab } from "colorjs.io/fn";
 import Plotly, { type ColorScale } from "plotly.js-dist-min";
 import React from "react";
 import {
@@ -88,7 +87,9 @@ export const Heatmap = ({
 
   const [textScale, setTextScale] = React.useState(1);
   const [plotTitle, setPlotTitle] = React.useState("");
+  // @ts-ignore
   const [plotSubTitle, setPlotSubTitle] = React.useState("");
+  // @ts-ignore
   const [plotYTitle, setPlotYTitle] = React.useState("");
 
   const handleRelayout = React.useCallback(
