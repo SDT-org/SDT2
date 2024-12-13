@@ -1,6 +1,17 @@
+import { Lab } from "colorjs.io/fn";
 import Plotly, { type ColorScale } from "plotly.js-dist-min";
 import React from "react";
-import { ToggleButton } from "react-aria-components";
+import {
+  Button,
+  Dialog,
+  DialogTrigger,
+  Input,
+  Label,
+  OverlayArrow,
+  Popover,
+  TextField,
+  ToggleButton,
+} from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
 import useAppState, { type AppState } from "../appState";
 import { colorScales as defaultColorScales } from "../colorScales";
@@ -76,6 +87,9 @@ export const Heatmap = ({
   );
 
   const [textScale, setTextScale] = React.useState(1);
+  const [plotTitle, setPlotTitle] = React.useState("");
+  const [plotSubTitle, setPlotSubTitle] = React.useState("");
+  const [plotYTitle, setPlotYTitle] = React.useState("");
 
   const handleRelayout = React.useCallback(
     (event: Plotly.PlotRelayoutEvent) => {
@@ -169,15 +183,47 @@ export const Heatmap = ({
               </div>
 
               <div className="drawer">
-                <Slider
-                  label="Cell Spacing"
-                  labelClassName="sublabel"
-                  id="cellspace"
-                  onChange={(value) => updateSettings({ cellspace: value })}
-                  minValue={0}
-                  maxValue={20}
-                  value={settings.cellspace}
-                />
+                <div className="col-2">
+                  <DialogTrigger>
+                    <Button>Titles&#8230;</Button>
+                    <Popover>
+                      <OverlayArrow>
+                        <svg
+                          width={12}
+                          height={12}
+                          viewBox="0 0 12 12"
+                          aria-hidden="true"
+                        >
+                          <path d="M0 0 L6 6 L12 0" />
+                        </svg>
+                      </OverlayArrow>
+                      <Dialog>
+                        <label>
+                          Title
+                          <input type="text" />
+                        </label>
+                        <label>
+                          Subtitle
+                          <input type="text" />
+                        </label>
+                        <label>
+                          Y Axis Title
+                          <input type="text" />
+                        </label>
+                      </Dialog>
+                    </Popover>
+                  </DialogTrigger>
+
+                  <Slider
+                    label="Cell Spacing"
+                    labelClassName="sublabel"
+                    id="cellspace"
+                    onChange={(value) => updateSettings({ cellspace: value })}
+                    minValue={0}
+                    maxValue={20}
+                    value={settings.cellspace}
+                  />
+                </div>
 
                 {settings.colorScaleKey === "Discrete" ? (
                   <div className="col-2">
@@ -254,6 +300,36 @@ export const Heatmap = ({
                     isDisabled={!settings.annotation}
                   />
                 </div>
+              </div>
+            </div>
+            <div className="group">
+              <Switch
+                isSelected={settings.showTitles}
+                onChange={(value) => {
+                  updateSettings({
+                    showTitles: value,
+                  });
+                }}
+              >
+                Plot Titles
+              </Switch>
+              <div
+                className="drawer"
+                data-hidden={!settings.showTitles}
+                aria-hidden={!settings.showTitles}
+              >
+                <TextField onInput={setPlotTitle}>
+                  <Label>Title</Label>
+                  <Input />
+                </TextField>
+                <label>
+                  Subtitle
+                  <input type="text" />
+                </label>
+                <label>
+                  Y Axis Title
+                  <input type="text" />
+                </label>
               </div>
             </div>
             <div className="group">
@@ -420,10 +496,10 @@ export const Heatmap = ({
                 hoverinfo: "skip",
                 ...(settings.annotation
                   ? {
-                    x: annotations.x,
-                    y: annotations.y,
-                    text: annotations.text,
-                  }
+                      x: annotations.x,
+                      y: annotations.y,
+                      text: annotations.text,
+                    }
                   : {}),
               },
             ]}
@@ -433,11 +509,18 @@ export const Heatmap = ({
               scrollZoom: true,
               modeBarButtonsToRemove: ["sendDataToCloud", "toImage"],
               displaylogo: false,
-              editable: true,
+              editable: settings.showTitles,
               // showLink: true,
               // plotlyServerURL: "https://chart-studio.plotly.com",
             }}
             layout={{
+              ...(settings.showTitles
+                ? {
+                    title: {
+                      text: plotTitle,
+                    },
+                  }
+                : {}),
               font: plotFont,
               plot_bgcolor: "rgba(0,0,0,0)",
               paper_bgcolor: "rgba(0,0,0,0)",

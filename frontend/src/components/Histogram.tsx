@@ -92,7 +92,7 @@ export const Histogram = ({
           showline: settings.showAxisLines,
           // dtick: dataSetKey === "length" ? 25 : 1,
           tickmode: "auto",
-          autotick: true
+          autotick: true,
         },
         yaxis: {
           // title: settings.showAxisLabels
@@ -106,7 +106,7 @@ export const Histogram = ({
           showticklabels: settings.showTickLabels,
           showline: settings.showAxisLines,
           tickmode: "auto",
-          autotick: true
+          autotick: true,
         },
         dragmode: "pan",
         barmode: "overlay",

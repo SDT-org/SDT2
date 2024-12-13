@@ -114,6 +114,7 @@ export const initialAppState: AppState = {
       annotation_rounding: 0,
       annotation_alpha: "0",
       showscale: true,
+      showTitles: false,
       cbar_shrink: 1,
       cbar_aspect: 25,
       cbar_pad: 10,

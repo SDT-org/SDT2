@@ -40,6 +40,12 @@
   }
 }
 
+.react-aria-Dialog {
+  input[type="text"] {
+    width: 100%;
+  }
+}
+
 .export-modal:not(.success) {
   padding: 0;
   display: flex;
