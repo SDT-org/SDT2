@@ -318,7 +318,7 @@ export const Heatmap = ({
                 data-hidden={!settings.showTitles}
                 aria-hidden={!settings.showTitles}
               >
-                <TextField onInput={setPlotTitle}>
+                <TextField onChange={setPlotTitle}>
                   <Label>Title</Label>
                   <Input />
                 </TextField>
