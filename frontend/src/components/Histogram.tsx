@@ -1,5 +1,5 @@
 import Plotly from "plotly.js-dist-min";
-import type { Layout, PlotData } from "plotly.js-dist-min";
+import type { PlotData } from "plotly.js-dist-min";
 import React from "react";
 import {
   Input,
@@ -336,77 +336,78 @@ export const Histogram = ({
         {footer ? <div className="app-sidebar-footer">{footer}</div> : null}
       </div>
       <div className="app-main">
-      <Plot
-        data={[histogramTrace]}
-        layout={{
-          ...(settings.showTitles
-            ? {
-                title: {
-                  text: settings.title+
-                  (settings.subtitle
-                    ? `<br><span style="font-size:0.8em;">${settings.subtitle}</span>`
-                    : ""),  
-                    pad: { 
+        <Plot
+          data={[histogramTrace]}
+          layout={{
+            ...(settings.showTitles
+              ? {
+                  title: {
+                    text:
+                      settings.title +
+                      (settings.subtitle
+                        ? `<br><span style="font-size:0.8em;">${settings.subtitle}</span>`
+                        : ""),
+                    pad: {
                       t: 100,
                       r: 0,
-                      b:  0,
+                      b: 0,
                       l: 0,
-                    }
-                },
-              }
-            : {}),
-          font: plotFont,
-          uirevision: "true",
-          xaxis: {
-            ...(settings.showTitles
-              ? {
-                  title: {
-                    text: settings.xtitle,
+                    },
                   },
                 }
               : {}),
-            side: "bottom",
-            rangemode: "normal",
-            fixedrange: true,
-            zeroline: false,
-            showgrid: settings.showGrid,
-            showticklabels: settings.showTickLabels,
-            showline: settings.showAxisLines,
-            tickmode: "auto",
-            autotick: true,
-          },
-          yaxis: {
-            ...(settings.showTitles
-              ? {
-                  title: {
-                    text: settings.ytitle,
-                  },
-                }
-              : {}),
-            side: "left",
-            rangemode: "tozero",
-            fixedrange: true,
-            zeroline: false,
-            showgrid: settings.showGrid,
-            showticklabels: settings.showTickLabels,
-            showline: settings.showAxisLines,
-            tickmode: "auto",
-            autotick: true,
-          },
-          dragmode: "pan",
-          barmode: "overlay",
-          margin: { l: 50, r: 50, t: 50, b: 50 },
-        }}
-        onRelayout={updateTitles}
-        config={{
-          responsive: true,
-          displayModeBar: false,
-          scrollZoom: true,
-          displaylogo: false,
-          editable: false,
-        }}
-        style={{ width: "100%", height: "100%" }}
-      />
+            font: plotFont,
+            uirevision: "true",
+            xaxis: {
+              ...(settings.showTitles
+                ? {
+                    title: {
+                      text: settings.xtitle,
+                    },
+                  }
+                : {}),
+              side: "bottom",
+              rangemode: "normal",
+              fixedrange: true,
+              zeroline: false,
+              showgrid: settings.showGrid,
+              showticklabels: settings.showTickLabels,
+              showline: settings.showAxisLines,
+              tickmode: "auto",
+              autotick: true,
+            },
+            yaxis: {
+              ...(settings.showTitles
+                ? {
+                    title: {
+                      text: settings.ytitle,
+                    },
+                  }
+                : {}),
+              side: "left",
+              rangemode: "tozero",
+              fixedrange: true,
+              zeroline: false,
+              showgrid: settings.showGrid,
+              showticklabels: settings.showTickLabels,
+              showline: settings.showAxisLines,
+              tickmode: "auto",
+              autotick: true,
+            },
+            dragmode: "pan",
+            barmode: "overlay",
+            margin: { l: 50, r: 50, t: 50, b: 50 },
+          }}
+          onRelayout={updateTitles}
+          config={{
+            responsive: true,
+            displayModeBar: false,
+            scrollZoom: true,
+            displaylogo: false,
+            editable: false,
+          }}
+          style={{ width: "100%", height: "100%" }}
+        />
       </div>
     </>
   );

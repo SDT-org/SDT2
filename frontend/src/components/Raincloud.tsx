@@ -1,17 +1,28 @@
 import Plotly from "plotly.js-dist-min";
-import type { Layout, PlotData } from "plotly.js-dist-min";
+import type { PlotData } from "plotly.js-dist-min";
 import React from "react";
-import { Label, ToggleButton, ToggleButtonGroup } from "react-aria-components";
+import {
+  Input,
+  Label,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
 import type { ColorString } from "../colors";
 import { plotFont } from "../constants";
 import type { DataSets, DistributionState } from "../distributionState";
 import { arrayMinMax } from "../helpers";
+import {
+  useRelayoutHideSubtitle,
+  useRelayoutUpdateTitles,
+} from "../hooks/useRelayoutUpdateTitles";
 import type { DistributionData, MetaData } from "../plotTypes";
 import { ColorPicker } from "./ColorPicker";
 import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";
 import { Tooltip } from "./Tooltip";
+import { Switch } from "./Switch";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -42,7 +53,8 @@ export const Raincloud = ({
   }
   const dataSet = dataSets[dataSetKey];
   const [minDataValue, maxDataValue] = arrayMinMax(dataSet);
-
+  const updateTitles = useRelayoutUpdateTitles(updateSettings);
+  useRelayoutHideSubtitle(!settings.showTitles);
   const rainCloudTrace = React.useMemo(
     () =>
       ({
@@ -75,38 +87,6 @@ export const Raincloud = ({
       }) as Partial<PlotData>,
     [data.identity_combos, dataSet, settings],
   );
-
-  const layout = React.useMemo(() => {
-    return {
-      title: "",
-      uirevision: "true",
-      font: plotFont,
-      xaxis: {
-        side: "left",
-        rangemode: "tozero",
-        fixedrange: true,
-        zeroline: false,
-        dtick: 5,
-        showgrid: settings.showGrid,
-        showline: settings.showAxisLines,
-        showticklabels: settings.showTickLabels,
-        range: [minDataValue - 20, maxDataValue + 20],
-      },
-      yaxis: {
-        fixedrange: true,
-        dtick: 1,
-        zeroline: false,
-        showgrid: settings.showGrid,
-        showline: settings.showAxisLines,
-        showticklabels: settings.showTickLabels,
-      },
-      dragmode: "pan",
-      barmode: "overlay",
-      showlegend: false,
-      margin: { l: 50, r: 50, t: 50, b: 50 },
-    } as Partial<Layout>;
-  }, [settings, minDataValue, maxDataValue]);
-
   return (
     <>
       <div className="app-sidebar">
@@ -382,6 +362,60 @@ export const Raincloud = ({
                   />
                 </div>
               </div>
+              <div className="group">
+                 <Switch
+                   isSelected={settings.showTitles}
+                   onChange={(value) => {
+                     updateSettings({
+                       showTitles: value,
+                     });
+                   }}
+                 >
+                   Plot Titles
+                 </Switch>
+                 <div
+                   className="drawer"
+                   data-hidden={!settings.showTitles}
+                   aria-hidden={!settings.showTitles}
+                 >
+                   <div className="field">
+                     <TextField
+                       onChange={(value) => updateSettings({ title: value })}
+                       value={settings.title}
+                     >
+                       <Label>Title</Label>
+                       <Input />
+                     </TextField>
+                   </div>
+                   <div className="field">
+                     <TextField
+                       onChange={(value) => updateSettings({ subtitle: value })}
+                       value={settings.subtitle}
+                     >
+                       <Label>Subtitle</Label>
+                       <Input />
+                     </TextField>
+                   </div>
+                   <div className="field">
+                     <TextField
+                       onChange={(value) => updateSettings({ xtitle: value })}
+                       value={settings.xtitle}
+                     >
+                       <Label>X Axis Title</Label>
+                       <Input />
+                     </TextField>
+                   </div>
+                   <div className="field">
+                     <TextField
+                       onChange={(value) => updateSettings({ ytitle: value })}
+                       value={settings.ytitle}
+                     >
+                       <Label>Y Axis Title</Label>
+                       <Input />
+                     </TextField>
+                   </div>
+                 </div>
+               </div>
             </div>
           </div>
         </div>
@@ -390,13 +424,71 @@ export const Raincloud = ({
       <div className="app-main">
         <Plot
           data={[rainCloudTrace]}
-          layout={layout}
+          layout={{
+            ...(settings.showTitles
+              ? {
+                  title: {
+                    text:
+                      settings.title +
+                      (settings.subtitle
+                        ? `<br><span style="font-size:0.8em;">${settings.subtitle}</span>`
+                        : ""),
+                    pad: {
+                      t: 100,
+                      r: 0,
+                      b: 0,
+                      l: 0,
+                    },
+                  },
+                }
+              : {}),
+            uirevision: "true",
+            font: plotFont,
+            xaxis: {
+              ...(settings.showTitles
+                ? {
+                    title: {
+                      text: settings.xtitle,
+                    },
+                  }
+                : {}),
+              side: "left",
+              rangemode: "tozero",
+              fixedrange: true,
+              zeroline: false,
+              dtick: 5,
+              showgrid: settings.showGrid,
+              showline: settings.showAxisLines,
+              showticklabels: settings.showTickLabels,
+              range: [minDataValue - 20, maxDataValue + 20],
+            },
+            yaxis: {
+              ...(settings.showTitles
+                ? {
+                    title: {
+                      text: settings.ytitle,
+                    },
+                  }
+                : {}),
+              fixedrange: true,
+              dtick: 1,
+              zeroline: false,
+              showgrid: settings.showGrid,
+              showline: settings.showAxisLines,
+              showticklabels: settings.showTickLabels,
+            },
+            dragmode: "pan",
+            barmode: "overlay",
+            showlegend: false,
+            margin: { l: 50, r: 50, t: 50, b: 50 },
+          }}
+          onRelayout={updateTitles}
           config={{
             responsive: true,
             displayModeBar: false,
             scrollZoom: true,
             displaylogo: false,
-            editable: !!settings.makeEditable,
+            editable: false,
           }}
           style={{ width: "100%", height: "100%" }}
         />

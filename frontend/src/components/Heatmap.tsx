@@ -587,7 +587,7 @@ export const Heatmap = ({
                 ? {
                     title: {
                       text: settings.title,
-                      pad: { 
+                      pad: {
                         t: 100,
                         r: 0,
                         b: 50,
