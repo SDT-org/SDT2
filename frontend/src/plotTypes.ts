@@ -15,6 +15,10 @@ export interface HeatmapSettings {
   annotation_alpha: string;
   showscale: boolean;
   showTitles: boolean;
+  title: string;
+  subtitle: string;
+  xtitle: string;
+  ytitle: string;
   cbar_shrink: number;
   cbar_pad: number;
   cbar_aspect: number;
@@ -58,6 +62,10 @@ export const HeatmapSettingsSchema = z.object({
   annotation_rounding: z.union([z.literal(0), z.literal(1), z.literal(2)]),
   annotation_alpha: z.string(),
   showscale: z.boolean(),
+  title: z.string(),
+  subtitle: z.string(),
+  xtitle: z.string(),
+  ytitle: z.string(),
   cbar_shrink: z.number(),
   cbar_pad: z.number(),
   cbar_aspect: z.number(),

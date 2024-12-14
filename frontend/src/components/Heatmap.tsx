@@ -23,6 +23,13 @@ import { Slider } from "./Slider";
 import { Switch } from "./Switch";
 import { Tooltip } from "./Tooltip";
 
+type ExtendedPlotRelayoutEvent = Plotly.PlotRelayoutEvent & {
+  "title.text"?: string;
+  "title.subtitle.text"?: string;
+  "yaxis.title.text"?: string;
+  "xaxis.title.text"?: string;
+};
+
 const Plot = createPlotlyComponent(Plotly);
 
 export const Heatmap = ({
@@ -41,17 +48,20 @@ export const Heatmap = ({
     setAppState,
   } = useAppState();
 
-  const updateSettings = (values: Partial<AppState["client"]["heatmap"]>) =>
-    setAppState((prev) => ({
-      ...prev,
-      client: {
-        ...prev.client,
-        heatmap: {
-          ...prev.client.heatmap,
-          ...values,
+  const updateSettings = React.useCallback(
+    (values: Partial<AppState["client"]["heatmap"]>) =>
+      setAppState((prev) => ({
+        ...prev,
+        client: {
+          ...prev.client,
+          heatmap: {
+            ...prev.client.heatmap,
+            ...values,
+          },
         },
-      },
-    }));
+      })),
+    [setAppState],
+  );
 
   const discreteColorScale: ColorScale = React.useMemo(() => {
     const scales = [
@@ -86,15 +96,30 @@ export const Heatmap = ({
   );
 
   const [textScale, setTextScale] = React.useState(1);
-  const [plotTitle, setPlotTitle] = React.useState("");
-  // @ts-ignore
-  const [plotSubTitle, setPlotSubTitle] = React.useState("");
-  // @ts-ignore
-  const [plotYTitle, setPlotYTitle] = React.useState("");
 
   const handleRelayout = React.useCallback(
-    (event: Plotly.PlotRelayoutEvent) => {
+    (event: ExtendedPlotRelayoutEvent) => {
       console.log("Relayout event:", event);
+      if (event["title.text"]) {
+        updateSettings({
+          title: event["title.text"],
+        });
+      }
+      if (event["title.subtitle.text"]) {
+        updateSettings({
+          subtitle: event["title.subtitle.text"],
+        });
+      }
+      if (event["yaxis.title.text"]) {
+        updateSettings({
+          ytitle: event["yaxis.title.text"],
+        });
+      }
+      if (event["xaxis.title.text"]) {
+        updateSettings({
+          xtitle: event["xaxis.title.text"],
+        });
+      }
       if (event["xaxis.autorange"]) {
         setTextScale(1);
         return;
@@ -113,8 +138,21 @@ export const Heatmap = ({
       );
       setTextScale(scale);
     },
-    [data.length],
+    [data.length, updateSettings],
   );
+
+  React.useEffect(() => {
+    const subtitleEl = document.getElementsByClassName("gtitle-subtitle")[0];
+    if (!subtitleEl) {
+      return;
+    }
+
+    if (!settings.showTitles) {
+      subtitleEl.setAttribute("data-hidden", "true");
+    } else {
+      subtitleEl.removeAttribute("data-hidden");
+    }
+  }, [settings.showTitles]);
 
   return (
     <>
@@ -319,18 +357,34 @@ export const Heatmap = ({
                 data-hidden={!settings.showTitles}
                 aria-hidden={!settings.showTitles}
               >
-                <TextField onChange={setPlotTitle}>
+                <TextField
+                  onChange={(value) => updateSettings({ title: value })}
+                  value={settings.title}
+                >
                   <Label>Title</Label>
                   <Input />
                 </TextField>
-                <label>
-                  Subtitle
-                  <input type="text" />
-                </label>
-                <label>
-                  Y Axis Title
-                  <input type="text" />
-                </label>
+                <TextField
+                  onChange={(value) => updateSettings({ subtitle: value })}
+                  value={settings.subtitle}
+                >
+                  <Label>Subtitle</Label>
+                  <Input />
+                </TextField>
+                <TextField
+                  onChange={(value) => updateSettings({ xtitle: value })}
+                  value={settings.xtitle}
+                >
+                  <Label>X Axis Title</Label>
+                  <Input />
+                </TextField>
+                <TextField
+                  onChange={(value) => updateSettings({ ytitle: value })}
+                  value={settings.ytitle}
+                >
+                  <Label>Y Axis Title</Label>
+                  <Input />
+                </TextField>
               </div>
             </div>
             <div className="group">
@@ -482,6 +536,7 @@ export const Heatmap = ({
                   len: settings.cbar_shrink,
                   thickness: settings.cbar_aspect,
                   xpad: settings.cbar_pad,
+                  title: "",
                 },
               },
               {
@@ -511,6 +566,7 @@ export const Heatmap = ({
               modeBarButtonsToRemove: ["sendDataToCloud", "toImage"],
               displaylogo: false,
               editable: settings.showTitles,
+              // editable: false,
               // showLink: true,
               // plotlyServerURL: "https://chart-studio.plotly.com",
             }}
@@ -518,7 +574,10 @@ export const Heatmap = ({
               ...(settings.showTitles
                 ? {
                     title: {
-                      text: plotTitle,
+                      text: settings.title,
+                      subtitle: {
+                        text: settings.subtitle,
+                      },
                     },
                   }
                 : {}),
@@ -537,6 +596,13 @@ export const Heatmap = ({
               dragmode: "pan",
               hovermode: "closest",
               xaxis: {
+                ...(settings.showTitles
+                  ? {
+                      title: {
+                        text: settings.xtitle,
+                      },
+                    }
+                  : {}),
                 minallowed: -2,
                 maxallowed: tickText.length + 2,
                 automargin: true,
@@ -557,6 +623,16 @@ export const Heatmap = ({
                 showgrid: false,
               },
               yaxis: {
+                ...(settings.showTitles
+                  ? {
+                      title: {
+                        text: settings.ytitle,
+                        pad: {
+                          r: 15,
+                        },
+                      },
+                    }
+                  : {}),
                 minallowed: -2,
                 maxallowed: tickText.length + 2,
                 automargin: true,
