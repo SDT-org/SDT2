@@ -97,7 +97,13 @@ def do_cancel_run():
         pool.join()
 
     set_state(
-        view="runner", progress=0, pair_progress=0, pair_count=0, estimated_time=None
+        view="runner",
+        progress=0,
+        pair_progress=0,
+        pair_count=0,
+        estimated_time=None,
+        stage="",
+        sequences_count=0
     )
 
 
