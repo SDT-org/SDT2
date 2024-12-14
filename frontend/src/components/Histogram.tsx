@@ -1,14 +1,25 @@
 import Plotly from "plotly.js-dist-min";
 import type { Layout, PlotData } from "plotly.js-dist-min";
 import React from "react";
-import { ToggleButton, ToggleButtonGroup } from "react-aria-components";
+import {
+  Input,
+  Label,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
 import type { ColorString } from "../colors";
 import { plotFont } from "../constants";
 import type { DataSets, DistributionState } from "../distributionState";
+import {
+  useRelayoutHideSubtitle,
+  useRelayoutUpdateTitles,
+} from "../hooks/useRelayoutUpdateTitles";
 import type { DistributionData } from "../plotTypes";
 import { ColorPicker } from "./ColorPicker";
 import { Slider } from "./Slider";
+import { Switch } from "./Switch";
 import { Tooltip } from "./Tooltip";
 
 const Plot = createPlotlyComponent(Plotly);
@@ -39,9 +50,9 @@ export const Histogram = ({
   }
 
   const dataSet = dataSets[dataSetKey];
-  console.log(dataSet);
-  console.log(dataSets);
-  console.log(dataSetKey);
+
+  const updateTitles = useRelayoutUpdateTitles(updateSettings);
+  useRelayoutHideSubtitle(!settings.showTitles);
 
   const histogramTrace = React.useMemo(
     () =>
@@ -65,56 +76,6 @@ export const Histogram = ({
       }) as Partial<PlotData>,
     [settings, dataSet],
   );
-
-  const layout = React.useMemo(
-    () =>
-      ({
-        title: {
-          // text:settings.showAxisLabels
-          // ? "Distribution of Pairwise Identities"
-          // : "",
-          // subtitle: {
-          //   text:settings.showAxisLabels ? "Histogram" : "",
-          // }
-        },
-        uirevision: "true",
-        font: plotFont,
-        xaxis: {
-          // title: {
-          //   text: settings.showAxisLabels ? "Percent Pairwise Identity" : "",
-          // },
-          side: "bottom",
-          rangemode: "normal",
-          fixedrange: true,
-          zeroline: false,
-          showgrid: settings.showGrid,
-          showticklabels: settings.showTickLabels,
-          showline: settings.showAxisLines,
-          // dtick: dataSetKey === "length" ? 25 : 1,
-          tickmode: "auto",
-          autotick: true,
-        },
-        yaxis: {
-          // title: settings.showAxisLabels
-          //   ? "Proportion of Pairwise Identities"
-          //   : "",
-          side: "left",
-          rangemode: "tozero",
-          fixedrange: true,
-          zeroline: false,
-          showgrid: settings.showGrid,
-          showticklabels: settings.showTickLabels,
-          showline: settings.showAxisLines,
-          tickmode: "auto",
-          autotick: true,
-        },
-        dragmode: "pan",
-        barmode: "overlay",
-        margin: { l: 50, r: 50, t: 50, b: 50 },
-      }) as Partial<Layout>,
-    [settings],
-  );
-
   return (
     <>
       <div className="app-sidebar">
@@ -315,24 +276,137 @@ export const Histogram = ({
                   step={1}
                 />
               </div>
+              <div className="group">
+                <Switch
+                  isSelected={settings.showTitles}
+                  onChange={(value) => {
+                    updateSettings({
+                      showTitles: value,
+                    });
+                  }}
+                >
+                  Plot Titles
+                </Switch>
+                <div
+                  className="drawer"
+                  data-hidden={!settings.showTitles}
+                  aria-hidden={!settings.showTitles}
+                >
+                  <div className="field">
+                    <TextField
+                      onChange={(value) => updateSettings({ title: value })}
+                      value={settings.title}
+                    >
+                      <Label>Title</Label>
+                      <Input />
+                    </TextField>
+                  </div>
+                  <div className="field">
+                    <TextField
+                      onChange={(value) => updateSettings({ subtitle: value })}
+                      value={settings.subtitle}
+                    >
+                      <Label>Subtitle</Label>
+                      <Input />
+                    </TextField>
+                  </div>
+                  <div className="field">
+                    <TextField
+                      onChange={(value) => updateSettings({ xtitle: value })}
+                      value={settings.xtitle}
+                    >
+                      <Label>X Axis Title</Label>
+                      <Input />
+                    </TextField>
+                  </div>
+                  <div className="field">
+                    <TextField
+                      onChange={(value) => updateSettings({ ytitle: value })}
+                      value={settings.ytitle}
+                    >
+                      <Label>Y Axis Title</Label>
+                      <Input />
+                    </TextField>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
         {footer ? <div className="app-sidebar-footer">{footer}</div> : null}
       </div>
       <div className="app-main">
-        <Plot
-          data={[histogramTrace]}
-          layout={layout}
-          config={{
-            responsive: true,
-            displayModeBar: false,
-            scrollZoom: true,
-            displaylogo: false,
-            editable: settings.makeEditable,
-          }}
-          style={{ width: "100%", height: "100%" }}
-        />
+      <Plot
+        data={[histogramTrace]}
+        layout={{
+          ...(settings.showTitles
+            ? {
+                title: {
+                  text: settings.title+
+                  (settings.subtitle
+                    ? `<br><span style="font-size:0.8em;">${settings.subtitle}</span>`
+                    : ""),  
+                    pad: { 
+                      t: 100,
+                      r: 0,
+                      b:  0,
+                      l: 0,
+                    }
+                },
+              }
+            : {}),
+          font: plotFont,
+          uirevision: "true",
+          xaxis: {
+            ...(settings.showTitles
+              ? {
+                  title: {
+                    text: settings.xtitle,
+                  },
+                }
+              : {}),
+            side: "bottom",
+            rangemode: "normal",
+            fixedrange: true,
+            zeroline: false,
+            showgrid: settings.showGrid,
+            showticklabels: settings.showTickLabels,
+            showline: settings.showAxisLines,
+            tickmode: "auto",
+            autotick: true,
+          },
+          yaxis: {
+            ...(settings.showTitles
+              ? {
+                  title: {
+                    text: settings.ytitle,
+                  },
+                }
+              : {}),
+            side: "left",
+            rangemode: "tozero",
+            fixedrange: true,
+            zeroline: false,
+            showgrid: settings.showGrid,
+            showticklabels: settings.showTickLabels,
+            showline: settings.showAxisLines,
+            tickmode: "auto",
+            autotick: true,
+          },
+          dragmode: "pan",
+          barmode: "overlay",
+          margin: { l: 50, r: 50, t: 50, b: 50 },
+        }}
+        onRelayout={updateTitles}
+        config={{
+          responsive: true,
+          displayModeBar: false,
+          scrollZoom: true,
+          displaylogo: false,
+          editable: false,
+        }}
+        style={{ width: "100%", height: "100%" }}
+      />
       </div>
     </>
   );

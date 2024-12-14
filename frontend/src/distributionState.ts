@@ -20,6 +20,7 @@ type VisualizationBase = {
   showAxisLines: boolean;
   makeEditable: boolean;
   showMeanline: boolean;
+  showTitles: boolean;
 };
 
 export type DistributionState = {
@@ -35,6 +36,10 @@ export type DistributionState = {
     histlineColor: ColorString;
     dtickx: number;
     dticky: number;
+    title: string;
+    subtitle: string;
+    xtitle: string;
+    ytitle: string;
   };
   raincloud: VisualizationBase & {
     bandwidth: number;
@@ -52,6 +57,10 @@ export type DistributionState = {
     plotOrientation: "horizontal" | "vertical";
     editable: boolean;
     dticks: number;
+    title: string;
+    subtitle: string;
+    xtitle: string;
+    ytitle: string;
   };
   violin: VisualizationBase & {
     bandwidth: number;
@@ -74,6 +83,10 @@ export type DistributionState = {
     showZeroLine: boolean;
     whiskerWidth: number;
     plotOrientation: "horizontal" | "vertical";
+    title: string;
+    subtitle: string;
+    xtitle: string;
+    ytitle: string;
   };
 };
 
@@ -87,6 +100,7 @@ const VisualizationBaseSchema = z.object({
   showAxisLines: z.boolean(),
   makeEditable: z.boolean(),
   showMeanline: z.boolean(),
+  showTitles: z.boolean(),
 });
 
 export const DistributionStateSchema = z.object({
@@ -102,6 +116,10 @@ export const DistributionStateSchema = z.object({
     histlineColor: ColorStringSchema,
     dtickx: z.number(),
     dticky: z.number(),
+    title: z.string(),
+    subtitle: z.string(),
+    xtitle: z.string(),
+    ytitle: z.string(),
   }),
   raincloud: VisualizationBaseSchema.extend({
     bandwidth: z.number(),
@@ -119,6 +137,10 @@ export const DistributionStateSchema = z.object({
     plotOrientation: z.enum(["horizontal", "vertical"]),
     editable: z.boolean(),
     dticks: z.number(),
+    title: z.string(),
+    subtitle: z.string(),
+    xtitle: z.string(),
+    ytitle: z.string(),
   }),
   violin: VisualizationBaseSchema.extend({
     bandwidth: z.number(),
@@ -141,6 +163,10 @@ export const DistributionStateSchema = z.object({
     showZeroLine: z.boolean(),
     whiskerWidth: z.number(),
     plotOrientation: z.enum(["horizontal", "vertical"]),
+    title: z.string(),
+    subtitle: z.string(),
+    xtitle: z.string(),
+    ytitle: z.string(),
   }),
 });
 
@@ -170,6 +196,11 @@ export const initialDistributionState: DistributionState = {
     showMeanline: true,
     dtickx: 5,
     dticky: 1,
+    showTitles: true,
+    subtitle: "Histogram",
+    title: "Histogram",
+    xtitle: "Percent Identity",
+    ytitle: "Frequency",
   },
   raincloud: {
     ...visualizationDefaults,
@@ -189,6 +220,11 @@ export const initialDistributionState: DistributionState = {
     showMeanline: true,
     makeEditable: true,
     dticks: 5,
+    showTitles: true,
+    subtitle: "Raincloud Plot",
+    title: "Raincloud Plot",
+    xtitle: "Percent Identity",
+    ytitle: "Genome",
   },
   violin: {
     ...visualizationDefaults,
@@ -213,6 +249,12 @@ export const initialDistributionState: DistributionState = {
     showViolin: true,
     showZeroLine: false,
     whiskerWidth: 0.2,
+    showTitles: true,
+    showTickLabels: true,
+    title: "Violin Plot",
+    subtitle: "Violin Plot",
+    xtitle: "",
+    ytitle: "",
   },
 };
 

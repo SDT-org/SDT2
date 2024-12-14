@@ -577,7 +577,7 @@ export const Heatmap = ({
               scrollZoom: true,
               modeBarButtonsToRemove: ["sendDataToCloud", "toImage"],
               displaylogo: false,
-              editable: settings.showTitles,
+              editable: false,
               // editable: false,
               // showLink: true,
               // plotlyServerURL: "https://chart-studio.plotly.com",
@@ -587,6 +587,12 @@ export const Heatmap = ({
                 ? {
                     title: {
                       text: settings.title,
+                      pad: { 
+                        t: 100,
+                        r: 0,
+                        b: 50,
+                        l: 0,
+                      },
                       subtitle: {
                         text: settings.subtitle,
                       },
@@ -597,13 +603,13 @@ export const Heatmap = ({
               plot_bgcolor: "rgba(0,0,0,0)",
               paper_bgcolor: "rgba(0,0,0,0)",
               uirevision: "true",
-              margin: {
-                l: 25,
-                r: 25,
-                b: 25,
-                t: 25,
-                pad: 5,
-              },
+              // margin: {
+              //   l: 25,
+              //   r: 25,
+              //   b: 25,
+              //   t: 25,
+              //   pad: 5,
+              // },
               autosize: true,
               dragmode: "pan",
               hovermode: "closest",
