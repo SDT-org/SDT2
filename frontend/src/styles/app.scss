@@ -519,7 +519,7 @@ small {
 }
 
 .app-loader.delay {
-  animation: reveal 0s linear var(--app-loader-delay) forwards;
+  animation: reveal 0.25s linear var(--app-loader-delay) forwards;
   opacity: 0;
 }
 
@@ -741,6 +741,11 @@ label.sublabel,
     max-width: 38.4rem;
     font-weight: 600;
 
+    > * {
+      opacity: 0;
+      animation: reveal 0.2s ease-in-out var(--app-loader-delay) forwards;
+    }
+
     .bar {
       height: 1.6rem;
       border-radius: 1.6rem;
@@ -756,6 +761,13 @@ label.sublabel,
     .estimate {
       font-size: 1.3rem;
       font-weight: normal;
+      height: 1.9rem;
+      color: var(--text-deemphasis-color);
+
+      > span {
+        opacity: 0;
+        animation: reveal 0.25s ease-in-out var(--app-loader-delay) forwards;
+      }
     }
   }
 
