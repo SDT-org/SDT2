@@ -237,18 +237,50 @@ export const Heatmap = ({
                         </svg>
                       </OverlayArrow>
                       <Dialog>
-                        <label>
-                          Title
-                          <input type="text" />
-                        </label>
-                        <label>
-                          Subtitle
-                          <input type="text" />
-                        </label>
-                        <label>
-                          Y Axis Title
-                          <input type="text" />
-                        </label>
+                        <div className="field">
+                          <TextField
+                            onChange={(value) =>
+                              updateSettings({ title: value })
+                            }
+                            value={settings.title}
+                          >
+                            <Label>Title</Label>
+                            <Input />
+                          </TextField>
+                        </div>
+                        <div className="field">
+                          <TextField
+                            onChange={(value) =>
+                              updateSettings({ subtitle: value })
+                            }
+                            value={settings.subtitle}
+                          >
+                            <Label>Subtitle</Label>
+                            <Input />
+                          </TextField>
+                        </div>
+                        <div className="field">
+                          <TextField
+                            onChange={(value) =>
+                              updateSettings({ xtitle: value })
+                            }
+                            value={settings.xtitle}
+                          >
+                            <Label>X Axis Title</Label>
+                            <Input />
+                          </TextField>
+                        </div>
+                        <div className="field">
+                          <TextField
+                            onChange={(value) =>
+                              updateSettings({ ytitle: value })
+                            }
+                            value={settings.ytitle}
+                          >
+                            <Label>Y Axis Title</Label>
+                            <Input />
+                          </TextField>
+                        </div>
                       </Dialog>
                     </Popover>
                   </DialogTrigger>
@@ -357,34 +389,42 @@ export const Heatmap = ({
                 data-hidden={!settings.showTitles}
                 aria-hidden={!settings.showTitles}
               >
-                <TextField
-                  onChange={(value) => updateSettings({ title: value })}
-                  value={settings.title}
-                >
-                  <Label>Title</Label>
-                  <Input />
-                </TextField>
-                <TextField
-                  onChange={(value) => updateSettings({ subtitle: value })}
-                  value={settings.subtitle}
-                >
-                  <Label>Subtitle</Label>
-                  <Input />
-                </TextField>
-                <TextField
-                  onChange={(value) => updateSettings({ xtitle: value })}
-                  value={settings.xtitle}
-                >
-                  <Label>X Axis Title</Label>
-                  <Input />
-                </TextField>
-                <TextField
-                  onChange={(value) => updateSettings({ ytitle: value })}
-                  value={settings.ytitle}
-                >
-                  <Label>Y Axis Title</Label>
-                  <Input />
-                </TextField>
+                <div className="field">
+                  <TextField
+                    onChange={(value) => updateSettings({ title: value })}
+                    value={settings.title}
+                  >
+                    <Label>Title</Label>
+                    <Input />
+                  </TextField>
+                </div>
+                <div className="field">
+                  <TextField
+                    onChange={(value) => updateSettings({ subtitle: value })}
+                    value={settings.subtitle}
+                  >
+                    <Label>Subtitle</Label>
+                    <Input />
+                  </TextField>
+                </div>
+                <div className="field">
+                  <TextField
+                    onChange={(value) => updateSettings({ xtitle: value })}
+                    value={settings.xtitle}
+                  >
+                    <Label>X Axis Title</Label>
+                    <Input />
+                  </TextField>
+                </div>
+                <div className="field">
+                  <TextField
+                    onChange={(value) => updateSettings({ ytitle: value })}
+                    value={settings.ytitle}
+                  >
+                    <Label>Y Axis Title</Label>
+                    <Input />
+                  </TextField>
+                </div>
               </div>
             </div>
             <div className="group">
