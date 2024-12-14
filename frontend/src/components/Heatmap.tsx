@@ -16,19 +16,16 @@ import useAppState, { type AppState } from "../appState";
 import { colorScales as defaultColorScales } from "../colorScales";
 import { plotFont } from "../constants";
 import { useAnnotations } from "../hooks/useAnnotations";
+import {
+  useRelayoutHideSubtitle,
+  useRelayoutUpdateTitles,
+} from "../hooks/useRelayoutUpdateTitles";
 import type { ColorScaleKey, HeatmapData, HeatmapSettings } from "../plotTypes";
 import { NumberInput } from "./NumberInput";
 import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";
 import { Switch } from "./Switch";
 import { Tooltip } from "./Tooltip";
-
-type ExtendedPlotRelayoutEvent = Plotly.PlotRelayoutEvent & {
-  "title.text"?: string;
-  "title.subtitle.text"?: string;
-  "yaxis.title.text"?: string;
-  "xaxis.title.text"?: string;
-};
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -97,29 +94,8 @@ export const Heatmap = ({
 
   const [textScale, setTextScale] = React.useState(1);
 
-  const handleRelayout = React.useCallback(
-    (event: ExtendedPlotRelayoutEvent) => {
-      console.log("Relayout event:", event);
-      if (event["title.text"]) {
-        updateSettings({
-          title: event["title.text"],
-        });
-      }
-      if (event["title.subtitle.text"]) {
-        updateSettings({
-          subtitle: event["title.subtitle.text"],
-        });
-      }
-      if (event["yaxis.title.text"]) {
-        updateSettings({
-          ytitle: event["yaxis.title.text"],
-        });
-      }
-      if (event["xaxis.title.text"]) {
-        updateSettings({
-          xtitle: event["xaxis.title.text"],
-        });
-      }
+  const updateTextScale = React.useCallback(
+    (event: Plotly.PlotRelayoutEvent) => {
       if (event["xaxis.autorange"]) {
         setTextScale(1);
         return;
@@ -127,32 +103,25 @@ export const Heatmap = ({
       if (!event["xaxis.range[0]"]) {
         return;
       }
-      const earlyRamp = data.length < 10 ? 0 : data.length < 50 ? 10 : 0;
+
+      const dataLength = data.length;
+      const earlyRamp = dataLength < 10 ? 0 : dataLength < 50 ? 10 : 0;
       const initialRange = -2;
       const x0 = event["xaxis.range[0]"] || initialRange;
       const x1 = event["xaxis.range[1]"] || initialRange;
-      const length = data.length + 2 + earlyRamp;
+
+      const length = dataLength + 2 + earlyRamp;
       const scale = Math.max(
         1,
         Math.min(4, Number((length / ((x1 - x0) * 1.5)).toFixed(1))),
       );
       setTextScale(scale);
     },
-    [data.length, updateSettings],
+    [data.length],
   );
 
-  React.useEffect(() => {
-    const subtitleEl = document.getElementsByClassName("gtitle-subtitle")[0];
-    if (!subtitleEl) {
-      return;
-    }
-
-    if (!settings.showTitles) {
-      subtitleEl.setAttribute("data-hidden", "true");
-    } else {
-      subtitleEl.removeAttribute("data-hidden");
-    }
-  }, [settings.showTitles]);
+  const updateTitles = useRelayoutUpdateTitles(updateSettings);
+  useRelayoutHideSubtitle(!settings.showTitles);
 
   return (
     <>
@@ -550,7 +519,10 @@ export const Heatmap = ({
         {data ? (
           <Plot
             id="plot"
-            onRelayout={handleRelayout}
+            onRelayout={(e) => {
+              updateTitles(e);
+              updateTextScale(e);
+            }}
             data={[
               {
                 z: data,
