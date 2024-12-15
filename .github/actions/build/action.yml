@@ -18,6 +18,7 @@ runs:
       run: |
         source venv-pywebview/bin/activate
         bun run build
+      shell: bash
 
     - name: Sign and Notarize macOS Build
       if: ${{ inputs.os-type == 'macos' }}
@@ -34,6 +35,7 @@ runs:
         xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}" --team-id "${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}" --password "${{ secrets.MACOS_NOTARIZATION_PWD }}" > /dev/null
         xcrun notarytool submit "build/SDT2.app.zip" --keychain-profile "notarytool-profile" --wait
         xcrun stapler staple "./build/SDT2.app"
+      shell: bash
 
     - name: Build for Ubuntu
       if: ${{ inputs.os-type == 'ubuntu' }}
@@ -42,12 +44,14 @@ runs:
         bun run build
         chmod +x build/SDT2
         tar -czvf build/SDT2.tar.gz -C build SDT2
+      shell: bash
 
     - name: Build for Windows
       if: ${{ inputs.os-type == 'windows' }}
       run: |
         venv-pywebview\\Scripts\\activate
         bun run build ${{ inputs.extra-flags }}
+      shell: pwsh
 
     - name: Sign Windows Build
       if: ${{ inputs.os-type == 'windows' }}
@@ -64,7 +68,9 @@ runs:
         file-digest: SHA256
         timestamp-rfc3161: http://timestamp.acs.microsoft.com
         timestamp-digest: SHA256
+      shell: pwsh
 
     - name: Zip Windows Standalone Directory
       if: ${{ inputs.os-type == 'windows' && inputs.extra-flags == '--skip-onefile' }}
       run: powershell Compress-Archive -Path build/SDT2.dist/* -DestinationPath build/SDT2.zip
+      shell: pwsh

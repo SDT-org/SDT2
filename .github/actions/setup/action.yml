@@ -12,8 +12,10 @@ runs:
 
     - name: Install virtualenv
       run: pip install virtualenv
+      shell: ${{ runner.os == 'Windows' && 'pwsh' || 'bash' }}
 
     - uses: oven-sh/setup-bun@v2
 
     - name: Initialize
       run: bun run init
+      shell: ${{ runner.os == 'Windows' && 'pwsh' || 'bash' }}
