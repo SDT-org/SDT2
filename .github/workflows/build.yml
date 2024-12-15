@@ -14,9 +14,9 @@ jobs:
           - os: windows-latest
             name: windows-standalone
           - os: macos-latest
-            name: default-macos
+            name: macos-default
           - os: macos-13
-            name: macos-13
+            name: macos-x86
           - os: ubuntu-latest
             arch: x64
     runs-on: ${{ matrix.os }}
@@ -41,7 +41,7 @@ jobs:
         run: bun run init
 
       - name: macOS - Build
-        if: matrix.os == 'macos-latest'
+        if: matrix.name == 'macos-default' || matrix.name == 'macos-x86'
         run: |
           source venv-pywebview/bin/activate
           bun run build
