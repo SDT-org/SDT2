@@ -1,0 +1,70 @@
+name: Build for OS
+inputs:
+  os-type:
+    type: string
+    required: true
+  arch:
+    type: string
+    required: false
+  extra-flags:
+    type: string
+    required: false
+    default: ""
+runs:
+  using: "composite"
+  steps:
+    - name: Build for macOS
+      if: ${{ inputs.os-type == 'macos' }}
+      run: |
+        source venv-pywebview/bin/activate
+        bun run build
+
+    - name: Sign and Notarize macOS Build
+      if: ${{ inputs.os-type == 'macos' }}
+      run: |
+        echo ${{ secrets.MACOS_CERTIFICATE }} | base64 --decode > certificate.p12
+        security create-keychain -p "${{ secrets.MACOS_CI_KEYCHAIN_PWD }}" build.keychain
+        security default-keychain -s build.keychain
+        security unlock-keychain -p "${{ secrets.MACOS_CI_KEYCHAIN_PWD }}" build.keychain
+        security import certificate.p12 -k build.keychain -P "${{ secrets.MACOS_CERTIFICATE_PWD }}" -T /usr/bin/codesign
+        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${{ secrets.MACOS_CI_KEYCHAIN_PWD }}" build.keychain
+        /usr/bin/codesign -f -o runtime --timestamp -s "${{ secrets.MACOS_CERTIFICATE_NAME }}" --deep ./build/SDT2.app
+        /usr/bin/codesign -vvv ./build/SDT2.app
+        ditto -c -k --keepParent "build/SDT2.app" "build/SDT2.app.zip"
+        xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}" --team-id "${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}" --password "${{ secrets.MACOS_NOTARIZATION_PWD }}" > /dev/null
+        xcrun notarytool submit "build/SDT2.app.zip" --keychain-profile "notarytool-profile" --wait
+        xcrun stapler staple "./build/SDT2.app"
+
+    - name: Build for Ubuntu
+      if: ${{ inputs.os-type == 'ubuntu' }}
+      run: |
+        source venv-pywebview/bin/activate
+        bun run build
+        chmod +x build/SDT2
+        tar -czvf build/SDT2.tar.gz -C build SDT2
+
+    - name: Build for Windows
+      if: ${{ inputs.os-type == 'windows' }}
+      run: |
+        venv-pywebview\\Scripts\\activate
+        bun run build ${{ inputs.extra-flags }}
+
+    - name: Sign Windows Build
+      if: ${{ inputs.os-type == 'windows' }}
+      uses: azure/trusted-signing-action@v0.4.0
+      with:
+        azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+        endpoint: ${{ secrets.AZURE_ENDPOINT }}
+        code-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+        certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+        files-folder: ${{ inputs.extra-flags == '--skip-onefile' && 'build\\SDT2.dist' || 'build' }}
+        files-folder-filter: exe
+        file-digest: SHA256
+        timestamp-rfc3161: http://timestamp.acs.microsoft.com
+        timestamp-digest: SHA256
+
+    - name: Zip Windows Standalone Directory
+      if: ${{ inputs.os-type == 'windows' && inputs.extra-flags == '--skip-onefile' }}
+      run: powershell Compress-Archive -Path build/SDT2.dist/* -DestinationPath build/SDT2.zip

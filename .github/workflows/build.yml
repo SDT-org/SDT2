@@ -5,98 +5,93 @@ on:
       - '*'
 
 jobs:
-  build:
-    strategy:
-      matrix:
-        os: [windows-latest, macos-latest, ubuntu-latest]
-        include:
-          - os: ubuntu-latest
-            arch: x64
-    runs-on: ${{ matrix.os }}
-
+  build-macos:
+    runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
+      - name: Universal Setup
+        uses: ./.github/actions/setup
         with:
           python-version: '3.11'
-
-      - name: Install virtualenv
-        run: pip install virtualenv
-
-      - uses: oven-sh/setup-bun@v2
-
-      - name: macOS - Install dependencies
-        if: runner.os == 'macOS'
-        run: brew install autoconf automake libtool
-
-      - name: Run init
-        run: bun run init
-
-      - name: macOS - Build
-        if: matrix.os == 'macos-latest'
-        run: |
-          source venv-pywebview/bin/activate
-          bun run build
-
-      - name: Linux - Build
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          source venv-pywebview/bin/activate
-          bun run build
-
-      - name: Windows - Build
-        if: matrix.os == 'windows-latest'
-        run: |
-          venv-pywebview\\Scripts\\activate
-          bun run build
-
-      - name: Windows - Sign artifact
-        if: matrix.os == 'windows-latest'
-        uses: azure/trusted-signing-action@v0.4.0
+      - name: macOS arm64 Build
+        uses: ./.github/actions/build
         with:
-          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
-          endpoint: ${{ secrets.AZURE_ENDPOINT }}
-          code-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
-          certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-          files-folder: build
-          files-folder-filter: exe
-          file-digest: SHA256
-          timestamp-rfc3161: http://timestamp.acs.microsoft.com
-          timestamp-digest: SHA256
-
-      - name: macOS - Sign artifact
-        if: matrix.os == 'macos-latest'
-        run: |
-          echo ${{ secrets.MACOS_CERTIFICATE }} | base64 --decode > certificate.p12
-
-          security create-keychain -p "${{ secrets.MACOS_CI_KEYCHAIN_PWD }}" build.keychain
-          security default-keychain -s build.keychain
-          security unlock-keychain -p "${{ secrets.MACOS_CI_KEYCHAIN_PWD }}" build.keychain
-          security import certificate.p12 -k build.keychain -P "${{ secrets.MACOS_CERTIFICATE_PWD }}" -T /usr/bin/codesign
-          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${{ secrets.MACOS_CI_KEYCHAIN_PWD }}" build.keychain
-
-          /usr/bin/codesign -f -o runtime --timestamp -s "${{ secrets.MACOS_CERTIFICATE_NAME }}" --deep ./build/SDT2.app
-          /usr/bin/codesign -vvv ./build/SDT2.app
-
-      - name: macOS - Notarize artifact
-        if: matrix.os == 'macos-latest'
-        run: |
-          ditto -c -k --keepParent "build/SDT2.app" "build/SDT2.app.zip"
-          xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}" --team-id "${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}" --password "${{ secrets.MACOS_NOTARIZATION_PWD }}" > /dev/null
-          xcrun notarytool submit "build/SDT2.app.zip" --keychain-profile "notarytool-profile" --wait
-          xcrun stapler staple "./build/SDT2.app"
-
-      - name: Ubuntu - Prepare artifact
-        if: matrix.os == 'ubuntu-latest' || (matrix.os == 'ubuntu-22.04' && matrix.arch == 'arm64')
-        run: chmod +x build/SDT2 && tar -czvf build/SDT2.tar.gz -C build SDT2
-
-      - uses: actions/upload-artifact@v4
+          os-type: macos
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }}-build-output
-          path: |
-            ${{ matrix.os == 'windows-latest' && 'build/SDT2.exe' || '' }}
-            ${{ matrix.os == 'macos-latest' && 'build/SDT2.app.zip' || '' }}
-            ${{ (matrix.os == 'ubuntu-latest' || (matrix.os == 'ubuntu-22.04' && matrix.arch == 'arm64')) && 'build/SDT2.tar.gz' || '' }}
+          name: macos-build-output
+          path: build/SDT2.app.zip
+
+  build-macos-x86_64:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - name: Universal Setup
+        uses: ./.github/actions/setup
+        with:
+          python-version: '3.11'
+      - name: macOS x86_64 Build
+        uses: ./.github/actions/build
+        with:
+          os-type: macos
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build-x86_64-output
+          path: build/SDT2.app.zip
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Universal Setup
+        uses: ./.github/actions/setup
+        with:
+          python-version: '3.11'
+      - name: Linux-Specific Build
+        uses: ./.github/actions/build
+        with:
+          os-type: ubuntu
+      - name: Upload Linux Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build-output
+          path: build/SDT2.tar.gz
+
+  build-windows-onefile:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Universal Setup
+        uses: ./.github/actions/setup
+        with:
+          python-version: '3.11'
+      - name: Windows Build Onefile
+        uses: ./.github/actions/build
+        with:
+          os-type: windows
+      - name: Upload Windows Onefile Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build-onefile
+          path: build/SDT2.exe
+
+  build-windows-standalone:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Universal Setup
+        uses: ./.github/actions/setup
+        with:
+          python-version: '3.11'
+      - name: Windows Build Standalone
+        uses: ./.github/actions/build
+        with:
+          os-type: windows
+          extra-flags: --skip-onefile
+      - name: Upload Windows Standalone Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build-standalone
+          path: build/SDT2.zip

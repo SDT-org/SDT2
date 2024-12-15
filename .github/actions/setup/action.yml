@@ -1,0 +1,19 @@
+name: Setup
+inputs:
+  python-version:
+    type: string
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install virtualenv
+      run: pip install virtualenv
+
+    - uses: oven-sh/setup-bun@v2
+
+    - name: Initialize
+      run: bun run init
