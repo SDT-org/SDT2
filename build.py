@@ -61,10 +61,10 @@ def make_platform_build_command(settings):
         python_executable,
         "-m",
         "nuitka",
+        "--standalone",
+        "--include-package-data=webview",
         f"--include-data-dir={bio_data_src_path}={bio_data_dest_path}",
         f"--include-data-file={parasail_library_path}={os.path.join('parasail', parasail_library_name)}",
-        f"--report={report_path}",
-        "--standalone",
         "--include-data-dir=gui=gui",
         "--include-data-dir=docs=docs",
         "--include-data-dir=assets=assets",
@@ -73,6 +73,7 @@ def make_platform_build_command(settings):
         "--output-filename=SDT2",
         f"--output-dir={build_path}",
         "--assume-yes-for-downloads",
+        f"--report={report_path}",
     ]
 
     match platform.system():
