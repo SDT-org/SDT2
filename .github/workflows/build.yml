@@ -66,9 +66,9 @@ jobs:
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
           azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
           endpoint: ${{ secrets.AZURE_ENDPOINT }}
-          code-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-          files-folder: build
+          files-folder: ${{ matrix.name == 'windows-standalone' && 'build//app.dist' || 'build' }}
           files-folder-filter: exe
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
@@ -103,7 +103,7 @@ jobs:
       - name: Windows - Prepare standalone artifact
         if: ${{ matrix.name == 'windows-standalone' }}
         run: |
-          powershell Compress-Archive -Path build/app.dist\* -DestinationPath SDT2.zip
+          powershell Compress-Archive -Path build\\app.dist\\* -DestinationPath SDT2.zip
 
       - uses: actions/upload-artifact@v4
         with:
