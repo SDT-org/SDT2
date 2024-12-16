@@ -1,16 +1,6 @@
 import Plotly, { type ColorScale } from "plotly.js-dist-min";
 import React from "react";
-import {
-  Button,
-  Dialog,
-  DialogTrigger,
-  Input,
-  Label,
-  OverlayArrow,
-  Popover,
-  TextField,
-  ToggleButton,
-} from "react-aria-components";
+import { Input, Label, TextField, ToggleButton } from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
 import useAppState, { type AppState } from "../appState";
 import { colorScales as defaultColorScales } from "../colorScales";
@@ -191,69 +181,7 @@ export const Heatmap = ({
               </div>
 
               <div className="drawer">
-                <div className="col-2">
-                  <DialogTrigger>
-                    <Button>Titles&#8230;</Button>
-                    <Popover>
-                      <OverlayArrow>
-                        <svg
-                          width={12}
-                          height={12}
-                          viewBox="0 0 12 12"
-                          aria-hidden="true"
-                        >
-                          <path d="M0 0 L6 6 L12 0" />
-                        </svg>
-                      </OverlayArrow>
-                      <Dialog>
-                        <div className="field">
-                          <TextField
-                            onChange={(value) =>
-                              updateSettings({ title: value })
-                            }
-                            value={settings.title}
-                          >
-                            <Label>Title</Label>
-                            <Input />
-                          </TextField>
-                        </div>
-                        <div className="field">
-                          <TextField
-                            onChange={(value) =>
-                              updateSettings({ subtitle: value })
-                            }
-                            value={settings.subtitle}
-                          >
-                            <Label>Subtitle</Label>
-                            <Input />
-                          </TextField>
-                        </div>
-                        <div className="field">
-                          <TextField
-                            onChange={(value) =>
-                              updateSettings({ xtitle: value })
-                            }
-                            value={settings.xtitle}
-                          >
-                            <Label>X Axis Title</Label>
-                            <Input />
-                          </TextField>
-                        </div>
-                        <div className="field">
-                          <TextField
-                            onChange={(value) =>
-                              updateSettings({ ytitle: value })
-                            }
-                            value={settings.ytitle}
-                          >
-                            <Label>Y Axis Title</Label>
-                            <Input />
-                          </TextField>
-                        </div>
-                      </Dialog>
-                    </Popover>
-                  </DialogTrigger>
-
+                <div className="field ">
                   <Slider
                     label="Cell Spacing"
                     labelClassName="sublabel"
@@ -578,7 +506,6 @@ export const Heatmap = ({
               modeBarButtonsToRemove: ["sendDataToCloud", "toImage"],
               displaylogo: false,
               editable: false,
-              // editable: false,
               // showLink: true,
               // plotlyServerURL: "https://chart-studio.plotly.com",
             }}

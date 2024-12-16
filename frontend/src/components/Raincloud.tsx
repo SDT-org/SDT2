@@ -21,8 +21,8 @@ import type { DistributionData, MetaData } from "../plotTypes";
 import { ColorPicker } from "./ColorPicker";
 import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";
-import { Tooltip } from "./Tooltip";
 import { Switch } from "./Switch";
+import { Tooltip } from "./Tooltip";
 
 const Plot = createPlotlyComponent(Plotly);
 
@@ -80,6 +80,7 @@ export const Raincloud = ({
         meanline: {
           visible: settings.showMeanline,
         },
+        hoveron: "points",
         hovertemplate: "%{text}<br> <br>Percent Identity: %{x}<extra></extra>",
         text: data.identity_combos.map(
           (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}`,
@@ -106,7 +107,6 @@ export const Raincloud = ({
                         "showTickLabels",
                         "showAxisLines",
                         "showAxisLabels",
-                        "makeEditable",
                         "showMeanline",
                       ].includes(key) && settings[key as keyof typeof settings],
                   )}
@@ -116,7 +116,6 @@ export const Raincloud = ({
                       showTickLabels: value.has("showTickLabels"),
                       showAxisLines: value.has("showAxisLines"),
                       showAxisLabels: value.has("showAxisLabels"),
-                      makeEditable: value.has("makeEditable"),
                       showMeanline: value.has("showMeanline"),
                     })
                   }
@@ -170,10 +169,10 @@ export const Raincloud = ({
                       </svg>
                     </ToggleButton>
                   </Tooltip>
-                  <Tooltip tooltip="Toggle axis values">
+                  <Tooltip tooltip="Toggle tick values">
                     <ToggleButton
                       id="showTickLabels"
-                      aria-label="Toggle axis values"
+                      aria-label="Toggle tick values"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -192,32 +191,6 @@ export const Raincloud = ({
                         >
                           <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4zM9 7v10M6 9l3-2" />
                           <path d="M15.5 17a2.5 2.5 0 0 1-2.5-2.5v-5a2.5 2.5 0 1 1 5 0v5a2.5 2.5 0 0 1-2.5 2.5z" />
-                        </g>
-                      </svg>
-                    </ToggleButton>
-                  </Tooltip>
-                  <Tooltip tooltip="Toggle editable mode">
-                    <ToggleButton
-                      id="makeEditable"
-                      aria-label="Toggle editable mode"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
-                        <g
-                          style={{
-                            fill: "none",
-                            stroke: "currentcolor",
-                            strokeWidth: 2,
-                            strokeLinecap: "round",
-                            strokeLinejoin: "round",
-                            strokeMiterlimit: 10,
-                          }}
-                        >
-                          <path d="M14 2 L18 6 L7 17 H3 V13 Z" />
-                          <path d="M3 22 L21 22" />
                         </g>
                       </svg>
                     </ToggleButton>
@@ -337,7 +310,7 @@ export const Raincloud = ({
                   value={settings.pointPos}
                   onChange={(value) => updateSettings({ pointPos: value })}
                   minValue={-2}
-                  maxValue={2}
+                  maxValue={-0.5}
                   step={0.1}
                 />
 
@@ -363,59 +336,59 @@ export const Raincloud = ({
                 </div>
               </div>
               <div className="group">
-                 <Switch
-                   isSelected={settings.showTitles}
-                   onChange={(value) => {
-                     updateSettings({
-                       showTitles: value,
-                     });
-                   }}
-                 >
-                   Plot Titles
-                 </Switch>
-                 <div
-                   className="drawer"
-                   data-hidden={!settings.showTitles}
-                   aria-hidden={!settings.showTitles}
-                 >
-                   <div className="field">
-                     <TextField
-                       onChange={(value) => updateSettings({ title: value })}
-                       value={settings.title}
-                     >
-                       <Label>Title</Label>
-                       <Input />
-                     </TextField>
-                   </div>
-                   <div className="field">
-                     <TextField
-                       onChange={(value) => updateSettings({ subtitle: value })}
-                       value={settings.subtitle}
-                     >
-                       <Label>Subtitle</Label>
-                       <Input />
-                     </TextField>
-                   </div>
-                   <div className="field">
-                     <TextField
-                       onChange={(value) => updateSettings({ xtitle: value })}
-                       value={settings.xtitle}
-                     >
-                       <Label>X Axis Title</Label>
-                       <Input />
-                     </TextField>
-                   </div>
-                   <div className="field">
-                     <TextField
-                       onChange={(value) => updateSettings({ ytitle: value })}
-                       value={settings.ytitle}
-                     >
-                       <Label>Y Axis Title</Label>
-                       <Input />
-                     </TextField>
-                   </div>
-                 </div>
-               </div>
+                <Switch
+                  isSelected={settings.showTitles}
+                  onChange={(value) => {
+                    updateSettings({
+                      showTitles: value,
+                    });
+                  }}
+                >
+                  Plot Titles
+                </Switch>
+                <div
+                  className="drawer"
+                  data-hidden={!settings.showTitles}
+                  aria-hidden={!settings.showTitles}
+                >
+                  <div className="field">
+                    <TextField
+                      onChange={(value) => updateSettings({ title: value })}
+                      value={settings.title}
+                    >
+                      <Label>Title</Label>
+                      <Input />
+                    </TextField>
+                  </div>
+                  <div className="field">
+                    <TextField
+                      onChange={(value) => updateSettings({ subtitle: value })}
+                      value={settings.subtitle}
+                    >
+                      <Label>Subtitle</Label>
+                      <Input />
+                    </TextField>
+                  </div>
+                  <div className="field">
+                    <TextField
+                      onChange={(value) => updateSettings({ xtitle: value })}
+                      value={settings.xtitle}
+                    >
+                      <Label>X Axis Title</Label>
+                      <Input />
+                    </TextField>
+                  </div>
+                  <div className="field">
+                    <TextField
+                      onChange={(value) => updateSettings({ ytitle: value })}
+                      value={settings.ytitle}
+                    >
+                      <Label>Y Axis Title</Label>
+                      <Input />
+                    </TextField>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

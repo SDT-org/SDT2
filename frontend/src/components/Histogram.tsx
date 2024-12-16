@@ -93,7 +93,6 @@ export const Histogram = ({
                       "showTickLabels",
                       "showAxisLines",
                       "showAxisLabels",
-                      "makeEditable",
                       "showMeanline",
                     ].includes(key) && settings[key as keyof typeof settings],
                 )}
@@ -103,7 +102,6 @@ export const Histogram = ({
                     showTickLabels: value.has("showTickLabels"),
                     showAxisLines: value.has("showAxisLines"),
                     showAxisLabels: value.has("showAxisLabels"),
-                    makeEditable: value.has("makeEditable"),
                     showMeanline: value.has("showMeanline"),
                   })
                 }
@@ -183,7 +181,7 @@ export const Histogram = ({
                     </svg>
                   </ToggleButton>
                 </Tooltip>
-                <Tooltip tooltip="Toggle axis tick values">
+                <Tooltip tooltip="Toggle tick values">
                   <ToggleButton
                     id="showTickLabels"
                     aria-label="Toggle axis tick values"
@@ -205,32 +203,6 @@ export const Histogram = ({
                       >
                         <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4zM9 7v10M6 9l3-2" />
                         <path d="M15.5 17a2.5 2.5 0 0 1-2.5-2.5v-5a2.5 2.5 0 1 1 5 0v5a2.5 2.5 0 0 1-2.5 2.5z" />
-                      </g>
-                    </svg>
-                  </ToggleButton>
-                </Tooltip>
-                <Tooltip tooltip="Toggle editable mode">
-                  <ToggleButton
-                    id="makeEditable"
-                    aria-label="Toggle editable mode"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <g
-                        style={{
-                          fill: "none",
-                          stroke: "currentcolor",
-                          strokeWidth: 2,
-                          strokeLinecap: "round",
-                          strokeLinejoin: "round",
-                          strokeMiterlimit: 10,
-                        }}
-                      >
-                        <path d="M14 2 L18 6 L7 17 H3 V13 Z" />
-                        <path d="M3 22 L21 22" />
                       </g>
                     </svg>
                   </ToggleButton>

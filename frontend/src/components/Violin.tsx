@@ -1,12 +1,22 @@
 import Plotly from "plotly.js-dist-min";
-import type { Layout, PlotData } from "plotly.js-dist-min";
+import type { PlotData } from "plotly.js-dist-min";
 import React from "react";
-import { Label, ToggleButton, ToggleButtonGroup } from "react-aria-components";
+import {
+  Input,
+  Label,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
 import type { ColorString } from "../colors";
 import { plotFont } from "../constants";
 import type { DataSets, DistributionState } from "../distributionState";
 import { arrayMinMax } from "../helpers";
+import {
+  useRelayoutHideSubtitle,
+  useRelayoutUpdateTitles,
+} from "../hooks/useRelayoutUpdateTitles";
 import type { DistributionData, MetaData } from "../plotTypes";
 import { ColorPicker } from "./ColorPicker";
 import { Select, SelectItem } from "./Select";
@@ -44,7 +54,8 @@ export const Violin = ({
 
   const dataSet = dataSets[dataSetKey];
   const [minDataValue, maxDataValue] = arrayMinMax(dataSet);
-
+  const updateTitles = useRelayoutUpdateTitles(updateSettings);
+  useRelayoutHideSubtitle(!settings.showTitles);
   const violinTrace = React.useMemo(
     () =>
       ({
@@ -106,69 +117,12 @@ export const Violin = ({
         },
         fillcolor: settings.boxfillColor,
         hovermode: "closest",
+        boxgap: 1 - settings.boxWidth,
         hovertemplate:
           "Percent Identity: %{x}<br>Percent Identity: %{y}<extra></extra>",
       }) as Partial<PlotData>,
     [dataSet, settings],
   );
-
-  const layout = React.useMemo(() => {
-    const isVertical = settings.plotOrientation === "vertical";
-
-    return {
-      title: settings.showAxisLabels
-        ? "Distribution of Pairwise Identities"
-        : "",
-      subtitle: settings.showAxisLabels ? "Histogram" : "",
-      uirevision: settings.plotOrientation,
-      font: plotFont,
-      xaxis: isVertical
-        ? {
-            fixedrange: true,
-            zeroline: false,
-            showgrid: settings.showGrid,
-            showline: settings.showAxisLines,
-            showticklabels: settings.showTickLabels,
-          }
-        : {
-            side: "left",
-            rangemode: "tozero",
-            fixedrange: true,
-            zeroline: false,
-            showgrid: settings.showGrid,
-            showline: settings.showAxisLines,
-            showticklabels: settings.showTickLabels,
-            tickmode: "auto",
-            autotick: true,
-            range: [minDataValue - 20, maxDataValue + 20],
-          },
-      yaxis: isVertical
-        ? {
-            side: "left",
-            rangemode: "tozero",
-            fixedrange: true,
-            zeroline: false,
-            showgrid: settings.showGrid,
-            showline: settings.showAxisLines,
-            showticklabels: settings.showTickLabels,
-            tickmode: "auto",
-            autotick: true,
-            range: [minDataValue - 20, maxDataValue + 20],
-          }
-        : {
-            fixedrange: true,
-            zeroline: false,
-            showgrid: settings.showGrid,
-            showline: settings.showAxisLines,
-            showticklabels: settings.showTickLabels,
-          },
-      dragmode: "pan",
-      barmode: "overlay",
-      showlegend: false,
-      boxgap: 1 - settings.boxWidth,
-      margin: { l: 50, r: 50, t: 50, b: 50 },
-    } as Partial<Layout>;
-  }, [settings, minDataValue, maxDataValue]);
 
   return (
     <>
@@ -188,7 +142,6 @@ export const Violin = ({
                         "showTickLabels",
                         "showAxisLines",
                         "showAxisLabels",
-                        "makeEditable",
                         "showMeanline",
                       ].includes(key) && settings[key as keyof typeof settings],
                   )}
@@ -198,7 +151,6 @@ export const Violin = ({
                       showTickLabels: value.has("showTickLabels"),
                       showAxisLines: value.has("showAxisLines"),
                       showAxisLabels: value.has("showAxisLabels"),
-                      makeEditable: value.has("makeEditable"),
                       showMeanline: value.has("showMeanline"),
                     })
                   }
@@ -252,10 +204,10 @@ export const Violin = ({
                       </svg>
                     </ToggleButton>
                   </Tooltip>
-                  <Tooltip tooltip="Toggle axis title">
+                  <Tooltip tooltip="Toggle tick values">
                     <ToggleButton
                       id="showTickLabels"
-                      aria-label="Toggle axis title"
+                      aria-label="Toggle tick values"
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -274,32 +226,6 @@ export const Violin = ({
                         >
                           <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4zM9 7v10M6 9l3-2" />
                           <path d="M15.5 17a2.5 2.5 0 0 1-2.5-2.5v-5a2.5 2.5 0 1 1 5 0v5a2.5 2.5 0 0 1-2.5 2.5z" />
-                        </g>
-                      </svg>
-                    </ToggleButton>
-                  </Tooltip>
-                  <Tooltip tooltip="Edit title and axis labels">
-                    <ToggleButton
-                      id="makeEditable"
-                      aria-label="Edit title and axis labels"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
-                        <g
-                          style={{
-                            fill: "none",
-                            stroke: "currentcolor",
-                            strokeWidth: 2,
-                            strokeLinecap: "round",
-                            strokeLinejoin: "round",
-                            strokeMiterlimit: 10,
-                          }}
-                        >
-                          <path d="M14 2 L18 6 L7 17 H3 V13 Z" />
-                          <path d="M3 22 L21 22" />
                         </g>
                       </svg>
                     </ToggleButton>
@@ -587,6 +513,60 @@ export const Violin = ({
                   step={0.1}
                 />
               </div>
+              <div className="group">
+                <Switch
+                  isSelected={settings.showTitles}
+                  onChange={(value) => {
+                    updateSettings({
+                      showTitles: value,
+                    });
+                  }}
+                >
+                  Plot Titles
+                </Switch>
+                <div
+                  className="drawer"
+                  data-hidden={!settings.showTitles}
+                  aria-hidden={!settings.showTitles}
+                >
+                  <div className="field">
+                    <TextField
+                      onChange={(value) => updateSettings({ title: value })}
+                      value={settings.title}
+                    >
+                      <Label>Title</Label>
+                      <Input />
+                    </TextField>
+                  </div>
+                  <div className="field">
+                    <TextField
+                      onChange={(value) => updateSettings({ subtitle: value })}
+                      value={settings.subtitle}
+                    >
+                      <Label>Subtitle</Label>
+                      <Input />
+                    </TextField>
+                  </div>
+                  <div className="field">
+                    <TextField
+                      onChange={(value) => updateSettings({ xtitle: value })}
+                      value={settings.xtitle}
+                    >
+                      <Label>X Axis Title</Label>
+                      <Input />
+                    </TextField>
+                  </div>
+                  <div className="field">
+                    <TextField
+                      onChange={(value) => updateSettings({ ytitle: value })}
+                      value={settings.ytitle}
+                    >
+                      <Label>Y Axis Title</Label>
+                      <Input />
+                    </TextField>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -598,13 +578,80 @@ export const Violin = ({
             settings.showViolin ? violinTrace : {},
             settings.showBox ? boxTrace : {},
           ]}
-          layout={layout}
+          layout={{
+            ...(settings.showTitles
+              ? {
+                  title: {
+                    text:
+                      settings.title +
+                      (settings.subtitle
+                        ? `<br><span style="font-size:0.8em;">${settings.subtitle}</span>`
+                        : ""),
+                    pad: {
+                      t: 100,
+                      r: 0,
+                      b: 0,
+                      l: 0,
+                    },
+                  },
+                }
+              : {}),
+            uirevision: settings.plotOrientation,
+            font: plotFont,
+            xaxis:
+              settings.plotOrientation === "vertical"
+                ? {
+                    fixedrange: true,
+                    zeroline: false,
+                    showgrid: settings.showGrid,
+                    showline: settings.showAxisLines,
+                    showticklabels: settings.showTickLabels,
+                  }
+                : {
+                    side: "left",
+                    rangemode: "tozero",
+                    fixedrange: true,
+                    zeroline: false,
+                    showgrid: settings.showGrid,
+                    showline: settings.showAxisLines,
+                    showticklabels: settings.showTickLabels,
+                    tickmode: "auto",
+                    autotick: true,
+                    range: [minDataValue - 20, maxDataValue + 20],
+                  },
+            yaxis:
+              settings.plotOrientation === "vertical"
+                ? {
+                    side: "left",
+                    rangemode: "tozero",
+                    fixedrange: true,
+                    zeroline: false,
+                    showgrid: settings.showGrid,
+                    showline: settings.showAxisLines,
+                    showticklabels: settings.showTickLabels,
+                    tickmode: "auto",
+                    autotick: true,
+                    range: [minDataValue - 20, maxDataValue + 20],
+                  }
+                : {
+                    fixedrange: true,
+                    zeroline: false,
+                    showgrid: settings.showGrid,
+                    showline: settings.showAxisLines,
+                    showticklabels: settings.showTickLabels,
+                  },
+            dragmode: "pan",
+            barmode: "overlay",
+            showlegend: false,
+            margin: { l: 50, r: 50, t: 50, b: 50 },
+          }}
+          onRelayout={updateTitles}
           config={{
             responsive: true,
             displayModeBar: false,
             scrollZoom: true,
             displaylogo: false,
-            editable: !!settings.makeEditable,
+            editable: false,
           }}
           style={{ width: "100%", height: "100%" }}
         />
