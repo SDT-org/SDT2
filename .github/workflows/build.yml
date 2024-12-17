@@ -9,17 +9,18 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: windows-latest
-            name: windows-onefile
-          - os: windows-latest
-            name: windows-standalone
-          - os: macos-latest
-            name: macos-default
-          - os: macos-13
-            name: macos-intel
-          - os: ubuntu-latest
+          # - os: windows-latest
+          #   name: windows-portable
+          # - os: windows-latest
+          #   name: windows-default
+          # - os: macos-latest
+          #   name: macos-default
+          # - os: macos-13
+          #   name: macos-intel
+          - os: ubuntu-20.04
             name: ubuntu-x64
             arch: x64
+
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -69,7 +70,7 @@ jobs:
           endpoint: ${{ secrets.AZURE_ENDPOINT }}
           trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-          files-folder: ${{ matrix.name == 'windows-standalone' && 'build//app.dist' || 'build' }}
+          files-folder: ${{ matrix.name == 'windows-default' && 'build//app.dist' || 'build' }}
           files-folder-filter: exe
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
@@ -102,7 +103,7 @@ jobs:
         run: chmod +x build/SDT2 && tar -czvf build/SDT2.tar.gz -C build SDT2
 
       - name: Windows - Prepare standalone artifact
-        if: ${{ matrix.name == 'windows-standalone' }}
+        if: ${{ matrix.name == 'windows-default' }}
         run: |
           powershell Compress-Archive -Path build\\app.dist\\* -DestinationPath SDT2.zip
 
