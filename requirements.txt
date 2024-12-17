@@ -1,8 +1,8 @@
-pywebview
+pywebview=5.3.2
 biopython
 numpy
 scipy
 psutil
 pandas
-nuitka
+nuitka==2.5.6
 parasail

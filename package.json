@@ -9,7 +9,7 @@
     "check": "bunx biome check --write frontend && bun run tsc --noEmit",
     "build": "bun run clean && bun run frontend:build && python build.py",
     "build:noclean": "bun run frontend:build && python build.py",
-    "clean": "node -e \"['build', 'gui'].forEach(d => require('fs').rmSync(d, { recursive: true, force: true }));\"",
+    "clean": "node -e \"['build', 'gui'].forEach(d => { try { require('fs').rmSync(d, { recursive: true, force: true }); } catch (e) { if (e.code !== 'ENOTEMPTY') throw e; } });\"",
     "backend": "run-script-os",
     "backend:default": "./venv-pywebview/bin/python -m jurigged backend/src/app.py",
     "backend:windows": ".\\venv-pywebview\\Scripts\\python backend\\src\\app.py",
@@ -32,7 +32,6 @@
     "react-dom": "^18.2.0",
     "react-plotly.js": "^2.6.0",
     "tinycolor2": "^1.6.0",
-    "vite": "^5.4.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -47,6 +46,7 @@
     "prettier": "3.2.5",
     "run-script-os": "^1.1.6",
     "sass": "^1.63.6",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "vite": "^5.4.0"
   }
 }

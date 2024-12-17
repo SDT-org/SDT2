@@ -14,9 +14,9 @@ jobs:
           - os: windows-latest
             name: windows-standalone
           - os: macos-latest
-            name: default-macos
+            name: macos-default
           - os: macos-13
-            name: macos-13
+            name: macos-x86
           - os: ubuntu-latest
             arch: x64
     runs-on: ${{ matrix.os }}
@@ -41,7 +41,7 @@ jobs:
         run: bun run init
 
       - name: macOS - Build
-        if: matrix.os == 'macos-latest'
+        if: matrix.name == 'macos-default' || matrix.name == 'macos-x86'
         run: |
           source venv-pywebview/bin/activate
           bun run build
@@ -66,16 +66,16 @@ jobs:
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
           azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
           endpoint: ${{ secrets.AZURE_ENDPOINT }}
-          code-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-          files-folder: build
+          files-folder: ${{ matrix.name == 'windows-standalone' && 'build//app.dist' || 'build' }}
           files-folder-filter: exe
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
 
       - name: macOS - Sign artifact
-        if: matrix.os == 'macos-latest'
+        if: matrix.name == 'macos-default' || matrix.name == 'macos-x86'
         run: |
           echo ${{ secrets.MACOS_CERTIFICATE }} | base64 --decode > certificate.p12
 
@@ -89,7 +89,7 @@ jobs:
           /usr/bin/codesign -v ./build/SDT2.app
 
       - name: macOS - Notarize artifact
-        if: matrix.os == 'macos-latest'
+        if: matrix.name == 'macos-default' || matrix.name == 'macos-x86'
         run: |
           ditto -c -k --keepParent "build/SDT2.app" "build/SDT2.app.zip"
           xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}" --team-id "${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}" --password "${{ secrets.MACOS_NOTARIZATION_PWD }}" > /dev/null
@@ -103,13 +103,13 @@ jobs:
       - name: Windows - Prepare standalone artifact
         if: ${{ matrix.name == 'windows-standalone' }}
         run: |
-          powershell Compress-Archive -Path build/app.dist\* -DestinationPath SDT2.zip
+          powershell Compress-Archive -Path build\\app.dist\\* -DestinationPath SDT2.zip
 
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.os }}-build-output
+          name: ${{ matrix.name }}-build-output
           path: |
             ${{ matrix.name == 'windows-onefile' && 'build/SDT2.exe' || '' }}
             ${{ matrix.name == 'windows-standalone' && 'SDT2.zip' || '' }}
-            ${{ matrix.os == 'macos-latest' && 'build/SDT2.app.zip' || '' }}
+            ${{ (matrix.name == 'macos-default' || matrix.name == 'macos-x86') && 'build/SDT2.app.zip' || '' }}
             ${{ (matrix.os == 'ubuntu-latest' || (matrix.os == 'ubuntu-22.04' && matrix.arch == 'arm64')) && 'build/SDT2.tar.gz' || '' }}
