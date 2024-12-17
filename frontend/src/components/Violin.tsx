@@ -513,58 +513,58 @@ export const Violin = ({
                   step={0.1}
                 />
               </div>
-              <div className="group">
-                <Switch
-                  isSelected={settings.showTitles}
-                  onChange={(value) => {
-                    updateSettings({
-                      showTitles: value,
-                    });
-                  }}
-                >
-                  Plot Titles
-                </Switch>
-                <div
-                  className="drawer"
-                  data-hidden={!settings.showTitles}
-                  aria-hidden={!settings.showTitles}
-                >
-                  <div className="field">
-                    <TextField
-                      onChange={(value) => updateSettings({ title: value })}
-                      value={settings.title}
-                    >
-                      <Label>Title</Label>
-                      <Input />
-                    </TextField>
-                  </div>
-                  <div className="field">
-                    <TextField
-                      onChange={(value) => updateSettings({ subtitle: value })}
-                      value={settings.subtitle}
-                    >
-                      <Label>Subtitle</Label>
-                      <Input />
-                    </TextField>
-                  </div>
-                  <div className="field">
-                    <TextField
-                      onChange={(value) => updateSettings({ xtitle: value })}
-                      value={settings.xtitle}
-                    >
-                      <Label>X Axis Title</Label>
-                      <Input />
-                    </TextField>
-                  </div>
-                  <div className="field">
-                    <TextField
-                      onChange={(value) => updateSettings({ ytitle: value })}
-                      value={settings.ytitle}
-                    >
-                      <Label>Y Axis Title</Label>
-                      <Input />
-                    </TextField>
-                  </div>
+            </div>
+            <div className="group">
+              <Switch
+                isSelected={settings.showTitles}
+                onChange={(value) => {
+                  updateSettings({
+                    showTitles: value,
+                  });
+                }}
+              >
+                Plot Titles
+              </Switch>
+              <div
+                className="drawer"
+                data-hidden={!settings.showTitles}
+                aria-hidden={!settings.showTitles}
+              >
+                <div className="field">
+                  <TextField
+                    onChange={(value) => updateSettings({ title: value })}
+                    value={settings.title}
+                  >
+                    <Label>Title</Label>
+                    <Input />
+                  </TextField>
+                </div>
+                <div className="field">
+                  <TextField
+                    onChange={(value) => updateSettings({ subtitle: value })}
+                    value={settings.subtitle}
+                  >
+                    <Label>Subtitle</Label>
+                    <Input />
+                  </TextField>
+                </div>
+                <div className="field">
+                  <TextField
+                    onChange={(value) => updateSettings({ xtitle: value })}
+                    value={settings.xtitle}
+                  >
+                    <Label>X Axis Title</Label>
+                    <Input />
+                  </TextField>
+                </div>
+                <div className="field">
+                  <TextField
+                    onChange={(value) => updateSettings({ ytitle: value })}
+                    value={settings.ytitle}
+                  >
+                    <Label>Y Axis Title</Label>
+                    <Input />
+                  </TextField>
                 </div>
               </div>
             </div>

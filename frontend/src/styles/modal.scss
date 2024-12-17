@@ -41,7 +41,7 @@
 }
 
 .react-aria-Dialog {
-  input[type="text"] {
+  input[type="text"]:not([inputmode="numeric"]) {
     width: 100%;
   }
 }

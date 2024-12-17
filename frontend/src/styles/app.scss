@@ -401,6 +401,10 @@ small {
     }
   }
 
+  .group + .group > .drawer:first-child {
+    border-top: 0;
+  }
+
   .drawer .header {
     border-bottom: 0.1rem solid var(--border-color);
     margin-top: 1.4rem;
@@ -434,6 +438,10 @@ small {
   .drawer,
   .setting-header {
     padding: var(--app-container-padding);
+  }
+
+  .setting-header {
+    margin: 0;
   }
 
   label input:not([type="text"]) {

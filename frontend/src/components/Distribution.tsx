@@ -25,7 +25,9 @@ const VisualizationSwitcher = ({
     <div className="group padded">
       <div className="row">
         <div className="field">
-          <label htmlFor="visualization">Visualization</label>
+          <label className="header" htmlFor="visualization">
+            Visualization
+          </label>
           <Select
             id="visualization"
             wide
@@ -50,7 +52,9 @@ const VisualizationSwitcher = ({
       </div>
       <div className="row">
         <div className="field">
-          <label htmlFor="data-set">Data Set</label>
+          <label className="header" htmlFor="data-set">
+            Data Set
+          </label>
           <Select
             id="data-set"
             wide
