@@ -103,9 +103,10 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
+          if-no-files-found: error
           name: ${{ matrix.name }}-build-output
           path: |
             ${{ matrix.name == 'windows-portable' && 'build/SDT2.exe' || '' }}
             ${{ matrix.name == 'windows-default' && 'SDT2.zip' || '' }}
             ${{ (matrix.name == 'macos-default' || matrix.name == 'macos-intel') && 'build/SDT2.app.zip' || '' }}
-            ${{ matrix.name == 'ubuntu-x86' && 'build/SDT2.tar.gz' || '' }}
+            ${{ matrix.name == 'ubuntu-x64' && 'build/SDT2.tar.gz' || '' }}
