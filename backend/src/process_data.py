@@ -40,17 +40,18 @@ def run_preprocessing(raw_seq_dict):
         seq_dict[key] = str(sequence)
     return seq_dict
 
+
 def grab_stats(seq_dict):
-    #https://stackoverflow.com/questions/20585920/how-to-add-multiple-values-to-a-dictionary-key
-    seq_stats={} 
+    # https://stackoverflow.com/questions/20585920/how-to-add-multiple-values-to-a-dictionary-key
+    seq_stats = {}
     for key, record in seq_dict.items():
-        gcCount = round(gc_fraction(str(record)),2)
-        genLen= (len(record))
+        gcCount = round(gc_fraction(str(record)), 2)
+        genLen = len(record)
         seq_stats.setdefault(key, [])
         seq_stats[key].append(gcCount)
         seq_stats[key].append(genLen)
     return seq_stats
-    
+
 
 ##Calculate the similarity scores from the alignments by iterating through each position in the alignemtn files as a zip
 def get_similarity(seq1, seq2):
@@ -179,7 +180,7 @@ def create_distance_matrix(dist_scores, order):
 
 # Save similarity scores as 2d matrix csv
 def save_matrix_to_csv(df, filename):
-    df.to_csv(filename, mode="w", header=False, index=True)
+    df.to_csv(filename + "_mat.csv", mode="w", header=False, index=True)
 
 
 # Save similarity scores as 3 column csv
@@ -197,13 +198,15 @@ def save_cols_to_csv(df, filename):
         columns=["First Sequence", "Second Sequence", "Identity Score"],
     )
     columnar_df.to_csv(filename + "_cols.csv", mode="w", header=True, index=False)
+
+
 def save_stats_to_csv(seq_stats, filename):
     stats_list = []
-    for key, value in (seq_stats.items()):
-        stats_list.append([key, value[0], value[1] ])
-    stats_df = pd.DataFrame(
-    stats_list, columns=["Sequence", "GC %", "Sequence Length"])
+    for key, value in seq_stats.items():
+        stats_list.append([key, value[0], value[1]])
+    stats_df = pd.DataFrame(stats_list, columns=["Sequence", "GC %", "Sequence Length"])
     stats_df.to_csv(filename + "_stats.csv", mode="w", header=True, index=False)
+
 
 def output_summary(file_name, start_time, end_time, run_summary):
     # Adjust the indentation of each line
@@ -250,15 +253,13 @@ def process_data(
     set_pair_count=lambda count: print(f"Pair count: {count}"),
 ):
     input_file = settings["input_file"]
-    INPUT_PATH = input_file
-
     file_name = os.path.basename(input_file)
     file_base = os.path.splitext(file_name)[0]
 
     set_stage("Preparing")
     print("Stage: Preparing")
 
-    sequences = SeqIO.parse(open(INPUT_PATH, encoding="utf-8"), "fasta")
+    sequences = SeqIO.parse(open(input_file, encoding="utf-8"), "fasta")
 
     # Create a dictionary with the full description as the key, replacing spaces with underscores
     processed_seq_dict = {
@@ -267,8 +268,8 @@ def process_data(
 
     set_stage("Preprocessing")
     seq_dict = run_preprocessing(processed_seq_dict)
-    seq_stats= grab_stats(seq_dict)
-    
+    seq_stats = grab_stats(seq_dict)
+
     set_stage("Analyzing")
     print("Stage: Analyzing")
 
@@ -291,28 +292,23 @@ def process_data(
     cluster_method = settings["cluster_method"]
 
     if cluster_method == "nj" or cluster_method == "upgma":
-        _, new_order = tree_clustering(
-            settings, dm, os.path.join(out_dir, f"{file_base}")
-        )
+        _, new_order = tree_clustering(settings, dm, os.path.join(out_dir, file_base))
         reorder_index = [
             order.index(id_) for id_ in new_order
         ]  # create numerical index of order and  of new order IDs
 
         aln_reordered = aln_scores[reorder_index, :][:, reorder_index]
         aln_lowt = np.tril(np.around(aln_reordered, 2))
-        aln_lowt[np.triu_indices(aln_lowt.shape[0], k=1)] = np.nan
-        # Create a DataFrame from the lower triangular matrix
-        df = pd.DataFrame(aln_lowt, index=new_order)
-        save_matrix_to_csv(df, os.path.join(out_dir, f"{file_base}_mat.csv"))
-        save_cols_to_csv(df, os.path.join(out_dir, f"{file_base}"))
-        save_stats_to_csv(seq_stats, os.path.join(out_dir, f"{file_base}"))
     else:
         aln_lowt = np.tril(np.around(aln_scores, 2))
-        aln_lowt[np.triu_indices(aln_lowt.shape[0], k=1)] = np.nan
-        df = pd.DataFrame(aln_lowt, index=order)
-        save_matrix_to_csv(df, os.path.join(out_dir, f"{file_base}_mat.csv"))
-        save_cols_to_csv(df, os.path.join(out_dir, f"{file_base}"))
-        save_stats_to_csv(seq_stats, os.path.join(out_dir, f"{file_base}"))
+
+    aln_lowt[np.triu_indices(aln_lowt.shape[0], k=1)] = np.nan
+    df = pd.DataFrame(
+        aln_lowt, index=order
+    )  # Create a DataFrame from the lower triangular matrix
+    save_cols_to_csv(df, os.path.join(out_dir, file_base))
+    save_stats_to_csv(seq_stats, os.path.join(out_dir, file_base))
+    save_matrix_to_csv(df, os.path.join(out_dir, file_base))
 
     set_stage("Finalizing")
     print("Stage: Finalizing")

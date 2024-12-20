@@ -23,7 +23,7 @@ import cluster
 from time import perf_counter
 from app_state import create_app_state
 from validations import validate_fasta
-from process_data import process_data
+from process_data import process_data, save_cols_to_csv
 from multiprocessing import Lock, Manager, Pool, cpu_count
 from config import app_version
 
@@ -62,11 +62,6 @@ def get_matrix_path():
         return state.filename[0]
 
 
-def get_stats_path():
-    state = get_state()
-    return state.filename[0]
-
-
 def find_source_files(prefix, suffixes):
     state = get_state()
     with os.scandir(state.tempdir_path) as entries:
@@ -103,7 +98,7 @@ def do_cancel_run():
         pair_count=0,
         estimated_time=None,
         stage="",
-        sequences_count=0
+        sequences_count=0,
     )
 
 
@@ -202,7 +197,7 @@ class Api:
 
     def open_file_dialog(self, filepath: str | None = None):
         if filepath is None:
-            filepath = ''
+            filepath = ""
         result = webview.windows[0].create_file_dialog(
             webview.OPEN_DIALOG,
             allow_multiple=False,
@@ -215,19 +210,44 @@ class Api:
             ),
         )
         if not result:
-            return ''
+            return ""
 
         if isinstance(result, str):
-            basename = os.path.basename(result)
-        else:
-            basename = os.path.basename(result[0])
+            result = [result]
+
+        matrix_path = result[0]
+        basename = os.path.basename(matrix_path)
 
         filetype, _ = mimetypes.guess_type(basename)
 
         if filetype in matrix_filetypes:
+            if filetype == "text/csv":
+                df = pd.read_csv(matrix_path, header=0)
+            else:
+                with open(matrix_path, "r") as temp_f:
+                    col_count = [len(l.split(",")) for l in temp_f.readlines()]
+                    column_names = [i for i in range(0, max(col_count))]
+
+                    df = pd.read_csv(
+                        matrix_path,
+                        delimiter=",",
+                        index_col=0,
+                        header=None,
+                        names=column_names,
+                    )
+
+            save_cols_to_csv(
+                df,
+                os.path.join(
+                    temp_dir.name,
+                    os.path.splitext(basename)[0].removesuffix("_mat"),
+                ),
+            )
+
             set_state(
                 view="viewer",
                 filename=result,
+                filemtime=os.path.getmtime(result[0]),
                 tempdir_path=os.path.dirname(result[0]),
                 basename=basename,
                 pair_progress=0,
@@ -235,9 +255,10 @@ class Api:
                 filetype=filetype,
             )
             assert_window().title = f"SDT2 - {get_state().basename}"
+
         else:
             assert_window().title = default_window_title
-            valid, message = validate_fasta(result[0], filetype)
+            valid, message = validate_fasta(matrix_path, filetype)
 
             if valid:
                 compute_stats = get_compute_stats(result[0])
@@ -245,6 +266,7 @@ class Api:
                     view="runner",
                     filename=result,
                     filetype=filetype,
+                    filemtime=os.path.getmtime(matrix_path),
                     basename=basename,
                     validation_error_id=None,
                     pair_progress=0,
@@ -254,7 +276,7 @@ class Api:
                     tempdir_path=temp_dir.name,
                     compute_stats=compute_stats,
                 )
-                return str(result[0])
+                return str(matrix_path)
             else:
                 set_state(
                     view="runner",
@@ -262,20 +284,23 @@ class Api:
                     filename="",
                     basename="",
                     filetype="",
+                    filemtime=None,
                     compute_stats=None,
                 )
 
     def select_path_dialog(self, directory: str | None = None):
         if directory is None:
-            directory = ''
-        print('select_path_dialog', directory)
-        result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG, directory=directory)
+            directory = ""
+        print("select_path_dialog", directory)
+        result = webview.windows[0].create_file_dialog(
+            webview.FOLDER_DIALOG, directory=directory
+        )
         output_path = None
         if result:
             if isinstance(result, str):
                 output_path = result
             else:
-                output_path=result[0]
+                output_path = result[0]
         return output_path
 
     def get_state(self):
@@ -378,7 +403,7 @@ class Api:
     def export_data(self, args: dict):
         state = get_state()
         matrix_path = get_matrix_path()
-        export_path = args['export_path']
+        export_path = args["export_path"]
 
         if state.filetype == "text/fasta":
             prefix = os.path.splitext(state.basename)[0]
@@ -401,10 +426,13 @@ class Api:
         if image_format not in saveable_formats:
             raise Exception(f"Expected image_format to be one of {saveable_formats}")
 
-        base_filename = os.path.basename(os.path.splitext(state.basename)[0]).removesuffix("_fasta")
+        base_filename = os.path.basename(
+            os.path.splitext(state.basename)[0]
+        ).removesuffix("_fasta")
         image_types = ["heatmap", "histogram", "violin", "raincloud"]
         image_filenames = {
-            img_type: f"{base_filename}_{img_type}.{image_format}" for img_type in image_types
+            img_type: f"{base_filename}_{img_type}.{image_format}"
+            for img_type in image_types
         }
 
         image_destinations = {
@@ -440,36 +468,40 @@ class Api:
         state = get_state()
         file_base = os.path.splitext(state.basename)[0]
         matrix_path = get_matrix_path()
-        stats_path = os.path.join(state.tempdir_path, f"{file_base}_stats.csv")
-        cols_path = os.path.join(state.tempdir_path, f"{file_base}_cols.csv")
-
-        # https://stackoverflow.com/a/57824142
-        # SDT1 matrix CSVs do not have padding for columns
-
-        ######
-        stats_df = pd.read_csv(stats_path, header=0)
-        gc_stats = stats_df["GC %"].map(lambda value: round(value * 100)).tolist()
-        len_stats = stats_df["Sequence Length"].tolist()
-        #######
 
         with open(matrix_path, "r") as temp_f:
             col_count = [len(l.split(",")) for l in temp_f.readlines()]
             column_names = [i for i in range(0, max(col_count))]
 
+        if state.filetype == "text/fasta":
+            stats_path = os.path.join(state.tempdir_path, f"{file_base}_stats.csv")
+            stats_df = pd.read_csv(stats_path, header=0)
+            gc_stats = stats_df["GC %"].map(lambda value: round(value * 100)).tolist()
+            len_stats = stats_df["Sequence Length"].tolist()
+        elif state.filetype in matrix_filetypes:
+            gc_stats = []
+            len_stats = []
+        else:
+            raise Exception("unsupported file type")
+
+        cols_dir = (
+            state.tempdir_path if state.filetype == "text/fasta" else temp_dir.name
+        )
+        cols_file_base = file_base.removesuffix("_mat")
+        cols_path = os.path.join(cols_dir, f"{cols_file_base}_cols.csv")
+        identity_scores = pd.read_csv(cols_path, skiprows=1).values.tolist()
+
         df = pd.read_csv(
             matrix_path, delimiter=",", index_col=0, header=None, names=column_names
         )
         tick_text = df.index.tolist()
-        count = len(tick_text)
-        set_state(sequences_count=count)
+        set_state(sequences_count=len(tick_text))
         data = df.to_numpy()
 
         diag_mask = np.eye(data.shape[0], dtype=bool)
         data_no_diag = np.where(diag_mask, np.nan, data)
         min_val = int(np.nanmin(data_no_diag))
         max_val = int(np.nanmax(data_no_diag))
-
-        identity_scores = pd.read_csv(cols_path, skiprows=1).values.tolist()
 
         # TODO might be able to make one tick text object for both to use?
         return data, tick_text, min_val, max_val, gc_stats, len_stats, identity_scores
