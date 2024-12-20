@@ -1,22 +1,22 @@
 import React from "react";
 import type { AppState, SetAppState } from "../appState";
+import useOpenFileDialog from "./useOpenFileDialog";
 
-export const useShortcutKeys = (appState: AppState, setAppState: SetAppState) =>
+export const useShortcutKeys = (
+  appState: AppState,
+  setAppState: SetAppState,
+) => {
+  const openFileDialog = useOpenFileDialog(appState, setAppState);
+
   React.useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key === "o") {
         event.preventDefault();
-        window.pywebview.api
-          .open_file_dialog(appState.client.lastDataFilePath)
-          .then((data) =>
-            setAppState((prev) => ({
-              ...prev,
-              client: { ...prev.client, lastDataFilePath: data },
-            })),
-          );
+        openFileDialog();
       }
     };
     document.addEventListener("keydown", handleKeydown);
 
     return () => document.removeEventListener("keydown", handleKeydown);
-  }, [appState, setAppState]);
+  }, [openFileDialog]);
+};

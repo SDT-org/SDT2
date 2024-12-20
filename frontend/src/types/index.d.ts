@@ -9,7 +9,9 @@ declare global {
         app_config: () => Promise<string>;
         get_state: () => Promise<AppState>;
         reset_state: () => Promise<void>;
-        open_file_dialog: (lastDataFilepath?: string) => Promise<string>;
+        open_file_dialog: (
+          lastDataFilepath?: string,
+        ) => Promise<string> | Promise<void>;
         select_path_dialog: (defaultDirectory?: string) => Promise<string>;
         export_data: (args: {
           export_path: string;

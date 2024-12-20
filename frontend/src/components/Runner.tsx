@@ -11,6 +11,7 @@ import {
 } from "react-aria-components";
 import useAppState, { type AppState, clusterMethods } from "../appState";
 import { formatBytes } from "../helpers";
+import useOpenFileDialog from "../hooks/useOpenFileDialog";
 import { useWaitForPywebview } from "../hooks/usePywebviewReadyEvent";
 import messages from "../messages";
 import { Select, SelectItem } from "./Select";
@@ -43,6 +44,7 @@ const RunnerSettings = ({
   startProcessData: () => void;
 }) => {
   const { appState, setAppState } = useAppState();
+  const openFileDialog = useOpenFileDialog(appState, setAppState);
   const updateClientState = React.useCallback(
     (value: Partial<typeof appState.client>) =>
       setAppState((previous) => {
@@ -161,19 +163,7 @@ const RunnerSettings = ({
               readOnly
               value={appState.validation_error_id ? "" : (fileName ?? "")}
             />
-            <Button
-              type="button"
-              onPress={() => {
-                window.pywebview.api
-                  .open_file_dialog(appState.client.lastDataFilePath)
-                  .then((data) =>
-                    setAppState((prev) => ({
-                      ...prev,
-                      client: { ...prev.client, lastDataFilePath: data },
-                    })),
-                  );
-              }}
-            >
+            <Button type="button" onPress={openFileDialog}>
               Select file&#8230;
             </Button>
           </div>

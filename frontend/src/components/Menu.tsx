@@ -10,6 +10,7 @@ import {
   Separator,
 } from "react-aria-components";
 import { type AppState, useAppState } from "../appState";
+import useOpenFileDialog from "../hooks/useOpenFileDialog";
 
 // AppMenuButton and AppMenuItem were derived from https://react-spectrum.adobe.com/react-aria/Menu.html#reusable-wrappers
 interface MyMenuButtonProps<T>
@@ -102,6 +103,7 @@ export type MainMenuProps = {
 
 export const MainMenu = () => {
   const { appState, setAppState } = useAppState();
+  const openFileDialog = useOpenFileDialog(appState, setAppState);
   const onNew = () => {
     if (
       !(
@@ -123,14 +125,7 @@ export const MainMenu = () => {
       return;
     }
 
-    window.pywebview.api
-      .open_file_dialog(appState.client.lastDataFilePath)
-      .then((data) =>
-        setAppState((prev) => ({
-          ...prev,
-          client: { ...prev.client, lastDataFilePath: data },
-        })),
-      );
+    openFileDialog();
   };
 
   const onExport = () =>

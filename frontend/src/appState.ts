@@ -26,6 +26,7 @@ export type AppState = {
   view: "runner" | "loader" | "viewer";
   filename: string[];
   filetype: string;
+  filemtime?: string;
   basename: string;
   progress: number;
   debug: boolean;
