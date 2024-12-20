@@ -221,20 +221,19 @@ class Api:
         filetype, _ = mimetypes.guess_type(basename)
 
         if filetype in matrix_filetypes:
-            if filetype == "text/csv":
-                df = pd.read_csv(matrix_path, header=0)
-            else:
-                with open(matrix_path, "r") as temp_f:
+            # Maybe can remove this if we can find a way to make pandas
+            # infer the max column length based on the latest column length
+            with open(matrix_path, "r") as temp_f:
                     col_count = [len(l.split(",")) for l in temp_f.readlines()]
                     column_names = [i for i in range(0, max(col_count))]
 
-                    df = pd.read_csv(
-                        matrix_path,
-                        delimiter=",",
-                        index_col=0,
-                        header=None,
-                        names=column_names,
-                    )
+            df = pd.read_csv(
+                matrix_path,
+                delimiter=",",
+                index_col=0,
+                header=None,
+                names=column_names,
+            )
 
             save_cols_to_csv(
                 df,
