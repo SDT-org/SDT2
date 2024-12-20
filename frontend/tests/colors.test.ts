@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { colorScales } from "../src/colorScales";
+import { type ColorScaleArray, colorScales } from "../src/colorScales";
 import {
-  type ColorScaleArray,
   findScaleLower,
   findScaleUpper,
   interpolateColor,

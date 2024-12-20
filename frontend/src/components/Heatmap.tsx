@@ -1,9 +1,12 @@
-import Plotly, { type ColorScale } from "plotly.js-dist-min";
+import Plotly from "plotly.js-dist-min";
 import React from "react";
 import { Input, Label, TextField, ToggleButton } from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
 import useAppState, { type AppState } from "../appState";
-import { colorScales as defaultColorScales } from "../colorScales";
+import {
+  type ColorScaleArray,
+  colorScales as defaultColorScales,
+} from "../colorScales";
 import { plotFont } from "../constants";
 import { useAnnotations } from "../hooks/useAnnotations";
 import {
@@ -50,7 +53,7 @@ export const Heatmap = ({
     [setAppState],
   );
 
-  const discreteColorScale: ColorScale = React.useMemo(() => {
+  const discreteColorScale: ColorScaleArray = React.useMemo(() => {
     const scales = [
       [0, "#CDF0FF"],
       [Math.max(0, settings.cutoff_2 / 100 - 0.01), "#20B9FF"],
@@ -61,7 +64,7 @@ export const Heatmap = ({
     if (settings.cutoff_1 < 100) {
       scales.push([1, "#FF6167"]);
     }
-    return scales as Array<[number, string]>;
+    return scales as ColorScaleArray;
   }, [settings.cutoff_1, settings.cutoff_2]);
 
   const colorScales = React.useMemo(

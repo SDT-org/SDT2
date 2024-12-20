@@ -1,6 +1,7 @@
 import Color from "colorjs.io";
 import tinycolor from "tinycolor2";
 import { z } from "zod";
+import type { ColorScaleArray } from "./colorScales";
 
 export type ColorString =
   | `hsl(${number}, ${number}%, ${number}%)`
@@ -16,8 +17,6 @@ export const ColorStringSchema = z
     },
   );
 
-export type ColorScaleArray = Array<[number, string]>;
-
 export const findScaleLower = (colorScale: ColorScaleArray, value: number) =>
   colorScale
     .filter((curr) => curr[0] <= value)
@@ -26,7 +25,7 @@ export const findScaleLower = (colorScale: ColorScaleArray, value: number) =>
 export const findScaleUpper = (colorScale: ColorScaleArray, value: number) =>
   colorScale
     .filter((curr) => curr[0] >= value)
-    .reduce((prev, curr) => (curr[0] < prev[0] ? curr : prev));
+    .reduce((prev, curr) => (curr[0] < prev[0] ? curr : prev), colorScale[0]);
 
 export const originalRgbFormat = {
   name: "rgb",

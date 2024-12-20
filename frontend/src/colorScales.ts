@@ -1,3 +1,8 @@
+export type ColorScaleArray = [
+  [number, string],
+  [number, string],
+  ...[number, string][],
+];
 type ColorScaleKey =
   | "Greys"
   | "YlGnBu"
@@ -20,7 +25,7 @@ type ColorScaleKey =
 
 // https://github.com/plotly/plotly.js/blob/482802bd31cbf2638040357fcc4ff3bafa3292f8/src/components/colorscale/scales.js
 export const colorScales: {
-  [K in ColorScaleKey]: [[number, string], ...[number, string][]];
+  [K in ColorScaleKey]: ColorScaleArray;
 } = {
   Greys: [
     [0, "rgb(0,0,0)"],

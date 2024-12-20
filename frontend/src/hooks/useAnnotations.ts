@@ -1,6 +1,7 @@
 import React from "react";
 import tinycolor from "tinycolor2";
 import type { AppState } from "../appState";
+import type { ColorScaleArray } from "../colorScales";
 import { interpolateColor, originalRgbFormat } from "../colors";
 import type { HeatmapData } from "../plotTypes";
 
@@ -9,7 +10,7 @@ export const useAnnotations = (
   data: HeatmapData,
   vmin: number,
   vmax: number,
-  _colorScale: Array<[number, string]>,
+  _colorScale: ColorScaleArray,
   reverse: boolean,
   roundTo: AppState["client"]["heatmap"]["annotation_rounding"],
 ) =>
@@ -33,9 +34,9 @@ export const useAnnotations = (
       colorScale = [..._colorScale]
         .reverse()
         .map((data, i) => [
-          (_colorScale[i] ?? _colorScale[0] ?? [0, "rgb(255, 0, 0)"])[0],
+          (_colorScale[i] ?? _colorScale[0])[0],
           data[1],
-        ]);
+        ]) as ColorScaleArray;
     }
 
     const dataMin = vmin;
