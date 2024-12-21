@@ -115,7 +115,7 @@ export const MainMenu = createHideableComponent(() => {
       return;
     }
 
-    window.pywebview.api.reset_state();
+    window.pywebview.api.cancel_run("clear");
   };
 
   const onOpen = () => {

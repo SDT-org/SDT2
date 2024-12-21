@@ -21,11 +21,13 @@ import shutil
 import mimetypes
 import cluster
 from time import perf_counter
+from multiprocessing import Lock, Manager, Pool, cpu_count
+
 from app_state import create_app_state
 from validations import validate_fasta
-from process_data import process_data, save_cols_to_csv
-from multiprocessing import Lock, Manager, Pool, cpu_count
 from config import app_version
+from utils import get_child_process_info
+from process_data import process_data, save_cols_to_csv
 
 dev_frontend_host = "http://localhost:5173"
 is_compiled = "__compiled__" in globals()
@@ -91,16 +93,6 @@ def do_cancel_run():
         pool.terminate()
         pool.join()
 
-    set_state(
-        view="runner",
-        progress=0,
-        pair_progress=0,
-        pair_count=0,
-        estimated_time=None,
-        stage="",
-        sequences_count=0,
-    )
-
 
 def assert_window():
     assert window is not None
@@ -161,17 +153,7 @@ class Api:
         return json.dumps({"appVersion": app_version})
 
     def processes_info(self):
-        process = psutil.Process()
-        info = []
-
-        for child in process.children(recursive=True):
-            try:
-                cpu_percent = child.cpu_percent(interval=0.1)
-                memory = child.memory_info().rss
-                info.append((child.pid, cpu_percent, memory, child.nice()))
-            except:
-                pass
-        return json.dumps(info)
+        return json.dumps(get_child_process_info())
 
     def get_available_memory(self):
         return psutil.virtual_memory().available
@@ -220,12 +202,14 @@ class Api:
 
         filetype, _ = mimetypes.guess_type(basename)
 
+        do_cancel_run()
+
         if filetype in matrix_filetypes:
             # Maybe can remove this if we can find a way to make pandas
             # infer the max column length based on the latest column length
             with open(matrix_path, "r") as temp_f:
-                    col_count = [len(l.split(",")) for l in temp_f.readlines()]
-                    column_names = [i for i in range(0, max(col_count))]
+                col_count = [len(l.split(",")) for l in temp_f.readlines()]
+                column_names = [i for i in range(0, max(col_count))]
 
             df = pd.read_csv(
                 matrix_path,
@@ -309,7 +293,7 @@ class Api:
         reset_state()
         assert_window().title = default_window_title
 
-    def run_process_data(self, args: dict):
+    def start_run(self, args: dict):
         global pool, cancelled, start_time
         set_state(view="loader")
 
@@ -382,8 +366,21 @@ class Api:
                     set_state(view="viewer")
                     assert_window().title = f"SDT2 - {get_state().basename}"
 
-    def cancel_run(self):
+    def cancel_run(self, run_settings: str):
         do_cancel_run()
+
+        if run_settings == "preserve":
+            set_state(
+                view="runner",
+                progress=0,
+                pair_progress=0,
+                pair_count=0,
+                estimated_time=None,
+                stage="",
+                sequences_count=0,
+            )
+        elif run_settings == "clear":
+            reset_state()
 
     def confirm_overwrite(self, destination_files):
         files_to_overwrite = [f for f in destination_files if os.path.exists(f)]

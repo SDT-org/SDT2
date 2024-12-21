@@ -4,7 +4,7 @@ import { useAppBlur } from "../hooks/appBlur";
 import { useWaitForPywebview } from "../hooks/usePywebviewReadyEvent";
 import { useSaveState } from "../hooks/useSaveState";
 import { useShortcutKeys } from "../hooks/useShortcutKeys";
-import { useStartProcessData } from "../hooks/useStartProcessData";
+import { useStartRun } from "../hooks/useStartProcessData";
 import { useSyncState } from "../hooks/useSyncState";
 import { restoreClientState } from "../restoreClientState";
 import { ErrorBoundary } from "./ErrorBoundary";
@@ -32,7 +32,7 @@ export const App = () => {
   const [appState, setAppState] = React.useState<AppState>(initialAppState);
   const [loading, setLoading] = React.useState(true);
   const [initialized, setInitialized] = React.useState(false);
-  const startProcessData = useStartProcessData(appState);
+  const startRun = useStartRun(appState);
   useSyncState(setAppState);
   useShortcutKeys(appState, setAppState);
   useAppBlur();
@@ -47,11 +47,7 @@ export const App = () => {
 
   const APP_VIEWS: { [K in AppState["view"]]: React.ReactElement } = {
     runner: (
-      <Runner
-        {...commonViewProps}
-        startProcessData={startProcessData}
-        appState={appState}
-      />
+      <Runner {...commonViewProps} startRun={startRun} appState={appState} />
     ),
     loader: <Loader {...commonViewProps} />,
     viewer: <Viewer {...commonViewProps} />,

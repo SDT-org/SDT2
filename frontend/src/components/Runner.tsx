@@ -39,9 +39,9 @@ const WarningIcon = () => (
 );
 
 const RunnerSettings = ({
-  startProcessData,
+  startRun,
 }: {
-  startProcessData: () => void;
+  startRun: () => void;
 }) => {
   const { appState, setAppState } = useAppState();
   const openFileDialog = useOpenFileDialog(appState, setAppState);
@@ -75,7 +75,7 @@ const RunnerSettings = ({
         !appState.validation_error_id
       ) {
         event.preventDefault();
-        startProcessData();
+        startRun();
       }
     };
     document.addEventListener("keydown", handleEnter);
@@ -83,7 +83,7 @@ const RunnerSettings = ({
     return () => {
       document.removeEventListener("keydown", handleEnter);
     };
-  }, [appState.filename, appState.validation_error_id, startProcessData]);
+  }, [appState.filename, appState.validation_error_id, startRun]);
 
   const initialized = React.useRef(false);
   React.useEffect(() => {
@@ -382,7 +382,7 @@ const RunnerSettings = ({
               <Button
                 data-primary
                 type="button"
-                onPress={startProcessData}
+                onPress={startRun}
                 isDisabled={Boolean(
                   !fileName ||
                     appState.validation_error_id ||
@@ -407,11 +407,11 @@ const RunnerSettings = ({
 
 export const Runner = ({
   mainMenu,
-  startProcessData,
+  startRun: startProcessData,
 }: {
   appState: AppState;
   mainMenu: React.ReactNode;
-  startProcessData: () => void;
+  startRun: () => void;
 }) => {
   const [appConfig, setAppConfig] = React.useState<{ appVersion: string }>();
   const fetchAppConfig = React.useCallback(() => {
@@ -426,7 +426,7 @@ export const Runner = ({
     <div className="app-wrapper with-header with-footer">
       <div className="app-header runner">{mainMenu}</div>
       <div className="app-main centered runner">
-        <RunnerSettings startProcessData={startProcessData} />
+        <RunnerSettings startRun={startProcessData} />
       </div>
       <div className="app-footer centered">
         <div>{appConfig ? appConfig.appVersion : null}</div>

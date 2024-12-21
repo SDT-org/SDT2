@@ -29,10 +29,10 @@ declare global {
           data: string;
           format: AppState["client"]["saveFormat"];
         }) => Promise<void>;
-        run_process_data: (args: RunProcessDataArgs) => Promise<void>;
+        start_run: (args: RunProcessDataArgs) => Promise<void>;
         processes_info: () => Promise<string>;
         get_available_memory: () => Promise<number>;
-        cancel_run: () => Promise<void>;
+        cancel_run: (run_settings?: "preserve" | "clear") => Promise<void>;
         get_data: () => Promise<string>;
         show_about: () => Promise<void>;
         show_manual: () => Promise<void>;

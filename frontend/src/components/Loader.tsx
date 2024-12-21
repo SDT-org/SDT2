@@ -126,7 +126,7 @@ export const Loader = ({
               )
             ) {
               setCanceling(true);
-              window.pywebview.api.cancel_run();
+              window.pywebview.api.cancel_run("preserve");
             }
           }}
           isDisabled={canceling}
