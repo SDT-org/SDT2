@@ -36,49 +36,46 @@ export const Viewer = ({
     });
 
   return (
-    <div className="app-wrapper with-header">
-      <div className="app-header">
-        <div className="left">
-          {mainMenu}
-          <div className="run-info">
-            {appState.sequences_count > 0 ? (
-              <>
-                {appState.sequences_count} Sequence
-                {appState.sequences_count === 1 ? "" : "s"}
-              </>
-            ) : null}
-            <span className="filename">{appState.basename}</span>
+    <Tabs
+      selectedKey={appState.client.dataView}
+      onSelectionChange={setDataView}
+    >
+      <div className="app-wrapper with-header">
+        <div className="app-header">
+          <div className="left">
+            {mainMenu}
+            <div className="run-info">
+              {appState.sequences_count > 0 ? (
+                <>
+                  {appState.sequences_count} Sequence
+                  {appState.sequences_count === 1 ? "" : "s"}
+                </>
+              ) : null}
+              <span className="filename">{appState.basename}</span>
+            </div>
           </div>
-        </div>
-        <Tabs
-          selectedKey={appState.client.dataView}
-          onSelectionChange={setDataView}
-        >
+
           <TabList>
             <Tab id="heatmap">Heatmap</Tab>
             <Tab id="distribution">Distribution</Tab>
           </TabList>
-        </Tabs>
-        <div className="right">
-          <Button
-            onPress={() =>
-              setAppState((previous) => {
-                return {
-                  ...previous,
-                  client: { ...previous.client, showExportModal: true },
-                };
-              })
-            }
-          >
-            Export
-          </Button>
+
+          <div className="right">
+            <Button
+              onPress={() =>
+                setAppState((previous) => {
+                  return {
+                    ...previous,
+                    client: { ...previous.client, showExportModal: true },
+                  };
+                })
+              }
+            >
+              Export
+            </Button>
+          </div>
         </div>
-      </div>
-      <Tabs
-        className={"app-panels"}
-        selectedKey={appState.client.dataView}
-        onSelectionChange={setDataView}
-      >
+
         <TabPanel id="heatmap" className="app-panel">
           {appState.client.dataView === "heatmap" &&
           !loading &&
@@ -92,8 +89,8 @@ export const Viewer = ({
             <Distribution data={distributionData} metaData={metaData} />
           ) : null}
         </TabPanel>
-      </Tabs>
-      {loading ? <div className="app-overlay app-loader" /> : null}
-    </div>
+        {loading ? <div className="app-overlay app-loader" /> : null}
+      </div>
+    </Tabs>
   );
 };

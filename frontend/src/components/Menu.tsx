@@ -1,3 +1,4 @@
+import { createHideableComponent } from "@react-aria/collections";
 import {
   Button,
   Menu,
@@ -101,7 +102,7 @@ export type MainMenuProps = {
   onExit: () => void;
 };
 
-export const MainMenu = () => {
+export const MainMenu = createHideableComponent(() => {
   const { appState, setAppState } = useAppState();
   const openFileDialog = useOpenFileDialog(appState, setAppState);
   const onNew = () => {
@@ -155,4 +156,4 @@ export const MainMenu = () => {
       <AppMenuItem onAction={onExit}>Exit</AppMenuItem>
     </AppMenuButton>
   );
-};
+});
