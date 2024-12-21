@@ -1,5 +1,5 @@
-import Plotly from "plotly.js-dist-min";
-import type { PlotData } from "plotly.js-dist-min";
+import type { PlotData } from "plotly.js";
+import Plotly from "plotly.js-cartesian-dist-min";
 import React from "react";
 import {
   Input,

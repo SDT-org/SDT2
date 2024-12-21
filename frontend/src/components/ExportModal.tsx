@@ -1,4 +1,4 @@
-import Plotly from "plotly.js-dist-min";
+import Plotly from "plotly.js-cartesian-dist-min";
 import React from "react";
 import {
   Button,

@@ -9,10 +9,10 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from itertools import combinations_with_replacement as cwr
 from functools import partial
-import numpy as np
-import pandas as pd
+from pandas import DataFrame
+from numpy import tril, triu_indices, zeros, around, nan
 import parasail
-from Bio import SeqIO, Phylo, SeqUtils
+from Bio import SeqIO, Phylo
 from Bio.SeqUtils import gc_fraction
 from Bio.Phylo.TreeConstruction import (
     DistanceTreeConstructor,
@@ -113,7 +113,7 @@ def get_alignment_scores(
 ):
     seq_ids = list(seq_dict.keys())
     n = len(seq_ids)
-    dist_scores = np.zeros((n, n))
+    dist_scores = zeros((n, n))
     # for each sequence id in seq_id add to new dict as key and the index position is enumerated and stored as value for later reference
     order = {seq_id: i for i, seq_id in enumerate(seq_ids)}
     # create list  combinations including self v. self
@@ -193,7 +193,7 @@ def save_cols_to_csv(df, filename):
             if i > j:  # lower triangular part (excluding diagonal)
                 columnar_output.append([row, col, df.loc[row, col]])
     # Convert to a DataFrame
-    columnar_df = pd.DataFrame(
+    columnar_df = DataFrame(
         columnar_output,
         columns=["First Sequence", "Second Sequence", "Identity Score"],
     )
@@ -204,7 +204,7 @@ def save_stats_to_csv(seq_stats, filename):
     stats_list = []
     for key, value in seq_stats.items():
         stats_list.append([key, value[0], value[1]])
-    stats_df = pd.DataFrame(stats_list, columns=["Sequence", "GC %", "Sequence Length"])
+    stats_df = DataFrame(stats_list, columns=["Sequence", "GC %", "Sequence Length"])
     stats_df.to_csv(filename + "_stats.csv", mode="w", header=True, index=False)
 
 
@@ -298,12 +298,12 @@ def process_data(
         ]  # create numerical index of order and  of new order IDs
 
         aln_reordered = aln_scores[reorder_index, :][:, reorder_index]
-        aln_lowt = np.tril(np.around(aln_reordered, 2))
+        aln_lowt = tril(around(aln_reordered, 2))
     else:
-        aln_lowt = np.tril(np.around(aln_scores, 2))
+        aln_lowt = tril(around(aln_scores, 2))
 
-    aln_lowt[np.triu_indices(aln_lowt.shape[0], k=1)] = np.nan
-    df = pd.DataFrame(
+    aln_lowt[triu_indices(aln_lowt.shape[0], k=1)] = nan
+    df = DataFrame(
         aln_lowt, index=order
     )  # Create a DataFrame from the lower triangular matrix
     save_cols_to_csv(df, os.path.join(out_dir, file_base))

@@ -13,8 +13,8 @@ import webview
 import tempfile
 import shutil
 import json
-import pandas as pd
-import numpy as np
+from pandas import read_csv, DataFrame
+from numpy import eye, where, nan, nanmin, nanmax
 import base64
 import urllib.parse
 import shutil
@@ -211,7 +211,7 @@ class Api:
                 col_count = [len(l.split(",")) for l in temp_f.readlines()]
                 column_names = [i for i in range(0, max(col_count))]
 
-            df = pd.read_csv(
+            df = read_csv(
                 matrix_path,
                 delimiter=",",
                 index_col=0,
@@ -471,7 +471,7 @@ class Api:
 
         if state.filetype == "text/fasta":
             stats_path = os.path.join(state.tempdir_path, f"{file_base}_stats.csv")
-            stats_df = pd.read_csv(stats_path, header=0)
+            stats_df = read_csv(stats_path, header=0)
             gc_stats = stats_df["GC %"].map(lambda value: round(value * 100)).tolist()
             len_stats = stats_df["Sequence Length"].tolist()
         elif state.filetype in matrix_filetypes:
@@ -485,19 +485,19 @@ class Api:
         )
         cols_file_base = file_base.removesuffix("_mat")
         cols_path = os.path.join(cols_dir, f"{cols_file_base}_cols.csv")
-        identity_scores = pd.read_csv(cols_path, skiprows=1).values.tolist()
+        identity_scores = read_csv(cols_path, skiprows=1).values.tolist()
 
-        df = pd.read_csv(
+        df = read_csv(
             matrix_path, delimiter=",", index_col=0, header=None, names=column_names
         )
         tick_text = df.index.tolist()
         set_state(sequences_count=len(tick_text))
         data = df.to_numpy()
 
-        diag_mask = np.eye(data.shape[0], dtype=bool)
-        data_no_diag = np.where(diag_mask, np.nan, data)
-        min_val = int(np.nanmin(data_no_diag))
-        max_val = int(np.nanmax(data_no_diag))
+        diag_mask = eye(data.shape[0], dtype=bool)
+        data_no_diag = where(diag_mask, nan, data)
+        min_val = int(nanmin(data_no_diag))
+        max_val = int(nanmax(data_no_diag))
 
         # TODO might be able to make one tick text object for both to use?
         return data, tick_text, min_val, max_val, gc_stats, len_stats, identity_scores
@@ -506,7 +506,7 @@ class Api:
         data, tick_text, min_val, max_val, gc_stats, len_stats, identity_scores = (
             self.load_data_and_stats()
         )
-        heat_data = pd.DataFrame(data, index=tick_text)
+        heat_data = DataFrame(data, index=tick_text)
         parsedData = heat_data.values.tolist()
 
         data_to_dump = dict(
