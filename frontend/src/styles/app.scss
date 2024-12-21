@@ -847,7 +847,7 @@ label.sublabel,
     border-radius: 4px;
 
     &[data-focused] {
-      background: var(--foreground-color);
+      background: var(--fill-color);
       color: var(--background-color);
     }
   }
