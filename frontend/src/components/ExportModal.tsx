@@ -162,6 +162,8 @@ export const ExportModal = () => {
     };
   }, [exportState, setAppState]);
 
+  const groupCss = "group col-2 onefr-auto";
+
   return (
     <ModalOverlay
       className={`react-aria-ModalOverlay export-modal-overlay ${exportState}`}
@@ -199,36 +201,49 @@ export const ExportModal = () => {
                 <>
                   <Heading slot="title">Export images and data</Heading>
                   <form className="form export-form">
-                    <label htmlFor="export-path" className="header">
-                      Output Folder
-                    </label>
+                    <div
+                      className={appState.client.dataExportPath ? "" : groupCss}
+                    >
+                      <label htmlFor="export-path" className="header">
+                        Output Folder
+                      </label>
 
-                    <div className="group  col-2 onefr-auto">
-                      <div className="filename">
-                        {appState.client.dataExportPath}
-                      </div>
-                      <Button
-                        type="button"
-                        onPress={() => {
-                          setExportState("idle");
-                          window.pywebview.api
-                            .select_path_dialog(appState.client.dataExportPath)
-                            .then((result) => {
-                              if (!result) {
-                                return;
-                              }
-                              setAppState((prev) => ({
-                                ...prev,
-                                client: {
-                                  ...prev.client,
-                                  dataExportPath: result,
-                                },
-                              }));
-                            });
-                        }}
+                      <div
+                        className={`${appState.client.dataExportPath ? groupCss : ""}`}
                       >
-                        Set...
-                      </Button>
+                        {appState.client.dataExportPath ? (
+                          <div className="filename">
+                            {appState.client.dataExportPath}
+                          </div>
+                        ) : null}
+                        <Button
+                          type="button"
+                          onPress={() => {
+                            setExportState("idle");
+                            window.pywebview.api
+                              .select_path_dialog(
+                                appState.client.dataExportPath,
+                              )
+                              .then((result) => {
+                                if (!result) {
+                                  return;
+                                }
+                                setAppState((prev) => ({
+                                  ...prev,
+                                  client: {
+                                    ...prev.client,
+                                    dataExportPath: result,
+                                  },
+                                }));
+                              });
+                          }}
+                        >
+                          {appState.client.dataExportPath
+                            ? "Set"
+                            : "Set folder"}
+                          ...
+                        </Button>
+                      </div>
                     </div>
                     <div className="group col-2 onefr-auto force-flat">
                       <label htmlFor="save-format" className="header">

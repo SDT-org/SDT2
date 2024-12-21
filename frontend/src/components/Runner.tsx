@@ -217,11 +217,13 @@ const RunnerSettings = ({
 
               {appState.client.enableOutputAlignments ? (
                 <div className="setting">
-                  <div aria-live="polite" className="folder">
-                    <span>
-                      {appState.client.alignmentExportPath.replace("/", "")}
-                    </span>
-                  </div>
+                  {appState.client.alignmentExportPath ? (
+                    <div aria-live="polite" className="folder">
+                      <span>
+                        {appState.client.alignmentExportPath.replace("/", "")}
+                      </span>
+                    </div>
+                  ) : null}
                   <Button
                     onPress={() => {
                       window.pywebview.api
@@ -381,7 +383,12 @@ const RunnerSettings = ({
                 data-primary
                 type="button"
                 onPress={startProcessData}
-                isDisabled={Boolean(!fileName || appState.validation_error_id)}
+                isDisabled={Boolean(
+                  !fileName ||
+                    appState.validation_error_id ||
+                    (appState.client.enableOutputAlignments &&
+                      !appState.client.alignmentExportPath.length),
+                )}
               >
                 Start Analysis
               </Button>
