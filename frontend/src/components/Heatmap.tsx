@@ -34,6 +34,7 @@ export const Heatmap = ({
   const {
     appState: {
       client: { heatmap: settings },
+      sequences_count,
     },
     setAppState,
   } = useAppState();
@@ -111,6 +112,22 @@ export const Heatmap = ({
       setTextScale(scale);
     },
     [data.length],
+  );
+
+  const maybeWarnPerformance = React.useCallback(
+    (enabled: boolean, fn: () => void) => {
+      if (
+        enabled &&
+        sequences_count > 99 &&
+        !confirm(
+          "Warning: Enabling this setting may significantly impact render performance.",
+        )
+      ) {
+        return;
+      }
+      fn();
+    },
+    [sequences_count],
   );
 
   const updateTitles = useRelayoutUpdateTitles(updateSettings);
@@ -228,9 +245,11 @@ export const Heatmap = ({
               <Switch
                 isSelected={settings.annotation}
                 onChange={(value) =>
-                  updateSettings({
-                    annotation: value,
-                  })
+                  maybeWarnPerformance(value, () =>
+                    updateSettings({
+                      annotation: value,
+                    }),
+                  )
                 }
               >
                 Percent Identities
@@ -331,9 +350,11 @@ export const Heatmap = ({
               <Switch
                 isSelected={settings.axis_labels}
                 onChange={(value) =>
-                  updateSettings({
-                    axis_labels: value,
-                  })
+                  maybeWarnPerformance(value, () =>
+                    updateSettings({
+                      axis_labels: value,
+                    }),
+                  )
                 }
               >
                 Axis Labels
