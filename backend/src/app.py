@@ -19,10 +19,10 @@ import base64
 import urllib.parse
 import shutil
 import mimetypes
-import cluster
 from time import perf_counter
 from multiprocessing import Lock, Manager, Pool, cpu_count
 
+import cluster
 from app_state import create_app_state
 from validations import validate_fasta
 from config import app_version
