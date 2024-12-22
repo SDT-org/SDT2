@@ -584,6 +584,7 @@ export const Heatmap = ({
                 ...(settings.titleFont === "Monospace"
                   ? plotFontMonospace
                   : plotFontSansSerif),
+                // @ts-ignore
                 weight: "bold",
               },
               plot_bgcolor: "rgba(0,0,0,0)",
