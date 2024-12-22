@@ -71,17 +71,30 @@
     color: var(--text-color);
     position: relative;
 
+    &[data-reverse-checkmark] {
+      padding-left: 0.8rem;
+      &::before {
+        display: none;
+      }
+    }
+
     &[data-selected] {
       font-weight: 600;
       background: none;
 
-      &::before {
+      &:not([data-reverse-checkmark])::before,
+      &[data-reverse-checkmark]::after {
         content: "✓";
         content: "✓" / "";
         alt: " ";
         position: absolute;
         top: 4px;
         left: 4px;
+      }
+
+      &[data-reverse-checkmark]::after {
+        left: unset;
+        right: 4px;
       }
     }
 

@@ -1,19 +1,23 @@
 .heatmap-sidebar {
-  .form .field .colorscale-setting.col-2 {
-    grid-template-columns: min-content 1fr;
+  .form .field .colorscale-setting {
+    grid-template-columns: 1fr auto;
+    gap: 0.4rem;
 
-    .controls {
-      display: flex;
-      justify-self: flex-end;
-      gap: 0.4rem;
-      flex-direction: row-reverse;
-    }
-
-    .react-aria-Select .react-aria-Button {
-      padding-left: 0.6rem;
-      padding-right: 0.6rem;
-      font-weight: 450;
+    .react-aria-Select {
       width: 100%;
+
+      .react-aria-Button {
+        padding-left: 0.6rem;
+        padding-right: 0.6rem;
+        font-weight: 450;
+        width: 100%;
+
+        > span {
+          justify-content: flex-start;
+          width: 100%;
+          padding-left: 0.4rem;
+        }
+      }
     }
 
     .react-aria-ToggleButton {
@@ -26,7 +30,29 @@
       }
     }
   }
+}
 
+.color-scale-list-item {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr;
+  gap: 0.8rem;
+  align-items: center;
+  overflow: hidden;
+
+  span {
+    justify-self: flex-start;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    display: inline-block;
+    width: 100%;
+    text-align: left;
+  }
+  span.preview {
+    width: 2.4rem;
+    height: 1.4rem;
+    box-shadow: inset 0 0 0.1rem rgba(0, 0, 0, 0.75);
+  }
 }
 
 .react-aria-Popover .react-aria-ListBox [data-key="Discrete"] {

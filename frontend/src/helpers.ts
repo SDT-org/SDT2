@@ -28,7 +28,8 @@ export const formatBytes = (bytes: number, decimals = 2) => {
   return `${Number.parseFloat((bytes / k ** i).toFixed(dm))} ${sizes[i]}`;
 };
 
-export const formatTitle = (key: string) => key.replaceAll("_", " ");
+export const formatTitle = (key: string, replacement = " ") =>
+  key.replaceAll("_", replacement);
 
 // https://stackoverflow.com/a/42623277
 export const arrayMinMax = (arr: number[]): [number, number] =>

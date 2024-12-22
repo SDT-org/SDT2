@@ -73,6 +73,11 @@ export const interpolateColor = (
   };
 };
 
+export const makeLinearGradient = (scale: ColorScaleArray) => {
+  const values = Array.from({ length: 10 }, (_, i) => i / 10);
+  return values.map((v) => interpolateColor(scale, v).value);
+};
+
 type ColorName =
   | "White"
   | "Black"

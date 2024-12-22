@@ -34,11 +34,11 @@ export interface HeatmapSettings {
 export const HeatmapSettingsSchema = z.object({
   colorScaleKey: z.enum([
     "Greys",
-    "YlGnBu",
     "Greens",
-    "YlOrRd",
-    "Bluered",
-    "RdBu",
+    "Yellow_Green_Blue",
+    "Yellow_Orange_Red",
+    "Blue_Red",
+    "Red_Blue",
     "Reds",
     "Blues",
     "Picnic",
