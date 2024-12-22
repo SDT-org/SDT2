@@ -1,11 +1,13 @@
+// Adapted from https://react-spectrum.adobe.com/react-aria/ColorSwatch.html
+
 import type {
+  ColorSwatchProps,
   ColorPickerProps as RACColorPickerProps,
   ColorSliderProps as RACColorSliderProps,
 } from "react-aria-components";
 import {
   Button,
   ColorArea,
-  ColorSwatch,
   ColorSwatchPicker,
   ColorSwatchPickerItem,
   ColorThumb,
@@ -15,6 +17,7 @@ import {
   Popover,
   ColorPicker as RACColorPicker,
   ColorSlider as RACColorSlider,
+  ColorSwatch as RACColorSwatch,
   SliderOutput,
   SliderTrack,
 } from "react-aria-components";
@@ -47,6 +50,18 @@ interface ColorPickerProps extends RACColorPickerProps {
   className?: string;
   "aria-label"?: string;
 }
+
+export const ColorSwatch = (props: ColorSwatchProps) => {
+  return (
+    <RACColorSwatch
+      {...props}
+      style={({ color }) => ({
+        background: `linear-gradient(${color}, ${color}),
+          repeating-conic-gradient(#CCC 0% 25%, white 0% 50%) 50% / 16px 16px`,
+      })}
+    />
+  );
+};
 
 export const ColorPicker = ({
   label,
