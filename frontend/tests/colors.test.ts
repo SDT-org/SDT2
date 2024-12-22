@@ -46,7 +46,7 @@ describe("interpolateColor", () => {
   describe("with a real dataset", () => {
     test("works with normal ratio", () => {
       const interpolatedColor = interpolateColor(
-        colorScales.YlGnBu,
+        colorScales.Yellow_Green_Blue,
         0.57,
         originalRgbFormat,
       );
@@ -59,7 +59,7 @@ describe("interpolateColor", () => {
 
     test("works with zero ratio", () => {
       const interpolatedColor = interpolateColor(
-        colorScales.YlGnBu,
+        colorScales.Yellow_Green_Blue,
         0.5,
         originalRgbFormat,
       );

@@ -7,7 +7,7 @@ import {
   type ColorScaleArray,
   colorScales as defaultColorScales,
 } from "../colorScales";
-import { plotFont } from "../constants";
+import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import { formatTitle } from "../helpers";
 import { useAnnotations } from "../hooks/useAnnotations";
 import {
@@ -316,6 +316,28 @@ export const Heatmap = ({
                 data-hidden={!settings.showTitles}
                 aria-hidden={!settings.showTitles}
               >
+                <div className="col-2 auto-onefr align-items-center">
+                  <Label htmlFor="font">Font Type</Label>
+                  <Select
+                    id="font"
+                    data-compact
+                    selectedKey={settings.titleFont}
+                    onSelectionChange={(value) =>
+                      updateSettings({
+                        titleFont: value as typeof settings.titleFont,
+                      })
+                    }
+                    items={["Sans Serif", "Monospace"].map((name) => ({
+                      id: name,
+                      name,
+                    }))}
+                  >
+                    {(item) => (
+                      <SelectItem textValue={item.name}>{item.name}</SelectItem>
+                    )}
+                  </Select>
+                </div>
+
                 <div className="field">
                   <TextField
                     onChange={(value) => updateSettings({ title: value })}
@@ -517,7 +539,7 @@ export const Heatmap = ({
                 // @ts-ignore
                 scrollZoom: true,
                 textfont: {
-                  ...plotFont,
+                  ...plotFontMonospace,
                   size: settings.annotation_font_size * textScale,
                   color: annotations?.textColors ?? "white",
                 },
@@ -558,17 +580,15 @@ export const Heatmap = ({
                     },
                   }
                 : {}),
-              font: plotFont,
+              font: {
+                ...(settings.titleFont === "Monospace"
+                  ? plotFontMonospace
+                  : plotFontSansSerif),
+                weight: "bold",
+              },
               plot_bgcolor: "rgba(0,0,0,0)",
               paper_bgcolor: "rgba(0,0,0,0)",
               uirevision: "true",
-              // margin: {
-              //   l: 25,
-              //   r: 25,
-              //   b: 25,
-              //   t: 25,
-              //   pad: 5,
-              // },
               autosize: true,
               dragmode: "pan",
               hovermode: "closest",
@@ -577,6 +597,12 @@ export const Heatmap = ({
                   ? {
                       title: {
                         text: settings.xtitle,
+                        font: {
+                          ...(settings.titleFont === "Monospace"
+                            ? plotFontMonospace
+                            : plotFontSansSerif),
+                          weight: "bold",
+                        },
                       },
                     }
                   : {}),
@@ -584,7 +610,7 @@ export const Heatmap = ({
                 maxallowed: tickText.length + 2,
                 automargin: true,
                 tickfont: {
-                  ...plotFont,
+                  ...plotFontMonospace,
                   size: settings.axlabel_xfontsize,
                   color: "black",
                 },
@@ -604,6 +630,12 @@ export const Heatmap = ({
                   ? {
                       title: {
                         text: settings.ytitle,
+                        font: {
+                          ...(settings.titleFont === "Monospace"
+                            ? plotFontMonospace
+                            : plotFontSansSerif),
+                          weight: "bold",
+                        },
                         pad: {
                           r: 15,
                         },
@@ -617,6 +649,7 @@ export const Heatmap = ({
                 range: [tickText.length - 1, 0],
                 autorange: false,
                 tickfont: {
+                  ...plotFontMonospace,
                   size: settings.axlabel_yfontsize,
                   color: "black",
                 },

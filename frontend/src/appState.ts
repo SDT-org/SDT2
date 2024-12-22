@@ -115,6 +115,7 @@ export const initialAppState: AppState = {
       annotation_rounding: 0,
       annotation_alpha: "0",
       showscale: true,
+      titleFont: "Sans Serif",
       showTitles: false,
       title: "",
       subtitle: "",
