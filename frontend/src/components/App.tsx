@@ -1,5 +1,5 @@
 import React from "react";
-import { type Key, Tab, TabList, TabPanel, Tabs } from "react-aria-components";
+import { type Key, TabPanel, Tabs } from "react-aria-components";
 import { type AppState, AppStateContext, initialAppState } from "../appState";
 import { useAppBlur } from "../hooks/appBlur";
 import { useWaitForPywebview } from "../hooks/usePywebviewReadyEvent";
@@ -78,13 +78,13 @@ export const App = () => {
               selectedKey={appState.activeDocumentId}
               onSelectionChange={setActiveDocumentId}
             >
-              <TabList>
-                {appState.documents.map((doc) => (
-                  <Tab id={doc.id} key={doc.id}>
-                    {doc.basename || "Untitled"}
-                  </Tab>
-                ))}
-              </TabList>
+              {/* <TabList> */}
+              {/*   {appState.documents.map((doc) => ( */}
+              {/*     <Tab id={doc.id} key={doc.id}> */}
+              {/*       {doc.basename || "Untitled"} */}
+              {/*     </Tab> */}
+              {/*   ))} */}
+              {/* </TabList> */}
               {appState.documents.map((doc) => (
                 <TabPanel id={doc.id} key={doc.id}>
                   <Document id={doc.id} key={doc.id} />

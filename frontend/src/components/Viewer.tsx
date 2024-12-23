@@ -1,3 +1,4 @@
+import { createHideableComponent } from "@react-aria/collections";
 import type React from "react";
 import {
   Button,
@@ -16,6 +17,7 @@ import {
 import { useGetData } from "../hooks/useGetData";
 import { Distribution } from "./Distribution";
 import { Heatmap } from "./Heatmap";
+import { SelectDocumentMenu } from "./SelectDocumentMenu";
 
 export const Viewer = ({
   docState,
@@ -43,6 +45,7 @@ export const Viewer = ({
         <div className="app-header">
           <div className="left">
             {mainMenu}
+            <SelectDocumentMenu />
             <div className="run-info">
               {docState.sequences_count > 0 ? (
                 <>
