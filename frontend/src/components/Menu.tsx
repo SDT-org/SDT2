@@ -161,15 +161,19 @@ export const MainMenu = createHideableComponent(() => {
     <AppMenuButton label="☰">
       <AppMenuItem onAction={onNew}>New</AppMenuItem>
       <AppMenuItem onAction={onOpen}>Open...</AppMenuItem>
-      <AppMenuItem onAction={onSave}>
-        {activeDocState.savepath ? "Save" : "Save As..."}
-      </AppMenuItem>
-      <AppMenuItem
-        isDisabled={activeDocState?.view !== "viewer"}
-        onAction={onExport}
-      >
-        Export...
-      </AppMenuItem>
+      {activeDocState.view === "viewer" ? (
+        <>
+          <AppMenuItem onAction={onSave}>
+            {activeDocState.savepath ? "Save" : "Save As..."}
+          </AppMenuItem>
+          <AppMenuItem
+            isDisabled={activeDocState?.view !== "viewer"}
+            onAction={onExport}
+          >
+            Export...
+          </AppMenuItem>
+        </>
+      ) : null}
       <AppMenuItem onAction={onManual}>Manual</AppMenuItem>
       <AppMenuItem onAction={onAbout}>About</AppMenuItem>
       <Separator />
