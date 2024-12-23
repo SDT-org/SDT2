@@ -38,13 +38,15 @@ export const Heatmap = ({
   footer?: React.ReactNode;
 }) => {
   const { heatmap: settings, sequences_count } = docState;
-  console.log(docState);
 
   const updateSettings = React.useCallback(
     (values: Partial<DocState["heatmap"]>) =>
       setDocState((prev) => ({
         ...prev,
-        heatmap: { ...prev.heatmap, ...values },
+        heatmap: {
+          ...prev.heatmap,
+          ...values,
+        },
       })),
     [setDocState],
   );
@@ -172,11 +174,11 @@ export const Heatmap = ({
                       aria-label="Toggle reverse colorscale"
                       id="reverse"
                       isSelected={settings.reverse}
-                      onChange={() =>
+                      onChange={(value) => {
                         updateSettings({
-                          reverse: !settings.reverse,
-                        })
-                      }
+                          reverse: value,
+                        });
+                      }}
                     >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

@@ -18,8 +18,6 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
     GetDataResponse["metadata"] | undefined
   >();
 
-  console.log(docState);
-
   React.useEffect(() => {
     setLoading(true);
 

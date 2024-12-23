@@ -85,9 +85,6 @@ body {
     width: 3.4rem;
     color: var(--text-secondary-color);
   }
-  &.runner {
-    grid-template-columns: min-content;
-  }
 
   .left,
   .right {

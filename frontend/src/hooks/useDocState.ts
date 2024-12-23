@@ -4,7 +4,6 @@ import {
   type DocState,
   type SetAppState,
   findDoc,
-  initialDocState,
 } from "../appState";
 
 export const useDocState = (
@@ -12,29 +11,30 @@ export const useDocState = (
   appState: AppState,
   setAppState: SetAppState,
 ) => {
-  const foundState = findDoc(docId, appState);
+  const docState = React.useMemo(() => {
+    const foundDoc = findDoc(docId, appState);
 
-  if (!foundState) {
-    throw new Error(
-      `Expected document to be found: ${appState.activeDocumentId}`,
-    );
-  }
+    if (!foundDoc) {
+      throw new Error(`Expected document to be found: ${docId}`);
+    }
 
-  const docState = { ...initialDocState, ...foundState };
+    return foundDoc;
+  }, [docId, appState]);
 
   const setDocState = React.useCallback(
     (nextDoc: (prevDoc: DocState) => DocState) =>
       setAppState((prev) => ({
         ...prev,
         documents: prev.documents.map((prevDoc) =>
-          prevDoc.filename[0] === docId ? nextDoc(prevDoc) : prevDoc,
+          prevDoc.id === docId ? nextDoc(prevDoc) : prevDoc,
         ),
       })),
     [docId, setAppState],
   );
 
   const updateDocState = React.useCallback(
-    (values: Partial<DocState>) => setDocState((prev) => ({ ...prev, values })),
+    (values: Partial<DocState>) =>
+      setDocState((prev) => ({ ...prev, ...values })),
     [setDocState],
   );
 

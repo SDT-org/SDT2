@@ -4,7 +4,6 @@ import { useDocState } from "../hooks/useDocState";
 import { Loader } from "./Loader";
 import { MainMenu } from "./Menu";
 import { Runner } from "./Runner";
-import { Select, SelectItem } from "./Select";
 import { Viewer } from "./Viewer";
 
 export const Document = ({

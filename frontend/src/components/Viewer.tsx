@@ -1,5 +1,4 @@
-import { createHideableComponent } from "@react-aria/collections";
-import type React from "react";
+import React from "react";
 import {
   Button,
   type Key,
@@ -34,10 +33,14 @@ export const Viewer = ({
   const { loading, tickText, heatmapData, distributionData, metaData } =
     useGetData(docState, setDocState);
 
-  const setDataView = (newValue: Key) =>
-    updateDocState({
-      dataView: newValue as DocState["dataView"],
-    });
+  const setDataView = React.useCallback(
+    (newValue: Key) => {
+      updateDocState({
+        dataView: newValue as DocState["dataView"],
+      });
+    },
+    [updateDocState],
+  );
 
   return (
     <Tabs selectedKey={docState.dataView} onSelectionChange={setDataView}>

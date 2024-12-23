@@ -21,6 +21,7 @@ import useOpenFileDialog from "../hooks/useOpenFileDialog";
 import { useStartRun } from "../hooks/useStartRun";
 import messages from "../messages";
 import { Select, SelectItem } from "./Select";
+import { SelectDocumentMenu } from "./SelectDocumentMenu";
 import { Switch } from "./Switch";
 
 export type RunProcessDataArgs = Pick<AppState, "compute_cores"> & {
@@ -421,7 +422,12 @@ export const Runner = ({
 }) => {
   return (
     <div className="app-wrapper with-header">
-      <div className="app-header runner">{mainMenu}</div>
+      <div className="app-header">
+        <div className="left">
+          {mainMenu}
+          <SelectDocumentMenu />
+        </div>
+      </div>
       <div className="app-main centered runner">
         <RunnerSettings
           docState={docState}
