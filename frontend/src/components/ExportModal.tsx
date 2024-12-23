@@ -132,6 +132,7 @@ export const ExportModal = () => {
     getImages().then((images) => {
       window.pywebview.api
         .export_data({
+          doc_id: appState.activeDocumentId,
           export_path: appState.dataExportPath,
           output_cluster: outputCluster,
           cluster_threshold_one: thresholds.one,
@@ -157,7 +158,7 @@ export const ExportModal = () => {
       setExportState("idle");
       setAppState((prev) => ({
         ...prev,
-        client: { ...prev, showExportModal: false },
+        showExportModal: false,
       }));
     };
 
@@ -178,7 +179,7 @@ export const ExportModal = () => {
         setAppState((previous) => {
           return {
             ...previous,
-            client: { ...previous, showExportModal: false },
+            showExportModal: false,
           };
         })
       }
@@ -189,7 +190,7 @@ export const ExportModal = () => {
           setAppState((previous) => {
             return {
               ...previous,
-              client: { ...previous, showExportModal: false },
+              showExportModal: false,
             };
           })
         }
@@ -232,10 +233,7 @@ export const ExportModal = () => {
                                 }
                                 setAppState((prev) => ({
                                   ...prev,
-                                  client: {
-                                    ...prev,
-                                    dataExportPath: result,
-                                  },
+                                  dataExportPath: result,
                                 }));
                               });
                           }}
@@ -255,10 +253,7 @@ export const ExportModal = () => {
                         onSelectionChange={(value) =>
                           setAppState((previous) => ({
                             ...previous,
-                            client: {
-                              ...previous,
-                              saveFormat: value as SaveableImageFormat,
-                            },
+                            saveFormat: value as SaveableImageFormat,
                           }))
                         }
                         items={Object.entries(saveableImageFormats).map(

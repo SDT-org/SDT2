@@ -21,6 +21,7 @@ declare global {
         ) => Promise<[string, string]> | Promise<void>;
         select_path_dialog: (defaultDirectory?: string) => Promise<string>;
         export_data: (args: {
+          doc_id: string;
           export_path: string;
           output_cluster: boolean;
           cluster_threshold_one: number;
