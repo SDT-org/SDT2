@@ -2,7 +2,7 @@ import Plotly from "plotly.js-cartesian-dist-min";
 import React from "react";
 import { Input, Label, TextField, ToggleButton } from "react-aria-components";
 import createPlotlyComponent from "react-plotly.js/factory";
-import useAppState, { type AppState } from "../appState";
+import type { DocState, SetDocState, UpdateDocState } from "../appState";
 import {
   type ColorScaleArray,
   colorScales as defaultColorScales,
@@ -27,32 +27,26 @@ export const Heatmap = ({
   data,
   tickText,
   footer,
+  docState,
+  setDocState,
 }: {
+  docState: DocState;
+  setDocState: SetDocState;
+  updateDocState: UpdateDocState;
   data: HeatmapData;
   tickText: string[];
   footer?: React.ReactNode;
 }) => {
-  const {
-    appState: {
-      client: { heatmap: settings },
-      sequences_count,
-    },
-    setAppState,
-  } = useAppState();
+  const { heatmap: settings, sequences_count } = docState;
+  console.log(docState);
 
   const updateSettings = React.useCallback(
-    (values: Partial<AppState["client"]["heatmap"]>) =>
-      setAppState((prev) => ({
+    (values: Partial<DocState["heatmap"]>) =>
+      setDocState((prev) => ({
         ...prev,
-        client: {
-          ...prev.client,
-          heatmap: {
-            ...prev.client.heatmap,
-            ...values,
-          },
-        },
+        heatmap: { ...prev.heatmap, ...values },
       })),
-    [setAppState],
+    [setDocState],
   );
 
   const discreteColorScale: ColorScaleArray = React.useMemo(() => {

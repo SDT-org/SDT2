@@ -8,12 +8,13 @@ import {
   ModalOverlay,
 } from "react-aria-components";
 import useAppState, {
-  saveableImageFormats,
-  type AppState,
+  type DocState,
   type SaveableImageFormat,
+  saveableImageFormats,
 } from "../appState";
 import { useDistributionState } from "../distributionState";
 import { assertDefined } from "../helpers";
+import { useDocState } from "../hooks/useDocState";
 import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";
 import { Switch } from "./Switch";
@@ -54,33 +55,38 @@ const SuccessMessage = () => (
 );
 
 export const ExportModal = () => {
+  const { appState, setAppState } = useAppState();
+  if (
+    !appState.activeDocumentId ||
+    !appState.documents.find((doc) => doc.id === appState.activeDocumentId)
+  ) {
+    return null;
+  }
   const [exportState, setExportState] = React.useState<
     "idle" | "exporting" | "success"
   >("idle");
-  const { appState, setAppState } = useAppState();
   const [outputCluster, setOutputCluster] = React.useState(false);
   const [thresholds, setThresholds] = React.useState({ one: 79, two: 0 });
-  const { updateDistributionState } = useDistributionState(
+  const { docState, setDocState, updateDocState } = useDocState(
+    appState.activeDocumentId,
     appState,
     setAppState,
   );
 
+  const { updateDistributionState } = useDistributionState(
+    docState,
+    setDocState,
+  );
+
   const swapDataView = React.useCallback(
-    (view: AppState["client"]["dataView"]) =>
-      setAppState((previous) => {
-        return {
-          ...previous,
-          client: {
-            ...previous.client,
-            dataView: view,
-          },
-        };
-      }),
-    [setAppState],
+    (view: DocState["dataView"]) => {
+      updateDocState({ dataView: view });
+    },
+    [updateDocState],
   );
 
   const getImages = React.useCallback(async () => {
-    const previousDataView = appState.client.dataView;
+    const previousDataView = docState.dataView;
     const renderTimeout = 400;
     await new Promise((r) => setTimeout(r, 200));
     swapDataView("heatmap");
@@ -89,7 +95,7 @@ export const ExportModal = () => {
     let element = getPlotlyElement();
 
     const config = {
-      format: appState.client.saveFormat,
+      format: appState.saveFormat,
       width: 1000,
       height: 800,
     };
@@ -119,14 +125,14 @@ export const ExportModal = () => {
 
     swapDataView(previousDataView);
     return { heatmapImage, histogramImage, violinImage, raincloudImage };
-  }, [appState, swapDataView, updateDistributionState]);
+  }, [appState, docState.dataView, swapDataView, updateDistributionState]);
 
   const doExport = React.useCallback(() => {
     setExportState("exporting");
     getImages().then((images) => {
       window.pywebview.api
         .export_data({
-          export_path: appState.client.dataExportPath,
+          export_path: appState.dataExportPath,
           output_cluster: outputCluster,
           cluster_threshold_one: thresholds.one,
           cluster_threshold_two: thresholds.two,
@@ -134,7 +140,7 @@ export const ExportModal = () => {
           histogram_image_data: images.histogramImage,
           violin_image_data: images.violinImage,
           raincloud_image_data: images.raincloudImage,
-          image_format: appState.client.saveFormat,
+          image_format: appState.saveFormat,
         })
         .then((result) =>
           result ? setExportState("success") : setExportState("idle"),
@@ -151,7 +157,7 @@ export const ExportModal = () => {
       setExportState("idle");
       setAppState((prev) => ({
         ...prev,
-        client: { ...prev.client, showExportModal: false },
+        client: { ...prev, showExportModal: false },
       }));
     };
 
@@ -167,23 +173,23 @@ export const ExportModal = () => {
   return (
     <ModalOverlay
       className={`react-aria-ModalOverlay export-modal-overlay ${exportState}`}
-      isOpen={appState.client.showExportModal}
+      isOpen={appState.showExportModal}
       onOpenChange={() =>
         setAppState((previous) => {
           return {
             ...previous,
-            client: { ...previous.client, showExportModal: false },
+            client: { ...previous, showExportModal: false },
           };
         })
       }
     >
       <Modal
-        isOpen={appState.client.showExportModal}
+        isOpen={appState.showExportModal}
         onOpenChange={() =>
           setAppState((previous) => {
             return {
               ...previous,
-              client: { ...previous.client, showExportModal: false },
+              client: { ...previous, showExportModal: false },
             };
           })
         }
@@ -201,19 +207,17 @@ export const ExportModal = () => {
                 <>
                   <Heading slot="title">Export images and data</Heading>
                   <form className="form export-form">
-                    <div
-                      className={appState.client.dataExportPath ? "" : groupCss}
-                    >
+                    <div className={appState.dataExportPath ? "" : groupCss}>
                       <label htmlFor="export-path" className="header">
                         Output Folder
                       </label>
 
                       <div
-                        className={`${appState.client.dataExportPath ? groupCss : ""}`}
+                        className={`${appState.dataExportPath ? groupCss : ""}`}
                       >
-                        {appState.client.dataExportPath ? (
+                        {appState.dataExportPath ? (
                           <div className="filename">
-                            {appState.client.dataExportPath}
+                            {appState.dataExportPath}
                           </div>
                         ) : null}
                         <Button
@@ -221,9 +225,7 @@ export const ExportModal = () => {
                           onPress={() => {
                             setExportState("idle");
                             window.pywebview.api
-                              .select_path_dialog(
-                                appState.client.dataExportPath,
-                              )
+                              .select_path_dialog(appState.dataExportPath)
                               .then((result) => {
                                 if (!result) {
                                   return;
@@ -231,16 +233,14 @@ export const ExportModal = () => {
                                 setAppState((prev) => ({
                                   ...prev,
                                   client: {
-                                    ...prev.client,
+                                    ...prev,
                                     dataExportPath: result,
                                   },
                                 }));
                               });
                           }}
                         >
-                          {appState.client.dataExportPath
-                            ? "Set"
-                            : "Set folder"}
+                          {appState.dataExportPath ? "Set" : "Set folder"}
                           ...
                         </Button>
                       </div>
@@ -251,12 +251,12 @@ export const ExportModal = () => {
                       </label>
                       <Select
                         data-flat
-                        selectedKey={appState.client.saveFormat}
+                        selectedKey={appState.saveFormat}
                         onSelectionChange={(value) =>
                           setAppState((previous) => ({
                             ...previous,
                             client: {
-                              ...previous.client,
+                              ...previous,
                               saveFormat: value as SaveableImageFormat,
                             },
                           }))
@@ -334,7 +334,7 @@ export const ExportModal = () => {
                       </Button>
                       <Button
                         data-primary
-                        isDisabled={!appState.client.dataExportPath}
+                        isDisabled={!appState.dataExportPath}
                         onPress={doExport}
                       >
                         Export

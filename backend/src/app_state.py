@@ -1,76 +1,26 @@
-# Usage
-# get_state, set_state, reset_state = create_app_state()
-
-# Update state
-# set_state(filename="example.txt")
-# set_state(progress=50)
-# set_state(debug=True)
-
-# Access state
-# current_state = get_state()
-# print("Current State:", current_state)
-
 from collections import namedtuple
+from document_state import DocState, create_document_state
 
 AppState = namedtuple(
     "AppState",
     [
-        "view",
-        "filename",
-        "filetype",
-        "filemtime",
-        "basename",
-        "progress",
-        "stage",
         "debug",
-        "tempdir_path",  # TODO: rename tempdir_path, it's no longer an accurate name
-        "sequences_count",
-        "pair_progress",
-        "pair_count",
-        "estimated_time",
-        "validation_error_id",
-        "compute_stats",
         "platform",
+        "documents"
     ],
 )
 
 
 def create_app_state(
-    view="runner",
-    filename="",
-    filetype="",
-    filemtime=None,
-    basename="",
-    progress=0,
-    stage="",
     debug=False,
     on_update=None,
-    tempdir_path="",
-    sequences_count=0,
-    pair_progress=0,
-    pair_count=0,
-    estimated_time=None,
-    validation_error_id=None,
-    compute_stats=None,
     platform=None,
+    documents=[]
 ):
     default_state = AppState(
-        view=view,
-        filename=filename,
-        filetype=filetype,
-        filemtime=filemtime,
-        basename=basename,
-        progress=progress,
-        stage=stage,
         debug=debug,
-        tempdir_path=tempdir_path,
-        sequences_count=sequences_count,
-        pair_progress=pair_progress,
-        pair_count=pair_count,
-        estimated_time=estimated_time,
-        validation_error_id=validation_error_id,
-        compute_stats=compute_stats,
         platform=platform,
+        documents=documents
     )
 
     state = default_state
@@ -78,11 +28,21 @@ def create_app_state(
     def get_state():
         return state
 
-    def set_state(**kwargs):
+    def set_state(updater=None, **kwargs):
         nonlocal state
+        current_state = state
+        if callable(updater):
+           state = state._replace(**updater(current_state)._asdict())
+        else:
+           state = state._replace(**kwargs)
+           on_state_updated()
 
-        state = state._replace(**kwargs)
-        on_state_updated()
+    # def set_state(skip_callbacks=False, **kwargs):
+    #     nonlocal state
+    #     state = state._replace(**kwargs)
+
+    #     if skip_callbacks == False:
+    #         on_state_updated()
 
     def reset_state():
         nonlocal state
@@ -93,4 +53,30 @@ def create_app_state(
         if on_update:
             on_update(state)
 
-    return get_state, set_state, reset_state
+    def new_document(id: str, **kwargs):
+        if get_document(id):
+            return update_document(id, **kwargs)
+
+        doc_state = create_document_state(id=id, **kwargs)
+        set_state(documents=state.documents + [doc_state])
+
+    def get_document(id: str) -> DocState | None:
+        return next((doc for doc in state.documents if doc.id == id), None)
+
+    def update_document(id: str, **updates):
+        updated_documents = [
+            doc._replace(**updates) if doc.id == id else doc
+            for doc in state.documents
+        ]
+
+        set_state(documents=updated_documents)
+
+    def remove_document(id: str):
+        updated_documents = [doc for doc in state.documents if doc.id != id]
+        set_state(documents=updated_documents)
+
+    def remove_empty_documents():
+        updated_documents = [doc for doc in state.documents if doc.filename != ""]
+        set_state(documents=updated_documents)
+
+    return get_state, set_state, reset_state, new_document, get_document, update_document, remove_document, remove_empty_documents

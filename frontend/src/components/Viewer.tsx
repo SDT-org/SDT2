@@ -7,51 +7,50 @@ import {
   TabPanel,
   Tabs,
 } from "react-aria-components";
-import type { AppState, SetAppState } from "../appState";
+import {
+  type DocState,
+  type SetDocState,
+  type UpdateDocState,
+  useAppState,
+} from "../appState";
 import { useGetData } from "../hooks/useGetData";
 import { Distribution } from "./Distribution";
 import { Heatmap } from "./Heatmap";
 
 export const Viewer = ({
-  appState,
-  setAppState,
+  docState,
+  setDocState,
+  updateDocState,
   mainMenu,
 }: {
-  appState: AppState;
-  setAppState: SetAppState;
+  docState: DocState;
+  setDocState: SetDocState;
+  updateDocState: UpdateDocState;
   mainMenu: React.ReactNode;
 }) => {
+  const { setAppState } = useAppState();
   const { loading, tickText, heatmapData, distributionData, metaData } =
-    useGetData();
+    useGetData(docState, setDocState);
 
   const setDataView = (newValue: Key) =>
-    setAppState((previous) => {
-      return {
-        ...previous,
-        client: {
-          ...previous.client,
-          dataView: newValue as AppState["client"]["dataView"],
-        },
-      };
+    updateDocState({
+      dataView: newValue as DocState["dataView"],
     });
 
   return (
-    <Tabs
-      selectedKey={appState.client.dataView}
-      onSelectionChange={setDataView}
-    >
+    <Tabs selectedKey={docState.dataView} onSelectionChange={setDataView}>
       <div className="app-wrapper with-header">
         <div className="app-header">
           <div className="left">
             {mainMenu}
             <div className="run-info">
-              {appState.sequences_count > 0 ? (
+              {docState.sequences_count > 0 ? (
                 <>
-                  {appState.sequences_count} Sequence
-                  {appState.sequences_count === 1 ? "" : "s"}
+                  {docState.sequences_count} Sequence
+                  {docState.sequences_count === 1 ? "" : "s"}
                 </>
               ) : null}
-              <span className="filename">{appState.basename}</span>
+              <span className="filename">{docState.basename}</span>
             </div>
           </div>
 
@@ -63,12 +62,7 @@ export const Viewer = ({
           <div className="right">
             <Button
               onPress={() =>
-                setAppState((previous) => {
-                  return {
-                    ...previous,
-                    client: { ...previous.client, showExportModal: true },
-                  };
-                })
+                setAppState((prev) => ({ ...prev, showExportModal: true }))
               }
             >
               Export
@@ -77,16 +71,27 @@ export const Viewer = ({
         </div>
 
         <TabPanel id="heatmap" className="app-panel">
-          {appState.client.dataView === "heatmap" &&
+          {docState.dataView === "heatmap" &&
           !loading &&
           heatmapData &&
           metaData ? (
-            <Heatmap data={heatmapData} tickText={tickText} />
+            <Heatmap
+              data={heatmapData}
+              tickText={tickText}
+              docState={docState}
+              setDocState={setDocState}
+              updateDocState={updateDocState}
+            />
           ) : null}
         </TabPanel>
         <TabPanel id="distribution" className="app-panel">
           {distributionData && metaData ? (
-            <Distribution data={distributionData} metaData={metaData} />
+            <Distribution
+              data={distributionData}
+              metaData={metaData}
+              docState={docState}
+              setDocState={setDocState}
+            />
           ) : null}
         </TabPanel>
         {loading ? <div className="app-overlay app-loader" /> : null}

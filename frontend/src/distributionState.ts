@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { AppState, SetAppState } from "./appState";
+import type { DocState, SetDocState } from "./appState";
 import { type ColorString, ColorStringSchema, Colors } from "./colors";
 
 export type Visualization = "histogram" | "violin" | "raincloud";
@@ -259,18 +259,15 @@ export const initialDistributionState: DistributionState = {
 };
 
 export const useDistributionState = (
-  appState: AppState,
-  setAppState: SetAppState,
+  docState: DocState,
+  setDocState: SetDocState,
 ) => {
   const updateDistributionState = (values: Partial<DistributionState>) =>
-    setAppState((prev) => ({
+    setDocState((prev) => ({
       ...prev,
-      client: {
-        ...prev.client,
-        distribution: {
-          ...prev.client.distribution,
-          ...values,
-        },
+      distribution: {
+        ...prev.distribution,
+        ...values,
       },
     }));
 
@@ -279,22 +276,19 @@ export const useDistributionState = (
     (
       values: Partial<DistributionState["histogram" | "violin" | "raincloud"]>,
     ) =>
-      setAppState((prev) => ({
+      setDocState((prev) => ({
         ...prev,
-        client: {
-          ...prev.client,
-          distribution: {
-            ...prev.client.distribution,
-            [key]: {
-              ...prev.client.distribution[key],
-              ...values,
-            },
+        distribution: {
+          ...prev.distribution,
+          [key]: {
+            ...prev.distribution[key],
+            ...values,
           },
         },
       }));
 
   return {
-    distributionState: appState.client.distribution,
+    distributionState: docState.distribution,
     updateDistributionState,
     updateHistogram: updateVisualization("histogram"),
     updateRaincloud: updateVisualization("raincloud"),

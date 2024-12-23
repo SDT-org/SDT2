@@ -10,7 +10,7 @@ import {
   Popover,
   Separator,
 } from "react-aria-components";
-import { type AppState, useAppState } from "../appState";
+import { type AppState, findDoc, useAppState } from "../appState";
 import useOpenFileDialog from "../hooks/useOpenFileDialog";
 
 // AppMenuButton and AppMenuItem were derived from https://react-spectrum.adobe.com/react-aria/Menu.html#reusable-wrappers
@@ -104,35 +104,29 @@ export type MainMenuProps = {
 
 export const MainMenu = createHideableComponent(() => {
   const { appState, setAppState } = useAppState();
+  const activeDocState = findDoc(appState.activeDocumentId, appState);
+
+  if (!activeDocState) {
+    throw new Error(`Could not locate document: ${appState.activeDocumentId}`);
+  }
+
   const openFileDialog = useOpenFileDialog(appState, setAppState);
   const onNew = () => {
-    if (
-      !(
-        appState.view !== "runner" &&
-        confirm("Are you sure? Current results will be cleared.")
-      )
-    ) {
-      return;
-    }
-
-    window.pywebview.api.cancel_run("clear");
+    window.pywebview.api
+      .new_doc()
+      .then((id: string) =>
+        setAppState((prev) => ({ ...prev, activeDocumentId: id })),
+      );
   };
 
   const onOpen = () => {
-    if (
-      appState.view !== "runner" &&
-      !confirm("Are you sure? Current results will be cleared.")
-    ) {
-      return;
-    }
-
     openFileDialog();
   };
 
   const onExport = () =>
     setAppState((previous) => ({
       ...previous,
-      client: { ...previous.client, showExportModal: true },
+      showExportModal: true,
     }));
 
   const onAbout = () => window.pywebview.api.show_about();
@@ -147,9 +141,12 @@ export const MainMenu = createHideableComponent(() => {
     <AppMenuButton label="☰">
       <AppMenuItem onAction={onNew}>New</AppMenuItem>
       <AppMenuItem onAction={onOpen}>Open...</AppMenuItem>
-      {appState.view === "viewer" ? (
-        <AppMenuItem onAction={onExport}>Export images and data...</AppMenuItem>
-      ) : null}
+      <AppMenuItem
+        isDisabled={activeDocState?.view !== "viewer"}
+        onAction={onExport}
+      >
+        Export...
+      </AppMenuItem>
       <AppMenuItem onAction={onManual}>Manual</AppMenuItem>
       <AppMenuItem onAction={onAbout}>About</AppMenuItem>
       <Separator />

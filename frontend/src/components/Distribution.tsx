@@ -1,4 +1,4 @@
-import useAppState from "../appState";
+import type { DocState, SetDocState } from "../appState";
 import {
   type DataSets,
   type Visualization,
@@ -82,9 +82,13 @@ const VisualizationSwitcher = ({
 );
 
 export const Distribution = ({
+  docState,
+  setDocState,
   data,
   metaData,
 }: {
+  docState: DocState;
+  setDocState: SetDocState;
   data: DistributionData | undefined;
   metaData: MetaData;
   footer?: React.ReactNode;
@@ -102,14 +106,13 @@ export const Distribution = ({
     length: data.length_stats,
   };
 
-  const { appState, setAppState } = useAppState();
   const {
     distributionState,
     updateDistributionState,
     updateHistogram,
     updateRaincloud,
     updateViolin,
-  } = useDistributionState(appState, setAppState);
+  } = useDistributionState(docState, setDocState);
 
   const sidebarComponent = (
     <VisualizationSwitcher
@@ -156,5 +159,5 @@ export const Distribution = ({
     ),
   };
 
-  return components[distributionState.visualization];
+  return components[docState.distribution.visualization];
 };

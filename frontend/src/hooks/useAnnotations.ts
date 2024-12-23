@@ -1,6 +1,6 @@
 import React from "react";
 import tinycolor from "tinycolor2";
-import type { AppState } from "../appState";
+import type { DocState } from "../appState";
 import type { ColorScaleArray } from "../colorScales";
 import { interpolateColor, originalRgbFormat } from "../colors";
 import type { HeatmapData } from "../plotTypes";
@@ -12,7 +12,7 @@ export const useAnnotations = (
   vmax: number,
   _colorScale: ColorScaleArray,
   reverse: boolean,
-  roundTo: AppState["client"]["heatmap"]["annotation_rounding"],
+  roundTo: DocState["heatmap"]["annotation_rounding"],
 ) =>
   React.useMemo(() => {
     if (!enabled) {

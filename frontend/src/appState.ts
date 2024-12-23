@@ -22,14 +22,14 @@ export const saveableImageFormats = {
 export type SaveableImageFormat = keyof typeof saveableImageFormats;
 const saveableImageFormatKeys = ["svg", "png", "jpeg"] as const;
 
-export type AppState = {
+export type DocState = {
+  id: string;
   view: "runner" | "loader" | "viewer";
-  filename: string[];
+  filename: string[]; // TODO: really fix this array nonsense
   filetype: string;
   filemtime?: string;
   basename: string;
   progress: number;
-  debug: boolean;
   sequences_count: number;
   stage: string;
   pair_progress: number;
@@ -41,27 +41,33 @@ export type AppState = {
     required_memory: number;
     available_memory: number;
   };
+  dataView: "heatmap" | "distribution";
+  distribution: DistributionState;
+  heatmap: HeatmapSettings;
+};
+
+export type AppState = {
+  activeDocumentId: DocState["id"];
+  activeRunDocumentId: DocState["id"];
+  documents: DocState[];
+  // TODO: make platform info an api, doesn't need to be state at all
   platform: {
     cores: number;
     memory: number;
     platform: string;
   };
-  client: {
-    dataView: "heatmap" | "distribution";
-    enableClustering: boolean;
-    enableOutputAlignments: boolean;
-    cluster_method: (typeof clusterMethods)[number];
-    compute_cores: number;
-    error?: Error | null;
-    errorInfo?: ErrorInfo | PromiseRejectionEvent["reason"] | null;
-    saveFormat: SaveableImageFormat;
-    showExportModal: boolean;
-    alignmentExportPath: string;
-    dataExportPath: string;
-    lastDataFilePath: string;
-    distribution: DistributionState;
-    heatmap: HeatmapSettings;
-  };
+  debug: boolean;
+  enableClustering: boolean;
+  enableOutputAlignments: boolean;
+  cluster_method: (typeof clusterMethods)[number];
+  compute_cores: number;
+  showExportModal: boolean;
+  saveFormat: SaveableImageFormat;
+  alignmentExportPath: string;
+  dataExportPath: string;
+  lastDataFilePath: string;
+  error?: Error | null;
+  errorInfo?: ErrorInfo | PromiseRejectionEvent["reason"] | null;
 };
 
 export const clientStateSchema = z.object({
@@ -81,58 +87,64 @@ export const clientStateSchema = z.object({
   heatmap: HeatmapSettingsSchema,
 });
 
-export const initialAppState: AppState = {
+export const initialDocState: DocState = {
+  id: "",
   view: "runner",
   filename: [""],
   filetype: "",
   basename: "",
+  // TODO: wrap in runState
   progress: 0,
-  debug: false,
   sequences_count: 0,
   stage: "Preprocessing",
   pair_progress: 0,
   pair_count: 0,
-  client: {
-    dataView: "heatmap",
-    dataExportPath: "",
-    alignmentExportPath: "",
-    lastDataFilePath: "",
-    enableClustering: true,
-    enableOutputAlignments: false,
-    cluster_method: "Neighbor-Joining",
-    saveFormat: "svg",
-    showExportModal: false,
-    compute_cores: 1,
-    distribution: initialDistributionState,
-    heatmap: {
-      colorScaleKey: "Portland",
-      reverse: false,
-      vmax: 100,
-      vmin: 65,
-      cellspace: 1,
-      annotation: false,
-      annotation_font_size: 10,
-      annotation_rounding: 0,
-      annotation_alpha: "0",
-      showscale: true,
-      titleFont: "Sans Serif",
-      showTitles: false,
-      title: "",
-      subtitle: "",
-      xtitle: "",
-      ytitle: "",
-      cbar_shrink: 1,
-      cbar_aspect: 25,
-      cbar_pad: 10,
-      axis_labels: false,
-      axlabel_xrotation: 270,
-      axlabel_xfontsize: 12,
-      axlabel_yrotation: 360,
-      axlabel_yfontsize: 12,
-      cutoff_1: 95,
-      cutoff_2: 75,
-    },
+  dataView: "heatmap",
+  distribution: initialDistributionState,
+  heatmap: {
+    colorScaleKey: "Portland",
+    reverse: false,
+    vmax: 100,
+    vmin: 65,
+    cellspace: 1,
+    annotation: false,
+    annotation_font_size: 10,
+    annotation_rounding: 0,
+    annotation_alpha: "0",
+    showscale: true,
+    titleFont: "Sans Serif",
+    showTitles: false,
+    title: "",
+    subtitle: "",
+    xtitle: "",
+    ytitle: "",
+    cbar_shrink: 1,
+    cbar_aspect: 25,
+    cbar_pad: 10,
+    axis_labels: false,
+    axlabel_xrotation: 270,
+    axlabel_xfontsize: 12,
+    axlabel_yrotation: 360,
+    axlabel_yfontsize: 12,
+    cutoff_1: 95,
+    cutoff_2: 75,
   },
+};
+
+export const initialAppState: AppState = {
+  activeDocumentId: "",
+  activeRunDocumentId: "",
+  debug: false,
+  dataExportPath: "",
+  alignmentExportPath: "",
+  lastDataFilePath: "",
+  enableClustering: true,
+  enableOutputAlignments: false,
+  cluster_method: "Neighbor-Joining",
+  saveFormat: "svg",
+  showExportModal: false,
+  compute_cores: 1,
+  documents: [],
   platform: {
     cores: 1,
     memory: 1,
@@ -143,7 +155,12 @@ export const initialAppState: AppState = {
 export const clientStateKey = "app-client-state";
 
 export type SetAppState = React.Dispatch<React.SetStateAction<AppState>>;
+export type SetDocState = (nextDoc: (prevDoc: DocState) => DocState) => void;
+export type UpdateDocState = (newValues: Partial<DocState>) => void;
 export type SyncStateEvent = CustomEvent<{ state: AppState }>;
+
+export const findDoc = (id: string, appState: AppState) =>
+  appState.documents.find((d) => d.id === id);
 
 export const AppStateContext = React.createContext<{
   appState: AppState;

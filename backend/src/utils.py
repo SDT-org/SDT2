@@ -1,4 +1,5 @@
 import psutil
+from hashlib import sha256
 
 
 def get_child_process_info():
@@ -14,3 +15,6 @@ def get_child_process_info():
             pass
 
     return info
+
+def make_doc_id(input: str) -> str:
+    return sha256(input.encode()).hexdigest()

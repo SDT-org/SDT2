@@ -9,9 +9,11 @@ declare global {
         app_config: () => Promise<string>;
         get_state: () => Promise<AppState>;
         reset_state: () => Promise<void>;
+        new_doc: () => Promise<string>;
         open_file_dialog: (
-          lastDataFilepath?: string,
-        ) => Promise<string> | Promise<void>;
+          doc_id?: string,
+          last_data_filepath?: string,
+        ) => Promise<[string, string]> | Promise<void>;
         select_path_dialog: (defaultDirectory?: string) => Promise<string>;
         export_data: (args: {
           export_path: string;
@@ -32,8 +34,11 @@ declare global {
         start_run: (args: RunProcessDataArgs) => Promise<void>;
         processes_info: () => Promise<string>;
         get_available_memory: () => Promise<number>;
-        cancel_run: (run_settings?: "preserve" | "clear") => Promise<void>;
-        get_data: () => Promise<string>;
+        cancel_run: (
+          doc_id: string,
+          run_settings?: "preserve" | "clear",
+        ) => Promise<void>;
+        get_data: (docId: string) => Promise<string>;
         show_about: () => Promise<void>;
         show_manual: () => Promise<void>;
         close_app: () => Promise<void>;

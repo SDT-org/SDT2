@@ -1,5 +1,5 @@
 import React from "react";
-import useAppState, { initialAppState } from "../appState";
+import { type DocState, type SetDocState, initialDocState } from "../appState";
 import type {
   DistributionData,
   GetDataResponse,
@@ -8,8 +8,7 @@ import type {
 import { getScaledFontSize } from "../plotUtils";
 import { services } from "../services";
 
-export const useGetData = () => {
-  const { appState, setAppState } = useAppState();
+export const useGetData = (docState: DocState, setDocState: SetDocState) => {
   const [loading, setLoading] = React.useState(false);
   const [tickText, setTickText] = React.useState<string[]>([""]);
   const [heatmapData, setHeatmapData] = React.useState<HeatmapData>();
@@ -19,11 +18,13 @@ export const useGetData = () => {
     GetDataResponse["metadata"] | undefined
   >();
 
-  const getData = React.useCallback(() => {
+  console.log(docState);
+
+  React.useEffect(() => {
     setLoading(true);
 
     services
-      .getData()
+      .getData(docState.id)
       .then((rawData) => {
         const parsedResponse: GetDataResponse = JSON.parse(
           rawData.replace(/\bNaN\b/g, "null"),
@@ -42,40 +43,30 @@ export const useGetData = () => {
           raw_mat: identity_scores.map((i) => i[2]),
           identity_combos: identity_scores.map((i) => [i[0], i[1]]),
         });
-        setAppState((prev) => ({
+
+        setDocState((prev) => ({
           ...prev,
-          client: {
-            ...prev.client,
-            heatmap: {
-              ...prev.client.heatmap,
-              vmin: metadata.minVal,
-              ...(appState.sequences_count > 99 && {
-                annotation: false,
-                axis_labels: false,
-                cellspace: 0,
-              }),
-              annotation_font_size: getScaledFontSize(
-                initialAppState.client.heatmap.annotation_font_size,
-                parsedData.length,
-              ),
-            },
+          heatmap: {
+            ...prev.heatmap,
+            vmin: metadata.minVal,
+            ...(docState.sequences_count > 99 && {
+              annotation: false,
+              axis_labels: false,
+              cellspace: 0,
+            }),
+            annotation_font_size: getScaledFontSize(
+              initialDocState.heatmap.annotation_font_size,
+              parsedData.length,
+            ),
           },
         }));
       })
       .finally(() => {
         setLoading(false);
       });
-  }, [appState.sequences_count, setAppState]);
-
-  React.useEffect(() => {
-    if (!appState.filemtime) {
-      return;
-    }
-    getData();
-  }, [getData, appState.filemtime]);
+  }, [docState.id, docState.sequences_count, setDocState]);
 
   return {
-    getData,
     loading,
     tickText,
     heatmapData,

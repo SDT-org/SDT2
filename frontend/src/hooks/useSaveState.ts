@@ -6,15 +6,6 @@ export const useSaveState = (initialized: boolean, appState: AppState) =>
     if (!initialized) {
       return;
     }
-    localStorage.setItem(
-      clientStateKey,
-      JSON.stringify({
-        ...appState.client,
-        lastDataFilePath:
-          typeof appState.filename === "string"
-            ? appState.filename
-            : appState.filename[0],
-      }),
-    );
+    localStorage.setItem(clientStateKey, JSON.stringify(appState));
     window.APP_STATE = appState;
   }, [initialized, appState]);

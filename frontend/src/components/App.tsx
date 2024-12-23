@@ -1,64 +1,101 @@
 import React from "react";
+import { type Key, Tab, TabList, TabPanel, Tabs } from "react-aria-components";
 import { type AppState, AppStateContext, initialAppState } from "../appState";
 import { useAppBlur } from "../hooks/appBlur";
 import { useWaitForPywebview } from "../hooks/usePywebviewReadyEvent";
 import { useSaveState } from "../hooks/useSaveState";
 import { useShortcutKeys } from "../hooks/useShortcutKeys";
-import { useStartRun } from "../hooks/useStartProcessData";
 import { useSyncState } from "../hooks/useSyncState";
-import { restoreClientState } from "../restoreClientState";
+import { Document } from "./Document";
+// import { restoreClientState } from "../restoreClientState";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { ExportModal } from "./ExportModal";
-import { Loader } from "./Loader";
-import { MainMenu } from "./Menu";
-import { Runner } from "./Runner";
-import { Viewer } from "./Viewer";
 
 export const App = () => {
-  const restoreInitialState = React.useCallback(() => {
-    setLoading(true);
+  // const restoreInitialState = React.useCallback(() => {
+  //   setLoading(true);
 
-    window.pywebview.api.get_state().then((data) => {
-      setAppState((prev) => ({
-        ...data,
-        client: restoreClientState(prev.client),
-        showExportModal: false,
-      }));
-      setLoading(false);
-      setInitialized(true);
-    });
-  }, []);
+  //   window.pywebview.api.get_state().then((data) => {
+  //     setAppState((prev) => ({
+  //       ...data,
+  //       client: restoreClientState(prev.client),
+  //       showExportModal: false,
+  //     }));
+  //     setLoading(false);
+  //     setInitialized(true);
+  //   });
+  // }, []);
 
   const [appState, setAppState] = React.useState<AppState>(initialAppState);
-  const [loading, setLoading] = React.useState(true);
+  // const [loading, setLoading] = React.useState(true);
+  // const [loading] = React.useState(true);
   const [initialized, setInitialized] = React.useState(false);
-  const startRun = useStartRun(appState);
+  // const startRun = useStartRun(appState);
   useSyncState(setAppState);
   useShortcutKeys(appState, setAppState);
   useAppBlur();
-  useWaitForPywebview(restoreInitialState);
+  useWaitForPywebview(() => setInitialized(true));
+  // useWaitForPywebview(restoreInitialState);
   useSaveState(initialized, appState);
 
-  const commonViewProps = {
-    appState,
-    setAppState,
-    mainMenu: <MainMenu />,
-  };
+  React.useEffect(() => {
+    if (!initialized) {
+      return;
+    }
+    if (appState.documents.length === 0) {
+      window.pywebview.api.new_doc();
+      return;
+    }
 
-  const APP_VIEWS: { [K in AppState["view"]]: React.ReactElement } = {
-    runner: (
-      <Runner {...commonViewProps} startRun={startRun} appState={appState} />
-    ),
-    loader: <Loader {...commonViewProps} />,
-    viewer: <Viewer {...commonViewProps} />,
-  };
+    if (
+      appState.documents.length > 0 &&
+      !appState.documents.find((d) => d.id === appState.activeDocumentId)
+    ) {
+      setAppState((prev) => {
+        const newActive = appState.documents[appState.documents.length - 1];
+        if (!newActive) {
+          return prev;
+        }
+        return {
+          ...prev,
+          activeDocumentId: newActive.id,
+        };
+      });
+    }
+  }, [initialized, appState.documents, appState.activeDocumentId]);
+
+  const setActiveDocumentId = (id: Key) =>
+    setAppState((prev) => ({ ...prev, activeDocumentId: id as string }));
 
   return (
     <ErrorBoundary appState={appState} setAppState={setAppState}>
       <AppStateContext.Provider value={{ appState, setAppState }}>
-        {loading ? <div className="app-overlay app-loader" /> : null}
-        {initialized && !loading ? APP_VIEWS[appState?.view || "viewer"] : null}
-        <ExportModal />
+        {initialized &&
+        appState.documents.length > 0 &&
+        appState.activeDocumentId ? (
+          <>
+            <Tabs
+              selectedKey={appState.activeDocumentId}
+              onSelectionChange={setActiveDocumentId}
+            >
+              <TabList>
+                {appState.documents.map((doc) => (
+                  <Tab id={doc.id} key={doc.id}>
+                    {doc.basename || "Untitled"}
+                  </Tab>
+                ))}
+              </TabList>
+              {appState.documents.map((doc) => (
+                <TabPanel id={doc.id} key={doc.id}>
+                  <Document id={doc.id} key={doc.id} />
+                </TabPanel>
+              ))}
+            </Tabs>
+            {appState.activeDocumentId ? <ExportModal /> : null}
+          </>
+        ) : (
+          <div className="app-overlay app-loader" />
+        )}
       </AppStateContext.Provider>
     </ErrorBoundary>
   );

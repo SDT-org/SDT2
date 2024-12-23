@@ -1,6 +1,11 @@
 import React, { type ErrorInfo } from "react";
 import { Button, Dialog, Modal } from "react-aria-components";
-import { type AppState, type SetAppState, initialAppState } from "../appState";
+import {
+  type AppState,
+  type SetAppState,
+  findDoc,
+  initialAppState,
+} from "../appState";
 import { formatBytes } from "../helpers";
 
 interface Props {
@@ -30,11 +35,8 @@ export class ErrorBoundary extends React.Component<Props> {
     this.props.setAppState((previous) => {
       return {
         ...previous,
-        client: {
-          ...previous.client,
-          error,
-          errorInfo,
-        },
+        error,
+        errorInfo,
       };
     });
 
@@ -53,11 +55,8 @@ export class ErrorBoundary extends React.Component<Props> {
     this.props.setAppState((previous) => {
       return {
         ...previous,
-        client: {
-          ...previous.client,
-          error: new Error(e.reason),
-          errorInfo: e.reason,
-        },
+        error: new Error(e.reason),
+        errorInfo: e.reason,
       };
     });
   }
@@ -87,10 +86,17 @@ export class ErrorBoundary extends React.Component<Props> {
   }
 
   override render() {
-    const error = this.props.appState.client.error;
-    const errorInfo = this.props.appState.client.errorInfo;
+    const activeRunDocState = findDoc(
+      this.props.appState.activeRunDocumentId,
+      this.props.appState,
+    );
+    const activeDocState = findDoc(
+      this.props.appState.activeDocumentId,
+      this.props.appState,
+    );
+    const error = this.props.appState.error;
+    const errorInfo = this.props.appState.errorInfo;
     const platform = this.props.appState.platform;
-    const stats = this.props.appState.compute_stats;
     const objectToHuman = (obj?: unknown) =>
       Object.entries(obj ?? {})
         .map((v) => `${v[0].toUpperCase()}: ${v[1]}`)
@@ -102,9 +108,14 @@ export class ErrorBoundary extends React.Component<Props> {
       errorInfo?.componentStack,
       objectToHuman({ ...platform, memory: formatBytes(platform.memory) }),
       objectToHuman({
-        ...stats,
-        available_memory: formatBytes(stats?.available_memory || 0),
-        required_memory: formatBytes(stats?.required_memory || 0),
+        activeDoc: activeDocState,
+        activeRunDoc: activeRunDocState,
+        run_available_memory: formatBytes(
+          activeRunDocState?.compute_stats?.available_memory || 0,
+        ),
+        run_required_memory: formatBytes(
+          activeRunDocState?.compute_stats?.required_memory || 0,
+        ),
       }),
     ]
       .filter(Boolean)
@@ -114,11 +125,8 @@ export class ErrorBoundary extends React.Component<Props> {
       this.props.setAppState((previous) => {
         return {
           ...previous,
-          client: {
-            ...previous.client,
-            error: null,
-            errorInfo: null,
-          },
+          error: null,
+          errorInfo: null,
         };
       });
 

@@ -1,15 +1,14 @@
 import type { AppState } from "../appState";
 
-export const startRun = (appState: AppState) =>
+export const startRun = (docId: string, appState: AppState) =>
   window.pywebview.api
     .start_run({
-      cluster_method: appState.client.enableClustering
-        ? appState.client.cluster_method
+      doc_id: docId,
+      cluster_method: appState.enableClustering
+        ? appState.cluster_method
         : "None",
-      compute_cores: appState.client.compute_cores,
-      export_alignments: appState.client.enableOutputAlignments
-        ? "True"
-        : "False",
+      compute_cores: appState.compute_cores,
+      export_alignments: appState.enableOutputAlignments ? "True" : "False",
     })
     .catch((e) => {
       if (e.toString().includes("PARASAIL_TRACEBACK")) {
@@ -18,12 +17,13 @@ export const startRun = (appState: AppState) =>
             "Please ensure you have adequate swap/page size and system memory.\n\n" +
             "Error ID: PARASAIL_TRACEBACK",
         );
-        cancelRun("preserve");
+        cancelRun(docId, "preserve");
       } else {
         throw e;
       }
     });
 
 export const cancelRun = (
-  run_settings: Parameters<typeof window.pywebview.api.cancel_run>[0],
-) => window.pywebview.api.cancel_run(run_settings);
+  docId: string,
+  run_settings: Parameters<typeof window.pywebview.api.cancel_run>[1],
+) => window.pywebview.api.cancel_run(docId, run_settings);

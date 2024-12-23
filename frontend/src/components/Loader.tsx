@@ -1,16 +1,24 @@
 import React from "react";
 import { Button, Label, ProgressBar } from "react-aria-components";
-import type { AppState } from "../appState";
+import {
+  type DocState,
+  type SetDocState,
+  type UpdateDocState,
+  useAppState,
+} from "../appState";
 import { formatBytes } from "../helpers";
 import { LoadingAnimation } from "./LoadingAnimation";
 
 export const Loader = ({
-  appState: { stage, progress, estimated_time, debug, compute_stats },
+  docState: { id: docId, stage, progress, estimated_time, compute_stats },
   mainMenu,
 }: {
-  appState: AppState;
+  docState: DocState;
+  setDocState: SetDocState;
+  updateDocState: UpdateDocState;
   mainMenu: React.ReactNode;
 }) => {
+  const { appState } = useAppState();
   const [canceling, setCanceling] = React.useState(false);
   const [estimatedDisplay, setEstimatedDisplay] = React.useState("");
   const startTime = React.useRef(Date.now());
@@ -38,7 +46,7 @@ export const Loader = ({
   }, [estimated_time]);
 
   React.useEffect(() => {
-    if (!debug) {
+    if (!appState.debug) {
       return;
     }
 
@@ -55,7 +63,7 @@ export const Loader = ({
       500,
     );
     return () => clearInterval(id);
-  }, [debug]);
+  }, [appState.debug]);
 
   return (
     <div className="app-wrapper with-header loader">
@@ -96,7 +104,7 @@ export const Loader = ({
               </>
             )}
           </ProgressBar>
-          {debug ? (
+          {appState.debug ? (
             <details
               style={{
                 position: "absolute",
@@ -126,7 +134,7 @@ export const Loader = ({
               )
             ) {
               setCanceling(true);
-              window.pywebview.api.cancel_run("preserve");
+              window.pywebview.api.cancel_run(docId, "preserve");
             }
           }}
           isDisabled={canceling}

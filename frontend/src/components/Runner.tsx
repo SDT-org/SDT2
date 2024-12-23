@@ -9,16 +9,23 @@ import {
   SliderThumb,
   SliderTrack,
 } from "react-aria-components";
-import useAppState, { type AppState, clusterMethods } from "../appState";
+import useAppState, {
+  type AppState,
+  type DocState,
+  type SetDocState,
+  type UpdateDocState,
+  clusterMethods,
+} from "../appState";
 import { formatBytes } from "../helpers";
 import useOpenFileDialog from "../hooks/useOpenFileDialog";
-import { useWaitForPywebview } from "../hooks/usePywebviewReadyEvent";
+import { useStartRun } from "../hooks/useStartRun";
 import messages from "../messages";
 import { Select, SelectItem } from "./Select";
 import { Switch } from "./Switch";
 
-export type RunProcessDataArgs = Pick<AppState["client"], "compute_cores"> & {
-  cluster_method: AppState["client"]["cluster_method"] | "None";
+export type RunProcessDataArgs = Pick<AppState, "compute_cores"> & {
+  doc_id: string;
+  cluster_method: AppState["cluster_method"] | "None";
   export_alignments: "True" | "False";
 };
 
@@ -39,40 +46,41 @@ const WarningIcon = () => (
 );
 
 const RunnerSettings = ({
-  startRun,
+  docState,
+  setDocState,
 }: {
-  startRun: () => void;
+  docState: DocState;
+  setDocState: SetDocState;
+  updateDocState: UpdateDocState;
 }) => {
   const { appState, setAppState } = useAppState();
+  const startRun = useStartRun(docState, appState);
   const openFileDialog = useOpenFileDialog(appState, setAppState);
-  const updateClientState = React.useCallback(
-    (value: Partial<typeof appState.client>) =>
+  const fileName =
+    docState.filename?.length && docState.filename[0]
+      ? docState.filename[0].split("/").pop()
+      : undefined;
+
+  const updateAppState = React.useCallback(
+    (value: Partial<AppState>) =>
       setAppState((previous) => {
         return {
           ...previous,
-          client: {
-            ...previous.client,
-            ...value,
-          },
+          ...value,
         };
       }),
     [setAppState],
   );
 
-  const fileName =
-    appState.filename?.length && appState.filename[0]
-      ? appState.filename[0].split("/").pop()
-      : undefined;
-
-  const isFastaType = appState.filetype === "text/fasta";
+  const isFastaType = docState.filetype === "text/fasta";
 
   React.useEffect(() => {
     const handleEnter = (event: KeyboardEvent) => {
       if (
         event.key === "Enter" &&
         (event.ctrlKey || event.metaKey || event.altKey) &&
-        Boolean(appState.filename) &&
-        !appState.validation_error_id
+        Boolean(docState.filename) &&
+        !docState.validation_error_id
       ) {
         event.preventDefault();
         startRun();
@@ -83,27 +91,27 @@ const RunnerSettings = ({
     return () => {
       document.removeEventListener("keydown", handleEnter);
     };
-  }, [appState.filename, appState.validation_error_id, startRun]);
+  }, [docState.filename, docState.validation_error_id, startRun]);
 
   const initialized = React.useRef(false);
   React.useEffect(() => {
-    if (!appState.compute_stats || initialized.current) {
+    if (!docState.compute_stats || initialized.current) {
       return;
     }
-    updateClientState({
-      compute_cores: appState.compute_stats.recommended_cores,
+    updateAppState({
+      compute_cores: docState.compute_stats.recommended_cores,
     });
     initialized.current = true;
-  }, [appState.compute_stats, updateClientState]);
+  }, [docState.compute_stats, updateAppState]);
 
   React.useEffect(() => {
     const id = setInterval(() => {
-      if (!appState.filename) {
+      if (!docState.filename) {
         return;
       }
 
       window.pywebview.api.get_available_memory().then((available_memory) =>
-        setAppState((previous) => {
+        setDocState((previous) => {
           return {
             ...previous,
             compute_stats: {
@@ -119,16 +127,16 @@ const RunnerSettings = ({
     }, 3000);
 
     return () => clearInterval(id);
-  }, [appState.filename, setAppState]);
+  }, [docState.filename, setDocState]);
 
   const estimatedMemory =
-    (appState.compute_stats?.required_memory || 1) *
-    (appState.client.compute_cores || 1);
+    (docState.compute_stats?.required_memory || 1) *
+    (appState.compute_cores || 1);
 
-  const estimatedMemoryValue = appState.compute_stats
-    ? ((appState.compute_stats.required_memory *
-        (appState.client.compute_cores || 1)) /
-        appState.compute_stats.available_memory) *
+  const estimatedMemoryValue = docState.compute_stats
+    ? ((docState.compute_stats.required_memory *
+        (appState.compute_cores || 1)) /
+        docState.compute_stats.available_memory) *
       100
     : 1;
 
@@ -142,11 +150,9 @@ const RunnerSettings = ({
           : "low";
 
   const coresImpact =
-    appState.compute_stats && appState.compute_stats.recommended_cores === 0
+    docState.compute_stats && docState.compute_stats.recommended_cores === 0
       ? "extreme"
-      : impactName(
-          (appState.client.compute_cores / appState.platform.cores) * 100,
-        );
+      : impactName((appState.compute_cores / appState.platform.cores) * 100);
 
   return (
     <div className="form-wrapper runner-wrapper">
@@ -161,33 +167,33 @@ const RunnerSettings = ({
               id="data-file"
               type="text"
               readOnly
-              value={appState.validation_error_id ? "" : (fileName ?? "")}
+              value={docState.validation_error_id ? "" : (fileName ?? "")}
             />
-            <Button type="button" onPress={openFileDialog}>
+            <Button type="button" onPress={() => openFileDialog(docState.id)}>
               Select file&#8230;
             </Button>
           </div>
         </div>
-        {isFastaType && !appState.validation_error_id ? (
+        {isFastaType && !docState.validation_error_id ? (
           <>
             <div className="field clustering inline-toggle">
               <Switch
-                isSelected={appState.client.enableClustering}
+                isSelected={appState.enableClustering}
                 onChange={(value) => {
-                  updateClientState({ enableClustering: value });
+                  updateAppState({ enableClustering: value });
                 }}
               >
                 Cluster sequences
               </Switch>
               <div
                 className="setting clustering-method"
-                data-hidden={!appState.client.enableClustering}
-                aria-hidden={!appState.client.enableClustering}
+                data-hidden={!appState.enableClustering}
+                aria-hidden={!appState.enableClustering}
               >
                 <Select
-                  selectedKey={appState.client.cluster_method}
+                  selectedKey={appState.cluster_method}
                   onSelectionChange={(value) => {
-                    updateClientState({
+                    updateAppState({
                       cluster_method: value as (typeof clusterMethods)[number],
                     });
                   }}
@@ -207,37 +213,34 @@ const RunnerSettings = ({
 
             <div className="field output inline-toggle">
               <Switch
-                isSelected={appState.client.enableOutputAlignments}
+                isSelected={appState.enableOutputAlignments}
                 onChange={(value) => {
-                  updateClientState({ enableOutputAlignments: value });
+                  updateAppState({ enableOutputAlignments: value });
                 }}
               >
                 Save alignments
               </Switch>
 
-              {appState.client.enableOutputAlignments ? (
+              {appState.enableOutputAlignments ? (
                 <div className="setting">
-                  {appState.client.alignmentExportPath ? (
+                  {appState.alignmentExportPath ? (
                     <div aria-live="polite" className="folder">
                       <span>
-                        {appState.client.alignmentExportPath.replace("/", "")}
+                        {appState.alignmentExportPath.replace("/", "")}
                       </span>
                     </div>
                   ) : null}
                   <Button
                     onPress={() => {
                       window.pywebview.api
-                        .select_path_dialog(appState.client.alignmentExportPath)
+                        .select_path_dialog(appState.alignmentExportPath)
                         .then((result) => {
                           if (!result) {
                             return;
                           }
                           setAppState((prev) => ({
                             ...prev,
-                            client: {
-                              ...prev.client,
-                              alignmentExportPath: result,
-                            },
+                            alignmentExportPath: result,
                           }));
                         });
                     }}
@@ -252,32 +255,32 @@ const RunnerSettings = ({
               <label className="header" htmlFor="compute-cores">
                 Performance
               </label>
-              {appState.compute_stats ? (
+              {docState.compute_stats ? (
                 <div className="setting performance-settings">
                   <div className="cores-used inline">
                     <div>
                       <Label id="compute-cores-label">Cores</Label>
                       <small className="text-deemphasis">
-                        {appState.compute_stats.recommended_cores} Recommended /{" "}
+                        {docState.compute_stats.recommended_cores} Recommended /{" "}
                         {appState.platform.cores} Total
                       </small>
                     </div>
                     <Slider
                       aria-labelledby="compute-cores-label"
                       onChange={(value) =>
-                        updateClientState({ compute_cores: value })
+                        updateAppState({ compute_cores: value })
                       }
                       minValue={1}
                       maxValue={appState.platform.cores}
-                      value={appState.client.compute_cores}
+                      value={appState.compute_cores}
                     >
                       <SliderOutput data-impact={coresImpact}>
                         {({ state }) => (
                           <>
-                            {appState.compute_stats &&
-                            (appState.compute_stats.recommended_cores === 0 ||
-                              appState.client.compute_cores >
-                                appState.compute_stats.recommended_cores) ? (
+                            {docState.compute_stats &&
+                            (docState.compute_stats.recommended_cores === 0 ||
+                              appState.compute_cores >
+                                docState.compute_stats.recommended_cores) ? (
                               <WarningIcon />
                             ) : null}
                             {state.getThumbValueLabel(0)} /{" "}
@@ -308,9 +311,9 @@ const RunnerSettings = ({
                       </Label>
                       <div>
                         <small className="text-deemphasis">
-                          {appState.compute_stats?.available_memory
+                          {docState.compute_stats?.available_memory
                             ? `${formatBytes(
-                                appState.compute_stats?.available_memory || 0,
+                                docState.compute_stats?.available_memory || 0,
                                 0,
                               )} Available`
                             : null}{" "}
@@ -327,9 +330,9 @@ const RunnerSettings = ({
                           <>
                             <span className="value">
                               {formatBytes(estimatedMemory, 1)} /{" "}
-                              {appState.compute_stats?.available_memory
+                              {docState.compute_stats?.available_memory
                                 ? `${formatBytes(
-                                    appState.compute_stats?.available_memory ||
+                                    docState.compute_stats?.available_memory ||
                                       0,
                                     1,
                                   )}`
@@ -349,12 +352,12 @@ const RunnerSettings = ({
                         )}
                       </Meter>
                       <small className="swap">
-                        {appState.compute_stats &&
+                        {docState.compute_stats &&
                         estimatedMemoryValue > 100 ? (
                           <>
                             {formatBytes(
                               estimatedMemory -
-                                appState.compute_stats.available_memory,
+                                docState.compute_stats.available_memory,
                               0,
                             )}{" "}
                             Swap
@@ -367,11 +370,11 @@ const RunnerSettings = ({
               ) : null}
             </div>
 
-            {appState.compute_stats &&
-            (appState.compute_stats?.recommended_cores === 0 ||
+            {docState.compute_stats &&
+            (docState.compute_stats?.recommended_cores === 0 ||
               estimatedMemory > appState.platform.memory ||
-              appState.client.compute_cores >
-                appState.compute_stats?.recommended_cores) ? (
+              appState.compute_cores >
+                docState.compute_stats?.recommended_cores) ? (
               <div className="compute-forecast">
                 <b>Warning:</b> System instability may occur when exceeding
                 recommended cores or available memory. When exceeding available
@@ -385,9 +388,9 @@ const RunnerSettings = ({
                 onPress={startRun}
                 isDisabled={Boolean(
                   !fileName ||
-                    appState.validation_error_id ||
-                    (appState.client.enableOutputAlignments &&
-                      !appState.client.alignmentExportPath.length),
+                    docState.validation_error_id ||
+                    (appState.enableOutputAlignments &&
+                      !appState.alignmentExportPath.length),
                 )}
               >
                 Start Analysis
@@ -395,9 +398,9 @@ const RunnerSettings = ({
             </div>
           </>
         ) : null}
-        {appState.validation_error_id ? (
+        {docState.validation_error_id ? (
           <div className="validation-error">
-            {messages[appState.validation_error_id]}
+            {messages[docState.validation_error_id]}
           </div>
         ) : null}
       </div>
@@ -407,29 +410,24 @@ const RunnerSettings = ({
 
 export const Runner = ({
   mainMenu,
-  startRun: startProcessData,
+  docState,
+  setDocState,
+  updateDocState,
 }: {
-  appState: AppState;
+  docState: DocState;
+  setDocState: SetDocState;
+  updateDocState: UpdateDocState;
   mainMenu: React.ReactNode;
-  startRun: () => void;
 }) => {
-  const [appConfig, setAppConfig] = React.useState<{ appVersion: string }>();
-  const fetchAppConfig = React.useCallback(() => {
-    window.pywebview.api
-      .app_config()
-      .then((result) => setAppConfig(JSON.parse(result)));
-  }, []);
-
-  useWaitForPywebview(fetchAppConfig);
-
   return (
-    <div className="app-wrapper with-header with-footer">
+    <div className="app-wrapper with-header">
       <div className="app-header runner">{mainMenu}</div>
       <div className="app-main centered runner">
-        <RunnerSettings startRun={startProcessData} />
-      </div>
-      <div className="app-footer centered">
-        <div>{appConfig ? appConfig.appVersion : null}</div>
+        <RunnerSettings
+          docState={docState}
+          updateDocState={updateDocState}
+          setDocState={setDocState}
+        />
       </div>
     </div>
   );
