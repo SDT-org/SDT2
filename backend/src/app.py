@@ -113,9 +113,11 @@ def handle_open_file(filepath: str, doc_id: str | None):
     filetype, _ = mimetypes.guess_type(basename)
 
     if doc_id == None:
-        # doc_id = make_doc_id(filepath)
+        for doc in get_state().documents:
+            if doc.filename == filepath:
+                return [doc.id, doc.filename]
+
         doc_id = make_doc_id(str(time_ns()))
-    new_doc = get_document(doc_id) == None
 
     unique_dir = os.path.join(temp_dir.name, doc_id)
     os.makedirs(unique_dir, exist_ok=True)
@@ -165,8 +167,7 @@ def handle_open_file(filepath: str, doc_id: str | None):
 
         if valid:
             compute_stats = get_compute_stats(filepath)
-            func = new_document if new_doc else update_document
-            func(
+            new_document(
                 doc_id,
                 view="runner",
                 filename=filepath,
@@ -188,8 +189,7 @@ def handle_open_file(filepath: str, doc_id: str | None):
 
             return [doc_id, str(filepath)]
         else:
-            func = new_document if new_doc else update_document
-            func(
+            new_document(
                 doc_id,
                 view="runner",
                 validation_error_id=message,
@@ -226,28 +226,6 @@ class Api:
     def get_available_memory(self):
         return psutil.virtual_memory().available
 
-    def save_image(self, args: dict):
-        doc = get_document(args["doc_id"])
-        if doc == None:
-            raise Exception(f"could not find document: {args['doc_id']}")
-
-        file_name = f"{doc.basename}.{args['format']}"
-
-        save_path = webview.windows[0].create_file_dialog(
-            dialog_type=webview.SAVE_DIALOG,
-            directory=doc.filename,
-            save_filename=file_name,
-        )
-
-        if not save_path:
-            return
-
-        save_image_from_api(
-            data=args["data"],
-            format=args["format"],
-            destination=save_path,
-        )
-
     def open_file(self, filepath: str, doc_id: str | None = None):
         return handle_open_file(filepath=filepath, doc_id=doc_id)
 
@@ -271,7 +249,7 @@ class Api:
         if isinstance(result, Sequence):
             result = result[0]
         # do_cancel_run()
-        handle_open_file(result, doc_id)
+        return handle_open_file(result, doc_id)
 
     def select_path_dialog(self, directory: str | None = None):
         if directory is None:

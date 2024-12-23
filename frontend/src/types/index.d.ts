@@ -32,11 +32,6 @@ declare global {
           raincloud_image_data: string;
           image_format: SaveableImageFormat;
         }) => Promise<boolean>;
-        save_image: (args: {
-          export_path: string;
-          data: string;
-          format: AppState["client"]["saveFormat"];
-        }) => Promise<void>;
         start_run: (args: RunProcessDataArgs) => Promise<void>;
         processes_info: () => Promise<string>;
         get_available_memory: () => Promise<number>;
