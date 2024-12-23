@@ -375,13 +375,13 @@ class Api:
                 def increment_pair_progress(counter, lock, start_time):
                     with lock:
                         counter.value += 1
-                    pair_count = doc.pair_count
+                    doc = get_document(doc_id)
+                    pair_count = doc.pair_count if doc else 0
                     if pair_count and pair_count > 0:
                         progress = round((counter.value / pair_count) * 100)
                         elapsed = perf_counter() - start_time
                         estimated_total = elapsed * (pair_count / counter.value)
                         estimated = round(estimated_total - elapsed)
-                        print(doc_id, progress)
                         update_document(
                             doc_id,
                             progress=progress,
@@ -512,7 +512,7 @@ class Api:
             raise Exception(f"could not find document: {doc_id}")
 
         file_base = os.path.splitext(doc.basename)[0]
-        print(doc.filename)
+
         if doc.filetype == "text/fasta":
             matrix_path = get_matrix_path(doc)
         else:

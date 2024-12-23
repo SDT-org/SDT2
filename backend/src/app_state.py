@@ -68,7 +68,6 @@ def create_app_state(
             doc._replace(**updates) if doc.id == id else doc
             for doc in state.documents
         ]
-
         set_state(documents=updated_documents)
 
     def remove_document(id: str):
