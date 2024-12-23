@@ -11,6 +11,7 @@ declare global {
         get_state: () => Promise<AppState>;
         reset_state: () => Promise<void>;
         new_doc: () => Promise<string>;
+        save_doc: (doc_id: string, path: string) => Promise<boolean>;
         open_file: (
           filepath: string,
           doc_id?: string,
@@ -19,6 +20,10 @@ declare global {
           doc_id?: string,
           last_data_filepath?: string,
         ) => Promise<[string, string]> | Promise<void>;
+        save_file_dialog: (
+          filename: string,
+          defaultDirectory?: string,
+        ) => Promise<string>;
         select_path_dialog: (defaultDirectory?: string) => Promise<string>;
         export_data: (args: {
           doc_id: string;

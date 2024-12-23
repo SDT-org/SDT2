@@ -1,13 +1,22 @@
-import multiprocessing
+from enum import unique
 import os
 import sys
-from tempfile import TemporaryDirectory
-from typing import Sequence
 
 current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(current_file_path, "../../"))
 sys.path.append(os.path.join(current_file_path, "."))
 
+import multiprocessing
+from tempfile import TemporaryDirectory
+from platformdirs import user_documents_dir
+from utils import get_child_process_info, make_doc_id
+from process_data import process_data, save_cols_to_csv
+from document_state import DocState
+from app_settings import add_recent_file, load_app_settings
+from export_data import do_export_data, prepare_export_data
+from save_document import pack_document, unpack_document
+from app_state import create_app_state
+from validations import validate_fasta
 import platform
 from Bio import SeqIO
 import psutil
@@ -18,22 +27,13 @@ from numpy import eye, where, nan, nanmin, nanmax
 import mimetypes
 from time import perf_counter, time_ns
 from multiprocessing import Lock, Manager, Pool, cpu_count
+from config import app_version, dev_frontend_host
+from constants import matrix_filetypes, default_window_title
 
-from app_state import create_app_state
-from validations import validate_fasta
-from config import app_version
-from utils import get_child_process_info, make_doc_id
-from process_data import process_data, save_cols_to_csv
-from document_state import DocState
-from app_settings import add_recent_file, load_app_settings
-from export_data import do_export_data, prepare_export_data
-
-dev_frontend_host = "http://localhost:5173"
 is_compiled = "__compiled__" in globals()
 is_macos = platform.system() == "Darwin"
 temp_dir = TemporaryDirectory()
 
-default_window_title = "Sequence Demarcation Tool 2 Beta"
 
 try:
     cpu_count = cpu_count()
@@ -45,7 +45,8 @@ mimetypes.add_type("text/fasta", ".fas")
 mimetypes.add_type("text/fasta", ".faa")
 mimetypes.add_type("text/fasta", ".fnt")
 mimetypes.add_type("text/fasta", ".fa")
-matrix_filetypes = ("text/csv", "application/vnd.ms-excel", "text/plain")
+mimetypes.add_type("application/vnd.sdt", ".sdt")
+
 
 window = None
 pool = None
@@ -54,7 +55,19 @@ start_time = None
 
 
 def get_matrix_path(state: DocState):
-    if state.filetype == "text/fasta":
+    if state.filetype == "application/vnd.sdt":
+        path = next(
+            (
+                os.path.join(state.tempdir_path, file)
+                for file in os.listdir(state.tempdir_path)
+                if file.endswith("_mat.csv")
+            ),
+            None,
+        )
+        if path == None:
+            raise Exception(f"Failed to located matrix file")
+        return path
+    elif state.filetype == "text/fasta":
         file_base = os.path.splitext(state.basename)[0]
         return os.path.join(state.tempdir_path, f"{file_base}_mat.csv")
     else:
@@ -121,6 +134,22 @@ def handle_open_file(filepath: str, doc_id: str | None):
 
     unique_dir = os.path.join(temp_dir.name, doc_id)
     os.makedirs(unique_dir, exist_ok=True)
+
+    if filetype == "application/vnd.sdt":
+        unpack_document(filepath, unique_dir)
+        new_document(
+            doc_id,
+            view="viewer",
+            filename=filepath,
+            filemtime=os.path.getmtime(filepath),
+            tempdir_path=unique_dir,
+            basename=basename,
+            pair_progress=0,
+            pair_count=0,
+            filetype=filetype,
+        )
+        add_recent_file(filepath)
+        return [doc_id, filepath]
 
     if filetype in matrix_filetypes:
         # Maybe can remove this if we can find a way to make pandas
@@ -237,7 +266,8 @@ class Api:
             allow_multiple=False,
             directory=os.path.dirname(filepath),
             file_types=(
-                "Compatible file (*.fasta;*.fas;*.faa;*.fnt;*.fa;*.csv;*.txt)",
+                "Compatible file (*.fasta;*.fas;*.faa;*.fnt;*.fa;*.sdt;*.csv;*.txt)",
+                "SDT file (*.sdt)",
                 "FASTA file (*.fasta;*.fas;*.faa;*.fnt;*.fa)",
                 "SDT2 Matrix file (*.csv)",
                 "SDT1 Matrix file (*.txt)",
@@ -246,13 +276,33 @@ class Api:
         if not result:
             return ""
 
-        if isinstance(result, Sequence):
+        if isinstance(result, str):
+            result = result
+        else:
             result = result[0]
         # do_cancel_run()
         return handle_open_file(result, doc_id)
 
+    def save_file_dialog(self, filename: str, directory: str | None = None):
+        if directory == None:
+            directory = user_documents_dir()
+
+        result = webview.windows[0].create_file_dialog(
+            webview.SAVE_DIALOG, directory=directory, save_filename=filename
+        )
+
+        output_path = None
+
+        if result:
+            if isinstance(result, str):
+                output_path = result
+            else:
+                output_path = result[0]
+
+        return output_path
+
     def select_path_dialog(self, directory: str | None = None):
-        if directory is None:
+        if directory == None:
             directory = ""
 
         result = webview.windows[0].create_file_dialog(
@@ -261,10 +311,10 @@ class Api:
         output_path = None
 
         if result:
-            if isinstance(result, Sequence):
-                output_path = result[0]
-            else:
+            if isinstance(result, str):
                 output_path = result
+            else:
+                output_path = result[0]
         return output_path
 
     def get_state(self):
@@ -411,18 +461,23 @@ class Api:
         if doc == None:
             raise Exception(f"could not find document: {doc_id}")
 
-        file_base = os.path.splitext(doc.basename)[0]
-
-        if doc.filetype == "text/fasta":
+        if doc.filetype == "application/vnd.sdt" or doc.filetype == "text/fasta":
             matrix_path = get_matrix_path(doc)
         else:
             matrix_path = doc.filename
+
+        if doc.filetype == "application/vnd.sdt":
+            file_base = os.path.splitext(os.path.basename(matrix_path))[0].removesuffix(
+                "_mat"
+            )
+        else:
+            file_base = os.path.splitext(doc.basename)[0]
 
         with open(matrix_path, "r") as temp_f:
             col_count = [len(l.split(",")) for l in temp_f.readlines()]
             column_names = [i for i in range(0, max(col_count))]
 
-        if doc.filetype == "text/fasta":
+        if doc.filetype == "text/fasta" or doc.filetype == "application/vnd.sdt":
             stats_path = os.path.join(doc.tempdir_path, f"{file_base}_stats.csv")
             stats_df = read_csv(stats_path, header=0)
             gc_stats = stats_df["GC %"].map(lambda value: round(value * 100)).tolist()
@@ -474,6 +529,16 @@ class Api:
         id = make_doc_id(str(time_ns()))
         new_document(id)
         return id
+
+    def save_doc(self, doc_id: str, path: str):
+        doc = get_document(doc_id)
+        if doc == None:
+            raise Exception(f"Expected to find document: {doc_id}")
+        files = [
+            os.path.join(doc.tempdir_path, file)
+            for file in os.listdir(doc.tempdir_path)
+        ]
+        pack_document(path, files)
 
 
 def file_exists(path):

@@ -2,9 +2,9 @@ import base64
 import os
 import shutil
 import urllib.parse
-from webview.window import Window
 from document_state import DocState
 import cluster
+from constants import data_file_suffixes
 
 image_types = ["heatmap", "histogram", "violin", "raincloud"]
 
@@ -37,14 +37,14 @@ def save_image_from_api(data, format, destination):
 def prepare_export_data(export_path: str, matrix_path: str, doc: DocState, args: dict):
     if doc.filetype == "text/fasta":
         prefix = os.path.splitext(doc.basename)[0]
-        suffixes = ["_cols", "_mat", "_summary", "_tree", "_stats"]
+        suffixes = data_file_suffixes
     else:
         prefix = os.path.splitext(doc.basename)[0].removesuffix("_mat")
         suffixes = ["_mat"]
 
     if args["output_cluster"] == True:
         suffixes.append("_cluster")
-        # TODO: it's not intuitive that a save happens in here, move it outside
+        # TODO: it's not intuitive that an export happens in here, move it outside?
         cluster.export(
             matrix_path,
             args["cluster_threshold_one"],

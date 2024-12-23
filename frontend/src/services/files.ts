@@ -13,3 +13,16 @@ export const openFileDialog = async (
     return [false, ["", ""]];
   }
 };
+
+export const saveFileDialog = async (
+  filename: string,
+): Promise<[boolean, string]> => {
+  try {
+    const data = await window.pywebview.api.save_file_dialog(filename);
+    return [!!data, data];
+  } catch (e) {
+    console.error(e);
+    alert("An error occured while saving this file. Please try again.");
+    return [false, ""];
+  }
+};

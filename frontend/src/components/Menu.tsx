@@ -14,6 +14,7 @@ import {
 } from "react-aria-components";
 import { type AppState, findDoc, useAppState } from "../appState";
 import useOpenFileDialog from "../hooks/useOpenFileDialog";
+import { services } from "../services";
 
 // AppMenuButton and AppMenuItem were derived from https://react-spectrum.adobe.com/react-aria/Menu.html#reusable-wrappers
 interface MyMenuButtonProps<T>
@@ -106,7 +107,10 @@ export type MainMenuProps = {
 
 export const MainMenu = createHideableComponent(() => {
   const { appState, setAppState } = useAppState();
-  const activeDocState = findDoc(appState.activeDocumentId, appState);
+  const activeDocState = React.useMemo(
+    () => findDoc(appState.activeDocumentId, appState),
+    [appState],
+  );
 
   if (!activeDocState) {
     throw new Error(`Could not locate document: ${appState.activeDocumentId}`);
@@ -123,6 +127,10 @@ export const MainMenu = createHideableComponent(() => {
 
   const onOpen = () => {
     openFileDialog();
+  };
+
+  const onSave = () => {
+    return services.saveDocument(activeDocState);
   };
 
   const onExport = () =>
@@ -153,6 +161,9 @@ export const MainMenu = createHideableComponent(() => {
     <AppMenuButton label="☰">
       <AppMenuItem onAction={onNew}>New</AppMenuItem>
       <AppMenuItem onAction={onOpen}>Open...</AppMenuItem>
+      <AppMenuItem onAction={onSave}>
+        {activeDocState.savepath ? "Save" : "Save As..."}
+      </AppMenuItem>
       <AppMenuItem
         isDisabled={activeDocState?.view !== "viewer"}
         onAction={onExport}
