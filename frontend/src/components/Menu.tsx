@@ -151,8 +151,6 @@ export const MainMenu = createHideableComponent(() => {
 
   React.useEffect(() => {
     window.pywebview.api.app_settings().then((data) => {
-      console.log(data);
-
       setRecentFiles(data.recent_files);
     });
   }, []);
