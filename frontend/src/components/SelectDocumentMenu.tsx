@@ -4,6 +4,7 @@ import { Select, SelectItem } from "./Select";
 
 export const SelectDocumentMenu = createHideableComponent(() => {
   const { appState, setAppState } = useAppState();
+
   return (
     <Select
       id="select-file"
@@ -20,7 +21,9 @@ export const SelectDocumentMenu = createHideableComponent(() => {
         name: basename,
       }))}
     >
-      {(item) => <SelectItem textValue={item.name}>{item.name}</SelectItem>}
+      {(item) => (
+        <SelectItem textValue={item.name}>{item.name || "Untitled"}</SelectItem>
+      )}
     </Select>
   );
 });

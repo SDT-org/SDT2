@@ -2,6 +2,7 @@ import multiprocessing
 import os
 import sys
 from tempfile import TemporaryDirectory
+from typing import Sequence
 
 current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(current_file_path, "../../"))
@@ -29,6 +30,7 @@ from config import app_version
 from utils import get_child_process_info, make_doc_id
 from process_data import process_data, save_cols_to_csv
 from document_state import DocState
+from app_settings import add_recent_file, get_app_settings_path, load_app_settings
 
 dev_frontend_host = "http://localhost:5173"
 is_compiled = "__compiled__" in globals()
@@ -60,7 +62,7 @@ def get_matrix_path(state: DocState):
         file_base = os.path.splitext(state.basename)[0]
         return os.path.join(state.tempdir_path, f"{file_base}_mat.csv")
     else:
-        return state.filename[0]
+        return state.filename
 
 
 def find_source_files(state: DocState, prefix, suffixes):
@@ -137,6 +139,102 @@ def get_compute_stats(filename):
     }
 
 
+def handle_open_file(filepath: str, doc_id: str | None):
+    basename = os.path.basename(filepath)
+    filetype, _ = mimetypes.guess_type(basename)
+
+    if doc_id == None:
+        # doc_id = make_doc_id(filepath)
+        doc_id = make_doc_id(str(time_ns()))
+    new_doc = get_document(doc_id) == None
+
+    unique_dir = os.path.join(temp_dir.name, doc_id)
+    os.makedirs(unique_dir, exist_ok=True)
+
+    if filetype in matrix_filetypes:
+        # Maybe can remove this if we can find a way to make pandas
+        # infer the max column length based on the latest column length
+        with open(filepath, "r") as temp_f:
+            col_count = [len(l.split(",")) for l in temp_f.readlines()]
+            column_names = [i for i in range(0, max(col_count))]
+
+        df = read_csv(
+            filepath,
+            delimiter=",",
+            index_col=0,
+            header=None,
+            names=column_names,
+        )
+
+        new_document(
+            doc_id,
+            view="viewer",
+            filename=filepath,
+            filemtime=os.path.getmtime(filepath),
+            tempdir_path=unique_dir,
+            basename=basename,
+            pair_progress=0,
+            pair_count=0,
+            filetype=filetype,
+        )
+
+        save_cols_to_csv(
+            df,
+            os.path.join(
+                unique_dir,
+                os.path.splitext(basename)[0].removesuffix("_mat"),
+            ),
+        )
+
+        add_recent_file(filepath)
+
+        return [doc_id, filepath]
+
+    else:
+        assert_window().title = default_window_title
+        valid, message = validate_fasta(filepath, filetype)
+
+        if valid:
+            compute_stats = get_compute_stats(filepath)
+            func = new_document if new_doc else update_document
+            func(
+                doc_id,
+                view="runner",
+                filename=filepath,
+                filetype=filetype,
+                filemtime=os.path.getmtime(filepath),
+                tempdir_path=unique_dir,
+                basename=basename,
+                validation_error_id=None,
+                pair_progress=0,
+                pair_count=0,
+                stage="",
+                progress=0,
+                compute_stats=compute_stats,
+            )
+            if len(get_state().documents) == 1:
+                remove_empty_documents()
+
+            add_recent_file(filepath)
+
+            return [doc_id, str(filepath)]
+        else:
+            func = new_document if new_doc else update_document
+            func(
+                doc_id,
+                view="runner",
+                validation_error_id=message,
+                filename="",
+                basename="",
+                filetype="",
+                filemtime=None,
+                compute_stats=None,
+            )
+
+        if len(get_state().documents) == 1:
+            remove_empty_documents()
+
+
 class Api:
     def close_app(self):
         os._exit(0)
@@ -150,6 +248,9 @@ class Api:
     def app_config(self):
         return json.dumps({"appVersion": app_version})
 
+    def app_settings(self):
+        return load_app_settings()
+
     def processes_info(self):
         return json.dumps(get_child_process_info())
 
@@ -157,12 +258,15 @@ class Api:
         return psutil.virtual_memory().available
 
     def save_image(self, args: dict):
-        state = get_state().documents[args["doc_id"]]
-        file_name = f"{state.basename}.{args['format']}"
+        doc = get_document(args["doc_id"])
+        if doc == None:
+            raise Exception(f"could not find document: {args['doc_id']}")
+
+        file_name = f"{doc.basename}.{args['format']}"
 
         save_path = webview.windows[0].create_file_dialog(
             dialog_type=webview.SAVE_DIALOG,
-            directory=state.filename[0],
+            directory=doc.filename,
             save_filename=file_name,
         )
 
@@ -174,6 +278,9 @@ class Api:
             format=args["format"],
             destination=save_path,
         )
+
+    def open_file(self, filepath: str, doc_id: str | None = None):
+        return handle_open_file(filepath=filepath, doc_id=doc_id)
 
     def open_file_dialog(self, doc_id: str | None = None, filepath: str | None = None):
         if filepath is None:
@@ -192,99 +299,10 @@ class Api:
         if not result:
             return ""
 
-        if isinstance(result, str):
-            result = [result]
-
-        matrix_path = result[0]
-        basename = os.path.basename(matrix_path)
-
-        filetype, _ = mimetypes.guess_type(basename)
-
-        do_cancel_run()
-
-        if doc_id == None:
-            doc_id = make_doc_id(result[0])
-
-        unique_dir = os.path.join(temp_dir.name, doc_id)
-        os.makedirs(unique_dir, exist_ok=True)
-
-        if filetype in matrix_filetypes:
-            # Maybe can remove this if we can find a way to make pandas
-            # infer the max column length based on the latest column length
-            with open(matrix_path, "r") as temp_f:
-                col_count = [len(l.split(",")) for l in temp_f.readlines()]
-                column_names = [i for i in range(0, max(col_count))]
-
-            df = read_csv(
-                matrix_path,
-                delimiter=",",
-                index_col=0,
-                header=None,
-                names=column_names,
-            )
-
-            new_document(
-                doc_id or make_doc_id(result[0]),
-                view="viewer",
-                filename=result,
-                filemtime=os.path.getmtime(result[0]),
-                tempdir_path=unique_dir,
-                basename=basename,
-                pair_progress=0,
-                pair_count=0,
-                filetype=filetype,
-            )
-
-            save_cols_to_csv(
-                df,
-                os.path.join(
-                    unique_dir,
-                    os.path.splitext(basename)[0].removesuffix("_mat"),
-                ),
-            )
-
-            return [doc_id, filepath]
-
-        else:
-            assert_window().title = default_window_title
-            valid, message = validate_fasta(matrix_path, filetype)
-
-            if valid:
-                compute_stats = get_compute_stats(result[0])
-                func = update_document if doc_id else new_document
-                func(
-                    doc_id or make_doc_id(str(time_ns())),
-                    view="runner",
-                    filename=result,
-                    filetype=filetype,
-                    filemtime=os.path.getmtime(matrix_path),
-                    tempdir_path=unique_dir,
-                    basename=basename,
-                    validation_error_id=None,
-                    pair_progress=0,
-                    pair_count=0,
-                    stage="",
-                    progress=0,
-                    compute_stats=compute_stats,
-                )
-                if len(get_state().documents) == 1:
-                    remove_empty_documents()
-                return [doc_id, str(matrix_path)]
-            else:
-                func = update_document if doc_id else new_document
-                func(
-                    doc_id or make_doc_id(str(time_ns())),
-                    view="runner",
-                    validation_error_id=message,
-                    filename="",
-                    basename="",
-                    filetype="",
-                    filemtime=None,
-                    compute_stats=None,
-                )
-
-            if len(get_state().documents) == 1:
-                remove_empty_documents()
+        if isinstance(result, Sequence):
+            result = result[0]
+        # do_cancel_run()
+        handle_open_file(result, doc_id)
 
     def select_path_dialog(self, directory: str | None = None):
         if directory is None:
@@ -296,10 +314,10 @@ class Api:
         output_path = None
 
         if result:
-            if isinstance(result, str):
-                output_path = result
-            else:
+            if isinstance(result, Sequence):
                 output_path = result[0]
+            else:
+                output_path = result
         return output_path
 
     def get_state(self):
@@ -320,7 +338,7 @@ class Api:
             print("\nAPI args:", args)
 
         settings = dict()
-        settings["input_file"] = doc.filename[0]
+        settings["input_file"] = doc.filename
         settings["out_dir"] = doc.tempdir_path
 
         if args.get("cluster_method") == "Neighbor-Joining":
@@ -494,7 +512,11 @@ class Api:
             raise Exception(f"could not find document: {doc_id}")
 
         file_base = os.path.splitext(doc.basename)[0]
-        matrix_path = get_matrix_path(doc)
+        print(doc.filename)
+        if doc.filetype == "text/fasta":
+            matrix_path = get_matrix_path(doc)
+        else:
+            matrix_path = doc.filename
 
         with open(matrix_path, "r") as temp_f:
             col_count = [len(l.split(",")) for l in temp_f.readlines()]
@@ -573,7 +595,6 @@ def push_backend_state(window: webview.Window):
         f: [d._asdict() for d in getattr(t, f)] if f == "documents" else getattr(t, f)
         for f in t._fields
     }
-    print(dict_state(state)["documents"])
     js_app_state = json.dumps(dict(state=dict_state(state)))
     window.evaluate_js(
         f"document.dispatchEvent(new CustomEvent('sync-state', {{ detail: {js_app_state} }}))"

@@ -25,7 +25,7 @@ const saveableImageFormatKeys = ["svg", "png", "jpeg"] as const;
 export type DocState = {
   id: string;
   view: "runner" | "loader" | "viewer";
-  filename: string[]; // TODO: really fix this array nonsense
+  filename: string;
   filetype: string;
   filemtime?: string;
   basename: string;
@@ -90,7 +90,7 @@ export const clientStateSchema = z.object({
 export const initialDocState: DocState = {
   id: "",
   view: "runner",
-  filename: [""],
+  filename: "",
   filetype: "",
   basename: "",
   // TODO: wrap in runState

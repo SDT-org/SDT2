@@ -7,9 +7,14 @@ declare global {
     pywebview: {
       api: {
         app_config: () => Promise<string>;
+        app_settings: () => Promise<{ recent_files: string[] }>;
         get_state: () => Promise<AppState>;
         reset_state: () => Promise<void>;
         new_doc: () => Promise<string>;
+        open_file: (
+          filepath: string,
+          doc_id?: string,
+        ) => Promise<[string, string]>;
         open_file_dialog: (
           doc_id?: string,
           last_data_filepath?: string,

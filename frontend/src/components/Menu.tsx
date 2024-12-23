@@ -1,4 +1,5 @@
 import { createHideableComponent } from "@react-aria/collections";
+import React from "react";
 import {
   Button,
   Menu,
@@ -9,6 +10,7 @@ import {
   type MenuTriggerProps,
   Popover,
   Separator,
+  SubmenuTrigger,
 } from "react-aria-components";
 import { type AppState, findDoc, useAppState } from "../appState";
 import useOpenFileDialog from "../hooks/useOpenFileDialog";
@@ -137,6 +139,16 @@ export const MainMenu = createHideableComponent(() => {
     }
   };
 
+  const [recentFiles, setRecentFiles] = React.useState<string[]>([]);
+
+  React.useEffect(() => {
+    window.pywebview.api.app_settings().then((data) => {
+      console.log(data);
+
+      setRecentFiles(data.recent_files);
+    });
+  }, []);
+
   return (
     <AppMenuButton label="☰">
       <AppMenuItem onAction={onNew}>New</AppMenuItem>
@@ -149,6 +161,29 @@ export const MainMenu = createHideableComponent(() => {
       </AppMenuItem>
       <AppMenuItem onAction={onManual}>Manual</AppMenuItem>
       <AppMenuItem onAction={onAbout}>About</AppMenuItem>
+      <Separator />
+      <SubmenuTrigger>
+        <AppMenuItem>Open Recent</AppMenuItem>
+        <Popover>
+          <Menu>
+            {recentFiles.map((filePath) => (
+              <AppMenuItem
+                key={filePath}
+                onAction={() =>
+                  window.pywebview.api.open_file(filePath).then((data) => {
+                    setAppState((prev) => ({
+                      ...prev,
+                      activeDocumentId: data[0],
+                    }));
+                  })
+                }
+              >
+                {filePath.split(/(\/|\\)/).pop()}
+              </AppMenuItem>
+            ))}
+          </Menu>
+        </Popover>
+      </SubmenuTrigger>
       <Separator />
       <AppMenuItem onAction={onExit}>Exit</AppMenuItem>
     </AppMenuButton>

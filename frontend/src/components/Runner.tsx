@@ -58,8 +58,8 @@ const RunnerSettings = ({
   const startRun = useStartRun(docState, appState);
   const openFileDialog = useOpenFileDialog(appState, setAppState);
   const fileName =
-    docState.filename?.length && docState.filename[0]
-      ? docState.filename[0].split("/").pop()
+    docState.filename?.length && docState.filename
+      ? docState.filename.split("/").pop()
       : undefined;
 
   const updateAppState = React.useCallback(
