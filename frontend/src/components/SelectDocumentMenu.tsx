@@ -5,6 +5,13 @@ import { Select, SelectItem } from "./Select";
 export const SelectDocumentMenu = createHideableComponent(() => {
   const { appState, setAppState } = useAppState();
 
+  if (
+    appState.documents.length === 1 &&
+    appState.documents[0]?.filename === ""
+  ) {
+    return null;
+  }
+
   return (
     <Select
       id="select-file"

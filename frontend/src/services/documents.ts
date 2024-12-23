@@ -15,3 +15,6 @@ export const saveDocument = async (docState: DocState) => {
   }
   return window.pywebview.api.save_doc(docState.id, docState.savepath);
 };
+
+export const closeDocument = (docId: string) =>
+  window.pywebview.api.close_doc(docId);

@@ -12,6 +12,7 @@ declare global {
         reset_state: () => Promise<void>;
         new_doc: () => Promise<string>;
         save_doc: (doc_id: string, path: string) => Promise<boolean>;
+        close_doc: (doc_id: string) => Promise<void>;
         open_file: (
           filepath: string,
           doc_id?: string,

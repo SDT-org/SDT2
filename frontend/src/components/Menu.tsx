@@ -129,9 +129,8 @@ export const MainMenu = createHideableComponent(() => {
     openFileDialog();
   };
 
-  const onSave = () => {
-    return services.saveDocument(activeDocState);
-  };
+  const onSave = () => services.saveDocument(activeDocState);
+  const onClose = () => services.closeDocument(activeDocState.id);
 
   const onExport = () =>
     setAppState((previous) => ({
@@ -159,22 +158,6 @@ export const MainMenu = createHideableComponent(() => {
     <AppMenuButton label="☰">
       <AppMenuItem onAction={onNew}>New</AppMenuItem>
       <AppMenuItem onAction={onOpen}>Open...</AppMenuItem>
-      {activeDocState.view === "viewer" ? (
-        <>
-          <AppMenuItem onAction={onSave}>
-            {activeDocState.savepath ? "Save" : "Save As..."}
-          </AppMenuItem>
-          <AppMenuItem
-            isDisabled={activeDocState?.view !== "viewer"}
-            onAction={onExport}
-          >
-            Export...
-          </AppMenuItem>
-        </>
-      ) : null}
-      <AppMenuItem onAction={onManual}>Manual</AppMenuItem>
-      <AppMenuItem onAction={onAbout}>About</AppMenuItem>
-      <Separator />
       <SubmenuTrigger>
         <AppMenuItem>Open Recent</AppMenuItem>
         <Popover>
@@ -197,6 +180,24 @@ export const MainMenu = createHideableComponent(() => {
           </Menu>
         </Popover>
       </SubmenuTrigger>
+      <Separator />
+      {activeDocState.view === "viewer" ? (
+        <>
+          <AppMenuItem onAction={onClose}>Close</AppMenuItem>
+          <AppMenuItem onAction={onSave}>
+            {activeDocState.savepath ? "Save" : "Save As..."}
+          </AppMenuItem>
+          <AppMenuItem
+            isDisabled={activeDocState?.view !== "viewer"}
+            onAction={onExport}
+          >
+            Export...
+          </AppMenuItem>
+          <Separator />
+        </>
+      ) : null}
+      <AppMenuItem onAction={onManual}>Manual</AppMenuItem>
+      <AppMenuItem onAction={onAbout}>About</AppMenuItem>
       <Separator />
       <AppMenuItem onAction={onExit}>Exit</AppMenuItem>
     </AppMenuButton>

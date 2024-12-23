@@ -540,6 +540,9 @@ class Api:
         ]
         pack_document(path, files)
 
+    def close_doc(self, doc_id: str):
+        remove_document(doc_id)
+
 
 def file_exists(path):
     return os.path.exists(os.path.join(os.path.dirname(__file__), path))
