@@ -5,7 +5,7 @@ export default defineConfig(({ mode }) => ({
   root: 'frontend/src',
   plugins: [
     react(),
-    mode === 'development' && {
+    process.env.REACT_DEV_TOOLS && {
      name: 'inject-devtools-script',
      transformIndexHtml(html) {
        return html.replace(

@@ -21,7 +21,9 @@
     "init:default": "virtualenv -p python3.11 venv-pywebview && ./venv-pywebview/bin/pip install Cython && ./venv-pywebview/bin/pip install -r requirements.txt",
     "init:qt5": "./venv-pywebview/bin/pip install pyqt5 pyqtwebengine -r requirements.txt",
     "init:gtk": "sudo apt install libgirepository1.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0 && ./venv-pywebview/bin/pip install pycairo pygobject -r requirements.txt",
-    "start": "bun run check && concurrently --raw --kill-others --success first --names \"frontend,backend\" \"bun run frontend:dev\" \"bun run backend\""
+    "start": "bun run check && concurrently --raw --kill-others --success first --names \"frontend,backend\" \"bun run frontend:dev\" \"bun run backend\"",
+    "start:debug": "DEBUG=true bun run start",
+    "start:tools": "concurrently --raw --kill-others \"bunx react-devtools\" \"REACT_DEV_TOOLS=true bun run start:debug\""
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.1",
@@ -42,7 +44,6 @@
     "@types/react-plotly.js": "^2.6.3",
     "@types/tinycolor2": "^1.4.6",
     "concurrently": "^9.1.0",
-    "prettier": "3.2.5",
     "run-script-os": "^1.1.6",
     "sass": "^1.63.6",
     "typescript": "^5.7.2",
