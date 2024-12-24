@@ -1,5 +1,5 @@
 import React, { type ErrorInfo } from "react";
-import { Button, Dialog, Modal } from "react-aria-components";
+import { Button, Dialog, Heading, Modal } from "react-aria-components";
 import {
   type AppState,
   type SetAppState,
@@ -88,11 +88,11 @@ export class ErrorBoundary extends React.Component<Props> {
   override render() {
     const activeRunDocState = findDoc(
       this.props.appState.activeRunDocumentId,
-      this.props.appState,
+      this.props.appState.documents,
     );
     const activeDocState = findDoc(
       this.props.appState.activeDocumentId,
-      this.props.appState,
+      this.props.appState.documents,
     );
     const error = this.props.appState.error;
     const errorInfo = this.props.appState.errorInfo;
@@ -144,7 +144,9 @@ export class ErrorBoundary extends React.Component<Props> {
         <Modal isDismissable isOpen={true} onOpenChange={resetAppError}>
           <Dialog>
             <div className="error-modal">
-              <h1>Something went wrong.</h1>
+              <Heading level={1} slot="title">
+                Something went wrong.
+              </Heading>
               <p>
                 Please{" "}
                 <a

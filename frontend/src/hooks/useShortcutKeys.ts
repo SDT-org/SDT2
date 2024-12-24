@@ -19,7 +19,7 @@ export const useShortcutKeys = (
         }
         if (event.key === "s") {
           event.preventDefault();
-          const doc = findDoc(appState.activeDocumentId, appState);
+          const doc = findDoc(appState.activeDocumentId, appState.documents);
           if (doc && doc.view === "viewer") {
             saveDocument(doc, !isSDTFile(doc.filetype));
           }
@@ -30,5 +30,5 @@ export const useShortcutKeys = (
     document.addEventListener("keydown", handleKeydown);
 
     return () => document.removeEventListener("keydown", handleKeydown);
-  }, [openFileDialog, appState]);
+  }, [openFileDialog, appState.activeDocumentId, appState.documents]);
 };

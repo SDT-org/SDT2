@@ -1,4 +1,5 @@
 import psutil
+from uuid import uuid4
 from hashlib import sha256
 
 
@@ -16,5 +17,5 @@ def get_child_process_info():
 
     return info
 
-def make_doc_id(input: str) -> str:
-    return sha256(input.encode()).hexdigest()
+def make_doc_id() -> str:
+    return str(uuid4())

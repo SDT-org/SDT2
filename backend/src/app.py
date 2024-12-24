@@ -130,7 +130,7 @@ def handle_open_file(filepath: str, doc_id: str | None):
             if doc.filename == filepath:
                 return [doc.id, doc.filename]
 
-        doc_id = make_doc_id(str(time_ns()))
+        doc_id = make_doc_id()
 
     unique_dir = os.path.join(temp_dir.name, doc_id)
     os.makedirs(unique_dir, exist_ok=True)
@@ -526,7 +526,7 @@ class Api:
         return json.dumps(data_to_dump)
 
     def new_doc(self):
-        id = make_doc_id(str(time_ns()))
+        id = make_doc_id()
         new_document(id)
         return id
 

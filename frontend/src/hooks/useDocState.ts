@@ -12,14 +12,14 @@ export const useDocState = (
   setAppState: SetAppState,
 ) => {
   const docState = React.useMemo(() => {
-    const foundDoc = findDoc(docId, appState);
+    const foundDoc = findDoc(docId, appState.documents);
 
     if (!foundDoc) {
       throw new Error(`Expected document to be found: ${docId}`);
     }
 
     return foundDoc;
-  }, [docId, appState]);
+  }, [docId, appState.documents]);
 
   const setDocState = React.useCallback(
     (nextDoc: (prevDoc: DocState) => DocState) =>

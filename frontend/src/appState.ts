@@ -161,8 +161,8 @@ export type SetDocState = (nextDoc: (prevDoc: DocState) => DocState) => void;
 export type UpdateDocState = (newValues: Partial<DocState>) => void;
 export type SyncStateEvent = CustomEvent<{ state: AppState }>;
 
-export const findDoc = (id: string, appState: AppState) =>
-  appState.documents.find((d) => d.id === id);
+export const findDoc = (id: string, documents: AppState["documents"]) =>
+  documents.find((d) => d.id === id);
 
 export const AppStateContext = React.createContext<{
   appState: AppState;
