@@ -11,7 +11,7 @@ from tempfile import TemporaryDirectory
 from platformdirs import user_documents_dir
 from utils import get_child_process_info, make_doc_id
 from process_data import process_data, save_cols_to_csv
-from document_state import DocState
+from document_state import DocState, save_doc_settings
 from app_settings import add_recent_file, load_app_settings
 from export_data import do_export_data, prepare_export_data
 from save_document import pack_document, unpack_document
@@ -280,7 +280,7 @@ class Api:
             result = result
         else:
             result = result[0]
-        # do_cancel_run()
+
         return handle_open_file(result, doc_id)
 
     def save_file_dialog(self, filename: str, directory: str | None = None):
@@ -539,6 +539,21 @@ class Api:
             for file in os.listdir(doc.tempdir_path)
         ]
         pack_document(path, files)
+
+    def save_doc_settings(self, args: dict):
+        doc = get_document(args["id"])
+        if doc == None:
+            raise Exception(f"Expected to find document: {args['id']}")
+        update_document(
+            args["id"],
+            dataView=args["dataView"],
+            heatmap=args["heatmap"],
+            distribution=args["distribution"],
+        )
+        doc = get_document(args["id"])
+        if doc == None:
+            raise Exception(f"Expected to find document: {args['id']}")
+        save_doc_settings(doc)
 
     def close_doc(self, doc_id: str):
         remove_document(doc_id)

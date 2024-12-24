@@ -13,6 +13,7 @@ import {
   SubmenuTrigger,
 } from "react-aria-components";
 import { type AppState, findDoc, useAppState } from "../appState";
+import { isSDTFile } from "../helpers";
 import useOpenFileDialog from "../hooks/useOpenFileDialog";
 import { services } from "../services";
 
@@ -116,6 +117,8 @@ export const MainMenu = createHideableComponent(() => {
     throw new Error(`Could not locate document: ${appState.activeDocumentId}`);
   }
 
+  const sdtFile = isSDTFile(activeDocState.filetype);
+
   const openFileDialog = useOpenFileDialog(appState, setAppState);
   const onNew = () => {
     window.pywebview.api
@@ -130,6 +133,7 @@ export const MainMenu = createHideableComponent(() => {
   };
 
   const onSave = () => services.saveDocument(activeDocState);
+  const onSaveAs = () => services.saveDocument(activeDocState, true);
   const onClose = () => services.closeDocument(activeDocState.id);
 
   const onExport = () =>
@@ -183,19 +187,19 @@ export const MainMenu = createHideableComponent(() => {
       <Separator />
       {activeDocState.view === "viewer" ? (
         <>
-          <AppMenuItem onAction={onClose}>Close</AppMenuItem>
-          <AppMenuItem onAction={onSave}>
-            {activeDocState.savepath ? "Save" : "Save As..."}
-          </AppMenuItem>
+          {sdtFile ? <AppMenuItem onAction={onSave}>Save</AppMenuItem> : null}
+
+          <AppMenuItem onAction={onSaveAs}>Save As...</AppMenuItem>
           <AppMenuItem
             isDisabled={activeDocState?.view !== "viewer"}
             onAction={onExport}
           >
             Export...
           </AppMenuItem>
-          <Separator />
         </>
       ) : null}
+      <AppMenuItem onAction={onClose}>Close</AppMenuItem>
+      <Separator />
       <AppMenuItem onAction={onManual}>Manual</AppMenuItem>
       <AppMenuItem onAction={onAbout}>About</AppMenuItem>
       <Separator />

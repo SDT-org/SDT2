@@ -29,8 +29,7 @@ export type DocState = {
   filetype: string;
   filemtime?: string;
   basename: string;
-  saved: boolean;
-  savepath: string;
+  modified: boolean;
   progress: number;
   sequences_count: number;
   stage: string;
@@ -95,8 +94,7 @@ export const initialDocState: DocState = {
   filename: "",
   filetype: "",
   basename: "",
-  saved: false,
-  savepath: "",
+  modified: false,
   // TODO: wrap in runState
   progress: 0,
   sequences_count: 0,

@@ -1,4 +1,6 @@
 from collections import namedtuple
+import json
+import os
 
 DocState = namedtuple(
     "DocState",
@@ -10,8 +12,7 @@ DocState = namedtuple(
         "filetype",
         "filemtime",
         "basename",
-        "saved",
-        "savepath",
+        "modified",
         "progress",
         "stage",
         "tempdir_path",
@@ -142,7 +143,6 @@ default_distribution_state = dict(
   ),
 )
 
-
 def create_document_state(
     id,
     view="runner",
@@ -151,8 +151,7 @@ def create_document_state(
     filetype="",
     filemtime=None,
     basename="",
-    saved=False,
-    savepath="",
+    modified=False,
     progress=0,
     stage="",
     tempdir_path="",
@@ -165,6 +164,13 @@ def create_document_state(
     heatmap=default_heatmap_state,
     distribution=default_distribution_state
 ):
+    if filetype == "application/vnd.sdt" and tempdir_path:
+        doc_settings = load_doc_settings(tempdir_path)
+        if doc_settings:
+            dataView = doc_settings["dataView"]
+            heatmap = doc_settings["heatmap"]
+            distribution = doc_settings["distribution"]
+
     return DocState(
         id=id,
         view=view,
@@ -173,8 +179,7 @@ def create_document_state(
         filetype=filetype,
         filemtime=filemtime,
         basename=basename,
-        saved=saved,
-        savepath=savepath,
+        modified=modified,
         progress=progress,
         stage=stage,
         tempdir_path=tempdir_path,
@@ -188,24 +193,22 @@ def create_document_state(
         distribution=distribution
     )
 
-    # state = default_state
+def get_doc_setting_path(tempdir_path: str):
+    return os.path.join(tempdir_path, "document.json")
 
-    # def get_state():
-    #     return state
+def load_doc_settings(dir_path: str):
+    path = get_doc_setting_path(dir_path)
+    if os.path.exists(path):
+        with open(path) as f:
+            return json.load(f)
+    return None
 
-    # def set_state(**kwargs):
-    #     nonlocal state
-
-    #     state = state._replace(**kwargs)
-    #     on_state_updated()
-
-    # def reset_state():
-    #     nonlocal state
-    #     state = default_state
-    #     on_state_updated()
-
-    # def on_state_updated():
-    #     if on_update:
-    #         on_update(state)
-
-    # return get_state, set_state, reset_state
+def save_doc_settings(doc_state: DocState):
+    path = get_doc_setting_path(doc_state.tempdir_path)
+    with open(path, "w") as f:
+        settings = {
+            "dataView": doc_state.dataView,
+            "heatmap": doc_state.heatmap,
+            "distribution": doc_state.distribution
+        }
+        json.dump(settings, f, indent=2)

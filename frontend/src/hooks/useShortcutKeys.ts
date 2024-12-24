@@ -1,5 +1,7 @@
 import React from "react";
-import type { AppState, SetAppState } from "../appState";
+import { type AppState, type SetAppState, findDoc } from "../appState";
+import { isSDTFile } from "../helpers";
+import { saveDocument } from "../services/documents";
 import useOpenFileDialog from "./useOpenFileDialog";
 
 export const useShortcutKeys = (
@@ -10,13 +12,23 @@ export const useShortcutKeys = (
 
   React.useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
-      if ((event.ctrlKey || event.metaKey) && event.key === "o") {
-        event.preventDefault();
-        openFileDialog();
+      if (event.ctrlKey || event.metaKey) {
+        if (event.key === "o") {
+          event.preventDefault();
+          openFileDialog();
+        }
+        if (event.key === "s") {
+          event.preventDefault();
+          const doc = findDoc(appState.activeDocumentId, appState);
+          if (doc && doc.view === "viewer") {
+            saveDocument(doc, !isSDTFile(doc.filetype));
+          }
+        }
       }
     };
+
     document.addEventListener("keydown", handleKeydown);
 
     return () => document.removeEventListener("keydown", handleKeydown);
-  }, [openFileDialog]);
+  }, [openFileDialog, appState]);
 };

@@ -1,5 +1,11 @@
-import type { SaveableImageFormat, SyncStateEvent } from "../appState";
+import type {
+  DocState,
+  SaveableImageFormat,
+  SyncStateEvent,
+} from "../appState";
 import type { RunProcessDataArgs } from "../components/Runner";
+import { DistributionState } from "../distributionState";
+import { HeatmapSettings } from "../plotTypes";
 import type { AppState } from "../src/appState";
 
 declare global {
@@ -13,6 +19,7 @@ declare global {
         new_doc: () => Promise<string>;
         save_doc: (doc_id: string, path: string) => Promise<boolean>;
         close_doc: (doc_id: string) => Promise<void>;
+        save_doc_settings: (docState: DocState) => Promise<void>;
         open_file: (
           filepath: string,
           doc_id?: string,

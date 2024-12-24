@@ -37,3 +37,6 @@ export const arrayMinMax = (arr: number[]): [number, number] =>
     ([min, max], val) => [Math.min(min, val), Math.max(max, val)],
     [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY],
   );
+
+export const isSDTFile = (fileType: string) =>
+  fileType === "application/vnd.sdt";
