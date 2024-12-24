@@ -109,7 +109,7 @@ export type MainMenuProps = {
 export const MainMenu = createHideableComponent(() => {
   const { appState, setAppState } = useAppState();
   const activeDocState = React.useMemo(
-    () => findDoc(appState.activeDocumentId, appState),
+    () => findDoc(appState.activeDocumentId, appState.documents),
     [appState],
   );
 
