@@ -86,11 +86,13 @@ export const Distribution = ({
   setDocState,
   data,
   metaData,
+  header,
 }: {
   docState: DocState;
   setDocState: SetDocState;
   data: DistributionData | undefined;
   metaData: MetaData;
+  header?: React.ReactNode;
   footer?: React.ReactNode;
 }) => {
   if (!data) {
@@ -115,16 +117,18 @@ export const Distribution = ({
   } = useDistributionState(docState, setDocState);
 
   const sidebarComponent = (
-    <VisualizationSwitcher
-      activeDataSet={distributionState.dataSet}
-      setActiveDataSet={(value: keyof DataSets) =>
-        updateDistributionState({ dataSet: value })
-      }
-      visualization={distributionState.visualization}
-      setVisualization={(value: Visualization) =>
-        updateDistributionState({ visualization: value })
-      }
-    />
+    <>
+      <VisualizationSwitcher
+        activeDataSet={distributionState.dataSet}
+        setActiveDataSet={(value: keyof DataSets) =>
+          updateDistributionState({ dataSet: value })
+        }
+        visualization={distributionState.visualization}
+        setVisualization={(value: Visualization) =>
+          updateDistributionState({ visualization: value })
+        }
+      />
+    </>
   );
 
   const commonProps = {
@@ -133,6 +137,7 @@ export const Distribution = ({
     dataSets,
     dataSetKey: distributionState.dataSet,
     sidebarComponent,
+    header,
   };
 
   const components = {

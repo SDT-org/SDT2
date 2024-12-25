@@ -44,44 +44,68 @@ export const Viewer = ({
     [updateDocState],
   );
 
+  const header = (
+    <Tabs
+      selectedKey={docState.dataView}
+      onSelectionChange={setDataView}
+      orientation="vertical"
+    >
+      <TabList>
+        <Tab id="heatmap">
+          <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
+            <svg
+              height={12}
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 30 30"
+              aria-hidden={true}
+              color="currentcolor"
+            >
+              <rect id="one" x="0" y="0" width={8} height={8} />
+              <rect x="0" y="10" width={8} height={8} />
+              <rect x="10" y="10" width={8} height={8} />
+              <rect x="0" y="20" width={8} height={8} />
+              <rect x="10" y="20" width={8} height={8} />
+              <rect x="20" y="20" width={8} height={8} />
+            </svg>
+            Heatmap
+          </div>
+        </Tab>
+        <Tab id="distribution">
+          <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
+            <svg
+              height={12}
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 30 30"
+              aria-hidden={true}
+              color="currentcolor"
+            >
+              <rect x="0" y="18" width={6} height={12} fill="black" />
+              <rect x="10" y="0" width={6} height={30} fill="black" />
+              <rect x="20" y="10" width={6} height={20} fill="black" />
+            </svg>
+            Distribution
+          </div>
+        </Tab>
+      </TabList>
+    </Tabs>
+  );
+
+  const footer = (
+    <Button
+      onPress={() =>
+        setAppState((prev) => ({
+          ...prev,
+          showExportModal: true,
+        }))
+      }
+    >
+      Export
+    </Button>
+  );
+
   return (
     <Tabs selectedKey={docState.dataView} onSelectionChange={setDataView}>
-      <div className="app-wrapper with-header">
-        <div className="app-header">
-          <div className="left">
-            {tabView === "select" ? (
-              <>
-                {mainMenu}
-                <SelectDocumentMenu />
-              </>
-            ) : null}
-            <div className="run-info">
-              {docState.sequences_count > 0 ? (
-                <>
-                  {docState.sequences_count} Sequence
-                  {docState.sequences_count === 1 ? "" : "s"}
-                </>
-              ) : null}
-              <span className="filename">{docState.basename}</span>
-            </div>
-          </div>
-
-          <TabList>
-            <Tab id="heatmap">Heatmap</Tab>
-            <Tab id="distribution">Distribution</Tab>
-          </TabList>
-
-          <div className="right">
-            <Button
-              onPress={() =>
-                setAppState((prev) => ({ ...prev, showExportModal: true }))
-              }
-            >
-              Export
-            </Button>
-          </div>
-        </div>
-
+      <div className="app-wrapper">
         <TabPanel id="heatmap" className="app-panel">
           {docState.dataView === "heatmap" &&
           !loading &&
@@ -93,6 +117,8 @@ export const Viewer = ({
               docState={docState}
               setDocState={setDocState}
               updateDocState={updateDocState}
+              header={header}
+              footer={footer}
             />
           ) : null}
         </TabPanel>
@@ -103,6 +129,8 @@ export const Viewer = ({
               metaData={metaData}
               docState={docState}
               setDocState={setDocState}
+              header={header}
+              footer={footer}
             />
           ) : null}
         </TabPanel>

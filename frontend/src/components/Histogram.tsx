@@ -28,6 +28,7 @@ export const Histogram = ({
   data,
   dataSets,
   dataSetKey,
+  header,
   footer,
   sidebarComponent,
   settings,
@@ -36,6 +37,7 @@ export const Histogram = ({
   data: DistributionData | undefined;
   dataSets: DataSets;
   dataSetKey: keyof DataSets;
+  header?: React.ReactNode;
   footer?: React.ReactNode;
   sidebarComponent?: React.ReactNode;
   settings: DistributionState["histogram"];
@@ -79,6 +81,7 @@ export const Histogram = ({
   return (
     <>
       <div className="app-sidebar">
+        {header}
         <div className="app-sidebar-toolbar">
           <div className="form">
             {sidebarComponent}
