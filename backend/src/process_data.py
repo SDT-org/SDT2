@@ -5,6 +5,7 @@ import os
 import sys
 import re
 import random
+from datetime import datetime, timedelta
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from itertools import combinations_with_replacement as cwr
@@ -21,10 +22,6 @@ from Bio.Phylo.TreeConstruction import (
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
-
-start_time = time.time()
-start_run = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-
 
 def run_preprocessing(raw_seq_dict):
     # convert seqrecord element in raw dict to key,vale of ids and seqs
@@ -207,41 +204,41 @@ def save_stats_to_csv(seq_stats, filename):
     stats_df = DataFrame(stats_list, columns=["Sequence", "GC %", "Sequence Length"])
     stats_df.to_csv(filename + "_stats.csv", mode="w", header=True, index=False)
 
+def friendly_total_time(total_time):
+    m, s = divmod(total_time, 60)
+    return f'{int(m)} minute{s:.2f} second' if m == 1 else f'{int(m)} minutes {s:.2f} seconds' if m > 0 else f'{s:.2f} seconds'
 
-def output_summary(file_name, start_time, end_time, run_summary):
-    # Adjust the indentation of each line
+def output_summary(file_name, start_time, end_time, start_counter, end_counter):
     build_type = f"{platform.system()} {platform.release()} {platform.machine()}"
-    kernel_info = platform.processor()
-    cpu_cores = os.cpu_count()
+    total_cores = os.cpu_count()
     total_ram = psutil.virtual_memory().total / (1024**3)
+    total_counter = end_counter - start_counter
 
-    # Run Summary
-
-    output_content = f"""
+    return f"""
     SDT {app_version} release for {platform.system()}
     Developed by Michael Lund and Josiah Ivey; Brejnev Muhire,
     Darren Martin, Simona Kraberger, Qiyun Zhu, Pierre Lefeuvre, Philippe Roumagnac, Arvind Varsani
 
     System info:
-    Host:    {platform.node()} ({kernel_info}, {total_ram:.2f} GB RAM)
-    Kernel:  {kernel_info} - auto-detect threads ({cpu_cores} CPU cores detected)
-    OS - build: {build_type}
+    Host:   {platform.node()}
+    OS:     {build_type}
+    CPU:    {platform.processor()} - {total_cores} cores
+    Memory: {total_ram:.2f} GB RAM
+
     Run info for {file_name}:
-    Start time:    {start_time}
+    Start time: {start_time.strftime("%b %d %Y, %I:%M %p %Z")}
+    End time:   {end_time.strftime("%b %d %Y, %I:%M %p %Z")}
+    Total time: {friendly_total_time(total_counter)}
 
     Parasail
     Using the Needleman-Wunsch algorithm with affine gap scoring:
-    Nucleotide: Open gap penalty:13 Extend gap: 1
-    Amino acid: Open gap penalty:10 Extend gap: 1
-    End time: {end_time}
-    Total runtime: {run_summary}
+    Nucleotide: Open gap penalty: 13, Extend gap: 1
+    Amino acid: Open gap penalty: 10, Extend gap: 1
     """
-
-    return output_content
-
 
 def fasta_alignments(seq_records, fname):
     SeqIO.write(seq_records, fname, "fasta")
+
 
 
 def process_data(
@@ -252,6 +249,8 @@ def process_data(
     set_stage=lambda stage: print(f"Stage: {stage}"),
     set_pair_count=lambda count: print(f"Pair count: {count}"),
 ):
+    start_time = datetime.now()
+    start_counter = time.perf_counter()
     input_file = settings["input_file"]
     file_name = os.path.basename(input_file)
     file_base = os.path.splitext(file_name)[0]
@@ -313,18 +312,16 @@ def process_data(
     set_stage("Finalizing")
     print("Stage: Finalizing")
 
-    # Finalize run
-    end_time = time.time()
-    end_run = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    elapsed_time = end_time - start_time
-    run_summary = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
+    end_time = datetime.now()
+    end_counter = time.perf_counter()
     save_output_summary = output_summary(
         file_name,
-        start_run,
-        end_run,
-        run_summary,
+        start_time,
+        end_time,
+        start_counter,
+        end_counter
     )
-    # Write to a text file
+
     with open(os.path.join(out_dir, f"{file_base}_summary.txt"), "w") as file:
         file.write(save_output_summary)
-    print(f"Elapsed time: {elapsed_time} seconds")
+    print(f"Elapsed time: {friendly_total_time(end_counter - start_counter)}")
