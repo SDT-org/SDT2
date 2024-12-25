@@ -8,11 +8,13 @@ export const Loader = ({
   docState: { id: docId, stage, progress, estimated_time },
   setDocState,
   mainMenu,
+  tabView,
 }: {
   docState: DocState;
   setDocState: SetDocState;
   updateDocState: UpdateDocState;
   mainMenu: React.ReactNode;
+  tabView: "tabs" | "select";
 }) => {
   const [canceling, setCanceling] = React.useState(false);
   const [estimatedDisplay, setEstimatedDisplay] = React.useState("");
@@ -50,7 +52,7 @@ export const Loader = ({
   return (
     <div className="app-wrapper with-header loader">
       <div className="app-header loader">
-        <div className="left">{mainMenu}</div>
+        <div className="left">{tabView === "select" ? mainMenu : null}</div>
         <div className="right" />
       </div>
       <div className="app-main centered loader">

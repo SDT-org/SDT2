@@ -424,12 +424,15 @@ export const Runner = ({
 }) => {
   return (
     <div className="app-wrapper with-header">
-      <div className="app-header">
-        <div className="left">
-          {mainMenu}
-          {tabView === "select" ? <SelectDocumentMenu /> : null}
+      {tabView === "select" ? (
+        <div className="app-header">
+          <div className="left">
+            {mainMenu}
+            <SelectDocumentMenu />
+          </div>
         </div>
-      </div>
+      ) : null}
+
       <div className="app-main centered runner">
         <RunnerSettings
           docState={docState}

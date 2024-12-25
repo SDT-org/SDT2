@@ -49,8 +49,12 @@ export const Viewer = ({
       <div className="app-wrapper with-header">
         <div className="app-header">
           <div className="left">
-            {mainMenu}
-            {tabView === "select" ? <SelectDocumentMenu /> : null}
+            {tabView === "select" ? (
+              <>
+                {mainMenu}
+                <SelectDocumentMenu />
+              </>
+            ) : null}
             <div className="run-info">
               {docState.sequences_count > 0 ? (
                 <>

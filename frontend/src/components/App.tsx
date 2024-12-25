@@ -10,6 +10,7 @@ import { Document } from "./Document";
 // import { restoreClientState } from "../restoreClientState";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { ExportModal } from "./ExportModal";
+import { MainMenu } from "./Menu";
 
 export const App = () => {
   // const restoreInitialState = React.useCallback(() => {
@@ -81,18 +82,23 @@ export const App = () => {
               onSelectionChange={setActiveDocumentId}
             >
               {tabView === "tabs" ? (
-                <TabList>
-                  {appState.documents.map((doc) => (
-                    <Tab id={doc.id} key={doc.id}>
-                      {doc.basename || "Untitled"}
-                      {doc.stage === "Analyzing" ? (
-                        ` (${doc.progress}%)`
-                      ) : doc.stage === "Postprocessing" ? (
-                        <div className="app-loader" />
-                      ) : null}
-                    </Tab>
-                  ))}
-                </TabList>
+                <div className="document-tabs appearance-alt">
+                  <MainMenu />
+                  {appState.documents.length > 1 ? (
+                    <TabList className="react-aria-TabList document-tablist">
+                      {appState.documents.map((doc) => (
+                        <Tab id={doc.id} key={doc.id}>
+                          {doc.basename || "Untitled"}
+                          {doc.stage === "Analyzing" ? (
+                            ` (${doc.progress}%)`
+                          ) : doc.stage === "Postprocessing" ? (
+                            <div className="app-loader" />
+                          ) : null}
+                        </Tab>
+                      ))}
+                    </TabList>
+                  ) : null}
+                </div>
               ) : null}
               {appState.documents.map((doc) => (
                 <TabPanel
