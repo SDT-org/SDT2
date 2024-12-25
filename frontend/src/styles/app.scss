@@ -746,7 +746,7 @@ label.sublabel,
     max-width: 38.4rem;
     font-weight: 600;
 
-    > * {
+    &[aria-valuenow="0"] > * {
       opacity: 0;
       animation: reveal 0.2s ease-in-out var(--app-loader-delay) forwards;
     }

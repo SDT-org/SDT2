@@ -414,18 +414,20 @@ export const Runner = ({
   docState,
   setDocState,
   updateDocState,
+  tabView,
 }: {
   docState: DocState;
   setDocState: SetDocState;
   updateDocState: UpdateDocState;
   mainMenu: React.ReactNode;
+  tabView: "tabs" | "select";
 }) => {
   return (
     <div className="app-wrapper with-header">
       <div className="app-header">
         <div className="left">
           {mainMenu}
-          <SelectDocumentMenu />
+          {tabView === "select" ? <SelectDocumentMenu /> : null}
         </div>
       </div>
       <div className="app-main centered runner">

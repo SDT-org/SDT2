@@ -28,21 +28,21 @@ def create_app_state(
     def get_state():
         return state
 
-    def set_state(updater=None, **kwargs):
-        nonlocal state
-        current_state = state
-        if callable(updater):
-           state = state._replace(**updater(current_state)._asdict())
-        else:
-           state = state._replace(**kwargs)
-           on_state_updated()
-
-    # def set_state(skip_callbacks=False, **kwargs):
+    # def set_state(updater=None, **kwargs):
     #     nonlocal state
-    #     state = state._replace(**kwargs)
+    #     current_state = state
+    #     if callable(updater):
+    #        state = state._replace(**updater(current_state)._asdict())
+    #     else:
+    #        state = state._replace(**kwargs)
+    #        on_state_updated()
 
-    #     if skip_callbacks == False:
-    #         on_state_updated()
+    def set_state(skip_callbacks=False, **kwargs):
+        nonlocal state
+        state = state._replace(**kwargs)
+
+        if skip_callbacks == False:
+            on_state_updated()
 
     def reset_state():
         nonlocal state
@@ -68,12 +68,12 @@ def create_app_state(
     def get_document(id: str) -> DocState | None:
         return next((doc for doc in state.documents if doc.id == id), None)
 
-    def update_document(id: str, **updates):
+    def update_document(id: str, skip_callbacks: bool = False, **updates):
         updated_documents = [
             doc._replace(**updates) if doc.id == id else doc
             for doc in state.documents
         ]
-        set_state(documents=updated_documents)
+        set_state(skip_callbacks=skip_callbacks, documents=updated_documents)
 
     def remove_document(id: str):
         updated_documents = [doc for doc in state.documents if doc.id != id]

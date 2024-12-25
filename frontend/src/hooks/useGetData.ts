@@ -20,7 +20,6 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
 
   React.useEffect(() => {
     setLoading(true);
-
     services
       .getData(docState.id)
       .then((rawData) => {

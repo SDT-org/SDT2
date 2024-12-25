@@ -23,11 +23,13 @@ export const Viewer = ({
   setDocState,
   updateDocState,
   mainMenu,
+  tabView,
 }: {
   docState: DocState;
   setDocState: SetDocState;
   updateDocState: UpdateDocState;
   mainMenu: React.ReactNode;
+  tabView: "tabs" | "select";
 }) => {
   const { setAppState } = useAppState();
   const { loading, tickText, heatmapData, distributionData, metaData } =
@@ -48,7 +50,7 @@ export const Viewer = ({
         <div className="app-header">
           <div className="left">
             {mainMenu}
-            <SelectDocumentMenu />
+            {tabView === "select" ? <SelectDocumentMenu /> : null}
             <div className="run-info">
               {docState.sequences_count > 0 ? (
                 <>

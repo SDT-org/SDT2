@@ -20,3 +20,7 @@ export const saveDocument = async (docState: DocState, saveAs?: boolean) => {
 
 export const closeDocument = (docId: string) =>
   window.pywebview.api.close_doc(docId);
+
+export const newDocument = () => window.pywebview.api.new_doc();
+export const getDocument = (docId: string) =>
+  window.pywebview.api.get_doc(docId);

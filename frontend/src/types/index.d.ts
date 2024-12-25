@@ -1,6 +1,7 @@
 import type {
   DocState,
   SaveableImageFormat,
+  SyncProgressEvent,
   SyncStateEvent,
 } from "../appState";
 import type { RunProcessDataArgs } from "../components/Runner";
@@ -17,6 +18,7 @@ declare global {
         get_state: () => Promise<AppState>;
         reset_state: () => Promise<void>;
         new_doc: () => Promise<string>;
+        get_doc: (doc_id: string) => Promise<DocState>;
         save_doc: (doc_id: string, path: string) => Promise<boolean>;
         close_doc: (doc_id: string) => Promise<void>;
         save_doc_settings: (docState: DocState) => Promise<void>;
@@ -68,5 +70,6 @@ declare global {
 
   interface GlobalEventHandlersEventMap {
     "sync-state": SyncStateEvent;
+    "sync-progress": SyncProgressEvent;
   }
 }

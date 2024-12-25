@@ -2,7 +2,6 @@ import psutil
 from uuid import uuid4
 from hashlib import sha256
 
-
 def get_child_process_info():
     process = psutil.Process()
     info = []

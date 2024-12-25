@@ -1,16 +1,12 @@
 import React from "react";
 import { Button, Label, ProgressBar } from "react-aria-components";
-import {
-  type DocState,
-  type SetDocState,
-  type UpdateDocState,
-  useAppState,
-} from "../appState";
-import { formatBytes } from "../helpers";
+import type { DocState, SetDocState, UpdateDocState } from "../appState";
+import { services } from "../services";
 import { LoadingAnimation } from "./LoadingAnimation";
 
 export const Loader = ({
-  docState: { id: docId, stage, progress, estimated_time, compute_stats },
+  docState: { id: docId, stage, progress, estimated_time },
+  setDocState,
   mainMenu,
 }: {
   docState: DocState;
@@ -18,14 +14,10 @@ export const Loader = ({
   updateDocState: UpdateDocState;
   mainMenu: React.ReactNode;
 }) => {
-  const { appState } = useAppState();
   const [canceling, setCanceling] = React.useState(false);
   const [estimatedDisplay, setEstimatedDisplay] = React.useState("");
   const startTime = React.useRef(Date.now());
   const updatedTime = React.useRef(Date.now());
-  const [processInfo, setProcessInfo] = React.useState<
-    [number, number, number, string][]
-  >([]);
 
   React.useEffect(() => {
     if (!estimated_time || Date.now() - updatedTime.current < 3000) {
@@ -46,24 +38,14 @@ export const Loader = ({
   }, [estimated_time]);
 
   React.useEffect(() => {
-    if (!appState.debug) {
-      return;
-    }
-
-    const id = setInterval(
-      () =>
-        window.pywebview.api.processes_info().then((data) => {
-          const parsedData = JSON.parse(data);
-          if (!parsedData) {
-            return;
-          }
-
-          setProcessInfo(parsedData.sort());
-        }),
-      500,
-    );
+    const handler = () => {
+      services.getDocument(docId).then((data) => {
+        setDocState((prev) => ({ ...prev, ...data }));
+      });
+    };
+    const id = setInterval(handler, 500);
     return () => clearInterval(id);
-  }, [appState.debug]);
+  }, [docId, setDocState]);
 
   return (
     <div className="app-wrapper with-header loader">
@@ -95,7 +77,7 @@ export const Loader = ({
                     style={{
                       width: `${percentage}%`,
                     }}
-                    data-animation={estimated_time && estimated_time > 10}
+                    data-animation
                   />
                 </div>
                 <div className="estimate text-secondary">
@@ -104,26 +86,6 @@ export const Loader = ({
               </>
             )}
           </ProgressBar>
-          {appState.debug ? (
-            <details
-              style={{
-                position: "absolute",
-                bottom: "1.6rem",
-                left: "1.6rem",
-                fontSize: "1rem",
-              }}
-            >
-              <summary>🔬</summary>
-              <pre>
-                Required: {formatBytes(compute_stats?.required_memory || 0)}
-                <br />
-                {processInfo.map(
-                  (i) =>
-                    `[${i[0]}] ${i[1].toString().padStart(5, " ")} ${formatBytes(i[2]).padStart(5, " ")} ${i[3]}\n`,
-                )}
-              </pre>
-            </details>
-          ) : null}
         </div>
         <Button
           className="react-aria-Button cancel-run"

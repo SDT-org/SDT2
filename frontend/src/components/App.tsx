@@ -1,5 +1,5 @@
 import React from "react";
-import { type Key, TabPanel, Tabs } from "react-aria-components";
+import { type Key, Tab, TabList, TabPanel, Tabs } from "react-aria-components";
 import { type AppState, AppStateContext, initialAppState } from "../appState";
 import { useAppBlur } from "../hooks/appBlur";
 import { useWaitForPywebview } from "../hooks/usePywebviewReadyEvent";
@@ -67,6 +67,8 @@ export const App = () => {
   const setActiveDocumentId = (id: Key) =>
     setAppState((prev) => ({ ...prev, activeDocumentId: id as string }));
 
+  const tabView = "tabs";
+
   return (
     <ErrorBoundary appState={appState} setAppState={setAppState}>
       <AppStateContext.Provider value={{ appState, setAppState }}>
@@ -78,16 +80,31 @@ export const App = () => {
               selectedKey={appState.activeDocumentId}
               onSelectionChange={setActiveDocumentId}
             >
-              {/* <TabList> */}
-              {/*   {appState.documents.map((doc) => ( */}
-              {/*     <Tab id={doc.id} key={doc.id}> */}
-              {/*       {doc.basename || "Untitled"} */}
-              {/*     </Tab> */}
-              {/*   ))} */}
-              {/* </TabList> */}
+              {tabView === "tabs" ? (
+                <TabList>
+                  {appState.documents.map((doc) => (
+                    <Tab id={doc.id} key={doc.id}>
+                      {doc.basename || "Untitled"}
+                      {doc.stage === "Analyzing" ? (
+                        ` (${doc.progress}%)`
+                      ) : doc.stage === "Postprocessing" ? (
+                        <div className="app-loader" />
+                      ) : null}
+                    </Tab>
+                  ))}
+                </TabList>
+              ) : null}
               {appState.documents.map((doc) => (
-                <TabPanel id={doc.id} key={doc.id}>
-                  <Document id={doc.id} key={doc.id} />
+                <TabPanel
+                  id={doc.id}
+                  key={doc.id}
+                  shouldForceMount={doc.view === "loader"}
+                  style={{
+                    display:
+                      doc.id === appState.activeDocumentId ? "block" : "none",
+                  }}
+                >
+                  <Document id={doc.id} key={doc.id} tabView={tabView} />
                 </TabPanel>
               ))}
             </Tabs>

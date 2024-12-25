@@ -160,6 +160,9 @@ export type SetAppState = React.Dispatch<React.SetStateAction<AppState>>;
 export type SetDocState = (nextDoc: (prevDoc: DocState) => DocState) => void;
 export type UpdateDocState = (newValues: Partial<DocState>) => void;
 export type SyncStateEvent = CustomEvent<{ state: AppState }>;
+export type SyncProgressEvent = CustomEvent<
+  Pick<DocState, "id" | "progress" | "pair_progress" | "estimated_time">
+>;
 
 export const findDoc = (id: string, documents: AppState["documents"]) =>
   documents.find((d) => d.id === id);

@@ -1,4 +1,3 @@
-from enum import unique
 import os
 import sys
 
@@ -25,8 +24,9 @@ import json
 from pandas import read_csv, DataFrame
 from numpy import eye, where, nan, nanmin, nanmax
 import mimetypes
-from time import perf_counter, time_ns
+from time import perf_counter
 from multiprocessing import Lock, Manager, Pool, cpu_count
+
 from config import app_version, dev_frontend_host
 from constants import matrix_filetypes, default_window_title
 
@@ -379,14 +379,17 @@ class Api:
                         elapsed = perf_counter() - start_time
                         estimated_total = elapsed * (pair_count / counter.value)
                         estimated = round(estimated_total - elapsed)
+
                         update_document(
                             doc_id,
+                            skip_callbacks=True,
                             progress=progress,
                             pair_progress=counter.value,
                             estimated_time=estimated,
                         )
 
                 update_document(doc_id, view="loader")
+
                 # assert_window().title = f"SDT2 - Analyzing {doc.basename}"
                 process_data(
                     settings=settings,
@@ -529,6 +532,10 @@ class Api:
         id = make_doc_id()
         new_document(id)
         return id
+
+    def get_doc(self, doc_id: str):
+        doc = get_document(doc_id)
+        return doc._asdict() if doc else None
 
     def save_doc(self, doc_id: str, path: str):
         doc = get_document(doc_id)

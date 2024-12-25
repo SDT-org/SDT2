@@ -8,8 +8,10 @@ import { Viewer } from "./Viewer";
 
 export const Document = ({
   id,
+  tabView,
 }: {
   id: string;
+  tabView: "tabs" | "select";
 }) => {
   const { appState, setAppState } = useAppState();
   const { docState, setDocState, updateDocState } = useDocState(
@@ -22,6 +24,7 @@ export const Document = ({
     setDocState,
     updateDocState,
     mainMenu: <MainMenu />,
+    tabView,
   };
 
   const VIEWS: { [K in DocState["view"]]: React.ReactElement } = {

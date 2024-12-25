@@ -117,24 +117,38 @@ export const MainMenu = createHideableComponent(() => {
     throw new Error(`Could not locate document: ${appState.activeDocumentId}`);
   }
 
-  const sdtFile = isSDTFile(activeDocState.filetype);
-
-  const openFileDialog = useOpenFileDialog(appState, setAppState);
-  const onNew = () => {
-    window.pywebview.api
-      .new_doc()
+  const makeNewDocument = () =>
+    services
+      .newDocument()
       .then((id: string) =>
         setAppState((prev) => ({ ...prev, activeDocumentId: id })),
       );
-  };
 
+  const sdtFile = isSDTFile(activeDocState.filetype);
+
+  const openFileDialog = useOpenFileDialog(appState, setAppState);
+  const onNew = makeNewDocument;
   const onOpen = () => {
     openFileDialog();
   };
-
   const onSave = () => services.saveDocument(activeDocState);
   const onSaveAs = () => services.saveDocument(activeDocState, true);
-  const onClose = () => services.closeDocument(activeDocState.id);
+  const onClose = () => {
+    const oldDocId = activeDocState.id;
+    if ([0, 1].includes(appState.documents.length)) {
+      return makeNewDocument().then(() => services.closeDocument(oldDocId));
+    }
+    setAppState((prev) => ({
+      ...prev,
+      activeDocumentId:
+        appState.documents[appState.documents.indexOf(activeDocState) + 1]
+          ?.id ||
+        appState.documents[appState.documents.indexOf(activeDocState) - 1]
+          ?.id ||
+        "",
+    }));
+    return services.closeDocument(activeDocState.id);
+  };
 
   const onExport = () =>
     setAppState((previous) => ({
