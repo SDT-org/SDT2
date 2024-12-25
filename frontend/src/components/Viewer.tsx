@@ -79,9 +79,9 @@ export const Viewer = ({
               aria-hidden={true}
               color="currentcolor"
             >
-              <rect x="0" y="18" width={6} height={12} fill="black" />
-              <rect x="10" y="0" width={6} height={30} fill="black" />
-              <rect x="20" y="10" width={6} height={20} fill="black" />
+              <rect x="0" y="18" width={6} height={10} fill="black" />
+              <rect x="10" y="0" width={6} height={28} fill="black" />
+              <rect x="20" y="10" width={6} height={18} fill="black" />
             </svg>
             Distribution
           </div>

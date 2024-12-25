@@ -144,72 +144,75 @@ export const Heatmap = ({
                   <label className="header" htmlFor="colorscale">
                     Colorscale
                   </label>
-                  <div className="col-2 onefr-atuo colorscale-setting">
-                    <Select
-                      id="colorscale"
-                      items={Object.keys(colorScales).map((name) => ({
-                        id: name,
-                        name,
-                      }))}
-                      selectedKey={settings.colorScaleKey}
-                      onSelectionChange={(value) => {
-                        updateSettings({
-                          colorScaleKey: value as ColorScaleKey,
-                        });
-                      }}
-                    >
-                      {(item) => (
-                        <SelectItem key={item.name} textValue={item.name}>
-                          <div className="color-scale-list-item">
-                            <span
-                              className="preview"
-                              aria-hidden="true"
-                              style={{
-                                background: `linear-gradient(to right, ${colorScales[item.name as ColorScaleKey].map((v) => v[1]).join(", ")})`,
-                              }}
-                            />
-                            <span>{formatTitle(item.name)}</span>
-                          </div>
-                        </SelectItem>
-                      )}
-                    </Select>
-                    <Tooltip tooltip="Reverse colorscale" delay={600}>
-                      <ToggleButton
-                        aria-label="Toggle reverse colorscale"
-                        id="reverse"
-                        isSelected={settings.reverse}
-                        onChange={(value) => {
-                          updateSettings({
-                            reverse: value,
-                          });
-                        }}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          aria-hidden="true"
-                        >
-                          <g
-                            style={{
-                              fill: "none",
-                              stroke: "currentcolor",
-                              strokeWidth: 2,
-                              strokeLinecap: "round",
-                              strokeLinejoin: "round",
-                              strokeMiterlimit: 10,
-                            }}
-                          >
-                            <path d="m15 1 5 5-5 5M9 23l-5-5 5-5" />
-                            <path d="M4 18h13a6 6 0 0 0 6-6v-1M20 6H7a6 6 0 0 0-6 6v1" />
-                          </g>
-                        </svg>
-                      </ToggleButton>
-                    </Tooltip>
-                  </div>
                 </div>
 
                 <div className="drawer">
-                  <div className="field ">
+                  <div className="field">
+                    <div className="col-2 onefr-atuo colorscale-setting">
+                      <Select
+                        id="colorscale"
+                        items={Object.keys(colorScales).map((name) => ({
+                          id: name,
+                          name,
+                        }))}
+                        selectedKey={settings.colorScaleKey}
+                        onSelectionChange={(value) => {
+                          updateSettings({
+                            colorScaleKey: value as ColorScaleKey,
+                          });
+                        }}
+                      >
+                        {(item) => (
+                          <SelectItem key={item.name} textValue={item.name}>
+                            <div className="color-scale-list-item">
+                              <span
+                                className="preview"
+                                aria-hidden="true"
+                                style={{
+                                  background: `linear-gradient(to right, ${colorScales[item.name as ColorScaleKey].map((v) => v[1]).join(", ")})`,
+                                }}
+                              />
+                              <span>{formatTitle(item.name)}</span>
+                            </div>
+                          </SelectItem>
+                        )}
+                      </Select>
+                      <Tooltip tooltip="Reverse colorscale" delay={600}>
+                        <ToggleButton
+                          aria-label="Toggle reverse colorscale"
+                          id="reverse"
+                          isSelected={settings.reverse}
+                          onChange={(value) => {
+                            updateSettings({
+                              reverse: value,
+                            });
+                          }}
+                        >
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                          >
+                            <g
+                              style={{
+                                fill: "none",
+                                stroke: "currentcolor",
+                                strokeWidth: 2,
+                                strokeLinecap: "round",
+                                strokeLinejoin: "round",
+                                strokeMiterlimit: 10,
+                              }}
+                            >
+                              <path d="m15 1 5 5-5 5M9 23l-5-5 5-5" />
+                              <path d="M4 18h13a6 6 0 0 0 6-6v-1M20 6H7a6 6 0 0 0-6 6v1" />
+                            </g>
+                          </svg>
+                        </ToggleButton>
+                      </Tooltip>
+                    </div>
+                  </div>
+
+                  <div className="field" style={{ paddingTop: "0.4rem" }}>
                     <Slider
                       label="Cell Spacing"
                       labelClassName="sublabel"
