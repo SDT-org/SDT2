@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Label, ProgressBar } from "react-aria-components";
+import { Button, Label, ProgressBar, TabPanel } from "react-aria-components";
 import type { DocState, SetDocState, UpdateDocState } from "../appState";
 import { services } from "../services";
 import { LoadingAnimation } from "./LoadingAnimation";
@@ -11,7 +11,6 @@ export const Loader = ({
   docState: DocState;
   setDocState: SetDocState;
   updateDocState: UpdateDocState;
-  mainMenu: React.ReactNode;
   tabView: "tabs" | "select";
 }) => {
   const [canceling, setCanceling] = React.useState(false);
@@ -48,56 +47,58 @@ export const Loader = ({
   }, [docId, setDocState]);
 
   return (
-    <div className="app-main full-height centered loader">
-      <div className="loader-wrapper">
-        <ProgressBar value={progress}>
-          {({ percentage, valueText }) => (
-            <>
-              <Label>
-                {stage ? (
-                  <>
-                    {stage}
-                    {Date.now() - startTime.current > 3000 ? (
-                      <LoadingAnimation className="loader-loading-animation" />
-                    ) : null}
-                  </>
-                ) : null}
-              </Label>
-              <span className="value">
-                {stage === "Analyzing" && valueText}
-              </span>
-              <div className="bar">
-                <div
-                  className="fill"
-                  style={{
-                    width: `${percentage}%`,
-                  }}
-                  data-animation
-                />
-              </div>
-              <div className="estimate text-secondary">
-                {(stage === "Analyzing" && estimatedDisplay) || <>&nbsp;</>}
-              </div>
-            </>
-          )}
-        </ProgressBar>
+    <TabPanel id={docId} key={docId}>
+      <div className="app-main full-height centered loader">
+        <div className="loader-wrapper">
+          <ProgressBar value={progress}>
+            {({ percentage, valueText }) => (
+              <>
+                <Label>
+                  {stage ? (
+                    <>
+                      {stage}
+                      {Date.now() - startTime.current > 3000 ? (
+                        <LoadingAnimation className="loader-loading-animation" />
+                      ) : null}
+                    </>
+                  ) : null}
+                </Label>
+                <span className="value">
+                  {stage === "Analyzing" && valueText}
+                </span>
+                <div className="bar">
+                  <div
+                    className="fill"
+                    style={{
+                      width: `${percentage}%`,
+                    }}
+                    data-animation
+                  />
+                </div>
+                <div className="estimate text-secondary">
+                  {(stage === "Analyzing" && estimatedDisplay) || <>&nbsp;</>}
+                </div>
+              </>
+            )}
+          </ProgressBar>
+        </div>
+        <Button
+          className="react-aria-Button cancel-run"
+          onPress={() => {
+            if (
+              window.confirm(
+                "Are you sure you want to cancel? All analysis progress will be lost.",
+              )
+            ) {
+              setCanceling(true);
+              window.pywebview.api.cancel_run(docId, "preserve");
+            }
+          }}
+          isDisabled={canceling}
+        >
+          {canceling ? "Canceling..." : "Cancel Run"}
+        </Button>
       </div>
-      <Button
-        className="react-aria-Button cancel-run"
-        onPress={() => {
-          if (
-            window.confirm(
-              "Are you sure you want to cancel? All analysis progress will be lost.",
-            )
-          ) {
-            setCanceling(true);
-            window.pywebview.api.cancel_run(docId, "preserve");
-          }
-        }}
-        isDisabled={canceling}
-      >
-        {canceling ? "Canceling..." : "Cancel Run"}
-      </Button>
-    </div>
+    </TabPanel>
   );
 };

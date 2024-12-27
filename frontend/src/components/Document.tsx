@@ -2,15 +2,16 @@ import type React from "react";
 import { type DocState, useAppState } from "../appState";
 import { useDocState } from "../hooks/useDocState";
 import { Loader } from "./Loader";
-import { MainMenu } from "./Menu";
 import { Runner } from "./Runner";
 import { Viewer } from "./Viewer";
 
 export const Document = ({
   id,
   tabView,
+  leftSidebarCollapsed,
 }: {
   id: string;
+  leftSidebarCollapsed: boolean;
   tabView: "tabs" | "select";
 }) => {
   const { appState, setAppState } = useAppState();
@@ -23,8 +24,8 @@ export const Document = ({
     docState,
     setDocState,
     updateDocState,
-    mainMenu: <MainMenu />,
     tabView,
+    leftSidebarCollapsed,
   };
 
   const VIEWS: { [K in DocState["view"]]: React.ReactElement } = {

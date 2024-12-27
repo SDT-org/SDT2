@@ -8,6 +8,7 @@ import {
   SliderOutput,
   SliderThumb,
   SliderTrack,
+  TabPanel,
 } from "react-aria-components";
 import useAppState, {
   type AppState,
@@ -416,16 +417,17 @@ export const Runner = ({
   docState: DocState;
   setDocState: SetDocState;
   updateDocState: UpdateDocState;
-  mainMenu: React.ReactNode;
   tabView: "tabs" | "select";
 }) => {
   return (
-    <div className="app-main full-height centered runner">
-      <RunnerSettings
-        docState={docState}
-        updateDocState={updateDocState}
-        setDocState={setDocState}
-      />
-    </div>
+    <TabPanel id={docState.id} key={docState.id}>
+      <div className="app-main full-height centered runner">
+        <RunnerSettings
+          docState={docState}
+          updateDocState={updateDocState}
+          setDocState={setDocState}
+        />
+      </div>
+    </TabPanel>
   );
 };
