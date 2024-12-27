@@ -213,6 +213,9 @@ body {
 
       &[data-selected] {
         box-shadow: 0 0 0.2rem 0 var(--shadow-color);
+
+        box-shadow: none;
+        background: #ddd;
       }
     }
   }
@@ -396,9 +399,11 @@ body {
       background: var(--canvas-color);
       box-shadow: none;
       padding: 0.8rem 0.8rem 0;
+
       .react-aria-Tab {
         background: #dfdfdf;
         border-radius: 0.4rem;
+
         &:not([data-selected]) {
           color: #666;
         }
@@ -411,6 +416,32 @@ body {
           clip-path: unset;
           color: #111;
           box-shadow: 0 0 0.2rem 0 var(--shadow-color);
+        }
+      }
+
+      .react-aria-Tab {
+        background: #e5e5e5;
+        border-radius: 0.4rem;
+
+        &:not([data-selected]) {
+          color: #666;
+        }
+        &:not([data-selected])[data-hovered] {
+          background: #f6f6f6;
+          box-shadow: 0 0 0.1rem 0 var(--shadow-color);
+        }
+        &[data-selected] {
+          background: #d5d5d5;
+          clip-path: unset;
+          color: #111;
+          box-shadow: 0 0 0.2rem 0 var(--shadow-color);
+
+          .close-button {
+            background: #bbb;
+            &:hover {
+              background: #aaa;
+            }
+          }
         }
       }
     }
