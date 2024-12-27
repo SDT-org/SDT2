@@ -7,8 +7,6 @@ import { LoadingAnimation } from "./LoadingAnimation";
 export const Loader = ({
   docState: { id: docId, stage, progress, estimated_time },
   setDocState,
-  mainMenu,
-  tabView,
 }: {
   docState: DocState;
   setDocState: SetDocState;
@@ -50,62 +48,56 @@ export const Loader = ({
   }, [docId, setDocState]);
 
   return (
-    <div className="app-wrapper with-header loader">
-      <div className="app-header loader">
-        <div className="left">{tabView === "select" ? mainMenu : null}</div>
-        <div className="right" />
+    <div className="app-main full-height centered loader">
+      <div className="loader-wrapper">
+        <ProgressBar value={progress}>
+          {({ percentage, valueText }) => (
+            <>
+              <Label>
+                {stage ? (
+                  <>
+                    {stage}
+                    {Date.now() - startTime.current > 3000 ? (
+                      <LoadingAnimation className="loader-loading-animation" />
+                    ) : null}
+                  </>
+                ) : null}
+              </Label>
+              <span className="value">
+                {stage === "Analyzing" && valueText}
+              </span>
+              <div className="bar">
+                <div
+                  className="fill"
+                  style={{
+                    width: `${percentage}%`,
+                  }}
+                  data-animation
+                />
+              </div>
+              <div className="estimate text-secondary">
+                {(stage === "Analyzing" && estimatedDisplay) || <>&nbsp;</>}
+              </div>
+            </>
+          )}
+        </ProgressBar>
       </div>
-      <div className="app-main centered loader">
-        <div className="loader-wrapper">
-          <ProgressBar value={progress}>
-            {({ percentage, valueText }) => (
-              <>
-                <Label>
-                  {stage ? (
-                    <>
-                      {stage}
-                      {Date.now() - startTime.current > 3000 ? (
-                        <LoadingAnimation className="loader-loading-animation" />
-                      ) : null}
-                    </>
-                  ) : null}
-                </Label>
-                <span className="value">
-                  {stage === "Analyzing" && valueText}
-                </span>
-                <div className="bar">
-                  <div
-                    className="fill"
-                    style={{
-                      width: `${percentage}%`,
-                    }}
-                    data-animation
-                  />
-                </div>
-                <div className="estimate text-secondary">
-                  {(stage === "Analyzing" && estimatedDisplay) || <>&nbsp;</>}
-                </div>
-              </>
-            )}
-          </ProgressBar>
-        </div>
-        <Button
-          className="react-aria-Button cancel-run"
-          onPress={() => {
-            if (
-              window.confirm(
-                "Are you sure you want to cancel? All analysis progress will be lost.",
-              )
-            ) {
-              setCanceling(true);
-              window.pywebview.api.cancel_run(docId, "preserve");
-            }
-          }}
-          isDisabled={canceling}
-        >
-          {canceling ? "Canceling..." : "Cancel Run"}
-        </Button>
-      </div>
+      <Button
+        className="react-aria-Button cancel-run"
+        onPress={() => {
+          if (
+            window.confirm(
+              "Are you sure you want to cancel? All analysis progress will be lost.",
+            )
+          ) {
+            setCanceling(true);
+            window.pywebview.api.cancel_run(docId, "preserve");
+          }
+        }}
+        isDisabled={canceling}
+      >
+        {canceling ? "Canceling..." : "Cancel Run"}
+      </Button>
     </div>
   );
 };

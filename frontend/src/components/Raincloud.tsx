@@ -90,7 +90,79 @@ export const Raincloud = ({
   );
   return (
     <>
-      <div className="app-sidebar">
+      <div className="app-main">
+        <Plot
+          data={[rainCloudTrace]}
+          layout={{
+            ...(settings.showTitles
+              ? {
+                  title: {
+                    text:
+                      settings.title +
+                      (settings.subtitle
+                        ? `<br><span style="font-size:0.8em;">${settings.subtitle}</span>`
+                        : ""),
+                    pad: {
+                      t: 100,
+                      r: 0,
+                      b: 0,
+                      l: 0,
+                    },
+                  },
+                }
+              : {}),
+            uirevision: "true",
+            font: plotFont,
+            xaxis: {
+              ...(settings.showTitles
+                ? {
+                    title: {
+                      text: settings.xtitle,
+                    },
+                  }
+                : {}),
+              side: "left",
+              rangemode: "tozero",
+              fixedrange: true,
+              zeroline: false,
+              dtick: 5,
+              showgrid: settings.showGrid,
+              showline: settings.showAxisLines,
+              showticklabels: settings.showTickLabels,
+              range: [minDataValue - 20, maxDataValue + 20],
+            },
+            yaxis: {
+              ...(settings.showTitles
+                ? {
+                    title: {
+                      text: settings.ytitle,
+                    },
+                  }
+                : {}),
+              fixedrange: true,
+              dtick: 1,
+              zeroline: false,
+              showgrid: settings.showGrid,
+              showline: settings.showAxisLines,
+              showticklabels: settings.showTickLabels,
+            },
+            dragmode: "pan",
+            barmode: "overlay",
+            showlegend: false,
+            margin: { l: 50, r: 50, t: 50, b: 50 },
+          }}
+          onRelayout={updateTitles}
+          config={{
+            responsive: true,
+            displayModeBar: false,
+            scrollZoom: true,
+            displaylogo: false,
+            editable: false,
+          }}
+          style={{ width: "100%", height: "100%" }}
+        />
+      </div>
+      <div className="app-sidebar app-sidebar-right">
         <div className="app-sidebar-toolbar">
           <div className="form">
             {sidebarComponent}
@@ -393,78 +465,6 @@ export const Raincloud = ({
           </div>
         </div>
         {footer ? <div className="app-sidebar-footer">{footer}</div> : null}
-      </div>
-      <div className="app-main">
-        <Plot
-          data={[rainCloudTrace]}
-          layout={{
-            ...(settings.showTitles
-              ? {
-                  title: {
-                    text:
-                      settings.title +
-                      (settings.subtitle
-                        ? `<br><span style="font-size:0.8em;">${settings.subtitle}</span>`
-                        : ""),
-                    pad: {
-                      t: 100,
-                      r: 0,
-                      b: 0,
-                      l: 0,
-                    },
-                  },
-                }
-              : {}),
-            uirevision: "true",
-            font: plotFont,
-            xaxis: {
-              ...(settings.showTitles
-                ? {
-                    title: {
-                      text: settings.xtitle,
-                    },
-                  }
-                : {}),
-              side: "left",
-              rangemode: "tozero",
-              fixedrange: true,
-              zeroline: false,
-              dtick: 5,
-              showgrid: settings.showGrid,
-              showline: settings.showAxisLines,
-              showticklabels: settings.showTickLabels,
-              range: [minDataValue - 20, maxDataValue + 20],
-            },
-            yaxis: {
-              ...(settings.showTitles
-                ? {
-                    title: {
-                      text: settings.ytitle,
-                    },
-                  }
-                : {}),
-              fixedrange: true,
-              dtick: 1,
-              zeroline: false,
-              showgrid: settings.showGrid,
-              showline: settings.showAxisLines,
-              showticklabels: settings.showTickLabels,
-            },
-            dragmode: "pan",
-            barmode: "overlay",
-            showlegend: false,
-            margin: { l: 50, r: 50, t: 50, b: 50 },
-          }}
-          onRelayout={updateTitles}
-          config={{
-            responsive: true,
-            displayModeBar: false,
-            scrollZoom: true,
-            displaylogo: false,
-            editable: false,
-          }}
-          style={{ width: "100%", height: "100%" }}
-        />
       </div>
     </>
   );

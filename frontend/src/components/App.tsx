@@ -1,7 +1,15 @@
 import React from "react";
-import { type Key, Tab, TabList, TabPanel, Tabs } from "react-aria-components";
+import {
+  Button,
+  type Key,
+  Tab,
+  TabList,
+  TabPanel,
+  Tabs,
+} from "react-aria-components";
 import { type AppState, AppStateContext, initialAppState } from "../appState";
 import { useAppBlur } from "../hooks/appBlur";
+import { useCloseDocument } from "../hooks/useCloseDocument";
 import { useWaitForPywebview } from "../hooks/usePywebviewReadyEvent";
 import { useSaveState } from "../hooks/useSaveState";
 import { useShortcutKeys } from "../hooks/useShortcutKeys";
@@ -69,6 +77,7 @@ export const App = () => {
     setAppState((prev) => ({ ...prev, activeDocumentId: id as string }));
 
   const tabView = "tabs";
+  const closeDocument = useCloseDocument(appState, setAppState);
 
   return (
     <ErrorBoundary appState={appState} setAppState={setAppState}>
@@ -80,20 +89,43 @@ export const App = () => {
             <Tabs
               selectedKey={appState.activeDocumentId}
               onSelectionChange={setActiveDocumentId}
+              className={"react-aria-Tabs app-layout"}
             >
               {tabView === "tabs" ? (
-                <div className="document-tabs appearance-alt">
+                <div className="document-tabs appearance-alt appearance-alt-light appearance-alt-round">
                   <MainMenu />
-                  {appState.documents.length > 1 ? (
+                  {appState.documents.length > 0 ? (
                     <TabList className="react-aria-TabList document-tablist">
                       {appState.documents.map((doc) => (
                         <Tab id={doc.id} key={doc.id}>
-                          {doc.basename || "Untitled"}
+                          <span>{doc.basename || "Untitled"}</span>
                           {doc.stage === "Analyzing" ? (
                             ` (${doc.progress}%)`
                           ) : doc.stage === "Postprocessing" ? (
                             <div className="app-loader" />
-                          ) : null}
+                          ) : (
+                            <Button
+                              className={"close-button"}
+                              aria-label={`Close ${doc.basename}`}
+                              onPress={() => closeDocument(doc.id)}
+                            >
+                              <svg
+                                aria-hidden={true}
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                width="10"
+                                height="10"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <line x1="4" y1="4" x2="20" y2="20" />
+                                <line x1="20" y1="4" x2="4" y2="20" />
+                              </svg>
+                            </Button>
+                          )}
                         </Tab>
                       ))}
                     </TabList>

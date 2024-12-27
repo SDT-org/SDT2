@@ -592,7 +592,7 @@ def push_backend_state(window: webview.Window):
 
 
 def on_closed():
-    map(lambda doc: doc.cleanup(), get_state().documents)
+    #map(lambda doc: doc.cleanup(), get_state().documents)
     do_cancel_run()
     os._exit(0)
 

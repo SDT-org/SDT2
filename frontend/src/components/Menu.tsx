@@ -14,6 +14,8 @@ import {
 } from "react-aria-components";
 import { type AppState, findDoc, useAppState } from "../appState";
 import { isSDTFile } from "../helpers";
+import { useCloseDocument } from "../hooks/useCloseDocument";
+import { useNewDocument } from "../hooks/useNewDocument";
 import useOpenFileDialog from "../hooks/useOpenFileDialog";
 import { services } from "../services";
 
@@ -117,38 +119,19 @@ export const MainMenu = createHideableComponent(() => {
     throw new Error(`Could not locate document: ${appState.activeDocumentId}`);
   }
 
-  const makeNewDocument = () =>
-    services
-      .newDocument()
-      .then((id: string) =>
-        setAppState((prev) => ({ ...prev, activeDocumentId: id })),
-      );
+  const newDocument = useNewDocument(setAppState);
+  const closeDocument = useCloseDocument(appState, setAppState);
 
   const sdtFile = isSDTFile(activeDocState.filetype);
 
   const openFileDialog = useOpenFileDialog(appState, setAppState);
-  const onNew = makeNewDocument;
+  const onNew = newDocument;
   const onOpen = () => {
     openFileDialog();
   };
   const onSave = () => services.saveDocument(activeDocState);
   const onSaveAs = () => services.saveDocument(activeDocState, true);
-  const onClose = () => {
-    const oldDocId = activeDocState.id;
-    if ([0, 1].includes(appState.documents.length)) {
-      return makeNewDocument().then(() => services.closeDocument(oldDocId));
-    }
-    setAppState((prev) => ({
-      ...prev,
-      activeDocumentId:
-        appState.documents[appState.documents.indexOf(activeDocState) + 1]
-          ?.id ||
-        appState.documents[appState.documents.indexOf(activeDocState) - 1]
-          ?.id ||
-        "",
-    }));
-    return services.closeDocument(activeDocState.id);
-  };
+  const onClose = () => closeDocument(appState.activeDocumentId);
 
   const onExport = () =>
     setAppState((previous) => ({

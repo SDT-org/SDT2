@@ -20,7 +20,7 @@ export const ColorStringSchema = z
 export const findScaleLower = (colorScale: ColorScaleArray, value: number) =>
   colorScale
     .filter((curr) => curr[0] <= value)
-    .reduce((prev, curr) => (curr[0] > prev[0] ? curr : prev));
+    .reduce((prev, curr) => (curr[0] > prev[0] ? curr : prev), colorScale[0]);
 
 export const findScaleUpper = (colorScale: ColorScaleArray, value: number) =>
   colorScale

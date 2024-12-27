@@ -68,6 +68,12 @@ def create_app_state(
     def get_document(id: str) -> DocState | None:
         return next((doc for doc in state.documents if doc.id == id), None)
 
+    def expect_document(id: str) -> DocState:
+        result = get_document(id)
+        if result is None:
+            raise Exception("Document not found")
+        return result
+
     def update_document(id: str, skip_callbacks: bool = False, **updates):
         updated_documents = [
             doc._replace(**updates) if doc.id == id else doc

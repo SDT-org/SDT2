@@ -21,7 +21,6 @@ import useOpenFileDialog from "../hooks/useOpenFileDialog";
 import { useStartRun } from "../hooks/useStartRun";
 import messages from "../messages";
 import { Select, SelectItem } from "./Select";
-import { SelectDocumentMenu } from "./SelectDocumentMenu";
 import { Switch } from "./Switch";
 
 export type RunProcessDataArgs = Pick<AppState, "compute_cores"> & {
@@ -410,11 +409,9 @@ const RunnerSettings = ({
 };
 
 export const Runner = ({
-  mainMenu,
   docState,
   setDocState,
   updateDocState,
-  tabView,
 }: {
   docState: DocState;
   setDocState: SetDocState;
@@ -423,23 +420,12 @@ export const Runner = ({
   tabView: "tabs" | "select";
 }) => {
   return (
-    <div className="app-wrapper with-header">
-      {tabView === "select" ? (
-        <div className="app-header">
-          <div className="left">
-            {mainMenu}
-            <SelectDocumentMenu />
-          </div>
-        </div>
-      ) : null}
-
-      <div className="app-main centered runner">
-        <RunnerSettings
-          docState={docState}
-          updateDocState={updateDocState}
-          setDocState={setDocState}
-        />
-      </div>
+    <div className="app-main full-height centered runner">
+      <RunnerSettings
+        docState={docState}
+        updateDocState={updateDocState}
+        setDocState={setDocState}
+      />
     </div>
   );
 };

@@ -28,8 +28,6 @@ export const Histogram = ({
   data,
   dataSets,
   dataSetKey,
-  header,
-  footer,
   sidebarComponent,
   settings,
   updateSettings,
@@ -37,8 +35,6 @@ export const Histogram = ({
   data: DistributionData | undefined;
   dataSets: DataSets;
   dataSetKey: keyof DataSets;
-  header?: React.ReactNode;
-  footer?: React.ReactNode;
   sidebarComponent?: React.ReactNode;
   settings: DistributionState["histogram"];
   updateSettings: React.Dispatch<Partial<DistributionState["histogram"]>>;
@@ -80,12 +76,84 @@ export const Histogram = ({
   );
   return (
     <>
-      <div className="app-sidebar">
-        {header}
+      <div className="app-main">
+        <Plot
+          data={[histogramTrace]}
+          layout={{
+            ...(settings.showTitles
+              ? {
+                  title: {
+                    text:
+                      settings.title +
+                      (settings.subtitle
+                        ? `<br><span style="font-size:0.8em;">${settings.subtitle}</span>`
+                        : ""),
+                    pad: {
+                      t: 100,
+                      r: 0,
+                      b: 0,
+                      l: 0,
+                    },
+                  },
+                }
+              : {}),
+            font: plotFont,
+            uirevision: "true",
+            xaxis: {
+              ...(settings.showTitles
+                ? {
+                    title: {
+                      text: settings.xtitle,
+                    },
+                  }
+                : {}),
+              side: "bottom",
+              rangemode: "normal",
+              fixedrange: true,
+              zeroline: false,
+              showgrid: settings.showGrid,
+              showticklabels: settings.showTickLabels,
+              showline: settings.showAxisLines,
+              tickmode: "auto",
+              autotick: true,
+            },
+            yaxis: {
+              ...(settings.showTitles
+                ? {
+                    title: {
+                      text: settings.ytitle,
+                    },
+                  }
+                : {}),
+              side: "left",
+              rangemode: "tozero",
+              fixedrange: true,
+              zeroline: false,
+              showgrid: settings.showGrid,
+              showticklabels: settings.showTickLabels,
+              showline: settings.showAxisLines,
+              tickmode: "auto",
+              autotick: true,
+            },
+            dragmode: "pan",
+            barmode: "overlay",
+            margin: { l: 50, r: 50, t: 50, b: 50 },
+          }}
+          onRelayout={updateTitles}
+          config={{
+            responsive: true,
+            displayModeBar: false,
+            scrollZoom: true,
+            displaylogo: false,
+            editable: false,
+          }}
+          style={{ width: "100%", height: "100%" }}
+        />
+      </div>
+      <div className="app-sidebar app-sidebar-right">
         <div className="app-sidebar-toolbar">
           <div className="form">
             {sidebarComponent}
-
             <div className="group">
               <div className="drawer">
                 <ToggleButtonGroup
@@ -311,81 +379,6 @@ export const Histogram = ({
             </div>
           </div>
         </div>
-        {footer ? <div className="app-sidebar-footer">{footer}</div> : null}
-      </div>
-      <div className="app-main">
-        <Plot
-          data={[histogramTrace]}
-          layout={{
-            ...(settings.showTitles
-              ? {
-                  title: {
-                    text:
-                      settings.title +
-                      (settings.subtitle
-                        ? `<br><span style="font-size:0.8em;">${settings.subtitle}</span>`
-                        : ""),
-                    pad: {
-                      t: 100,
-                      r: 0,
-                      b: 0,
-                      l: 0,
-                    },
-                  },
-                }
-              : {}),
-            font: plotFont,
-            uirevision: "true",
-            xaxis: {
-              ...(settings.showTitles
-                ? {
-                    title: {
-                      text: settings.xtitle,
-                    },
-                  }
-                : {}),
-              side: "bottom",
-              rangemode: "normal",
-              fixedrange: true,
-              zeroline: false,
-              showgrid: settings.showGrid,
-              showticklabels: settings.showTickLabels,
-              showline: settings.showAxisLines,
-              tickmode: "auto",
-              autotick: true,
-            },
-            yaxis: {
-              ...(settings.showTitles
-                ? {
-                    title: {
-                      text: settings.ytitle,
-                    },
-                  }
-                : {}),
-              side: "left",
-              rangemode: "tozero",
-              fixedrange: true,
-              zeroline: false,
-              showgrid: settings.showGrid,
-              showticklabels: settings.showTickLabels,
-              showline: settings.showAxisLines,
-              tickmode: "auto",
-              autotick: true,
-            },
-            dragmode: "pan",
-            barmode: "overlay",
-            margin: { l: 50, r: 50, t: 50, b: 50 },
-          }}
-          onRelayout={updateTitles}
-          config={{
-            responsive: true,
-            displayModeBar: false,
-            scrollZoom: true,
-            displaylogo: false,
-            editable: false,
-          }}
-          style={{ width: "100%", height: "100%" }}
-        />
       </div>
     </>
   );

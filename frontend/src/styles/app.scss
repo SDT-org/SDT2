@@ -21,7 +21,7 @@ body {
 
 .app-wrapper {
   display: grid;
-  height: calc(100vh - 3.6rem);
+  // height: calc(100vh - 3.9rem);
   grid-template-columns: 1fr;
   grid-template-rows: 1fr;
   grid-template-areas: "main";
@@ -118,20 +118,44 @@ body {
   }
 }
 
+.app-layout {
+  display: grid;
+  height: 100vh;
+  grid-template-rows: auto 1fr;
+}
+
 .app-panels {
   display: grid;
   overflow: hidden;
+  grid-template-areas: "sidebar-left panel";
+  grid-template-columns: 18rem 1fr;
+  height: calc(100vh - 3.9rem);
 }
 
 .app-panel {
   display: grid;
-  grid-template-columns: var(--app-sidebar-width) 1fr;
-  grid-template-areas: "sidebar main";
+  grid-area: panel;
+  grid-template-areas: "app-main sidebar-right";
+  grid-template-columns: 1fr var(--app-sidebar-width);
   overflow: hidden;
+  margin: 0.8rem;
+  margin-left: 0;
+  border-radius: 0.6rem;
+  box-shadow: 0 0 0.2rem 0 var(--drop-shadow-color);
+  // box-shadow: 0 0 0.3rem 0 var(--drop-shadow-color);
+}
+
+.app-sidebar-left {
+  grid-area: sidebar-left;
+}
+
+.app-sidebar-right {
+  grid-area: sidebar-right;
+  border-left: 0.1rem solid var(--border-color);
+  background: var(--app-right-sidebar-color);
 }
 
 .app-sidebar {
-  grid-area: sidebar;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -153,12 +177,20 @@ body {
     background: none;
     box-shadow: none;
     padding: 0.8rem 1.2rem 0.4rem;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
+    font-weight: bold;
     gap: 0.4rem;
 
     > .react-aria-Tab {
-      font-weight: 600;
       padding: 0.8rem;
+
+      &.header {
+        text-transform: uppercase;
+        margin: 1.2rem 0 0;
+        padding-bottom: 0.4rem;
+        font-size: 1.3rem;
+        font-weight: bold;
+      }
 
       &[data-selected] {
         box-shadow: 0 0 0.2rem 0 var(--shadow-color);
@@ -168,14 +200,14 @@ body {
 }
 
 .app-main {
-  grid-area: main;
+  grid-area: app-main;
   overflow: auto;
   min-width: 20rem;
 
-  margin: 0.8rem;
-  margin-left: 0;
-  border-radius: 0.4rem;
-  box-shadow: 0 0 0.2rem 0 var(--shadow-color);
+  // display: grid;
+  // grid-template-areas: "main sidebar";
+  // grid-template-columns: 1fr 26rem;
+  // grid-template-rows: 1fr;
 
   img {
     margin: 0 auto;
@@ -203,7 +235,7 @@ body {
   padding: 0.4rem 0.8rem 0;
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 0.8rem;
+  gap: 0.4rem;
   box-shadow: inset 0 0 0.1rem var(--app-tabs-shadow-color);
   font-size: 1.3rem;
 
@@ -212,13 +244,41 @@ body {
   }
 
   .react-aria-Button {
-    padding: 1rem 0.4rem;
+  }
+
+  .close-button {
+    all: unset;
+    display: flex;
+    place-items: center;
+    justify-content: center;
+    top: calc(50% - 1rem);
+    right: 0.4rem;
+    position: absolute;
+    height: 2rem;
+    width: 2rem;
+    // margin-right: -1.8rem;
+    margin-left: 0.2rem;
+    border-radius: 0.4rem;
+    transition: all 150ms ease-in-out;
+    opacity: 0;
+    &:hover {
+      background: #ddd;
+    }
   }
 
   .react-aria-Tab {
+    padding: .6rem 2.6rem;
+    position: relative;
+    font-size: 1.2rem;
+    font-weight: bold;
+
+    &:hover .close-button {
+      opacity: 1
+    }
+
     &[data-selected] {
       box-shadow: 0 0 0.2rem 0 var(--app-tabs-shadow-color);
-      // clip-path: inset(0 0 -0.3rem 0);
+      clip-path: inset(0 0 0rem 0);
       border-bottom-left-radius: 0;
       border-bottom-right-radius: 0;
     }
@@ -232,6 +292,7 @@ body {
   }
 
   .document-tablist {
+    gap: 0.8rem;
     &.react-aria-TabList {
       background: none;
       padding: 0;
@@ -259,6 +320,39 @@ body {
         color: #fff;
       }
     }
+    &.appearance-alt-light {
+      background: #cdcdcd;
+      .react-aria-Tab {
+        &:not([data-selected]) {
+          color: #666;
+        }
+        &[data-selected] {
+          background: var(--fill-color);
+          background: var(--canvas-color);
+          color: #111;
+        }
+      }
+    }
+    &.appearance-alt-round {
+      // background: var(--app-tabs-background-color);
+      background: #e6e6e6;
+      padding: 0.1rem 0 0.2rem;
+      padding: 0.4rem 1.2rem 0.5rem;
+      .react-aria-Tab {
+        border-radius: 0.4rem;
+        &:not([data-selected]) {
+          color: #666;
+        }
+        &[data-hovered] {
+          background: #f0f0f0;
+        }
+        &[data-selected] {
+          background: #fbfbfb;
+          clip-path: unset;
+          color: #111;
+        }
+      }
+    }
   }
 }
 
@@ -271,6 +365,10 @@ body {
 
 .flex {
   display: flex;
+}
+
+.full-height {
+  height: 100%;
 }
 
 input,
@@ -467,8 +565,8 @@ small {
   padding-bottom: 3.2rem;
 
   box-shadow: 0 0 0 1px var(--border-color);
-  border-radius: 6px;
-  background: var(--secondary-border-color);
+  // border-radius: 6px;
+  // background: var(--secondary-border-color);
 
   input,
   select {

@@ -1,3 +1,4 @@
+import { TabPanel } from "react-aria-components";
 import type { DocState, SetDocState } from "../appState";
 import {
   type DataSets,
@@ -13,8 +14,6 @@ import { Violin } from "./Violin";
 const VisualizationSwitcher = ({
   activeDataSet,
   setActiveDataSet,
-  visualization,
-  setVisualization,
 }: {
   activeDataSet: keyof DataSets;
   setActiveDataSet: React.Dispatch<keyof DataSets>;
@@ -23,33 +22,6 @@ const VisualizationSwitcher = ({
 }) => (
   <>
     <div className="group padded">
-      <div className="row">
-        <div className="field">
-          <label className="header" htmlFor="visualization">
-            Visualization
-          </label>
-          <Select
-            id="visualization"
-            wide
-            selectedKey={visualization}
-            onSelectionChange={(value) =>
-              setVisualization(value as Visualization)
-            }
-            items={Object.entries({
-              histogram: "Histogram",
-              violin: "Violin",
-              raincloud: "Raincloud",
-            }).map(([id, name]) => ({
-              id,
-              name,
-            }))}
-          >
-            {(item) => (
-              <SelectItem textValue={item.name}>{item.name}</SelectItem>
-            )}
-          </Select>
-        </div>
-      </div>
       <div className="row">
         <div className="field">
           <label className="header" htmlFor="data-set">
@@ -81,7 +53,7 @@ const VisualizationSwitcher = ({
   </>
 );
 
-export const Distribution = ({
+export const DistributionPanels = ({
   docState,
   setDocState,
   data,
@@ -140,29 +112,32 @@ export const Distribution = ({
     header,
   };
 
-  const components = {
-    histogram: (
-      <Histogram
-        {...commonProps}
-        settings={distributionState.histogram}
-        updateSettings={updateHistogram}
-      />
-    ),
-    violin: (
-      <Violin
-        {...commonProps}
-        settings={distributionState.violin}
-        updateSettings={updateViolin}
-      />
-    ),
-    raincloud: (
-      <Raincloud
-        {...commonProps}
-        settings={distributionState.raincloud}
-        updateSettings={updateRaincloud}
-      />
-    ),
-  };
+  return (
+    <>
+      <div className="app-sidebar app-sidebar-left">{header}</div>
+      <TabPanel id="distribution_histogram" className="app-panel">
+        <Histogram
+          {...commonProps}
+          settings={distributionState.histogram}
+          updateSettings={updateHistogram}
+        />
+      </TabPanel>
 
-  return components[docState.distribution.visualization];
+      <TabPanel id="distribution_violin" className="app-panel">
+        <Violin
+          {...commonProps}
+          settings={distributionState.violin}
+          updateSettings={updateViolin}
+        />
+      </TabPanel>
+
+      <TabPanel id="distribution_raincloud" className="app-panel">
+        <Raincloud
+          {...commonProps}
+          settings={distributionState.raincloud}
+          updateSettings={updateRaincloud}
+        />
+      </TabPanel>
+    </>
+  );
 };
