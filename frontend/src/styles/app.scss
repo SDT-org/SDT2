@@ -140,19 +140,17 @@ body {
   overflow: hidden;
   margin: 0.8rem;
   margin-left: 0;
-  border-radius: 0.6rem;
-  box-shadow: 0 0 0.2rem 0 var(--drop-shadow-color);
   // box-shadow: 0 0 0.3rem 0 var(--drop-shadow-color);
 }
 
 .app-sidebar-left {
   grid-area: sidebar-left;
+  margin-top: 0.2rem;
 }
 
 .app-sidebar-right {
   grid-area: sidebar-right;
-  border-left: 0.1rem solid var(--border-color);
-  background: var(--app-right-sidebar-color);
+
 }
 
 .app-sidebar {
@@ -203,6 +201,11 @@ body {
   grid-area: app-main;
   overflow: auto;
   min-width: 20rem;
+  border-radius: 0.6rem;
+  // margin: 0.1rem;
+  margin: 0.2rem;
+  box-shadow: 0 0 0.2rem 0 var(--drop-shadow-color);
+
 
   // display: grid;
   // grid-template-areas: "main sidebar";
@@ -215,6 +218,7 @@ body {
 
   &.runner,
   &.loader {
+    margin: 0.8rem 0.8rem 0;
     padding: 1.6rem;
   }
 }
@@ -252,14 +256,12 @@ body {
     place-items: center;
     justify-content: center;
     top: calc(50% - 1rem);
-    right: 0.4rem;
+    left: 0.4rem;
     position: absolute;
     height: 2rem;
     width: 2rem;
-    // margin-right: -1.8rem;
-    margin-left: 0.2rem;
     border-radius: 0.4rem;
-    transition: all 150ms ease-in-out;
+    transition: all 200ms ease-in-out;
     opacity: 0;
     &:hover {
       background: #ddd;
@@ -272,7 +274,7 @@ body {
     font-size: 1.2rem;
     font-weight: bold;
 
-    &:hover .close-button {
+    &[data-hovered] .close-button, &[data-selected] .close-button {
       opacity: 1
     }
 
@@ -334,17 +336,21 @@ body {
       }
     }
     &.appearance-alt-round {
+      justify-items: center;
       // background: var(--app-tabs-background-color);
       background: #e6e6e6;
-      padding: 0.1rem 0 0.2rem;
-      padding: 0.4rem 1.2rem 0.5rem;
+      background: var(--canvas-color);
+      box-shadow: none;
+      padding: 0.8rem 0.4rem 0;
       .react-aria-Tab {
+        background: #dfdfdf;
         border-radius: 0.4rem;
         &:not([data-selected]) {
           color: #666;
         }
-        &[data-hovered] {
-          background: #f0f0f0;
+        &:not([data-selected])[data-hovered] {
+          background: #f8f8f8;
+          box-shadow: 0 0 0.1rem 0 var(--shadow-color);
         }
         &[data-selected] {
           background: #fbfbfb;
@@ -562,9 +568,11 @@ small {
   overflow: auto;
   // flex-grow: 1;
   max-height: 100%;
-  padding-bottom: 3.2rem;
+  padding-bottom: 1.6rem;
+  margin: 0.2rem 1rem;
+  border-radius: 0.6rem;
 
-  box-shadow: 0 0 0 1px var(--border-color);
+  border: 0.1rem solid var(--border-color);
   // border-radius: 6px;
   // background: var(--secondary-border-color);
 
