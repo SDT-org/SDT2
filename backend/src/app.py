@@ -218,19 +218,7 @@ def handle_open_file(filepath: str, doc_id: str | None):
 
             return [doc_id, str(filepath)]
         else:
-            new_document(
-                doc_id,
-                view="runner",
-                validation_error_id=message,
-                filename="",
-                basename="",
-                filetype="",
-                filemtime=None,
-                compute_stats=None,
-            )
-
-        if len(get_state().documents) == 1:
-            remove_empty_documents()
+            raise Exception(message)
 
 
 class Api:

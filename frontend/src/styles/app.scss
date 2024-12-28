@@ -1277,6 +1277,15 @@ label.sublabel,
     padding: 0;
   }
 
+  &.flat {
+    background: #f6f7f8;
+    box-shadow: none;
+
+    &:hover {
+      background: #f0f1f2;
+    }
+  }
+
   &[data-pressed] {
     background: var(--button-background-pressed-color);
   }
