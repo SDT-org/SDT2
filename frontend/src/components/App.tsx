@@ -4,7 +4,6 @@ import { type AppState, AppStateContext, initialAppState } from "../appState";
 import { useAppBlur } from "../hooks/appBlur";
 import { useCloseDocument } from "../hooks/useCloseDocument";
 import { useWaitForPywebview } from "../hooks/usePywebviewReadyEvent";
-import { useSaveState } from "../hooks/useSaveState";
 import { useShortcutKeys } from "../hooks/useShortcutKeys";
 import { useSyncState } from "../hooks/useSyncState";
 import { Document } from "./Document";
