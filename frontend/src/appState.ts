@@ -42,7 +42,11 @@ export type DocState = {
     required_memory: number;
     available_memory: number;
   };
-  dataView: "heatmap" | "distribution";
+  dataView:
+    | "heatmap"
+    | "distribution_histogram"
+    | "distribution_violin"
+    | "distribution_raincloud";
   distribution: DistributionState;
   heatmap: HeatmapSettings;
 };
