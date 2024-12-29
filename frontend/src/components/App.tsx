@@ -38,7 +38,7 @@ export const App = () => {
   useAppBlur();
   useWaitForPywebview(() => setInitialized(true));
   // useWaitForPywebview(restoreInitialState);
-  useSaveState(initialized, appState);
+  // useSaveState(initialized, appState);
 
   React.useEffect(() => {
     if (!initialized) {
@@ -93,6 +93,11 @@ export const App = () => {
                     <Button
                       onPress={() => setLeftSidebarCollapsed((prev) => !prev)}
                     >
+                      <span data-sr-only>
+                        {leftSidebarCollapsed
+                          ? "Expand sidebar"
+                          : "Collapse sidebar"}
+                      </span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         height="1.6rem"
