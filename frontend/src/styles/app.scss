@@ -130,7 +130,7 @@ body {
   grid-template-columns: 18rem 1fr;
   height: calc(100vh - 3.9rem);
 
-  &[data-left-sidebar-collapsed=true] {
+  &[data-left-sidebar-collapsed="true"] {
     grid-template-columns: 6rem 1fr;
   }
 }
@@ -153,7 +153,6 @@ body {
 
 .app-sidebar-right {
   grid-area: sidebar-right;
-
 }
 
 .app-sidebar {
@@ -182,9 +181,9 @@ body {
     font-weight: bold;
     gap: 0.4rem;
 
-    &[data-collapsed=true] {
+    &[data-collapsed="true"] {
       width: 5.2rem;
-      .react-aria-Tab  {
+      .react-aria-Tab {
         svg {
           flex-shrink: 0;
         }
@@ -199,7 +198,6 @@ body {
       }
     }
 
-
     > .react-aria-Tab {
       padding: 0.8rem;
 
@@ -211,7 +209,7 @@ body {
         font-weight: bold;
       }
 
-      &[data-selected] {
+      &[data-selected="true"] {
         box-shadow: 0 0 0.2rem 0 var(--shadow-color);
 
         box-shadow: none;
@@ -229,7 +227,6 @@ body {
   // margin: 0.1rem;
   margin: 0.2rem;
   box-shadow: 0 0 0.2rem 0 var(--drop-shadow-color);
-
 
   // display: grid;
   // grid-template-areas: "main sidebar";
@@ -257,7 +254,6 @@ body {
   justify-content: space-between;
 }
 
-
 .document-tabs {
   padding: 0.4rem 0.8rem 0;
   display: grid;
@@ -267,7 +263,6 @@ body {
   font-size: 1.3rem;
 
   .sidebar-left-buttons {
-
     width: 17.8rem;
     display: flex;
     // justify-content: space-between;
@@ -313,13 +308,14 @@ body {
   }
 
   .react-aria-Tab {
-    padding: .6rem 2.6rem;
+    padding: 0.6rem 2.6rem;
     position: relative;
     font-size: 1.2rem;
     font-weight: bold;
 
-    &[data-hovered] .close-button, &[data-selected] .close-button {
-      opacity: 1
+    &[data-hovered] .close-button,
+    &[data-selected] .close-button {
+      opacity: 1;
     }
 
     &[data-selected] {
@@ -518,7 +514,8 @@ small {
     }
   }
 
-  .col-2, .flex-2 {
+  .col-2,
+  .flex-2 {
     margin-bottom: 0.8rem;
 
     &:last-child {
@@ -664,7 +661,8 @@ small {
     width: 100%;
   }
 
-  .col-2, .flex-2 {
+  .col-2,
+  .flex-2 {
     gap: 1.6rem;
   }
 
@@ -734,7 +732,8 @@ small {
     margin-right: 0.4rem;
   }
 
-  label.react-aria-Switch, .setting-header {
+  label.react-aria-Switch,
+  .setting-header {
     font-weight: 600;
   }
 
@@ -848,7 +847,7 @@ small {
   }
 }
 
-.loader-loading-animation  {
+.loader-loading-animation {
   display: inline-flex;
   margin-right: 0.5ch;
   height: 1.5ch;
@@ -1315,7 +1314,6 @@ label.sublabel,
     }
   }
 
-
   &[data-disabled] {
     background: var(--button-disabled-background-color);
     color: var(--button-disabled-foreground-color);
@@ -1385,6 +1383,18 @@ label.sublabel,
   position: absolute;
 }
 
+[data-sr-only] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
 .col-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1411,13 +1421,13 @@ label.sublabel,
 .align-items-center {
   align-items: center;
 }
-.align-items-flex-start{
+.align-items-flex-start {
   align-items: flex-start;
 }
 
 .col-2-reverse {
   > :first-child {
-   order: 1;
+    order: 1;
   }
 }
 
