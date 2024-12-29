@@ -42,7 +42,7 @@ export const Loader = ({
         setDocState((prev) => ({ ...prev, ...data }));
       });
     };
-    const id = setInterval(handler, 500);
+    const id = setInterval(handler, 120);
     return () => clearInterval(id);
   }, [docId, setDocState]);
 
