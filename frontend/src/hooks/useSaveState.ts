@@ -7,5 +7,7 @@ export const useSaveState = (initialized: boolean, appState: AppState) =>
       return;
     }
     localStorage.setItem(clientStateKey, JSON.stringify(appState));
-    window.APP_STATE = appState;
+    if (appState.debug) {
+      window.APP_STATE = appState;
+    }
   }, [initialized, appState]);
