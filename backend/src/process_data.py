@@ -206,7 +206,7 @@ def save_stats_to_csv(seq_stats, filename):
 
 def friendly_total_time(total_time):
     m, s = divmod(total_time, 60)
-    return f'{int(m)} minute{s:.2f} second' if m == 1 else f'{int(m)} minutes {s:.2f} seconds' if m > 0 else f'{s:.2f} seconds'
+    return f'{int(m)} minute, {s:.2f} second' if m == 1 else f'{int(m)} minutes, {s:.2f} seconds' if m > 0 else f'{s:.2f} seconds'
 
 def output_summary(file_name, start_time, end_time, start_counter, end_counter):
     build_type = f"{platform.system()} {platform.release()} {platform.machine()}"
