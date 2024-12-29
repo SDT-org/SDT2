@@ -103,21 +103,25 @@ export const ExportModal = () => {
     await Plotly.toImage(element, config);
     const heatmapImage = await Plotly.toImage(element, config);
 
-    swapDataView("distribution");
-
+    swapDataView("distribution_histogram");
     updateDistributionState({ visualization: "histogram" });
+
     await new Promise((r) => setTimeout(r, renderTimeout));
     element = getPlotlyElement();
     await Plotly.toImage(element, config);
     const histogramImage = await Plotly.toImage(element, config);
 
+    swapDataView("distribution_violin");
     updateDistributionState({ visualization: "violin" });
+
     await new Promise((r) => setTimeout(r, renderTimeout));
     element = getPlotlyElement();
     await Plotly.toImage(element, config);
     const violinImage = await Plotly.toImage(element, config);
 
+    swapDataView("distribution_raincloud");
     updateDistributionState({ visualization: "raincloud" });
+
     await new Promise((r) => setTimeout(r, renderTimeout));
     element = getPlotlyElement();
     await Plotly.toImage(element, config);
