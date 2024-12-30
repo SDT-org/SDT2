@@ -2,20 +2,22 @@ import type { DocState } from "../appState";
 import { saveFileDialog } from "./files";
 
 export const saveDocument = async (docState: DocState, saveAs?: boolean) => {
+  let filename = docState.filename;
+
   if (saveAs) {
-    return saveFileDialog(
+    const [success, result] = await saveFileDialog(
       `${docState.basename.split(".").slice(0, -1).join(".")}.sdt`,
-    ).then(([success, result]) => {
-      if (success) {
-        return window.pywebview.api.save_doc(docState.id, result);
-      }
+    );
+    if (success) {
+      filename = result;
+    } else {
       return false;
-    });
+    }
   }
 
   return window.pywebview.api
     .save_doc_settings(docState)
-    .then(() => window.pywebview.api.save_doc(docState.id, docState.filename));
+    .then(() => window.pywebview.api.save_doc(docState.id, filename));
 };
 
 export const closeDocument = (docId: string) =>

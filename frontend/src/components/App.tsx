@@ -87,7 +87,7 @@ export const App = () => {
             >
               {tabView === "tabs" ? (
                 <div className="document-tabs appearance-alt appearance-alt-light appearance-alt-round">
-                  <div className="sidebar-left-buttons">
+                  <div className="left">
                     <MainMenu />
                     <Button
                       onPress={() => setLeftSidebarCollapsed((prev) => !prev)}
@@ -99,7 +99,7 @@ export const App = () => {
                       </span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        height="1.6rem"
+                        height="16"
                         fill="currentColor"
                         viewBox="0 0 512 512"
                         aria-hidden="true"
@@ -147,6 +147,37 @@ export const App = () => {
                       ))}
                     </TabList>
                   ) : null}
+                  <div className="right">
+                    <Button
+                      onPress={() =>
+                        setAppState((prev) => ({
+                          ...prev,
+                          showExportModal: true,
+                        }))
+                      }
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        height="12"
+                      >
+                        <g
+                          style={{
+                            fill: "none",
+                            stroke: "currentcolor",
+                            strokeWidth: 2,
+                            strokeLinecap: "round",
+                            strokeLinejoin: "round",
+                            strokeMiterlimit: 10,
+                          }}
+                        >
+                          <path d="M15 3h6v6M21 3 11 13M19 18v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h1" />
+                        </g>
+                      </svg>
+                      <span>Export</span>
+                    </Button>
+                  </div>
                 </div>
               ) : null}
               {appState.documents.map((doc) => (

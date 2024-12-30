@@ -38,16 +38,15 @@ export const HeatmapSidebar = ({
     },
     [sequences_count],
   );
+
   return (
     <div className="app-sidebar app-sidebar-right heatmap-sidebar">
       <div className="app-sidebar-toolbar">
         <div className="form">
           <div className="group">
-            <div className="field padded flush">
-              <label className="header" htmlFor="colorscale">
-                Colorscale
-              </label>
-            </div>
+            <label className="setting-header" htmlFor="colorscale">
+              Colorscale
+            </label>
 
             <div className="drawer">
               <div className="field">

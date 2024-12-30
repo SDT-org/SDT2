@@ -53,8 +53,13 @@ export const Viewer = ({
       >
         <div className="app-sidebar app-sidebar-left heatmap-sidebar">
           <TabList data-collapsed={leftSidebarCollapsed}>
-            <Tab id="scores" isDisabled={true} data-hidden aria-hidden>
-              Scores
+            <Tab
+              id="pairwise"
+              isDisabled={true}
+              className={"react-aria-Tab header"}
+              data-hidden={leftSidebarCollapsed}
+            >
+              Pairwise
             </Tab>
             <Tab id="heatmap">
               <div
@@ -166,16 +171,7 @@ export const Viewer = ({
           </TabList>
           <div className="app-sidebar-body" />
           <div className="app-sidebar-footer">
-            <Button
-              onPress={() =>
-                setAppState((prev) => ({
-                  ...prev,
-                  showExportModal: true,
-                }))
-              }
-            >
-              Export
-            </Button>
+            <span></span>
           </div>
         </div>
         <TabPanel id="heatmap" className="app-panel">

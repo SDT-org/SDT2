@@ -7,6 +7,7 @@ import type {
 } from "../plotTypes";
 import { getScaledFontSize } from "../plotUtils";
 import { services } from "../services";
+import { getDocument } from "../services/documents";
 
 export const useGetData = (docState: DocState, setDocState: SetDocState) => {
   const [loading, setLoading] = React.useState(false);
@@ -18,11 +19,14 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
     GetDataResponse["metadata"] | undefined
   >();
 
+  // TODO: replace this entire thing, docstate already gets pushed by the backend
+  // so only make this set the defaults. also move all the data into the document
+  // so we aren't parsing it out here.
   React.useEffect(() => {
     setLoading(true);
     services
       .getData(docState.id)
-      .then((rawData) => {
+      .then(async (rawData) => {
         const parsedResponse: GetDataResponse = JSON.parse(
           rawData.replace(/\bNaN\b/g, "null"),
         );
@@ -41,10 +45,14 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
           identity_combos: identity_scores.map((i) => [i[0], i[1]]),
         });
 
+        const state = await getDocument(docState.id);
+
         setDocState((prev) => ({
           ...prev,
+          ...state,
           heatmap: {
             ...prev.heatmap,
+            ...state.heatmap,
             vmin: metadata.minVal,
             ...(docState.sequences_count > 99 && {
               annotation: false,

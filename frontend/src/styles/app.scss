@@ -141,8 +141,9 @@ body {
   grid-template-areas: "app-main sidebar-right";
   grid-template-columns: 1fr var(--app-sidebar-width);
   overflow: hidden;
-  margin: 0.8rem;
-  margin-left: 0;
+  // margin: 0.8rem;
+  padding: 0.8rem 0.2rem;
+  margin: 0 -0.2rem;
   // box-shadow: 0 0 0.3rem 0 var(--drop-shadow-color);
 }
 
@@ -182,7 +183,7 @@ body {
     gap: 0.4rem;
 
     &[data-collapsed="true"] {
-      width: 5.2rem;
+      // width: 5.2rem;
       .react-aria-Tab {
         svg {
           flex-shrink: 0;
@@ -196,10 +197,13 @@ body {
           // display: none;
         }
       }
+
+      > .react-aria-Tab {
+      }
     }
 
     > .react-aria-Tab {
-      padding: 0.8rem;
+      padding: 1rem 1.2rem;
 
       &.header {
         text-transform: uppercase;
@@ -207,11 +211,13 @@ body {
         padding-bottom: 0.4rem;
         font-size: 1.3rem;
         font-weight: bold;
+
+        &:first-of-type {
+          margin-top: 0.5rem;
+        }
       }
 
       &[data-selected="true"] {
-        box-shadow: 0 0 0.2rem 0 var(--shadow-color);
-
         box-shadow: none;
         background: #ddd;
       }
@@ -224,14 +230,7 @@ body {
   overflow: auto;
   min-width: 20rem;
   border-radius: 0.6rem;
-  // margin: 0.1rem;
-  margin: 0.2rem;
   box-shadow: 0 0 0.2rem 0 var(--drop-shadow-color);
-
-  // display: grid;
-  // grid-template-areas: "main sidebar";
-  // grid-template-columns: 1fr 26rem;
-  // grid-template-rows: 1fr;
 
   img {
     margin: 0 auto;
@@ -255,22 +254,18 @@ body {
 }
 
 .document-tabs {
-  padding: 0.4rem 0.8rem 0;
+  padding: 0.4rem 0.8rem;
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: auto 1fr auto;
   gap: 0.4rem;
   box-shadow: inset 0 0 0.1rem var(--app-tabs-shadow-color);
   font-size: 1.3rem;
 
-  .sidebar-left-buttons {
-    width: 17.8rem;
-    display: flex;
-    // justify-content: space-between;
-
-    .react-aria-Button {
+  .react-aria-Button {
       padding: 0.6rem 1rem;
       box-shadow: none;
       background: none;
+
       &[data-hovered] {
         background: #dfdfdf;
       }
@@ -280,6 +275,25 @@ body {
       &[data-pressed] {
         background: #cfcfcf;
       }
+
+      svg {
+        margin-right: 1ch;
+      }
+
+      font-weight: 500;
+    }
+
+  > .left {
+    width: 17.8rem;
+    display: flex;
+    // justify-content: space-between;
+  }
+
+  > .right {
+    padding-right: 0.3rem;
+
+    .react-aria-Button:not([data-hovered]) {
+      background: #e5e5e5;
     }
   }
 
@@ -650,7 +664,7 @@ small {
   z-index: 1;
   overflow: auto;
   max-height: 100%;
-  margin: 0.2rem 1rem;
+  margin: 0 1rem;
   border-radius: 0.6rem;
 
   border: 0.1rem solid var(--border-color);
@@ -725,6 +739,8 @@ small {
 
   .setting-header {
     margin: 0;
+    display: block;
+    line-height: 1.8rem;
   }
 
   label input:not([type="text"]) {
