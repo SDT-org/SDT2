@@ -1,18 +1,6 @@
 import React from "react";
-import {
-  Button,
-  type Key,
-  Tab,
-  TabList,
-  TabPanel,
-  Tabs,
-} from "react-aria-components";
-import {
-  type DocState,
-  type SetDocState,
-  type UpdateDocState,
-  useAppState,
-} from "../appState";
+import { type Key, Tab, TabList, TabPanel, Tabs } from "react-aria-components";
+import type { DocState, SetDocState, UpdateDocState } from "../appState";
 import { useGetData } from "../hooks/useGetData";
 import { DistributionPanels } from "./DistributionPanels";
 import { Heatmap } from "./Heatmap";
@@ -29,7 +17,6 @@ export const Viewer = ({
   leftSidebarCollapsed: boolean;
   tabView: "tabs" | "select";
 }) => {
-  const { setAppState } = useAppState();
   const { loading, tickText, heatmapData, distributionData, metaData } =
     useGetData(docState, setDocState);
 
@@ -170,9 +157,7 @@ export const Viewer = ({
             </Tab>
           </TabList>
           <div className="app-sidebar-body" />
-          <div className="app-sidebar-footer">
-            <span></span>
-          </div>
+          <div className="app-sidebar-footer" />
         </div>
         <TabPanel id="heatmap" className="app-panel">
           {docState.dataView === "heatmap" &&
