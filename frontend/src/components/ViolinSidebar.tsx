@@ -255,9 +255,9 @@ export const ViolinSidebar = ({
               value={settings.boxWidth}
               isDisabled={!settings.showBox}
               onChange={(value) => updateSettings({ boxWidth: value })}
-              minValue={0.1}
-              maxValue={1}
-              step={0.1}
+              minValue={0.05}
+              maxValue={.5}
+              step={0.05}
             />
           </div>
           <hr className="compact" />

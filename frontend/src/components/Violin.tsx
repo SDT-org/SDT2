@@ -139,6 +139,8 @@ export const Violin = ({
               : {}),
             uirevision: settings.plotOrientation,
             font: plotFont,
+            // @ts-ignore
+            boxgap: 1 - settings.boxWidth,
             xaxis:
               settings.plotOrientation === "vertical"
                 ? {

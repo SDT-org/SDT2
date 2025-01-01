@@ -52,28 +52,28 @@ export const Histogram = ({
   const updateTitles = useRelayoutUpdateTitles(updateSettings);
   useRelayoutHideSubtitle(!settings.showTitles);
 
-  const histogramTrace = React.useMemo(
-    () =>
-      ({
-        type: "histogram",
-        x: dataSet,
-        histnorm: "percent", // may add option to change this later
-        marker: {
-          color: settings.binColor,
-          line: {
-            width: settings.histOutlineWidth,
-            color: settings.histlineColor,
-          },
+  const histogramTrace = React.useMemo(() => {
+    const orientation = settings.plotOrientation;
+    return {
+      type: "histogram",
+      ...(orientation === "vertical"
+        ? { x: dataSet, xbins: { size: settings.binSize } }
+        : { y: dataSet, ybins: { size: settings.binSize } }),
+      histnorm: "percent",
+      marker: {
+        color: settings.binColor,
+        line: {
+          width: settings.histOutlineWidth,
+          color: settings.histlineColor,
         },
-        xbins: {
-          size: settings.binSize,
-        },
-        name: "Histogram",
-        hovertemplate:
-          "Percent Identity: %{x}<br>Percentage: %{y}<extra></extra>",
-      }) as Partial<PlotData>,
-    [settings, dataSet],
-  );
+      },
+      name: "Histogram",
+      hovertemplate:
+        orientation === "vertical"
+          ? "%{y:.2f}%<extra></extra>"
+          : "%{x:.2f}%<extra></extra>",
+    } as Partial<PlotData>;
+  }, [settings, dataSet]);
   return (
     <>
       <div className="app-main">
@@ -108,7 +108,8 @@ export const Histogram = ({
                   }
                 : {}),
               side: "bottom",
-              rangemode: "normal",
+              rangemode:
+                settings.plotOrientation === "vertical" ? "normal" : "tozero",
               fixedrange: true,
               zeroline: false,
               showgrid: settings.showGrid,
@@ -126,7 +127,8 @@ export const Histogram = ({
                   }
                 : {}),
               side: "left",
-              rangemode: "tozero",
+              rangemode:
+                settings.plotOrientation === "vertical" ? "tozero" : "normal",
               fixedrange: true,
               zeroline: false,
               showgrid: settings.showGrid,
@@ -280,6 +282,22 @@ export const Histogram = ({
                       </svg>
                     </ToggleButton>
                   </Tooltip>
+                </ToggleButtonGroup>
+                <Label>Orientation</Label>
+                <ToggleButtonGroup
+                  data-compact
+                  selectionMode="single"
+                  disallowEmptySelection={true}
+                  selectedKeys={[settings.plotOrientation]}
+                  onSelectionChange={(value) =>
+                    updateSettings({
+                      plotOrientation: value.values().next()
+                        .value as typeof settings.plotOrientation,
+                    })
+                  }
+                >
+                  <ToggleButton id="vertical">Vertical</ToggleButton>
+                  <ToggleButton id="horizontal">Horizontal</ToggleButton>
                 </ToggleButtonGroup>
                 <hr className="compact" />
                 <div className="col-2 auto-onefr align-items-center color-slider-gap">

@@ -87,6 +87,7 @@ default_distribution_state = dict(
     title="Histogram",
     xtitle="Percent Identity",
     ytitle="Frequency",
+    plotOrientation="vertical",
   ),
   raincloud=dict(
     **visualization_defaults,

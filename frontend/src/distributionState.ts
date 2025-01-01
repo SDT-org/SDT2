@@ -40,6 +40,7 @@ export type DistributionState = {
     subtitle: string;
     xtitle: string;
     ytitle: string;
+    plotOrientation: "horizontal" | "vertical";
   };
   raincloud: VisualizationBase & {
     bandwidth: number;
@@ -120,6 +121,7 @@ export const DistributionStateSchema = z.object({
     subtitle: z.string(),
     xtitle: z.string(),
     ytitle: z.string(),
+    plotOrientation: z.enum(["horizontal", "vertical"]),
   }),
   raincloud: VisualizationBaseSchema.extend({
     bandwidth: z.number(),
@@ -201,6 +203,7 @@ export const initialDistributionState: DistributionState = {
     title: "Histogram",
     xtitle: "Percent Identity",
     ytitle: "Frequency",
+    plotOrientation: "horizontal",
   },
   raincloud: {
     ...visualizationDefaults,
