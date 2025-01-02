@@ -1,6 +1,6 @@
 import type { AppState, DocState, SetAppState } from "../appState";
 import { services } from "../services";
-import { useNewDocument } from "./useNewDocument";
+import useNewDocument from "./useNewDocument";
 
 export const useCloseDocument = (
   appState: AppState,

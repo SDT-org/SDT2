@@ -15,7 +15,7 @@ import {
 import { type AppState, findDoc, useAppState } from "../appState";
 import { isSDTFile } from "../helpers";
 import { useCloseDocument } from "../hooks/useCloseDocument";
-import { useNewDocument } from "../hooks/useNewDocument";
+import useNewDocument from "../hooks/useNewDocument";
 import useOpenFileDialog from "../hooks/useOpenFileDialog";
 import { services } from "../services";
 
