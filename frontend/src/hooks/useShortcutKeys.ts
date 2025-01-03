@@ -1,28 +1,38 @@
 import React from "react";
-import { type AppState, type SetAppState, findDoc } from "../appState";
-import { isSDTFile } from "../helpers";
-import { saveDocument } from "../services/documents";
+import type { AppState, SetAppState } from "../appState";
+import { useCloseActiveDocument } from "./useCloseActiveDocument";
+import useNewDocument from "./useNewDocument";
 import useOpenFileDialog from "./useOpenFileDialog";
+import { useSaveActiveDocument } from "./useSaveActiveDocument";
 
 export const useShortcutKeys = (
   appState: AppState,
   setAppState: SetAppState,
 ) => {
   const openFileDialog = useOpenFileDialog(appState, setAppState);
+  const newDocument = useNewDocument(setAppState);
+  const closeActiveDocument = useCloseActiveDocument(appState, setAppState);
+  const saveActiveDocument = useSaveActiveDocument(appState);
+
+  const keyMap = React.useMemo(
+    () => ({
+      o: openFileDialog,
+      n: newDocument,
+      w: closeActiveDocument,
+      s: saveActiveDocument,
+    }),
+    [openFileDialog, newDocument, closeActiveDocument, saveActiveDocument],
+  );
 
   React.useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
-      if (event.ctrlKey || event.metaKey) {
-        if (event.key === "o") {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        Object.keys(keyMap).includes(event.key)
+      ) {
+        const fn = keyMap[event.key as keyof typeof keyMap];
+        if (fn?.()) {
           event.preventDefault();
-          openFileDialog();
-        }
-        if (event.key === "s") {
-          event.preventDefault();
-          const doc = findDoc(appState.activeDocumentId, appState.documents);
-          if (doc && doc.view === "viewer") {
-            saveDocument(doc, !isSDTFile(doc.filetype));
-          }
         }
       }
     };
@@ -30,5 +40,5 @@ export const useShortcutKeys = (
     document.addEventListener("keydown", handleKeydown);
 
     return () => document.removeEventListener("keydown", handleKeydown);
-  }, [openFileDialog, appState.activeDocumentId, appState.documents]);
+  }, [keyMap]);
 };

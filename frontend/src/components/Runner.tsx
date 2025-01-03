@@ -441,8 +441,12 @@ export const Runner = ({
   tabView: "tabs" | "select";
 }) => {
   return (
-    <TabPanel id={docState.id} key={docState.id}>
-      <div className="app-main full-height centered runner">
+    <TabPanel
+      id={docState.id}
+      key={docState.id}
+      className="app-panel full-width"
+    >
+      <div className="app-main centered runner">
         <RunnerSettings
           docState={docState}
           updateDocState={updateDocState}

@@ -18,109 +18,86 @@ body {
   overflow: hidden;
 }
 
-.app-wrapper {
-  display: grid;
-  // height: calc(100vh - 3.9rem);
-  grid-template-columns: 1fr;
-  grid-template-rows: 1fr;
-  grid-template-areas: "main";
-  background: var(--canvas-color);
-  color: var(--foreground-color);
-
-  &.with-header {
-    grid-template-rows: auto 1fr;
-    grid-template-areas:
-      "header"
-      "main";
-  }
-
-  &.with-footer {
-    grid-template-rows: 1fr auto;
-    grid-template-areas:
-      "main"
-      "footer";
-  }
-
-  &.with-header.with-footer {
-    grid-template-rows: auto 1fr auto;
-    grid-template-areas:
-      "header"
-      "main"
-      "footer";
-  }
-}
-
-.app-header {
-  grid-area: header;
-  padding: 0.8rem var(--app-container-padding);
-  z-index: 1;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  background: var(--app-header-color);
-  border-top: 1px solid var(--app-header-border-color);
-  border-bottom: 1px solid var(--app-header-border-color);
-  z-index: 10;
-
-  button,
-  .react-aria-Tab {
-    height: 3rem;
-  }
-
-  button {
-    font-weight: 500;
-    font-size: 1.3rem;
-  }
-
-  .react-aria-Tab {
-    padding-top: 0;
-    padding-bottom: 0;
-    line-height: 1.2rem;
-    text-align: center;
-    width: 11.2rem;
-  }
-
-  .react-aria-Button.main-menu-button {
-    padding: 0 1rem;
-    width: 3.4rem;
-    color: var(--text-secondary-color);
-  }
-
-  .left,
-  .right {
-    display: grid;
-  }
-
-  .left {
-    grid: auto-flow / auto 1fr;
-    grid-gap: 0.8rem;
-    display: flex;
-    place-items: center;
-  }
-
-  .right {
-    place-items: end;
-  }
-
-  .run-info {
-    display: grid;
-    grid: auto / auto-flow;
-    grid-gap: 0.8rem;
-    align-content: center;
-    font-size: 1.3rem;
-    font-weight: 500;
-    padding-left: 0.8rem;
-
-    .filename {
-      display: none;
-    }
-  }
-}
-
 .app-layout {
   display: grid;
   height: 100vh;
   grid-template-rows: auto 1fr;
+
+  grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "header"
+      "body";
+}
+
+.app-header {
+  grid-area: header;
+  padding: 0.9rem var(--app-container-padding);
+  display: grid;
+  grid-template-columns: 17rem 1fr 17rem;
+  align-items: flex-start;
+  z-index: 10;
+  font-size: 1.3rem;
+  height: var(--app-header-height);
+
+  @media (max-width: 55rem) {
+    grid-template-columns: auto 1fr auto;
+    gap: 2.4rem;
+  }
+
+  .app-header-left {
+    display: flex;
+    gap: 0.2rem;
+  }
+
+  .app-header-middle {
+    overflow: hidden;
+    display: flex;
+    place-items: center;
+    justify-content: center;
+
+    > .react-aria-Select .react-aria-Button {
+      color: #000;
+    }
+  }
+
+  .app-header-right {
+    place-items: end;
+
+    justify-self: flex-end;
+
+    .react-aria-Button {
+      gap: 0.8rem;
+    }
+  }
+
+  .react-aria-Button {
+    height: 3rem;
+    color: var(--text-secondary-color);
+    padding: 0.6rem 1rem;
+    box-shadow: none;
+    background: none;
+
+    &[data-hovered] {
+      background: #dfdfdf;
+    }
+    &[data-selected] {
+      background: #ccc;
+    }
+    &[data-pressed] {
+      background: #cfcfcf;
+    }
+
+    font-weight: 500;
+  }
+
+  .react-aria-Button.with-svg:not([data-hovered]),
+  .react-aria-Select .react-aria-Button:not([data-hovered]) {
+    background: #e5e5e5;
+  }
+}
+
+.app-body {
+  grid-area: body;
 }
 
 .app-panels {
@@ -128,23 +105,25 @@ body {
   overflow: hidden;
   grid-template-areas: "sidebar-left panel";
   grid-template-columns: 18rem 1fr;
-  height: calc(100vh - 4.1rem);
-
+  height: calc(100vh - var(--app-header-height));
   &[data-left-sidebar-collapsed="true"] {
     grid-template-columns: 6rem 1fr;
   }
 }
 
 .app-panel {
+  height: 100%;
+  overflow: hidden;
   display: grid;
   grid-area: panel;
   grid-template-areas: "app-main sidebar-right";
   grid-template-columns: 1fr var(--app-sidebar-width);
-  overflow: hidden;
-  // margin: 0.8rem;
-  padding: 0.8rem 0.2rem;
-  margin: 0 -0.2rem;
-  // box-shadow: 0 0 0.3rem 0 var(--drop-shadow-color);
+  // margin: 0 -0.2rem;
+
+  &.full-width {
+    grid-template-areas: "app-main";
+    grid-template-columns: 1fr;
+  }
 }
 
 .app-sidebar-left {
@@ -154,13 +133,13 @@ body {
 
 .app-sidebar-right {
   grid-area: sidebar-right;
+  margin: 0.2rem 0 var(--app-container-padding);
 }
 
 .app-sidebar {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  // border-right: 0.1rem solid var(--border-color);
 
   .group {
     border-bottom: 0.1rem solid var(--border-color);
@@ -183,7 +162,6 @@ body {
     gap: 0.4rem;
 
     &[data-collapsed="true"] {
-      // width: 5.2rem;
       .react-aria-Tab {
         svg {
           flex-shrink: 0;
@@ -194,7 +172,6 @@ body {
 
         &[data-disabled] {
           margin: 0;
-          // display: none;
         }
       }
 
@@ -204,6 +181,7 @@ body {
 
     > .react-aria-Tab {
       padding: 1rem 1.2rem;
+      transition: all 60ms ease-in-out;
 
       &.header {
         text-transform: uppercase;
@@ -217,9 +195,12 @@ body {
         }
       }
 
+      &[data-hovered="true"]:not([data-selected="true"]) {
+        background: #e7e7e7;
+      }
       &[data-selected="true"] {
         box-shadow: none;
-        background: #ddd;
+        background: var(--nav-selected-color);
       }
     }
   }
@@ -231,6 +212,7 @@ body {
   min-width: 20rem;
   border-radius: 0.6rem;
   box-shadow: 0 0 0.2rem 0 var(--drop-shadow-color);
+  margin: 0.2rem 0.2rem 1.2rem;
 
   img {
     margin: 0 auto;
@@ -238,8 +220,11 @@ body {
 
   &.runner,
   &.loader {
-    margin: 0.8rem 0.8rem 0;
-    padding: 1.6rem;
+    margin: calc(var(--app-container-padding));
+    margin-top: 0.2rem;
+
+    margin: 0.2rem 0 0;
+    border-radius: 0;
   }
 }
 
@@ -254,124 +239,46 @@ body {
 }
 
 .document-tabs {
-  padding: 0.8rem 0.8rem;
-  display: grid;
-  grid-template-columns: auto 1fr auto;
   gap: 0.4rem;
-  box-shadow: inset 0 0 0.1rem var(--app-tabs-shadow-color);
-  font-size: 1.3rem;
-
-  .react-aria-Button {
-      padding: 0.6rem 1rem;
-      box-shadow: none;
-      background: none;
-
-      &[data-hovered] {
-        background: #dfdfdf;
-      }
-      &[data-selected] {
-        background: #ccc;
-      }
-      &[data-pressed] {
-        background: #cfcfcf;
-      }
-
-      svg {
-        margin-right: 1ch;
-      }
-
-      font-weight: 500;
-    }
-
-  > .left {
-    width: 17.8rem;
-    display: flex;
-    padding-left: 0.5rem;
-
-    .react-aria-Button {
-      box-shadow: none;
-
-      svg {
-        margin: 0;
-      }
-    }
-  }
-
-  > .right {
-    padding-right: 0.3rem;
-
-    .react-aria-Button:not([data-hovered]) {
-      background: #e5e5e5;
-    }
-  }
-
-  & + .react-aria-TabPanel .app-header {
-    border-top: 0;
-  }
-
-  .close-button {
-    all: unset;
-    display: flex;
-    place-items: center;
-    justify-content: center;
-    top: calc(50% - 0.8rem);
-    left: 0.8rem;
-    position: absolute;
-    height: 1.6rem;
-    width: 1.6rem;
-    border-radius: 0.4rem;
-    transition: all 200ms ease-in-out;
-    opacity: 0;
-    background: #eee;
-
-    &:hover {
-      background: #ddd;
-    }
-  }
-  [data-selected] .close-button {
-    color: #fff;
-  }
-
-  .react-aria-Tab {
-    padding: 0.6rem 3.2rem;
-    position: relative;
-    font-size: 1.2rem;
-    font-weight: bold;
-
-    &[data-hovered] .close-button,
-    &[data-selected] .close-button {
-      opacity: 1;
-    }
-
-    &[data-selected] {
-      box-shadow: 0 0 0.2rem 0 var(--tabs-shadow-color);
-      clip-path: inset(0 0 0rem 0);
-      border-bottom-left-radius: 0;
-      border-bottom-right-radius: 0;
-    }
-  }
+  width: 100%;
 
   .document-tablist {
+    width: 100%;
+    overflow: auto;
     gap: 0.8rem;
+    display: flex;
+    place-content: center;
+    background: none;
+    padding: 0;
+    box-shadow: none;
+    border: 0;
+    transition: all 300ms ease-in-out;
+  }
 
-    margin-left: -17.8rem;
+  .document-tab {
+    display: flex;
+    align-items: center;
+    height: 3rem;
+    background: #e7e7e7;
+    font-weight: 500;
+    border-radius: 0.4rem;
+    flex-shrink: 0;
+    padding: 0 1.6rem 0 3.2rem;
+    justify-items: center;
+    font-weight: 500;
+    max-width: 18rem;
 
-    @media (max-width: 55rem) {
-      margin-left: 0;
+    .tab-title {
+      width: min-content;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
 
-    &.react-aria-TabList {
-      overflow-x: auto;
-      width: 100%;
-      display: flex;
-      place-content: center;
-      background: none;
-      padding: 0;
-      box-shadow: none;
-      border: 0;
-    }
-    .react-aria-Tab[data-selected] {
-      background: var(--app-header-color);
+    .tab-progress {
+      font-size: 1.1rem;
+      margin-left: 0.8rem;
+      margin-right: -0.8rem;
     }
 
     .app-loader {
@@ -379,100 +286,82 @@ body {
       height: 1rem;
       width: 1rem;
       top: calc(50% - 0.5rem);
-      right: 0.9rem;
+      right: 0;
       border-width: 0.2rem;
     }
-  }
 
-  &.appearance-alt {
-    background: #494a4b;
-    padding-top: 0;
+    > svg {
+      width: 1rem;
+      position: absolute;
+      left: 0.8rem;
+      color: #777;
+    }
 
-    .react-aria-Tab {
-      border-radius: 0;
-      font-weight: 600;
-      &:not([data-selected]) {
-        color: #c0c0c1;
+    .close-button {
+      all: unset;
+      visibility: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      top: calc(50% - 1.05rem);
+      left: 0.5rem;
+      position: absolute;
+      padding: 0.2rem;
+      border-radius: 0.4rem;
+
+      > svg {
+        transition: background 60ms ease-in-out;
+        border-radius: 0.4rem;
+        background: #d5d5d5;
+        height: 1.6rem;
+        width: 1.6rem;
+        padding: 0.4rem;
       }
-      &[data-selected] {
-        background: var(--fill-color);
-        background: #111;
-        color: #fff;
+
+      &:hover > svg {
+        background: #c5c5c5;
       }
     }
-    &.appearance-alt-light {
-      background: #cdcdcd;
-      .react-aria-Tab {
-        &:not([data-selected]) {
-          color: #666;
-        }
-        &[data-selected] {
-          background: var(--fill-color);
-          background: var(--canvas-color);
-          color: #111;
-        }
+
+    &:not([data-selected])[data-hovered] {
+      background: #ddd;
+
+      .close-button:not(:hover) > svg {
+        background: #ccc;
       }
     }
-    &.appearance-alt-round {
-      // background: var(--app-tabs-background-color);
-      background: #e6e6e6;
-      background: var(--canvas-color);
+
+    &[data-selected] {
+      width: 100%;
+      max-width: min-content;
       box-shadow: none;
-      padding: 0.8rem 0.8rem 0.2rem;
-      justify-items: center;
-      margin-top: 0.1rem;
+      background: var(--tab-selected-color);
+      color: #000;
 
-      .react-aria-TabList {
-        overflow: visible; // Shadows
+      .tab-title {
+        min-width: 18rem;
+        text-align: center;
       }
 
-      .react-aria-Tab {
-        background: #dfdfdf;
-        border-radius: 0.4rem;
-
-        &:not([data-selected]) {
-          color: #666;
+      .close-button {
+        &:hover > svg {
+          background: #999;
         }
-        &:not([data-selected])[data-hovered] {
-          background: #f6f6f6;
-          box-shadow: 0 0 0.1rem 0 var(--shadow-color);
-        }
-        &[data-selected] {
-          background: #fbfbfb;
-          clip-path: unset;
-          color: #111;
-          box-shadow: 0 0 0.2rem 0 var(--shadow-color);
+        > svg {
+          color: #fff;
+          background: #aaa;
         }
       }
+    }
 
-      .react-aria-Tab {
-        background: #e5e5e5;
-        border-radius: 0.4rem;
-
-        &:not([data-selected]) {
-          color: #666;
-        }
-        &:not([data-selected])[data-hovered] {
-          background: #f6f6f6;
-          background: #ddd;
-          box-shadow: 0 0 0.1rem 0 var(--shadow-color);
-        }
-        &[data-selected] {
-          background: #d5d5d5;
-          clip-path: unset;
-          color: #111;
-          // box-shadow: 0 0 0.1rem 0.1rem #bdbdbd;
-          box-shadow: none;
-
-          .close-button {
-            background: #bbb;
-            &:hover {
-              background: #aaa;
-            }
-          }
-        }
+    &:not([data-selected])[data-hovered],
+    &[data-selected] {
+      .close-button + svg {
+        visibility: hidden;
       }
-
+      .close-button {
+        visibility: visible;
+      }
     }
   }
 }

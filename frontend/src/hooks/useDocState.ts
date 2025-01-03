@@ -26,7 +26,9 @@ export const useDocState = (
       setAppState((prev) => ({
         ...prev,
         documents: prev.documents.map((prevDoc) =>
-          prevDoc.id === docId ? nextDoc(prevDoc) : prevDoc,
+          prevDoc.id === docId
+            ? { ...nextDoc(prevDoc), modified: true }
+            : prevDoc,
         ),
       })),
     [docId, setAppState],

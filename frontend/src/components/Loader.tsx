@@ -47,8 +47,8 @@ export const Loader = ({
   }, [docId, setDocState]);
 
   return (
-    <TabPanel id={docId} key={docId}>
-      <div className="app-main full-height centered loader">
+    <TabPanel id={docId} key={docId} className={"app-panel full-width"}>
+      <div className="app-main centered loader">
         <div className="loader-wrapper">
           <ProgressBar value={progress}>
             {({ percentage, valueText }) => (
