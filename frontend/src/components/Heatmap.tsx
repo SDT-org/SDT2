@@ -145,6 +145,10 @@ export const Heatmap = ({
                     thickness: settings.cbar_aspect,
                     xpad: settings.cbar_pad,
                     title: "",
+                    // @ts-ignore
+                    tickfont: {
+                      ...plotFontMonospace,
+                    },
                   },
                 },
                 {
@@ -171,11 +175,8 @@ export const Heatmap = ({
                 responsive: true,
                 displayModeBar: false,
                 scrollZoom: true,
-                modeBarButtonsToRemove: ["sendDataToCloud", "toImage"],
                 displaylogo: false,
                 editable: false,
-                // showLink: true,
-                // plotlyServerURL: "https://chart-studio.plotly.com",
               }}
               layout={{
                 ...(settings.showTitles
@@ -183,9 +184,9 @@ export const Heatmap = ({
                       title: {
                         text: settings.title,
                         pad: {
-                          t: 100,
+                          t: 0,
                           r: 0,
-                          b: 50,
+                          b: 0,
                           l: 0,
                         },
                         subtitle: {
