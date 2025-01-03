@@ -30,17 +30,16 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
         const parsedResponse: GetDataResponse = JSON.parse(
           rawData.replace(/\bNaN\b/g, "null"),
         );
-        const { data, metadata, identity_scores, gc_stats, length_stats } =
-          parsedResponse;
-
+        const { data, metadata, identity_scores, full_stats } = parsedResponse;
         const [tickText, ...parsedData] = data;
 
         setMetaData(metadata);
         setTickText(tickText as string[]);
         setHeatmapData(parsedData);
         setDistributionData({
-          gc_stats,
-          length_stats,
+          full_stats,
+          gc_stats: full_stats.map((row) => row[1]),
+          length_stats: full_stats.map((row) => row[2]),
           raw_mat: identity_scores.map((i) => i[2]),
           identity_combos: identity_scores.map((i) => [i[0], i[1]]),
         });

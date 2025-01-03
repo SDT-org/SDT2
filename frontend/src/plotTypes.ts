@@ -89,16 +89,18 @@ export type GetDataResponse = {
     minVal: number;
     maxVal: number;
   };
-  gc_stats: number[];
-  length_stats: number[];
   identity_scores: [string, string, number][];
+  stat_ids: string[];
+  full_stats: [string, number, number][];
 };
 
 // TODO: make this file about heatmap
 export type DistributionData = Omit<
   GetDataResponse,
-  "data" | "identity_scores" | "metadata"
+  "data" | "identity_scores" | "metadata" | "stat_ids"
 > & {
   raw_mat: number[];
   identity_combos: [string, string][];
+  gc_stats: number[];
+  length_stats: number[];
 };

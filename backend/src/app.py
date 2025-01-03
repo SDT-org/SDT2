@@ -471,11 +471,9 @@ class Api:
         if doc.filetype == "text/fasta" or doc.filetype == "application/vnd.sdt":
             stats_path = os.path.join(doc.tempdir_path, f"{file_base}_stats.csv")
             stats_df = read_csv(stats_path, header=0)
-            gc_stats = stats_df["GC %"].map(lambda value: round(value * 100)).tolist()
-            len_stats = stats_df["Sequence Length"].tolist()
+            
         elif doc.filetype in matrix_filetypes:
-            gc_stats = []
-            len_stats = []
+            stats_df = DataFrame([])
         else:
             raise Exception("unsupported file type")
 
@@ -498,10 +496,10 @@ class Api:
         max_val = int(nanmax(data_no_diag))
 
         # TODO might be able to make one tick text object for both to use?
-        return data, tick_text, min_val, max_val, gc_stats, len_stats, identity_scores
+        return data, tick_text, min_val, max_val, identity_scores, stats_df
 
     def get_data(self, doc_id: str):
-        data, tick_text, min_val, max_val, gc_stats, len_stats, identity_scores = (
+        data, tick_text, min_val, max_val, identity_scores, stats_df = (
             self.load_data_and_stats(doc_id)
         )
         heat_data = DataFrame(data, index=tick_text)
@@ -511,8 +509,7 @@ class Api:
             metadata=dict(minVal=min_val, maxVal=max_val),
             data=([tick_text] + parsedData),
             identity_scores=identity_scores,
-            gc_stats=list(gc_stats),
-            length_stats=list(len_stats),
+            full_stats=stats_df.values.tolist()
         )
         return json.dumps(data_to_dump)
 
