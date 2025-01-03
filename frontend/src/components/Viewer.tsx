@@ -22,9 +22,12 @@ export const Viewer = ({
 
   const setDataView = React.useCallback(
     (newValue: Key) => {
-      updateDocState({
-        dataView: newValue as DocState["dataView"],
-      });
+      updateDocState(
+        {
+          dataView: newValue as DocState["dataView"],
+        },
+        false,
+      );
     },
     [updateDocState],
   );

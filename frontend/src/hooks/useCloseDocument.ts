@@ -1,4 +1,9 @@
-import type { AppState, DocState, SetAppState } from "../appState";
+import {
+  type AppState,
+  type DocState,
+  type SetAppState,
+  findDoc,
+} from "../appState";
 import { services } from "../services";
 import useNewDocument from "./useNewDocument";
 
@@ -8,6 +13,17 @@ export const useCloseDocument = (
 ) => {
   return (docId: string) => {
     const newDocument = useNewDocument(setAppState);
+    const doc = findDoc(docId, appState.documents);
+
+    if (doc?.modified) {
+      if (
+        !confirm(
+          `${doc.basename} has unsaved changes, are you sure you want to close it?`,
+        )
+      ) {
+        return;
+      }
+    }
 
     if ([0, 1].includes(appState.documents.length)) {
       return newDocument().then(() => services.closeDocument(docId));

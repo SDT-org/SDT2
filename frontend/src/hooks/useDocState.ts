@@ -22,21 +22,29 @@ export const useDocState = (
   }, [docId, appState.documents]);
 
   const setDocState = React.useCallback(
-    (nextDoc: (prevDoc: DocState) => DocState) =>
-      setAppState((prev) => ({
+    (nextDoc: (prevDoc: DocState) => DocState, markModified = true) => {
+      const isValidType = [docState.filetype].includes("application/vnd.sdt");
+      const extraValues = isValidType && markModified ? { modified: true } : {};
+
+      return setAppState((prev) => ({
         ...prev,
         documents: prev.documents.map((prevDoc) =>
           prevDoc.id === docId
-            ? { ...nextDoc(prevDoc), modified: true }
+            ? {
+                ...nextDoc(prevDoc),
+                ...extraValues,
+              }
             : prevDoc,
         ),
-      })),
-    [docId, setAppState],
+      }));
+    },
+    [docId, setAppState, docState.filetype],
   );
 
   const updateDocState = React.useCallback(
-    (values: Partial<DocState>) =>
-      setDocState((prev) => ({ ...prev, ...values })),
+    (values: Partial<DocState>, markModified = true) => {
+      setDocState((prev) => ({ ...prev, ...values }), markModified);
+    },
     [setDocState],
   );
 

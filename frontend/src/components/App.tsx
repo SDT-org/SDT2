@@ -12,7 +12,6 @@ import { useWaitForPywebview } from "../hooks/usePywebviewReadyEvent";
 import { useShortcutKeys } from "../hooks/useShortcutKeys";
 import { useSyncState } from "../hooks/useSyncState";
 import { Document } from "./Document";
-// import { restoreClientState } from "../restoreClientState";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { ExportModal } from "./ExportModal";
 import Icons from "./Icons";
@@ -120,52 +119,76 @@ export const App = () => {
                     onSelectionChange={setActiveDocumentId}
                     className="document-tabs"
                   >
-                    <TabList className="document-tablist" ref={tabListRef}>
-                      {appState.documents.map((doc) => (
-                        <Tab
-                          id={doc.id}
-                          key={doc.id}
-                          className="react-aria-Tab document-tab"
-                        >
-                          <span className="tab-title">
-                            {doc.basename || "Untitled"}
-                          </span>
-                          {doc.stage === "Analyzing" ? (
-                            <span className="tab-progress text-tabular-nums">
-                              {" "}
-                              {doc.progress}%
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "min-content min-content",
+                      }}
+                    >
+                      <TabList className="document-tablist" ref={tabListRef}>
+                        {appState.documents.map((doc) => (
+                          <Tab
+                            id={doc.id}
+                            key={doc.id}
+                            className="react-aria-Tab document-tab"
+                          >
+                            <span
+                              className="tab-title"
+                              data-modified={doc.modified}
+                            >
+                              {doc.basename || "Untitled"}
+                              <i>{doc.modified ? "Edited" : null}</i>
                             </span>
-                          ) : doc.stage === "Postprocessing" ? (
-                            <div className="app-loader" />
-                          ) : (
-                            <>
-                              <Button
-                                className={"close-button"}
-                                aria-label={`Close ${doc.basename}`}
-                                onPress={() => closeDocument(doc.id)}
-                              >
-                                <svg
-                                  aria-hidden={true}
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  viewBox="0 0 24 24"
-                                  width="9"
-                                  height="9"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="4"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
+                            {doc.stage === "Analyzing" ? (
+                              <span className="tab-progress text-tabular-nums">
+                                {" "}
+                                {doc.progress}%
+                              </span>
+                            ) : doc.stage === "Postprocessing" ? (
+                              <div className="app-loader" />
+                            ) : (
+                              <>
+                                <Button
+                                  className={"close-button"}
+                                  aria-label={`Close ${doc.basename}`}
+                                  onPress={() => closeDocument(doc.id)}
                                 >
-                                  <line x1="4" y1="4" x2="20" y2="20" />
-                                  <line x1="20" y1="4" x2="4" y2="20" />
-                                </svg>
-                              </Button>
-                            </>
-                          )}
-                          <Icons.Document />
-                        </Tab>
-                      ))}
-                    </TabList>
+                                  <svg
+                                    aria-hidden={true}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    width="9"
+                                    height="9"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <line x1="4" y1="4" x2="20" y2="20" />
+                                    <line x1="20" y1="4" x2="4" y2="20" />
+                                  </svg>
+                                </Button>
+                              </>
+                            )}
+                            <Icons.Document />
+                          </Tab>
+                        ))}
+                      </TabList>
+                      <Button className={"react-aria-Button new-document"}>
+                        <svg
+                          height="16"
+                          xmlns="http://www.w3.org/2000/svg"
+                          aria-hidden="true"
+                          viewBox="0 0 448 512"
+                        >
+                          <path
+                            d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32v144H48c-17.7 0-32 14.3-32 32s14.3 32 32 32h144v144c0 17.7 14.3 32 32 32s32-14.3 32-32V288h144c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"
+                            fill="currentColor"
+                          />
+                        </svg>
+                      </Button>
+                    </div>
                   </Tabs>
                 ) : (
                   <Select

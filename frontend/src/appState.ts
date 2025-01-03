@@ -161,8 +161,14 @@ export const initialAppState: AppState = {
 export const clientStateKey = "app-client-state";
 
 export type SetAppState = React.Dispatch<React.SetStateAction<AppState>>;
-export type SetDocState = (nextDoc: (prevDoc: DocState) => DocState) => void;
-export type UpdateDocState = (newValues: Partial<DocState>) => void;
+export type SetDocState = (
+  nextDoc: (prevDoc: DocState) => DocState,
+  markModified: boolean,
+) => void;
+export type UpdateDocState = (
+  newValues: Partial<DocState>,
+  markModified: boolean,
+) => void;
 export type SyncStateEvent = CustomEvent<{ state: AppState }>;
 export type SyncProgressEvent = CustomEvent<
   Pick<DocState, "id" | "progress" | "pair_progress" | "estimated_time">

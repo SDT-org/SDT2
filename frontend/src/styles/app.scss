@@ -284,6 +284,24 @@ body {
       overflow: hidden;
       text-align: left;
       width: 100%;
+
+      i {
+        transition: margin 200ms ease-in-out, height 200ms ease-in-out;
+        display: block;
+        overflow: hidden;
+        font-size: 1.1rem;
+        line-height: 0.8;
+        font-style: normal;
+        font-weight: 550;
+        height: 1.2rem;
+      }
+
+      &[data-modified="false"] i {
+        height: 0;
+      }
+      &[data-modified="true"] i {
+        opacity: 0.6;
+      }
     }
 
     .tab-progress {
@@ -374,6 +392,10 @@ body {
       }
     }
   }
+
+  .react-aria-Button.new-document {
+    width: 3rem;
+  }
 }
 
 .centered {
@@ -421,7 +443,6 @@ small {
   &.runner-wrapper {
     max-width: 46.4rem;
     max-width: 49.6rem;
-    // max-width: 51.2rem;
     width: 100%;
   }
 }

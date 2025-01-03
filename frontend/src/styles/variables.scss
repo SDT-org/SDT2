@@ -38,8 +38,8 @@
   --button-warning-pressed-background-color: #e29f45;
   --button-warning-text-color: #fefefe;
 
-  --tab-selected-color: #ccc;
-  --nav-selected-color: #ddd;
+  --tab-selected-color: var(--nav-selected-color);
+  --nav-selected-color: #dadada;
 
   --switch-border-color: #bbb;
   --switch-blur-border-color: #777;

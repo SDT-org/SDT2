@@ -47,24 +47,27 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
 
         const state = await getDocument(docState.id);
 
-        setDocState((prev) => ({
-          ...prev,
-          ...state,
-          heatmap: {
-            ...prev.heatmap,
-            ...state.heatmap,
-            vmin: metadata.minVal,
-            ...(docState.sequences_count > 99 && {
-              annotation: false,
-              axis_labels: false,
-              cellspace: 0,
-            }),
-            annotation_font_size: getScaledFontSize(
-              initialDocState.heatmap.annotation_font_size,
-              parsedData.length,
-            ),
-          },
-        }));
+        setDocState(
+          (prev) => ({
+            ...prev,
+            ...state,
+            heatmap: {
+              ...prev.heatmap,
+              ...state.heatmap,
+              vmin: metadata.minVal,
+              ...(docState.sequences_count > 99 && {
+                annotation: false,
+                axis_labels: false,
+                cellspace: 0,
+              }),
+              annotation_font_size: getScaledFontSize(
+                initialDocState.heatmap.annotation_font_size,
+                parsedData.length,
+              ),
+            },
+          }),
+          false,
+        );
       })
       .finally(() => {
         setLoading(false);
