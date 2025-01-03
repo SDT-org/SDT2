@@ -40,6 +40,7 @@ export const App = () => {
   useWaitForPywebview(() => setInitialized(true));
   // useWaitForPywebview(restoreInitialState);
   // useSaveState(initialized, appState);
+  const tabListRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (!initialized) {
@@ -67,8 +68,22 @@ export const App = () => {
     }
   }, [initialized, appState.documents, appState.activeDocumentId]);
 
-  const setActiveDocumentId = (id: Key) =>
+  React.useEffect(() => {
+    setTimeout(() => {
+      if (!tabListRef.current || !appState.activeDocumentId) {
+        return;
+      }
+      const activeTab = tabListRef.current.querySelector("[data-selected]");
+
+      if (activeTab) {
+        activeTab?.scrollIntoView();
+      }
+    }, 0);
+  }, [appState.activeDocumentId]);
+
+  const setActiveDocumentId = (id: Key) => {
     setAppState((prev) => ({ ...prev, activeDocumentId: id as string }));
+  };
 
   const tabView = React.useMemo(
     () => (appState.documents.length > 20 ? "select" : "tabs"),
@@ -115,7 +130,7 @@ export const App = () => {
                     onSelectionChange={setActiveDocumentId}
                     className="document-tabs"
                   >
-                    <TabList className="document-tablist">
+                    <TabList className="document-tablist" ref={tabListRef}>
                       {appState.documents.map((doc) => (
                         <Tab
                           id={doc.id}

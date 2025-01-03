@@ -333,14 +333,14 @@ body {
 
     &[data-selected] {
       width: 100%;
-      max-width: min-content;
+      width: min-content;
+      min-width: 18rem;
+      max-width: 28rem;
       box-shadow: none;
       background: var(--tab-selected-color);
       color: #000;
 
       .tab-title {
-        min-width: 18rem;
-        text-align: center;
       }
 
       .close-button {
