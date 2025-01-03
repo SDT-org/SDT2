@@ -34,6 +34,7 @@ is_compiled = "__compiled__" in globals()
 is_macos = platform.system() == "Darwin"
 temp_dir = TemporaryDirectory()
 
+window_title_suffix = "" if is_macos else " - SDT2"
 
 try:
     cpu_count = cpu_count()
@@ -191,7 +192,6 @@ def handle_open_file(filepath: str, doc_id: str | None):
         return [doc_id, filepath]
 
     else:
-        assert_window().title = default_window_title
         valid, message = validate_fasta(filepath, filetype)
 
         if valid:
@@ -553,6 +553,8 @@ class Api:
     def close_doc(self, doc_id: str):
         remove_document(doc_id)
 
+    def set_window_title(self, title: str):
+        assert_window().title = f"{title}{window_title_suffix}"
 
 def file_exists(path):
     return os.path.exists(os.path.join(os.path.dirname(__file__), path))

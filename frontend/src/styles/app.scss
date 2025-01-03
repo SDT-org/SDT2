@@ -33,7 +33,7 @@ body {
   grid-area: header;
   padding: 0.9rem var(--app-container-padding);
   display: grid;
-  grid-template-columns: 17rem 1fr 17rem;
+  grid-template-columns: 10rem 1fr 10rem;
   align-items: flex-start;
   z-index: 10;
   font-size: 1.3rem;
@@ -118,7 +118,6 @@ body {
   grid-area: panel;
   grid-template-areas: "app-main sidebar-right";
   grid-template-columns: 1fr var(--app-sidebar-width);
-  // margin: 0 -0.2rem;
 
   &.full-width {
     grid-template-areas: "app-main";
@@ -252,7 +251,6 @@ body {
     padding: 0;
     box-shadow: none;
     border: 0;
-    transition: all 300ms ease-in-out;
   }
 
   .document-tab {
@@ -262,17 +260,23 @@ body {
     background: #e7e7e7;
     font-weight: 500;
     border-radius: 0.4rem;
-    flex-shrink: 0;
     padding: 0 1.6rem 0 3.2rem;
     justify-items: center;
     font-weight: 500;
-    max-width: 18rem;
+    overflow: hidden;
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 12rem;
+    transition: max-width 0.2s ease-out, flex-basis 0.2s ease-out, background 60ms ease-in-out;
+    min-width: 8.2rem;
+    max-width: 16rem;
 
     .tab-title {
-      width: min-content;
       white-space: nowrap;
       text-overflow: ellipsis;
       overflow: hidden;
+      text-align: left;
+      width: 100%;
     }
 
     .tab-progress {
@@ -332,10 +336,9 @@ body {
     }
 
     &[data-selected] {
-      width: 100%;
-      width: min-content;
-      min-width: 18rem;
-      max-width: 28rem;
+      flex-grow: 1;
+      flex-basis: 18rem;
+      max-width: 24rem;
       box-shadow: none;
       background: var(--tab-selected-color);
       color: #000;
@@ -1135,7 +1138,6 @@ label.sublabel,
   position: relative;
   --border-color: transparent;
   forced-color-adjust: none;
-  transition: all 220ms;
   border-radius: 6px;
   padding: 0.2rem 1.6rem;
   font-weight: 500;

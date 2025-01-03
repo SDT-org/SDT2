@@ -1,6 +1,11 @@
 import React from "react";
 import { Button, type Key, Tab, TabList, Tabs } from "react-aria-components";
-import { type AppState, AppStateContext, initialAppState } from "../appState";
+import {
+  type AppState,
+  AppStateContext,
+  findDoc,
+  initialAppState,
+} from "../appState";
 import { useAppBlur } from "../hooks/appBlur";
 import { useCloseDocument } from "../hooks/useCloseDocument";
 import { useWaitForPywebview } from "../hooks/usePywebviewReadyEvent";
@@ -15,31 +20,12 @@ import { MainMenu } from "./Menu";
 import { Select, SelectItem } from "./Select";
 
 export const App = () => {
-  // const restoreInitialState = React.useCallback(() => {
-  //   setLoading(true);
-
-  //   window.pywebview.api.get_state().then((data) => {
-  //     setAppState((prev) => ({
-  //       ...data,
-  //       client: restoreClientState(prev.client),
-  //       showExportModal: false,
-  //     }));
-  //     setLoading(false);
-  //     setInitialized(true);
-  //   });
-  // }, []);
-
   const [appState, setAppState] = React.useState<AppState>(initialAppState);
-  // const [loading, setLoading] = React.useState(true);
-  // const [loading] = React.useState(true);
   const [initialized, setInitialized] = React.useState(false);
-  // const startRun = useStartRun(appState);
   useSyncState(setAppState);
   useShortcutKeys(appState, setAppState);
   useAppBlur();
   useWaitForPywebview(() => setInitialized(true));
-  // useWaitForPywebview(restoreInitialState);
-  // useSaveState(initialized, appState);
   const tabListRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
@@ -78,12 +64,16 @@ export const App = () => {
       if (activeTab) {
         activeTab?.scrollIntoView();
       }
-    }, 0);
-  }, [appState.activeDocumentId]);
 
-  const setActiveDocumentId = (id: Key) => {
+      const doc = findDoc(appState.activeDocumentId, appState.documents);
+      if (doc) {
+        window.pywebview.api.set_window_title(doc.basename || "Untitled");
+      }
+    }, 0);
+  }, [appState.activeDocumentId, appState.documents]);
+
+  const setActiveDocumentId = (id: Key) =>
     setAppState((prev) => ({ ...prev, activeDocumentId: id as string }));
-  };
 
   const tabView = React.useMemo(
     () => (appState.documents.length > 20 ? "select" : "tabs"),

@@ -48,6 +48,7 @@ declare global {
           image_format: SaveableImageFormat;
         }) => Promise<boolean>;
         start_run: (args: RunProcessDataArgs) => Promise<void>;
+        set_window_title: (title: string) => Promise<void>;
         processes_info: () => Promise<string>;
         get_available_memory: () => Promise<number>;
         cancel_run: (
