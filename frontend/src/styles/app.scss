@@ -114,10 +114,12 @@ body {
 .app-panel {
   height: 100%;
   overflow: hidden;
+  position: relative;
   display: grid;
   grid-area: panel;
   grid-template-areas: "app-main sidebar-right";
   grid-template-columns: 1fr var(--app-sidebar-width);
+  padding-bottom: var(--app-container-padding);
 
   &.full-width {
     grid-template-areas: "app-main";
@@ -132,13 +134,17 @@ body {
 
 .app-sidebar-right {
   grid-area: sidebar-right;
-  margin: 0.2rem 0 var(--app-container-padding);
+  margin: 0.2rem var(--app-container-padding) 0;
+  height: 100%;
+  max-height: min-content;
+  overflow: auto;
+  border-radius: 0.6rem;
+  box-shadow: 0 0 0 0.1rem var(--border-color);
 }
 
 .app-sidebar {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 
   .group {
     border-bottom: 0.1rem solid var(--border-color);
@@ -206,12 +212,13 @@ body {
 }
 
 .app-main {
+  height: 100%;
   grid-area: app-main;
-  overflow: auto;
+  overflow: hidden;
   min-width: 20rem;
   border-radius: 0.6rem;
   box-shadow: 0 0 0.2rem 0 var(--drop-shadow-color);
-  margin: 0.2rem 0.2rem 1.2rem;
+  margin: 0.2rem 0.2rem 0;
 
   img {
     margin: 0 auto;
@@ -573,13 +580,6 @@ small {
 
 .app-sidebar-toolbar {
   z-index: 1;
-  overflow: auto;
-  max-height: 100%;
-  margin: 0 1rem;
-  border-radius: 0.6rem;
-
-  border: 0.1rem solid var(--border-color);
-  border-bottom: 0;
 
   input,
   select {
@@ -607,6 +607,10 @@ small {
     *:not(.header) + .col-2 {
       margin-top: 0.8rem;
     }
+  }
+
+  .group:last-child {
+    border-bottom: 0;
   }
 
   .group + .group > .drawer:first-child {
@@ -704,7 +708,6 @@ small {
 }
 
 .app-sidebar-footer {
-  // border-top: 1px solid var(--border-color);
   padding: 1.2rem;
   margin-right: 0.8rem;
   select {
