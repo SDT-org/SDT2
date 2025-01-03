@@ -208,6 +208,7 @@ export const Heatmap = ({
                 autosize: true,
                 dragmode: "pan",
                 hovermode: "closest",
+                aspectratio: { x: 1, y: 1 },
                 xaxis: {
                   ...(settings.showTitles
                     ? {
@@ -220,11 +221,12 @@ export const Heatmap = ({
                             weight: "bold",
                           },
                         },
+                        scaleratio: 1,
                       }
                     : {}),
                   minallowed: -2,
                   maxallowed: tickText.length + 2,
-                  automargin: true,
+
                   tickfont: {
                     ...plotFontMonospace,
                     size: settings.axlabel_xfontsize,
@@ -234,6 +236,7 @@ export const Heatmap = ({
                   tickvals: [...Array(tickText.length).keys()],
                   ticktext: tickText,
                   showticklabels: settings.axis_labels,
+                  ticklabelpadding: 0,
                   // @ts-ignore
                   ticks: settings.axis_labels ? false : "",
                   autorange: true,
@@ -261,7 +264,6 @@ export const Heatmap = ({
                   minallowed: -2,
                   maxallowed: tickText.length + 2,
                   automargin: true,
-                  scaleanchor: "x",
                   range: [tickText.length - 1, 0],
                   autorange: false,
                   tickfont: {
@@ -272,12 +274,16 @@ export const Heatmap = ({
                   tickangle: settings.axlabel_yrotation,
                   tickvals: [...Array(tickText.length).keys()],
                   ticktext: tickText,
+                  tickson: "all",
                   showticklabels: settings.axis_labels,
+                  ticklabelpadding: 0,
                   // @ts-ignore
                   ticks: settings.axis_labels ? false : "",
                   showline: false,
                   zeroline: false,
                   showgrid: false,
+                  scaleanchor: "x",
+                  scaleratio: 1,
                 },
               }}
               style={{ width: "100%", height: "100%" }}

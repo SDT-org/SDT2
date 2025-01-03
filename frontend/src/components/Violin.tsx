@@ -40,9 +40,13 @@ export const Violin = ({
   }
 
   const dataSet = dataSets[dataSetKey];
+  console.log("dataSetKey:", dataSetKey);
+  console.log("dataSet:", dataSet);
+  console.log("data.identity_combos:", data.identity_combos);
   const [minDataValue, maxDataValue] = arrayMinMax(dataSet);
   const updateTitles = useRelayoutUpdateTitles(updateSettings);
   useRelayoutHideSubtitle(!settings.showTitles);
+
   const violinTrace = React.useMemo(
     () =>
       ({
