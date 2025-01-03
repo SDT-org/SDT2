@@ -7,10 +7,7 @@ export const useCloseActiveDocument = (
 ) => {
   const closeDocument = useCloseDocument(appState, setAppState);
 
-  return () => {
-    const multipleDocuments = appState.documents.length > 1;
-
-    closeDocument(appState.activeDocumentId);
-    return multipleDocuments;
+  return async () => {
+    return await closeDocument(appState.activeDocumentId);
   };
 };

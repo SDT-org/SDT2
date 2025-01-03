@@ -21,7 +21,7 @@ export const useCloseDocument = (
           `${doc.basename} has unsaved changes, are you sure you want to close it?`,
         )
       ) {
-        return;
+        return true;
       }
     }
 
