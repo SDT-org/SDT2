@@ -2,7 +2,8 @@ import type { PlotData } from "plotly.js";
 import Plotly from "plotly.js-cartesian-dist-min";
 import React from "react";
 import createPlotlyComponent from "react-plotly.js/factory";
-import { plotFont } from "../constants";
+
+import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import type { DataSets, DistributionState } from "../distributionState";
 import { arrayMinMax } from "../helpers";
 import {
@@ -11,7 +12,6 @@ import {
 } from "../hooks/useRelayoutUpdateTitles";
 import type { DistributionData, MetaData } from "../plotTypes";
 import { ViolinSidebar } from "./ViolinSidebar";
-
 const Plot = createPlotlyComponent(Plotly);
 
 export const Violin = ({
@@ -45,12 +45,13 @@ export const Violin = ({
   useRelayoutHideSubtitle(!settings.showTitles);
 
   const scoresText = data.identity_combos.map(
-    (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]} <br>Percent Identity: %{${settings.plotOrientation === "vertical" ? "y" : "x"}}`,
+    (ids) =>
+      `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]} <br>Percent Identity: %{${settings.plotOrientation === "vertical" ? "y" : "x"}}`,
   );
 
   const gcLengthIndex = dataSetKey === "gc" ? 1 : 2;
-  const gcLengthSuffix = dataSetKey === 'gc' ? '%' : ' nt';
-  const gcLengthTitle = dataSetKey === 'gc' ? 'GC' : 'Length';
+  const gcLengthSuffix = dataSetKey === "gc" ? "%" : " nt";
+  const gcLengthTitle = dataSetKey === "gc" ? "GC" : "Length";
   const gcLengthText = data.full_stats.map(
     (stats) =>
       `${stats[0]}: ${gcLengthTitle} = ${stats[gcLengthIndex]}${gcLengthSuffix}`,
@@ -87,7 +88,7 @@ export const Violin = ({
         },
         hoveron: "points",
         scalemode: "width",
-        hovertemplate: `%{text}<extra></extra>`,
+        hovertemplate: "%{text}<extra></extra>",
         text: hoverText,
       }) as Partial<PlotData>,
     [dataSet, settings, hoverText],
@@ -136,26 +137,31 @@ export const Violin = ({
             ...(settings.showTitles
               ? {
                   title: {
-                    text:
-                      settings.title +
-                      (settings.subtitle
-                        ? `<br><span style="font-size:0.8em;">${settings.subtitle}</span>`
-                        : ""),
+                    text: settings.title,
                     pad: {
-                      t: 100,
+                      t: 0,
                       r: 0,
                       b: 0,
                       l: 0,
                     },
+                    subtitle: {
+                      text: settings.subtitle,
+                    },
                   },
                 }
               : {}),
+            font: {
+              ...(settings.titleFont === "Monospace"
+                ? plotFontMonospace
+                : plotFontSansSerif),
+              // @ts-ignore
+              weight: "bold",
+            },
             uirevision: settings.plotOrientation,
-            font: plotFont,
             // @ts-ignore
             boxgap: 1 - settings.boxWidth,
-            xaxis:
-              settings.plotOrientation === "vertical"
+            xaxis: {
+              ...(settings.plotOrientation === "vertical"
                 ? {
                     fixedrange: true,
                     zeroline: false,
@@ -174,9 +180,25 @@ export const Violin = ({
                     tickmode: "auto",
                     autotick: true,
                     range: [minDataValue - 20, maxDataValue + 20],
-                  },
-            yaxis:
-              settings.plotOrientation === "vertical"
+                  }),
+              ...(settings.showTitles
+                ? {
+                    title: {
+                      text: settings.xtitle,
+                      font: {
+                        ...(settings.titleFont === "Monospace"
+                          ? plotFontMonospace
+                          : plotFontSansSerif),
+                        //@ts-ignore
+                        weight: "bold",
+                      },
+                    },
+                    scaleratio: 1,
+                  }
+                : {}),
+            },
+            yaxis: {
+              ...(settings.plotOrientation === "vertical"
                 ? {
                     side: "left",
                     rangemode: "tozero",
@@ -195,7 +217,26 @@ export const Violin = ({
                     showgrid: settings.showGrid,
                     showline: settings.showAxisLines,
                     showticklabels: settings.showTickLabels,
-                  },
+                  }),
+
+              ...(settings.showTitles
+                ? {
+                    title: {
+                      text: settings.ytitle,
+                      font: {
+                        ...(settings.titleFont === "Monospace"
+                          ? plotFontMonospace
+                          : plotFontSansSerif),
+                        //@ts-ignore
+                        weight: "bold",
+                      },
+                      pad: {
+                        r: 15,
+                      },
+                    },
+                  }
+                : {}),
+            },
             dragmode: "pan",
             barmode: "overlay",
             showlegend: false,

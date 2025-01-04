@@ -41,6 +41,7 @@ export type DistributionState = {
     xtitle: string;
     ytitle: string;
     plotOrientation: "horizontal" | "vertical";
+    titleFont: "Monospace" | "Sans Serif";
   };
   raincloud: VisualizationBase & {
     bandwidth: number;
@@ -62,6 +63,7 @@ export type DistributionState = {
     subtitle: string;
     xtitle: string;
     ytitle: string;
+    titleFont: "Monospace" | "Sans Serif";
   };
   violin: VisualizationBase & {
     bandwidth: number;
@@ -88,6 +90,7 @@ export type DistributionState = {
     subtitle: string;
     xtitle: string;
     ytitle: string;
+    titleFont: "Monospace" | "Sans Serif";
   };
 };
 
@@ -122,6 +125,7 @@ export const DistributionStateSchema = z.object({
     xtitle: z.string(),
     ytitle: z.string(),
     plotOrientation: z.enum(["horizontal", "vertical"]),
+    titleFont: z.enum(["Monospace", "Sans Serif"]).optional(),
   }),
   raincloud: VisualizationBaseSchema.extend({
     bandwidth: z.number(),
@@ -143,6 +147,7 @@ export const DistributionStateSchema = z.object({
     subtitle: z.string(),
     xtitle: z.string(),
     ytitle: z.string(),
+    titleFont: z.enum(["Monospace", "Sans Serif"]).optional(),
   }),
   violin: VisualizationBaseSchema.extend({
     bandwidth: z.number(),
@@ -169,6 +174,7 @@ export const DistributionStateSchema = z.object({
     subtitle: z.string(),
     xtitle: z.string(),
     ytitle: z.string(),
+    titleFont: z.enum(["Monospace", "Sans Serif"]).optional(),
   }),
 });
 
@@ -204,6 +210,7 @@ export const initialDistributionState: DistributionState = {
     xtitle: "Percent Identity",
     ytitle: "Frequency",
     plotOrientation: "horizontal",
+    titleFont: "Sans Serif",
   },
   raincloud: {
     ...visualizationDefaults,
@@ -228,6 +235,7 @@ export const initialDistributionState: DistributionState = {
     title: "Raincloud Plot",
     xtitle: "Percent Identity",
     ytitle: "Genome",
+    titleFont: "Sans Serif",
   },
   violin: {
     ...visualizationDefaults,
@@ -258,6 +266,7 @@ export const initialDistributionState: DistributionState = {
     subtitle: "Violin Plot",
     xtitle: "",
     ytitle: "",
+    titleFont: "Sans Serif",
   },
 };
 

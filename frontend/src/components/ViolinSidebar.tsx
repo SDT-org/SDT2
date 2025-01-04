@@ -89,7 +89,7 @@ export const ViolinSidebar = ({
                       strokeMiterlimit: 10,
                     }}
                   >
-                    <path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z" />
+                    <path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1-2 -2v-14z" />
                     <path d="M3 10h18" />
                     <path d="M10 3v18" />
                   </g>
@@ -144,6 +144,7 @@ export const ViolinSidebar = ({
               </ToggleButton>
             </Tooltip>
           </ToggleButtonGroup>
+
           <Label>Orientation</Label>
           <ToggleButtonGroup
             data-compact
@@ -397,6 +398,7 @@ export const ViolinSidebar = ({
           />
         </div>
       </div>
+
       <div className="group">
         <Switch
           isSelected={settings.showTitles}
@@ -413,15 +415,36 @@ export const ViolinSidebar = ({
           data-hidden={!settings.showTitles}
           aria-hidden={!settings.showTitles}
         >
-          <div className="field">
-            <TextField
-              onChange={(value) => updateSettings({ title: value })}
-              value={settings.title}
+          <div className="col-2 auto-onefr align-items-center">
+            <Label htmlFor="font">Font Type</Label>
+            <Select
+              id="font"
+              data-compact
+              selectedKey={settings.titleFont}
+              onSelectionChange={(value) =>
+                updateSettings({
+                  titleFont: value as typeof settings.titleFont,
+                })
+              }
+              items={["Sans Serif", "Monospace"].map((name) => ({
+                id: name,
+                name,
+              }))}
             >
-              <Label>Title</Label>
-              <Input />
-            </TextField>
+              {(item) => (
+                <SelectItem textValue={item.name}>{item.name}</SelectItem>
+              )}
+            </Select>
           </div>
+
+          <TextField
+            onChange={(value) => updateSettings({ title: value })}
+            value={settings.title}
+          >
+            <Label>Title</Label>
+            <Input />
+          </TextField>
+
           <div className="field">
             <TextField
               onChange={(value) => updateSettings({ subtitle: value })}
@@ -431,6 +454,7 @@ export const ViolinSidebar = ({
               <Input />
             </TextField>
           </div>
+
           <div className="field">
             <TextField
               onChange={(value) => updateSettings({ xtitle: value })}
@@ -440,6 +464,7 @@ export const ViolinSidebar = ({
               <Input />
             </TextField>
           </div>
+
           <div className="field">
             <TextField
               onChange={(value) => updateSettings({ ytitle: value })}

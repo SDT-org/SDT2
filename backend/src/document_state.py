@@ -88,6 +88,7 @@ default_distribution_state = dict(
     xtitle="Percent Identity",
     ytitle="Frequency",
     plotOrientation="vertical",
+    titleFont="Sans Serif",
   ),
   raincloud=dict(
     **visualization_defaults,
@@ -112,6 +113,7 @@ default_distribution_state = dict(
     title="Raincloud Plot",
     xtitle="Percent Identity",
     ytitle="Genome",
+    titleFont="Sans Serif",
   ),
   violin=dict(
     **visualization_defaults,
@@ -141,6 +143,7 @@ default_distribution_state = dict(
     subtitle="Violin Plot",
     xtitle="",
     ytitle="",
+    titleFont="Sans Serif",
   ),
 )
 
