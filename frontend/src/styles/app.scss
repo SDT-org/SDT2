@@ -246,7 +246,9 @@ body {
 
 .document-tabs {
   gap: 0.4rem;
+  padding: 0 1.6rem;
   width: 100%;
+  position: relative;
 
   .document-tablist {
     width: 100%;
@@ -258,6 +260,14 @@ body {
     padding: 0;
     box-shadow: none;
     border: 0;
+  }
+
+  .react-aria-Button.new-document {
+    width: 3rem;
+    position: fixed;
+    top: .8rem;
+    left: 0;
+    margin-left: 0.2rem;
   }
 
   .document-tab {
@@ -277,6 +287,17 @@ body {
     transition: max-width 0.2s ease-out, flex-basis 0.2s ease-out, background 60ms ease-in-out;
     min-width: 8.2rem;
     max-width: 16rem;
+    transition: background 60ms ease-in-out;
+
+    &[data-closing="true"] {
+      display: none;
+      transition: none;
+    }
+
+    *, .close-button {
+      opacity: 0;
+      animation: reveal 120ms ease-in 0s forwards;
+    }
 
     .tab-title {
       white-space: nowrap;
@@ -368,9 +389,6 @@ body {
       background: var(--tab-selected-color);
       color: #000;
 
-      .tab-title {
-      }
-
       .close-button {
         &:hover > svg {
           background: #999;
@@ -391,10 +409,6 @@ body {
         visibility: visible;
       }
     }
-  }
-
-  .react-aria-Button.new-document {
-    width: 3rem;
   }
 }
 
@@ -770,6 +784,12 @@ small {
 @keyframes reveal {
   to {
     opacity: 1;
+  }
+}
+
+@keyframes hide {
+  to {
+    opacity: 0;
   }
 }
 

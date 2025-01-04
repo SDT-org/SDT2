@@ -8,6 +8,7 @@ import {
 } from "../appState";
 import { useAppBlur } from "../hooks/appBlur";
 import { useCloseDocument } from "../hooks/useCloseDocument";
+import useNewDocument from "../hooks/useNewDocument";
 import { useWaitForPywebview } from "../hooks/usePywebviewReadyEvent";
 import { useShortcutKeys } from "../hooks/useShortcutKeys";
 import { useSyncState } from "../hooks/useSyncState";
@@ -26,6 +27,7 @@ export const App = () => {
   useAppBlur();
   useWaitForPywebview(() => setInitialized(true));
   const tabListRef = React.useRef<HTMLDivElement>(null);
+  const lastTabRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     if (!initialized) {
@@ -54,7 +56,7 @@ export const App = () => {
   }, [initialized, appState.documents, appState.activeDocumentId]);
 
   React.useEffect(() => {
-    setTimeout(() => {
+    const id = setTimeout(() => {
       if (!tabListRef.current || !appState.activeDocumentId) {
         return;
       }
@@ -69,10 +71,15 @@ export const App = () => {
         window.pywebview.api.set_window_title(doc.basename || "Untitled");
       }
     }, 0);
+
+    return () => clearTimeout(id);
   }, [appState.activeDocumentId, appState.documents]);
 
-  const setActiveDocumentId = (id: Key) =>
-    setAppState((prev) => ({ ...prev, activeDocumentId: id as string }));
+  const setActiveDocumentId = React.useCallback(
+    (id: Key) =>
+      setAppState((prev) => ({ ...prev, activeDocumentId: id as string })),
+    [],
+  );
 
   const tabView = React.useMemo(
     () => (appState.documents.length > 20 ? "select" : "tabs"),
@@ -80,8 +87,67 @@ export const App = () => {
   );
 
   const closeDocument = useCloseDocument(appState, setAppState);
+  const newDocument = useNewDocument(setAppState);
 
   const [leftSidebarCollapsed, setLeftSidebarCollapsed] = React.useState(false);
+  const [newTabPositionRect, setNewTabPositionRect] = React.useState<DOMRect>();
+  const [hideNewTab, setHideNewTab] = React.useState(true);
+
+  const checkTabOverflow = React.useCallback(() => {
+    const container = tabListRef.current;
+    if (!container) {
+      return false;
+    }
+
+    return (
+      container.scrollWidth > container.offsetWidth ||
+      container.scrollHeight > container.offsetHeight
+    );
+  }, []);
+
+  const updateNewTabOffset = React.useCallback(() => {
+    if (!lastTabRef.current) {
+      return;
+    }
+    const rect = checkTabOverflow()
+      ? tabListRef?.current?.getBoundingClientRect()
+      : lastTabRef.current.getBoundingClientRect();
+
+    setNewTabPositionRect(rect);
+    setHideNewTab(false);
+  }, [checkTabOverflow]);
+
+  React.useEffect(() => {
+    if (!appState.documents.length) {
+      return;
+    }
+    const id = setTimeout(() => updateNewTabOffset(), 0);
+    return () => clearTimeout(id);
+  }, [updateNewTabOffset, appState.documents.length]);
+
+  React.useEffect(() => {
+    let id: Timer;
+
+    const observer = new MutationObserver(() => {
+      id = setTimeout(updateNewTabOffset, 0);
+    });
+
+    if (tabListRef.current) {
+      observer.observe(tabListRef.current, {
+        attributes: false,
+        childList: true,
+        subtree: true,
+      });
+    }
+
+    window.addEventListener("resize", updateNewTabOffset);
+
+    return () => {
+      clearTimeout(id);
+      window.removeEventListener("resize", updateNewTabOffset);
+      observer.disconnect();
+    };
+  }, [updateNewTabOffset]);
 
   return (
     <ErrorBoundary appState={appState} setAppState={setAppState}>
@@ -119,18 +185,19 @@ export const App = () => {
                     onSelectionChange={setActiveDocumentId}
                     className="document-tabs"
                   >
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "min-content min-content",
-                      }}
-                    >
-                      <TabList className="document-tablist" ref={tabListRef}>
-                        {appState.documents.map((doc) => (
+                    <TabList className="document-tablist" ref={tabListRef}>
+                      {appState.documents
+                        .filter((doc) => !("closing" in doc))
+                        .map((doc, index) => (
                           <Tab
                             id={doc.id}
                             key={doc.id}
                             className="react-aria-Tab document-tab"
+                            ref={
+                              appState.documents.length - 1 === index
+                                ? lastTabRef
+                                : null
+                            }
                           >
                             <span
                               className="tab-title"
@@ -174,21 +241,28 @@ export const App = () => {
                             <Icons.Document />
                           </Tab>
                         ))}
-                      </TabList>
-                      <Button className={"react-aria-Button new-document"}>
-                        <svg
-                          height="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                          aria-hidden="true"
-                          viewBox="0 0 448 512"
-                        >
-                          <path
-                            d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32v144H48c-17.7 0-32 14.3-32 32s14.3 32 32 32h144v144c0 17.7 14.3 32 32 32s32-14.3 32-32V288h144c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"
-                            fill="currentColor"
-                          />
-                        </svg>
-                      </Button>
-                    </div>
+                    </TabList>
+                    <Button
+                      className={"react-aria-Button new-document"}
+                      onPress={newDocument}
+                      style={{
+                        left: newTabPositionRect?.right || 0,
+                        top: newTabPositionRect?.top,
+                        opacity: hideNewTab ? "0" : "1",
+                      }}
+                    >
+                      <svg
+                        height="16"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-hidden="true"
+                        viewBox="0 0 448 512"
+                      >
+                        <path
+                          d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32v144H48c-17.7 0-32 14.3-32 32s14.3 32 32 32h144v144c0 17.7 14.3 32 32 32s32-14.3 32-32V288h144c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"
+                          fill="currentColor"
+                        />
+                      </svg>
+                    </Button>
                   </Tabs>
                 ) : (
                   <Select
