@@ -18,6 +18,7 @@ export const useSyncState = (setAppState: SetAppState) => {
           return {
             ...beDoc,
             dataView: feDoc?.dataView || beDoc.dataView,
+            modified: feDoc?.modified || false,
             heatmap: {
               ...beDoc.heatmap,
               ...feDoc?.heatmap,
