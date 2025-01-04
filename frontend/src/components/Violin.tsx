@@ -40,12 +40,23 @@ export const Violin = ({
   }
 
   const dataSet = dataSets[dataSetKey];
-  console.log("dataSetKey:", dataSetKey);
-  console.log("dataSet:", dataSet);
-  console.log("data.identity_combos:", data.identity_combos);
   const [minDataValue, maxDataValue] = arrayMinMax(dataSet);
   const updateTitles = useRelayoutUpdateTitles(updateSettings);
   useRelayoutHideSubtitle(!settings.showTitles);
+
+  const scoresText = data.identity_combos.map(
+    (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]} <br>Percent Identity: %{${settings.plotOrientation === "vertical" ? "y" : "x"}}`,
+  );
+
+  const gcLengthIndex = dataSetKey === "gc" ? 1 : 2;
+  const gcLengthSuffix = dataSetKey === 'gc' ? '%' : ' nt';
+  const gcLengthTitle = dataSetKey === 'gc' ? 'GC' : 'Length';
+  const gcLengthText = data.full_stats.map(
+    (stats) =>
+      `${stats[0]}: ${gcLengthTitle} = ${stats[gcLengthIndex]}${gcLengthSuffix}`,
+  );
+
+  const hoverText = dataSetKey === "scores" ? scoresText : gcLengthText;
 
   const violinTrace = React.useMemo(
     () =>
@@ -76,12 +87,10 @@ export const Violin = ({
         },
         hoveron: "points",
         scalemode: "width",
-        hovertemplate: `%{text}<br>Percent Identity: %{${settings.plotOrientation === "vertical" ? "y" : "x"}}<extra></extra>`,
-        text: data.identity_combos.map(
-          (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}`,
-        ),
+        hovertemplate: `%{text}<extra></extra>`,
+        text: hoverText,
       }) as Partial<PlotData>,
-    [data, dataSet, settings],
+    [dataSet, settings, hoverText],
   );
   const boxTrace = React.useMemo(
     () =>

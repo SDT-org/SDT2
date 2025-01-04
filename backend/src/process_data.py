@@ -42,7 +42,7 @@ def grab_stats(seq_dict):
     # https://stackoverflow.com/questions/20585920/how-to-add-multiple-values-to-a-dictionary-key
     seq_stats = {}
     for key, record in seq_dict.items():
-        gcCount = round(gc_fraction(str(record)), 2)
+        gcCount = round(gc_fraction(str(record)), 2) * 100
         genLen = len(record)
         seq_stats.setdefault(key, [])
         seq_stats[key].append(gcCount)
