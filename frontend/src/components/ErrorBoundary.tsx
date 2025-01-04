@@ -21,14 +21,14 @@ export class ErrorBoundary extends React.Component<Props> {
   }
 
   override componentDidMount(): void {
-    window.addEventListener("unhandledrejection", this.handlePromiseRejection);
+    // window.addEventListener("unhandledrejection", this.handlePromiseRejection);
   }
 
   override componentWillUnmount(): void {
-    window.removeEventListener(
-      "unhandledrejection",
-      this.handlePromiseRejection,
-    );
+    // window.removeEventListener(
+    //   "unhandledrejection",
+    //   this.handlePromiseRejection,
+    // );
   }
 
   override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
