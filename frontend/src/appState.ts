@@ -27,7 +27,7 @@ export type DocState = {
   view: "runner" | "loader" | "viewer";
   filename: string;
   filetype: string;
-  filemtime?: number;
+  filemtime: number | null;
   basename: string;
   modified: boolean;
   parsed: boolean;
