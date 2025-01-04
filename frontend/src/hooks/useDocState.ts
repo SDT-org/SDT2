@@ -3,8 +3,11 @@ import {
   type AppState,
   type DocState,
   type SetAppState,
+  docStateSchema,
   findDoc,
+  initialDocState,
 } from "../appState";
+import { partialSafeParse } from "../zodUtils";
 
 export const useDocState = (
   docId: string,
@@ -12,14 +15,62 @@ export const useDocState = (
   setAppState: SetAppState,
 ) => {
   const docState = React.useMemo(() => {
-    const foundDoc = findDoc(docId, appState.documents);
+    const state = findDoc(docId, appState.documents);
 
-    if (!foundDoc) {
+    if (!state) {
       throw new Error(`Expected document to be found: ${docId}`);
     }
 
-    return foundDoc;
-  }, [docId, appState.documents]);
+    if (state.parsed) {
+      return state;
+    }
+
+    console.count(`parsing doc ${docId}`);
+
+    try {
+      const parsedState = partialSafeParse(docStateSchema, state);
+      const validData = parsedState.validData;
+      const merged: DocState = {
+        ...initialDocState,
+        ...validData,
+        distribution: {
+          ...initialDocState.distribution,
+          ...validData.distribution,
+          histogram: {
+            ...initialDocState.distribution.histogram,
+            ...validData.distribution?.histogram,
+          },
+          violin: {
+            ...initialDocState.distribution.violin,
+            ...validData.distribution?.violin,
+          },
+          raincloud: {
+            ...initialDocState.distribution.raincloud,
+            ...validData.distribution?.raincloud,
+          },
+        },
+        heatmap: {
+          ...initialDocState.heatmap,
+          ...validData.heatmap,
+        },
+      };
+      if ("compute_stats" in state) {
+        merged.compute_stats = state.compute_stats;
+      }
+      if (parsedState.error) {
+        console.warn(parsedState.error);
+      }
+      setAppState((prev) => ({
+        ...prev,
+        documents: prev.documents.map((doc) =>
+          doc.id === docId ? { ...prev, ...merged, parsed: true } : doc,
+        ),
+      }));
+      return merged;
+    } catch (e) {
+      return initialDocState;
+    }
+  }, [docId, appState.documents, setAppState]);
 
   const setDocState = React.useCallback(
     (nextDoc: (prevDoc: DocState) => DocState, markModified = true) => {

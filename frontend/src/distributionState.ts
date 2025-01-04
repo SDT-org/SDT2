@@ -125,7 +125,7 @@ export const DistributionStateSchema = z.object({
     xtitle: z.string(),
     ytitle: z.string(),
     plotOrientation: z.enum(["horizontal", "vertical"]),
-    titleFont: z.enum(["Monospace", "Sans Serif"]).optional(),
+    titleFont: z.enum(["Monospace", "Sans Serif"]),
   }),
   raincloud: VisualizationBaseSchema.extend({
     bandwidth: z.number(),
@@ -147,7 +147,7 @@ export const DistributionStateSchema = z.object({
     subtitle: z.string(),
     xtitle: z.string(),
     ytitle: z.string(),
-    titleFont: z.enum(["Monospace", "Sans Serif"]).optional(),
+    titleFont: z.enum(["Monospace", "Sans Serif"]),
   }),
   violin: VisualizationBaseSchema.extend({
     bandwidth: z.number(),
@@ -174,7 +174,7 @@ export const DistributionStateSchema = z.object({
     subtitle: z.string(),
     xtitle: z.string(),
     ytitle: z.string(),
-    titleFont: z.enum(["Monospace", "Sans Serif"]).optional(),
+    titleFont: z.enum(["Monospace", "Sans Serif"]),
   }),
 });
 

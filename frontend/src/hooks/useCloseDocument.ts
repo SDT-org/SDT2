@@ -35,6 +35,7 @@ export const useCloseDocument = (
     if (appState.activeDocumentId === docId) {
       setAppState((prev) => ({
         ...prev,
+        documents: prev.documents.filter((doc) => doc.id !== docId),
         activeDocumentId:
           prev.documents[findDocIndex(prev.documents) + 1]?.id ||
           prev.documents[findDocIndex(prev.documents) - 1]?.id ||

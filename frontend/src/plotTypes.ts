@@ -63,6 +63,7 @@ export const HeatmapSettingsSchema = z.object({
   annotation_rounding: z.union([z.literal(0), z.literal(1), z.literal(2)]),
   annotation_alpha: z.string(),
   showscale: z.boolean(),
+  showTitles: z.boolean(),
   titleFont: z.enum(["Sans Serif", "Monospace"]),
   title: z.string(),
   subtitle: z.string(),

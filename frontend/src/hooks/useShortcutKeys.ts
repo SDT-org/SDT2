@@ -12,7 +12,7 @@ export const useShortcutKeys = (
   const openFileDialog = useOpenFileDialog(appState, setAppState);
   const newDocument = useNewDocument(setAppState);
   const closeActiveDocument = useCloseActiveDocument(appState, setAppState);
-  const saveActiveDocument = useSaveActiveDocument(appState);
+  const saveActiveDocument = useSaveActiveDocument(appState, setAppState);
 
   const keyMap = React.useMemo(
     () => ({

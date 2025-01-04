@@ -17,7 +17,7 @@ import { isSDTFile } from "../helpers";
 import { useCloseDocument } from "../hooks/useCloseDocument";
 import useNewDocument from "../hooks/useNewDocument";
 import useOpenFileDialog from "../hooks/useOpenFileDialog";
-import { services } from "../services";
+import { useSaveActiveDocument } from "../hooks/useSaveActiveDocument";
 
 // AppMenuButton and AppMenuItem were derived from https://react-spectrum.adobe.com/react-aria/Menu.html#reusable-wrappers
 interface MyMenuButtonProps<T>
@@ -121,6 +121,7 @@ export const MainMenu = createHideableComponent(() => {
 
   const newDocument = useNewDocument(setAppState);
   const closeDocument = useCloseDocument(appState, setAppState);
+  const saveDocument = useSaveActiveDocument(appState, setAppState);
 
   const sdtFile = isSDTFile(activeDocState.filetype);
 
@@ -129,8 +130,8 @@ export const MainMenu = createHideableComponent(() => {
   const onOpen = () => {
     openFileDialog();
   };
-  const onSave = () => services.saveDocument(activeDocState);
-  const onSaveAs = () => services.saveDocument(activeDocState, true);
+  const onSave = () => saveDocument();
+  const onSaveAs = () => saveDocument(true);
   const onClose = () => closeDocument(appState.activeDocumentId);
 
   const onExport = () =>

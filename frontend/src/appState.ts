@@ -27,9 +27,10 @@ export type DocState = {
   view: "runner" | "loader" | "viewer";
   filename: string;
   filetype: string;
-  filemtime?: string;
+  filemtime?: number;
   basename: string;
   modified: boolean;
+  parsed: boolean;
   progress: number;
   sequences_count: number;
   stage: string;
@@ -76,7 +77,6 @@ export type AppState = {
 };
 
 export const clientStateSchema = z.object({
-  dataView: z.enum(["heatmap", "distribution"]),
   enableClustering: z.boolean(),
   enableOutputAlignments: z.boolean(),
   cluster_method: z.enum(clusterMethods),
@@ -88,6 +88,35 @@ export const clientStateSchema = z.object({
   alignmentExportPath: z.string(),
   dataExportPath: z.string(),
   lastDataFilePath: z.string(),
+});
+
+export const docStateSchema = z.object({
+  id: z.string(),
+  view: z.enum(["runner", "loader", "viewer"]),
+  filename: z.string(),
+  filetype: z.string(),
+  filemtime: z.number().nullable(),
+  basename: z.string(),
+  modified: z.boolean(),
+  progress: z.number(),
+  sequences_count: z.number(),
+  pair_progress: z.number(),
+  pair_count: z.number(),
+  stage: z.enum([
+    "",
+    "Preparing",
+    "Preprocessing",
+    "Analyzing",
+    "Postprocessing",
+    "Finalizing",
+    "Processed",
+  ]),
+  dataView: z.enum([
+    "heatmap",
+    "distribution_histogram",
+    "distribution_violin",
+    "distribution_raincloud",
+  ]),
   distribution: DistributionStateSchema,
   heatmap: HeatmapSettingsSchema,
 });
@@ -99,6 +128,7 @@ export const initialDocState: DocState = {
   filetype: "",
   basename: "",
   modified: false,
+  parsed: false,
   // TODO: wrap in runState
   progress: 0,
   sequences_count: 0,
