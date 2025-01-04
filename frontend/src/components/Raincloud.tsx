@@ -131,21 +131,21 @@ export const Raincloud = ({
               showline: settings.showAxisLines,
               showticklabels: settings.showTickLabels,
               range: [minDataValue - 20, maxDataValue + 20],
-              tickmode: 'array',
+              tickmode: "array",
               tickfont: {
                 ...plotFontMonospace,
               },
               ticktext: Array.from(
-                {length: Math.ceil((maxDataValue + 20) / 5) + 1},
+                { length: Math.ceil((maxDataValue + 20) / 5) + 1 },
                 (_, i) => {
                   const value = i * 5;
-                  return value <= 100 ? value.toString() : '';  
-                }
+                  return value <= 100 ? value.toString() : "";
+                },
               ),
               tickvals: Array.from(
-                {length: Math.ceil((maxDataValue + 20) / 5) + 1},
-                (_, i) => i * 5
-              )
+                { length: Math.ceil((maxDataValue + 20) / 5) + 1 },
+                (_, i) => i * 5,
+              ),
             },
             yaxis: {
               ...(settings.showTitles
@@ -171,7 +171,6 @@ export const Raincloud = ({
               showgrid: settings.showGrid,
               showline: settings.showAxisLines,
               showticklabels: settings.showTickLabels,
-              
             },
             dragmode: "pan",
             barmode: "overlay",

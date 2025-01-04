@@ -63,6 +63,7 @@ def get_similarity(seq1, seq2):
                 dist += 1
         else:
             gaps += 1
+            
     similarity = float((float(dist)) / (len(seq1) - gaps))
     # convert to percentile
     similarity_percentile = similarity * 100

@@ -5,41 +5,48 @@ import createPlotlyComponent from "react-plotly.js/factory";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import type { DataSets, DistributionState } from "../distributionState";
 import { arrayMinMax } from "../helpers";
-import { useRelayoutHideSubtitle, useRelayoutUpdateTitles } from "../hooks/useRelayoutUpdateTitles";
+import {
+  useRelayoutHideSubtitle,
+  useRelayoutUpdateTitles,
+} from "../hooks/useRelayoutUpdateTitles";
 import type { DistributionData, MetaData } from "../plotTypes";
 import { ViolinSidebar } from "./ViolinSidebar";
 
 const Plot = createPlotlyComponent(Plotly);
 
-const getAxisConfig = (minDataValue: number, maxDataValue: number, isLength: boolean) => {
+const getAxisConfig = (
+  minDataValue: number,
+  maxDataValue: number,
+  isLength: boolean,
+) => {
   if (isLength) {
     return {
-      tickmode: 'linear',
+      tickmode: "linear",
       tickfont: {
         ...plotFontMonospace,
       },
       dtick: 10,
-      range: [minDataValue - 20, maxDataValue + 20]
+      range: [minDataValue - 20, maxDataValue + 20],
     };
   }
-  
+
   return {
-    tickmode: 'array',
+    tickmode: "array",
     tickfont: {
       ...plotFontMonospace,
     },
     range: [minDataValue - 20, maxDataValue + 20],
     ticktext: Array.from(
-      {length: Math.ceil((maxDataValue + 20) / 5) + 1},
+      { length: Math.ceil((maxDataValue + 20) / 5) + 1 },
       (_, i) => {
         const value = i * 5;
-        return value <= 100 ? value.toString() : '';
-      }
+        return value <= 100 ? value.toString() : "";
+      },
     ),
     tickvals: Array.from(
-      {length: Math.ceil((maxDataValue + 20) / 5) + 1},
-      (_, i) => i * 5
-    )
+      { length: Math.ceil((maxDataValue + 20) / 5) + 1 },
+      (_, i) => i * 5,
+    ),
   };
 };
 
@@ -122,7 +129,7 @@ export const Violin = ({
       }) as Partial<PlotData>,
     [dataSet, settings, hoverText],
   );
-  
+
   const boxTrace = React.useMemo(
     () =>
       ({
@@ -184,6 +191,7 @@ export const Violin = ({
               ...(settings.titleFont === "Monospace"
                 ? plotFontMonospace
                 : plotFontSansSerif),
+              //@ts-ignore
               weight: "bold",
             },
             uirevision: settings.plotOrientation,
@@ -204,9 +212,12 @@ export const Violin = ({
                     showgrid: settings.showGrid,
                     showline: settings.showAxisLines,
                     showticklabels: settings.showTickLabels,
-                    ...getAxisConfig(minDataValue, maxDataValue, dataSetKey === "length")
-                  }
-              ),
+                    ...getAxisConfig(
+                      minDataValue,
+                      maxDataValue,
+                      dataSetKey === "length",
+                    ),
+                  }),
               ...(settings.showTitles
                 ? {
                     title: {
@@ -215,6 +226,7 @@ export const Violin = ({
                         ...(settings.titleFont === "Monospace"
                           ? plotFontMonospace
                           : plotFontSansSerif),
+                        //@ts-ignore
                         weight: "bold",
                       },
                     },
@@ -231,7 +243,11 @@ export const Violin = ({
                     showgrid: settings.showGrid,
                     showline: settings.showAxisLines,
                     showticklabels: settings.showTickLabels,
-                    ...getAxisConfig(minDataValue, maxDataValue, dataSetKey === "length")
+                    ...getAxisConfig(
+                      minDataValue,
+                      maxDataValue,
+                      dataSetKey === "length",
+                    ),
                   }
                 : {
                     fixedrange: true,
@@ -248,6 +264,7 @@ export const Violin = ({
                         ...(settings.titleFont === "Monospace"
                           ? plotFontMonospace
                           : plotFontSansSerif),
+                        //@ts-ignore
                         weight: "bold",
                       },
                       pad: {
