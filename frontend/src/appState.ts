@@ -126,6 +126,7 @@ export const initialDocState: DocState = {
   view: "runner",
   filename: "",
   filetype: "",
+  filemtime: null,
   basename: "",
   modified: false,
   parsed: false,

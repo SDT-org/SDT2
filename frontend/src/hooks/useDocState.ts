@@ -25,8 +25,6 @@ export const useDocState = (
       return state;
     }
 
-    console.count(`parsing doc ${docId}`);
-
     try {
       const parsedState = partialSafeParse(docStateSchema, state);
       const validData = parsedState.validData;
