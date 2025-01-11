@@ -152,9 +152,6 @@ export const Heatmap = ({
             ) : (
               <Plot
                 id="plot"
-                onInitialized={(figure) => {
-                  // console.log(figure.data);
-                }}
                 onRelayout={(e) => {
                   updateTitles(e);
                   updateTextScale(e);

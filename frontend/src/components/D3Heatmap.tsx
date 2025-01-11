@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import { useEffect, useRef } from "react";
-import { type ColorScaleArray, colorScales } from "../colorScales";
+import type { ColorScaleArray } from "../colorScales";
 
 interface HeatmapCell {
   x: number;
