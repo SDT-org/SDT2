@@ -146,7 +146,7 @@ export const Heatmap = ({
                 minVal={settings.vmin}
                 maxVal={settings.vmax}
                 width={800}
-                height={600}
+                height={800}
               />
             ) : (
               <Plot

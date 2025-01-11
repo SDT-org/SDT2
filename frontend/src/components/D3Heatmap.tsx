@@ -51,7 +51,7 @@ export const D3Heatmap = ({
     if (!svgRef.current) return;
     d3.select(svgRef.current).selectAll("*").remove();
 
-    const margin = { top: 40, right: 40, bottom: 40, left: 60 };
+    const margin = { top: 60, right: 60, bottom: 60, left: 60 };
     const w = width - margin.left - margin.right;
     const h = height - margin.top - margin.bottom;
 
