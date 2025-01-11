@@ -70,7 +70,7 @@ export const D3Heatmap = ({
 
     // Draw each cell
     g.selectAll("rect")
-      .data(data)
+      .data(data.filter((d) => Number(d.value)))
       .join("rect")
       .attr("x", (d) => d.x * cellW)
       .attr("y", (d) => d.y * cellH)
