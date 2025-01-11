@@ -73,6 +73,7 @@ export const D3Heatmap = ({
     const cellW = w / n;
     const cellH = h / n;
     const cellOffset = cellSpace > 0 ? cellSpace / 2 : 0;
+    const labelOffset = 1;
     const fontSizeMin = 1;
     const fontSizeMax = 16;
     const fontSizeFactor = 0.01;
@@ -80,7 +81,6 @@ export const D3Heatmap = ({
       fontSizeMin +
       (fontSizeMax - fontSizeMin) /
         (fontSizeMin + fontSizeFactor * data.length);
-    console.log(data.length);
 
     const groups = g
       .selectAll("g")
@@ -102,6 +102,7 @@ export const D3Heatmap = ({
       .attr("y", cellH / 2)
       .attr("dy", ".35em")
       .attr("text-anchor", "middle")
+      .attr("font-family", "Roboto Mono")
       .attr("font-size", `${fontSize}px`)
       .text((d) => d.value)
       .attr("fill", (d) =>
@@ -132,10 +133,17 @@ export const D3Heatmap = ({
       .selectAll("text")
       .data(tickText)
       .join("text")
-      .attr("x", (_, i) => i * cellW + cellW / 2)
-      .attr("y", cellH + 5)
+      .attr("y", cellH)
       .attr("text-anchor", "middle")
+      .attr("font-family", "Roboto Mono")
       .attr("font-size", `${fontSize}px`)
+      .attr("font-weight", "bold")
+      .attr("text-anchor", "end")
+      .attr(
+        "transform",
+        (_, i) =>
+          `translate(${i * cellW - cellW / 2}, ${labelOffset}) rotate(-90)`,
+      )
       .text((txt) => txt);
 
     // Simple y-axis labels
@@ -144,11 +152,13 @@ export const D3Heatmap = ({
       .selectAll("text")
       .data(tickText)
       .join("text")
-      .attr("x", 0)
-      .attr("y", (_, i) => i * cellH)
+      .attr("x", -labelOffset)
+      .attr("y", (_, i) => i * cellH + cellH / 2)
       .attr("dominant-baseline", "middle")
       .attr("text-anchor", "end")
-      .attr("font-size", `${fontSize + 1}px`)
+      .attr("font-family", "Roboto Mono")
+      .attr("font-size", `${fontSize}px`)
+      .attr("font-weight", "bold")
       .text((txt) => txt);
   }, [data, tickText, colorScale, minVal, maxVal, width, height, cellSpace]);
 
