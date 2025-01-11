@@ -1,5 +1,6 @@
 import * as d3 from "d3";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
+import tinycolor from "tinycolor2";
 import type { ColorScaleArray } from "../colorScales";
 
 interface HeatmapCell {
@@ -48,16 +49,18 @@ export const D3Heatmap = ({
   cellSpace,
 }: D3HeatmapProps) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const [svgTransform, setSvgTransform] = React.useState({});
 
   useEffect(() => {
     if (!svgRef.current) return;
-    d3.select(svgRef.current).selectAll("*").remove();
+    const d3Svg = d3.select(svgRef.current as Element);
+    d3Svg.selectAll("*").remove();
 
     const margin = { top: 60, right: 60, bottom: 60, left: 60 };
+    // const margin = { top: 0, right: 0, bottom: 0, left: 0 };
     const w = width - margin.left - margin.right;
     const h = height - margin.top - margin.bottom;
 
-    // Number of rows/cols from tickText
     const n = tickText.length;
 
     const colorFn = createD3ColorScale(colorScale, minVal, maxVal);
@@ -69,18 +72,59 @@ export const D3Heatmap = ({
 
     const cellW = w / n;
     const cellH = h / n;
+    const cellOffset = cellSpace > 0 ? cellSpace / 2 : 0;
+    const fontSizeMin = 1;
+    const fontSizeMax = 16;
+    const fontSizeFactor = 0.01;
+    const fontSize =
+      fontSizeMin +
+      (fontSizeMax - fontSizeMin) /
+        (fontSizeMin + fontSizeFactor * data.length);
+    console.log(data.length);
 
-    // Draw each cell
-    g.selectAll("rect")
+    const groups = g
+      .selectAll("g")
       .data(data.filter((d) => Number(d.value)))
-      .join("rect")
-      .attr("x", (d) => d.x * cellW + cellSpace / 2)
-      .attr("y", (d) => d.y * cellH + cellSpace / 2)
+      .join("g")
+      .attr("transform", (d) => `translate(${d.x * cellW}, ${d.y * cellH})`);
+
+    groups
+      .append("rect")
       .attr("width", cellW - cellSpace)
       .attr("height", cellH - cellSpace)
-      .attr("fill", (d) => colorFn(d.value))
-      .append("title")
-      .text((d) => `Value: ${d.value.toFixed(1)}%`);
+      .attr("x", cellOffset)
+      .attr("y", cellOffset)
+      .attr("fill", (d) => colorFn(d.value));
+
+    groups
+      .append("text")
+      .attr("x", cellW / 2)
+      .attr("y", cellH / 2)
+      .attr("dy", ".35em")
+      .attr("text-anchor", "middle")
+      .attr("font-size", `${fontSize}px`)
+      .text((d) => d.value)
+      .attr("fill", (d) =>
+        tinycolor(colorFn(d.value)).isLight() ? "#000" : "#fff",
+      );
+
+    d3Svg.call(
+      d3
+        .zoom()
+        .extent([
+          [0, 0],
+          [width, height],
+        ])
+        .scaleExtent([1, 25])
+        .translateExtent([
+          [0 - margin.left, 0 - margin.top],
+          [width, height],
+        ])
+        .on("zoom", ({ transform }: d3.D3ZoomEvent<SVGSVGElement, unknown>) => {
+          setSvgTransform(transform as object);
+          g.attr("transform", transform.toString());
+        }),
+    );
 
     // Simple x-axis labels
     const xAxisG = g.append("g").attr("transform", `translate(0, ${h})`);
@@ -89,8 +133,9 @@ export const D3Heatmap = ({
       .data(tickText)
       .join("text")
       .attr("x", (_, i) => i * cellW + cellW / 2)
-      .attr("y", 20)
+      .attr("y", cellH + 5)
       .attr("text-anchor", "middle")
+      .attr("font-size", `${fontSize}px`)
       .text((txt) => txt);
 
     // Simple y-axis labels
@@ -99,12 +144,15 @@ export const D3Heatmap = ({
       .selectAll("text")
       .data(tickText)
       .join("text")
-      .attr("x", -5)
-      .attr("y", (_, i) => i * cellH + cellH / 2)
+      .attr("x", 0)
+      .attr("y", (_, i) => i * cellH)
       .attr("dominant-baseline", "middle")
       .attr("text-anchor", "end")
+      .attr("font-size", `${fontSize + 1}px`)
       .text((txt) => txt);
   }, [data, tickText, colorScale, minVal, maxVal, width, height, cellSpace]);
 
-  return <svg ref={svgRef} width={width} height={height} />;
+  console.log(svgTransform);
+
+  return <svg ref={svgRef} width={"100%"} height={"100%"} />;
 };
