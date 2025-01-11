@@ -162,7 +162,12 @@ export const D3Heatmap = ({
       .text((txt) => txt);
   }, [data, tickText, colorScale, minVal, maxVal, width, height, cellSpace]);
 
-  console.log(svgTransform);
-
-  return <svg ref={svgRef} width={"100%"} height={"100%"} />;
+  return (
+    <svg
+      style={{ background: "#fff" }}
+      ref={svgRef}
+      width={"100%"}
+      height={"100%"}
+    />
+  );
 };
