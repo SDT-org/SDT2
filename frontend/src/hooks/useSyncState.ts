@@ -5,6 +5,7 @@ import {
   type SyncStateEvent,
   findDoc,
 } from "../appState";
+import { parseDocState } from "../parseDocState";
 
 export const useSyncState = (setAppState: SetAppState) => {
   React.useEffect(() => {
@@ -15,7 +16,7 @@ export const useSyncState = (setAppState: SetAppState) => {
         ...event.detail.state,
         documents: event.detail.state.documents.map((beDoc) => {
           const feDoc = findDoc(beDoc.id, prev.documents);
-          return {
+          return parseDocState({
             ...beDoc,
             dataView: feDoc?.dataView || beDoc.dataView,
             modified: feDoc?.modified || false,
@@ -27,7 +28,7 @@ export const useSyncState = (setAppState: SetAppState) => {
               ...beDoc.distribution,
               ...feDoc?.distribution,
             },
-          };
+          });
         }),
       }));
     };

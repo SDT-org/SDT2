@@ -149,6 +149,12 @@ export const App = () => {
     };
   }, [updateNewTabOffset]);
 
+  const activeDocument = React.useMemo(
+    () =>
+      appState.documents.find((doc) => doc.id === appState.activeDocumentId),
+    [appState.activeDocumentId, appState.documents],
+  );
+
   return (
     <ErrorBoundary appState={appState} setAppState={setAppState}>
       <AppStateContext.Provider value={{ appState, setAppState }}>
@@ -186,61 +192,59 @@ export const App = () => {
                     className="document-tabs"
                   >
                     <TabList className="document-tablist" ref={tabListRef}>
-                      {appState.documents
-                        .filter((doc) => !("closing" in doc))
-                        .map((doc, index) => (
-                          <Tab
-                            id={doc.id}
-                            key={doc.id}
-                            className="react-aria-Tab document-tab"
-                            ref={
-                              appState.documents.length - 1 === index
-                                ? lastTabRef
-                                : null
-                            }
+                      {appState.documents.map((doc, index) => (
+                        <Tab
+                          id={doc.id}
+                          key={doc.id}
+                          className="react-aria-Tab document-tab"
+                          ref={
+                            appState.documents.length - 1 === index
+                              ? lastTabRef
+                              : null
+                          }
+                        >
+                          <span
+                            className="tab-title"
+                            data-modified={doc.modified}
                           >
-                            <span
-                              className="tab-title"
-                              data-modified={doc.modified}
-                            >
-                              {doc.basename || "Untitled"}
-                              <i>{doc.modified ? "Edited" : null}</i>
+                            {doc.basename || "Untitled"}
+                            <i>{doc.modified ? "Edited" : null}</i>
+                          </span>
+                          {doc.stage === "Analyzing" ? (
+                            <span className="tab-progress text-tabular-nums">
+                              {" "}
+                              {doc.progress}%
                             </span>
-                            {doc.stage === "Analyzing" ? (
-                              <span className="tab-progress text-tabular-nums">
-                                {" "}
-                                {doc.progress}%
-                              </span>
-                            ) : doc.stage === "Postprocessing" ? (
-                              <div className="app-loader" />
-                            ) : (
-                              <>
-                                <Button
-                                  className={"close-button"}
-                                  aria-label={`Close ${doc.basename}`}
-                                  onPress={() => closeDocument(doc.id)}
+                          ) : doc.stage === "Postprocessing" ? (
+                            <div className="app-loader" />
+                          ) : (
+                            <>
+                              <Button
+                                className={"close-button"}
+                                aria-label={`Close ${doc.basename}`}
+                                onPress={() => closeDocument(doc.id)}
+                              >
+                                <svg
+                                  aria-hidden={true}
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  width="9"
+                                  height="9"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="4"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
                                 >
-                                  <svg
-                                    aria-hidden={true}
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    width="9"
-                                    height="9"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="4"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <line x1="4" y1="4" x2="20" y2="20" />
-                                    <line x1="20" y1="4" x2="4" y2="20" />
-                                  </svg>
-                                </Button>
-                              </>
-                            )}
-                            <Icons.Document />
-                          </Tab>
-                        ))}
+                                  <line x1="4" y1="4" x2="20" y2="20" />
+                                  <line x1="20" y1="4" x2="4" y2="20" />
+                                </svg>
+                              </Button>
+                            </>
+                          )}
+                          <Icons.Document />
+                        </Tab>
+                      ))}
                     </TabList>
                     <Button
                       className={"react-aria-Button new-document"}
@@ -321,16 +325,18 @@ export const App = () => {
               onSelectionChange={setActiveDocumentId}
               className={"app-body"}
             >
-              {appState.documents.map((doc) => (
-                <Document
-                  id={doc.id}
-                  key={doc.id}
-                  tabView={tabView}
-                  leftSidebarCollapsed={leftSidebarCollapsed}
-                />
-              ))}
+              {appState.documents
+                .filter((doc) => doc.parsed)
+                .map((doc) => (
+                  <Document
+                    id={doc.id}
+                    key={doc.id}
+                    tabView={tabView}
+                    leftSidebarCollapsed={leftSidebarCollapsed}
+                  />
+                ))}
             </Tabs>
-            {appState.activeDocumentId ? <ExportModal /> : null}
+            {activeDocument ? <ExportModal /> : null}
           </div>
         ) : (
           <div className="app-overlay app-loader" />
