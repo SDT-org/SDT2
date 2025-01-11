@@ -1,6 +1,5 @@
 import Plotly from "plotly.js-cartesian-dist-min";
 import React from "react";
-
 import createPlotlyComponent from "react-plotly.js/factory";
 import type { DocState, SetDocState, UpdateDocState } from "../appState";
 import {
@@ -8,13 +7,13 @@ import {
   colorScales as defaultColorScales,
 } from "../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
-
 import { useAnnotations } from "../hooks/useAnnotations";
 import {
   useRelayoutHideSubtitle,
   useRelayoutUpdateTitles,
 } from "../hooks/useRelayoutUpdateTitles";
 import type { HeatmapData } from "../plotTypes";
+import { D3Heatmap } from "./D3Heatmap";
 import { HeatmapSidebar } from "./HeatmapSidebar";
 
 const Plot = createPlotlyComponent(Plotly);
@@ -104,6 +103,33 @@ export const Heatmap = ({
     [data.length],
   );
 
+  const d3HeatmapData = React.useMemo(
+    () =>
+      [...data].reverse().flatMap((row, y) =>
+        row.map((value, x) => ({
+          x,
+          y: data.length - 1 - y,
+          value: Number(value),
+        })),
+      ),
+    [data],
+  );
+
+  const [TEMP_D3, TEMP_setD3] = React.useState(true);
+
+  React.useEffect(() => {
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (event.key === "d") {
+        event.preventDefault();
+        TEMP_setD3((prev) => !prev);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeydown);
+
+    return () => document.removeEventListener("keydown", handleKeydown);
+  }, []);
+
   const updateTitles = useRelayoutUpdateTitles(updateSettings);
   useRelayoutHideSubtitle(!settings.showTitles);
 
@@ -112,182 +138,199 @@ export const Heatmap = ({
       {data ? (
         <>
           <div className="app-main">
-            <Plot
-              id="plot"
-              onRelayout={(e) => {
-                updateTitles(e);
-                updateTextScale(e);
-              }}
-              data={[
-                {
-                  z: data,
-                  colorscale: colorScales[settings.colorScaleKey],
-                  reversescale: settings.reverse,
-                  type: "heatmap",
-                  hovertemplate:
-                    "Seq 1: %{y}<br>Seq 2: %{x}<br>Percent Pairwise Identity: %{z}<extra></extra>",
-                  // @ts-ignore
-                  hoverongaps: false,
-                  transpose: false,
-                  zsmooth: false,
-                  autosize: true,
-                  set_aspect: 3,
-                  showscale: settings.showscale,
-                  zmin:
-                    settings.colorScaleKey === "Discrete" ? 0 : settings.vmin,
-                  zmax:
-                    settings.colorScaleKey === "Discrete" ? 100 : settings.vmax,
-                  // Gap between columns of cells. Actual 0 values cause blurriness on macOS
-                  xgap: settings.cellspace || 0.001,
-                  ygap: settings.cellspace || 0.001,
-                  colorbar: {
-                    len: settings.cbar_shrink,
-                    thickness: settings.cbar_aspect,
-                    xpad: settings.cbar_pad,
-                    title: "",
+            {TEMP_D3 ? (
+              <D3Heatmap
+                data={d3HeatmapData}
+                tickText={tickText}
+                colorScale={colorScales[settings.colorScaleKey]}
+                minVal={settings.vmin}
+                maxVal={settings.vmax}
+                width={800}
+                height={600}
+              />
+            ) : (
+              <Plot
+                id="plot"
+                onInitialized={(figure) => {
+                  // console.log(figure.data);
+                }}
+                onRelayout={(e) => {
+                  updateTitles(e);
+                  updateTextScale(e);
+                }}
+                data={[
+                  {
+                    z: data,
+                    colorscale: colorScales[settings.colorScaleKey],
+                    reversescale: settings.reverse,
+                    type: "heatmap",
+                    hovertemplate:
+                      "Seq 1: %{y}<br>Seq 2: %{x}<br>Percent Pairwise Identity: %{z}<extra></extra>",
                     // @ts-ignore
-                    tickfont: {
-                      ...plotFontMonospace,
+                    hoverongaps: false,
+                    transpose: false,
+                    zsmooth: false,
+                    autosize: true,
+                    set_aspect: 3,
+                    showscale: settings.showscale,
+                    zmin:
+                      settings.colorScaleKey === "Discrete" ? 0 : settings.vmin,
+                    zmax:
+                      settings.colorScaleKey === "Discrete"
+                        ? 100
+                        : settings.vmax,
+                    // Gap between columns of cells. Actual 0 values cause blurriness on macOS
+                    xgap: settings.cellspace || 0.001,
+                    ygap: settings.cellspace || 0.001,
+                    colorbar: {
+                      len: settings.cbar_shrink,
+                      thickness: settings.cbar_aspect,
+                      xpad: settings.cbar_pad,
+                      title: "",
+                      // @ts-ignore
+                      tickfont: {
+                        ...plotFontMonospace,
+                      },
                     },
                   },
-                },
-                {
-                  type: "scatter",
-                  mode: "text",
-                  // @ts-ignore
+                  {
+                    type: "scatter",
+                    mode: "text",
+                    // @ts-ignore
+                    scrollZoom: true,
+                    textfont: {
+                      ...plotFontMonospace,
+                      size: settings.annotation_font_size * textScale,
+                      color: annotations?.textColors ?? "white",
+                    },
+                    hoverinfo: "skip",
+                    ...(settings.annotation
+                      ? {
+                          x: annotations.x,
+                          y: annotations.y,
+                          text: annotations.text,
+                        }
+                      : {}),
+                  },
+                ]}
+                config={{
+                  responsive: true,
+                  displayModeBar: false,
                   scrollZoom: true,
-                  textfont: {
-                    ...plotFontMonospace,
-                    size: settings.annotation_font_size * textScale,
-                    color: annotations?.textColors ?? "white",
-                  },
-                  hoverinfo: "skip",
-                  ...(settings.annotation
-                    ? {
-                        x: annotations.x,
-                        y: annotations.y,
-                        text: annotations.text,
-                      }
-                    : {}),
-                },
-              ]}
-              config={{
-                responsive: true,
-                displayModeBar: false,
-                scrollZoom: true,
-                displaylogo: false,
-                editable: false,
-              }}
-              layout={{
-                ...(settings.showTitles
-                  ? {
-                      title: {
-                        text: settings.title,
-                        pad: {
-                          t: 0,
-                          r: 0,
-                          b: 0,
-                          l: 0,
-                        },
-                        subtitle: {
-                          text: settings.subtitle,
-                        },
-                      },
-                    }
-                  : {}),
-                font: {
-                  ...(settings.titleFont === "Monospace"
-                    ? plotFontMonospace
-                    : plotFontSansSerif),
-                  // @ts-ignore
-                  weight: "bold",
-                },
-                plot_bgcolor: "rgba(0,0,0,0)",
-                paper_bgcolor: "rgba(0,0,0,0)",
-                uirevision: "true",
-                autosize: true,
-                dragmode: "pan",
-                hovermode: "closest",
-                aspectratio: { x: 1, y: 1 },
-                xaxis: {
+                  displaylogo: false,
+                  editable: false,
+                }}
+                layout={{
                   ...(settings.showTitles
                     ? {
                         title: {
-                          text: settings.xtitle,
-                          font: {
-                            ...(settings.titleFont === "Monospace"
-                              ? plotFontMonospace
-                              : plotFontSansSerif),
-                            weight: "bold",
-                          },
-                        },
-                        scaleratio: 1,
-                      }
-                    : {}),
-                  minallowed: -2,
-                  maxallowed: tickText.length + 2,
-
-                  tickfont: {
-                    ...plotFontMonospace,
-                    size: settings.axlabel_xfontsize,
-                    color: "black",
-                  },
-                  tickangle: settings.axlabel_xrotation,
-                  tickvals: [...Array(tickText.length).keys()],
-                  ticktext: tickText,
-                  showticklabels: settings.axis_labels,
-                  ticklabelpadding: 0,
-                  // @ts-ignore
-                  ticks: settings.axis_labels ? false : "",
-                  autorange: true,
-                  showline: false,
-                  zeroline: false,
-                  showgrid: false,
-                },
-                yaxis: {
-                  ...(settings.showTitles
-                    ? {
-                        title: {
-                          text: settings.ytitle,
-                          font: {
-                            ...(settings.titleFont === "Monospace"
-                              ? plotFontMonospace
-                              : plotFontSansSerif),
-                            weight: "bold",
-                          },
+                          text: settings.title,
                           pad: {
-                            r: 15,
+                            t: 0,
+                            r: 0,
+                            b: 0,
+                            l: 0,
+                          },
+                          subtitle: {
+                            text: settings.subtitle,
                           },
                         },
                       }
                     : {}),
-                  minallowed: -2,
-                  maxallowed: tickText.length + 2,
-                  automargin: true,
-                  range: [tickText.length - 1, 0],
-                  autorange: false,
-                  tickfont: {
-                    ...plotFontMonospace,
-                    size: settings.axlabel_yfontsize,
-                    color: "black",
+                  font: {
+                    ...(settings.titleFont === "Monospace"
+                      ? plotFontMonospace
+                      : plotFontSansSerif),
+                    // @ts-ignore
+                    weight: "bold",
                   },
-                  tickangle: settings.axlabel_yrotation,
-                  tickvals: [...Array(tickText.length).keys()],
-                  ticktext: tickText,
-                  tickson: "all",
-                  showticklabels: settings.axis_labels,
-                  ticklabelpadding: 0,
-                  // @ts-ignore
-                  ticks: settings.axis_labels ? false : "",
-                  showline: false,
-                  zeroline: false,
-                  showgrid: false,
-                  scaleanchor: "x",
-                  scaleratio: 1,
-                },
-              }}
-              style={{ width: "100%", height: "100%" }}
-            />
+                  plot_bgcolor: "rgba(0,0,0,0)",
+                  paper_bgcolor: "rgba(0,0,0,0)",
+                  uirevision: "true",
+                  autosize: true,
+                  dragmode: "pan",
+                  hovermode: "closest",
+                  aspectratio: { x: 1, y: 1 },
+                  xaxis: {
+                    ...(settings.showTitles
+                      ? {
+                          title: {
+                            text: settings.xtitle,
+                            font: {
+                              ...(settings.titleFont === "Monospace"
+                                ? plotFontMonospace
+                                : plotFontSansSerif),
+                              weight: "bold",
+                            },
+                          },
+                          scaleratio: 1,
+                        }
+                      : {}),
+                    minallowed: -2,
+                    maxallowed: tickText.length + 2,
+
+                    tickfont: {
+                      ...plotFontMonospace,
+                      size: settings.axlabel_xfontsize,
+                      color: "black",
+                    },
+                    tickangle: settings.axlabel_xrotation,
+                    tickvals: [...Array(tickText.length).keys()],
+                    ticktext: tickText,
+                    showticklabels: settings.axis_labels,
+                    ticklabelpadding: 0,
+                    // @ts-ignore
+                    ticks: settings.axis_labels ? false : "",
+                    autorange: true,
+                    showline: false,
+                    zeroline: false,
+                    showgrid: false,
+                  },
+                  yaxis: {
+                    ...(settings.showTitles
+                      ? {
+                          title: {
+                            text: settings.ytitle,
+                            font: {
+                              ...(settings.titleFont === "Monospace"
+                                ? plotFontMonospace
+                                : plotFontSansSerif),
+                              weight: "bold",
+                            },
+                            pad: {
+                              r: 15,
+                            },
+                          },
+                        }
+                      : {}),
+                    minallowed: -2,
+                    maxallowed: tickText.length + 2,
+                    automargin: true,
+                    range: [tickText.length - 1, 0],
+                    autorange: false,
+                    tickfont: {
+                      ...plotFontMonospace,
+                      size: settings.axlabel_yfontsize,
+                      color: "black",
+                    },
+                    tickangle: settings.axlabel_yrotation,
+                    tickvals: [...Array(tickText.length).keys()],
+                    ticktext: tickText,
+                    tickson: "all",
+                    showticklabels: settings.axis_labels,
+                    ticklabelpadding: 0,
+                    // @ts-ignore
+                    ticks: settings.axis_labels ? false : "",
+                    showline: false,
+                    zeroline: false,
+                    showgrid: false,
+                    scaleanchor: "x",
+                    scaleratio: 1,
+                  },
+                }}
+                style={{ width: "100%", height: "100%" }}
+              />
+            )}
           </div>
           <HeatmapSidebar
             settings={settings}
