@@ -105,10 +105,10 @@ export const Heatmap = ({
 
   const d3HeatmapData = React.useMemo(
     () =>
-      [...data].reverse().flatMap((row, y) =>
+      data.flatMap((row, y) =>
         row.map((value, x) => ({
           x,
-          y: data.length - 1 - y,
+          y,
           value: Number(value),
         })),
       ),
