@@ -16,6 +16,7 @@ interface D3HeatmapProps {
   maxVal?: number;
   width?: number;
   height?: number;
+  cellSpace: number;
 }
 
 function createD3ColorScale(
@@ -44,6 +45,7 @@ export const D3Heatmap = ({
   maxVal = 100,
   width = 500,
   height = 500,
+  cellSpace,
 }: D3HeatmapProps) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
 
@@ -72,10 +74,10 @@ export const D3Heatmap = ({
     g.selectAll("rect")
       .data(data.filter((d) => Number(d.value)))
       .join("rect")
-      .attr("x", (d) => d.x * cellW)
-      .attr("y", (d) => d.y * cellH)
-      .attr("width", cellW)
-      .attr("height", cellH)
+      .attr("x", (d) => d.x * cellW + cellSpace / 2)
+      .attr("y", (d) => d.y * cellH + cellSpace / 2)
+      .attr("width", cellW - cellSpace)
+      .attr("height", cellH - cellSpace)
       .attr("fill", (d) => colorFn(d.value))
       .append("title")
       .text((d) => `Value: ${d.value.toFixed(1)}%`);
@@ -103,6 +105,7 @@ export const D3Heatmap = ({
       .attr("text-anchor", "end")
       .text((txt) => txt);
   }, [data, tickText, colorScale, minVal, maxVal, width, height]);
+  }, [data, tickText, colorScale, minVal, maxVal, width, height, cellSpace]);
 
   return <svg ref={svgRef} width={width} height={height} />;
 };
