@@ -104,7 +104,6 @@ export const D3Heatmap = ({
       .attr("dominant-baseline", "middle")
       .attr("text-anchor", "end")
       .text((txt) => txt);
-  }, [data, tickText, colorScale, minVal, maxVal, width, height]);
   }, [data, tickText, colorScale, minVal, maxVal, width, height, cellSpace]);
 
   return <svg ref={svgRef} width={width} height={height} />;
