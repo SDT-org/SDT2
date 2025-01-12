@@ -9,17 +9,6 @@ interface HeatmapCell {
   value: number;
 }
 
-interface D3HeatmapProps {
-  data: HeatmapCell[];
-  tickText: string[];
-  colorScale: ColorScaleArray;
-  minVal?: number;
-  maxVal?: number;
-  width?: number;
-  height?: number;
-  cellSpace: number;
-}
-
 function createD3ColorScale(
   colorArray: ColorScaleArray,
   minValue: number,
@@ -47,7 +36,20 @@ export const D3Heatmap = ({
   width = 500,
   height = 500,
   cellSpace,
-}: D3HeatmapProps) => {
+  roundTo,
+  showPercentIdentities = false,
+}: {
+  data: HeatmapCell[];
+  tickText: string[];
+  colorScale: ColorScaleArray;
+  minVal?: number;
+  maxVal?: number;
+  width?: number;
+  height?: number;
+  cellSpace: number;
+  roundTo: number;
+  showPercentIdentities: boolean;
+}) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [svgTransform, setSvgTransform] = React.useState({});
 
@@ -96,18 +98,20 @@ export const D3Heatmap = ({
       .attr("y", cellOffset)
       .attr("fill", (d) => colorFn(d.value));
 
-    groups
-      .append("text")
-      .attr("x", cellW / 2)
-      .attr("y", cellH / 2)
-      .attr("dy", ".35em")
-      .attr("text-anchor", "middle")
-      .attr("font-family", "Roboto Mono")
-      .attr("font-size", `${fontSize}px`)
-      .text((d) => d.value)
-      .attr("fill", (d) =>
-        tinycolor(colorFn(d.value)).isLight() ? "#000" : "#fff",
-      );
+    if (showPercentIdentities) {
+      groups
+        .append("text")
+        .attr("x", cellW / 2)
+        .attr("y", cellH / 2)
+        .attr("dy", ".35em")
+        .attr("text-anchor", "middle")
+        .attr("font-family", "Roboto Mono")
+        .attr("font-size", `${fontSize}px`)
+        .text((d) => d.value.toFixed(roundTo))
+        .attr("fill", (d) =>
+          tinycolor(colorFn(d.value)).isLight() ? "#000" : "#fff",
+        );
+    }
 
     d3Svg.call(
       d3
@@ -127,9 +131,9 @@ export const D3Heatmap = ({
         }),
     );
 
-    // Simple x-axis labels
-    const xAxisG = g.append("g").attr("transform", `translate(0, ${h})`);
-    xAxisG
+    // x-axis labels
+    g.append("g")
+      .attr("transform", `translate(0, ${h})`)
       .selectAll("text")
       .data(tickText)
       .join("text")
@@ -146,9 +150,8 @@ export const D3Heatmap = ({
       )
       .text((txt) => txt);
 
-    // Simple y-axis labels
-    const yAxisG = g.append("g");
-    yAxisG
+    // y-axis labels
+    g.append("g")
       .selectAll("text")
       .data(tickText)
       .join("text")
@@ -160,7 +163,18 @@ export const D3Heatmap = ({
       .attr("font-size", `${fontSize}px`)
       .attr("font-weight", "bold")
       .text((txt) => txt);
-  }, [data, tickText, colorScale, minVal, maxVal, width, height, cellSpace]);
+  }, [
+    data,
+    tickText,
+    colorScale,
+    minVal,
+    maxVal,
+    width,
+    height,
+    cellSpace,
+    roundTo,
+    showPercentIdentities,
+  ]);
 
   console.log(svgTransform);
 

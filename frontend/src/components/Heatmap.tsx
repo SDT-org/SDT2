@@ -13,6 +13,7 @@ import {
   useRelayoutUpdateTitles,
 } from "../hooks/useRelayoutUpdateTitles";
 import type { HeatmapData } from "../plotTypes";
+import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3Heatmap } from "./D3Heatmap";
 import { HeatmapSidebar } from "./HeatmapSidebar";
 
@@ -115,13 +116,17 @@ export const Heatmap = ({
     [data],
   );
 
-  const [TEMP_D3, TEMP_setD3] = React.useState(true);
+  const [tempHeatmapComponent, tempSetHeatmapComponent] =
+    React.useState("canvas");
 
   React.useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
       if (event.key === "d") {
         event.preventDefault();
-        TEMP_setD3((prev) => !prev);
+        const views = ["canvas", "svg", "plotly"];
+        tempSetHeatmapComponent(
+          (prev) => views[views.indexOf(prev) + 1] || "canvas",
+        );
       }
     };
 
@@ -130,6 +135,32 @@ export const Heatmap = ({
     return () => document.removeEventListener("keydown", handleKeydown);
   }, []);
 
+  const elementRef = React.useRef<HTMLDivElement | null>(null);
+  const [size, setSize] = React.useState<{ width: number; height: number }>({
+    width: 0,
+    height: 0,
+  });
+
+  const updateSize = React.useCallback(() => {
+    if (elementRef.current) {
+      const { offsetWidth, offsetHeight } = elementRef.current;
+      setSize({ width: offsetWidth, height: offsetHeight });
+    }
+  }, []);
+
+  React.useEffect(() => {
+    updateSize();
+
+    const handleResize = () => {
+      updateSize();
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [updateSize]);
+
   const updateTitles = useRelayoutUpdateTitles(updateSettings);
   useRelayoutHideSubtitle(!settings.showTitles);
 
@@ -137,17 +168,37 @@ export const Heatmap = ({
     <>
       {data ? (
         <>
-          <div className="app-main">
-            {TEMP_D3 ? (
+          <div
+            className="app-main"
+            ref={elementRef}
+            style={{ background: "#fff" }}
+          >
+            <div style={{ position: "absolute", left: 10, top: 5 }}>
+              {tempHeatmapComponent}
+            </div>
+            {tempHeatmapComponent === "canvas" ? (
+              <D3CanvasHeatmap
+                data={d3HeatmapData}
+                tickText={tickText}
+                colorScale={colorScales[settings.colorScaleKey]}
+                minVal={settings.vmin}
+                maxVal={settings.vmax}
+                width={size.width}
+                height={size.height}
+                cellSpace={settings.cellspace}
+              />
+            ) : tempHeatmapComponent === "svg" ? (
               <D3Heatmap
                 data={d3HeatmapData}
                 tickText={tickText}
                 colorScale={colorScales[settings.colorScaleKey]}
                 minVal={settings.vmin}
                 maxVal={settings.vmax}
-                width={800}
-                height={800}
+                width={size.width}
+                height={size.height}
                 cellSpace={settings.cellspace}
+                showPercentIdentities={settings.annotation}
+                roundTo={settings.annotation_rounding}
               />
             ) : (
               <Plot
