@@ -3,7 +3,6 @@ import type React from "react";
 import { useEffect, useMemo, useRef } from "react";
 import type { ColorScaleArray } from "../colorScales";
 
-
 //entirely based on https://observablehq.com/@d3/color-legend
 interface ColorLegendProps {
   colorScale: ColorScaleArray;
@@ -52,9 +51,9 @@ export const ColorLegend: React.FC<ColorLegendProps> = ({
       .append("linearGradient")
       .attr("id", gradientId)
       .attr("x1", "0%")
-      .attr("y1", "0%")
+      .attr("y1", "100%")
       .attr("x2", "0%")
-      .attr("y2", "100%");
+      .attr("y2", "0%");
 
     for (const [stop, color] of colorScale) {
       gradient
@@ -62,9 +61,9 @@ export const ColorLegend: React.FC<ColorLegendProps> = ({
         .attr("offset", `${stop * 100}%`)
         .attr("stop-color", color);
     }
-
+    
     const legendHeight = dimensions.cbarHeight - margin.top - margin.bottom;
-    const legendWidth = 20;
+    const legendWidth = 50; //padding
 
     g.append("rect")
       .attr("width", legendWidth)
@@ -73,7 +72,7 @@ export const ColorLegend: React.FC<ColorLegendProps> = ({
 
     const scale = d3
       .scaleLinear()
-      .domain([maxVal, minVal]) // Reversed domain for vertical axis
+      .domain([maxVal, minVal]) // Reversed domain for vertical axis ticks
       .range([0, legendHeight]);
 
     const axis = d3.axisRight(scale).ticks(ticks).tickSize(6);

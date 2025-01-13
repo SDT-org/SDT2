@@ -213,7 +213,7 @@ export const D3CanvasHeatmap = ({
           colorScale={colorScale}
           minVal={minVal}
           maxVal={maxVal}
-          position={{ x: 20, y: height / 2 }}
+          position={{ x: 20, y: height / 100 }}
           cbarHeight={cbarHeight}
           cbarWidth={cbarWidth}
         />
