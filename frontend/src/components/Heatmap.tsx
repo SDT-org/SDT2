@@ -186,6 +186,9 @@ export const Heatmap = ({
                 width={size.width}
                 height={size.height}
                 cellSpace={settings.cellspace}
+                showscale={settings.showscale}
+                cbarHeight={settings.cbar_shrink}
+                cbarWidth={settings.cbar_aspect}
               />
             ) : tempHeatmapComponent === "svg" ? (
               <D3Heatmap

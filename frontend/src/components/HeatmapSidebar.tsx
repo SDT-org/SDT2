@@ -358,16 +358,16 @@ export const HeatmapSidebar = ({
               <div className="range-group">
                 <Slider
                   label="Height"
-                  minValue={0.1}
-                  maxValue={1}
-                  step={0.1}
+                  minValue={10}
+                  maxValue={1000}
+                  step={10}
                   value={settings.cbar_shrink}
                   onChange={(value) => updateSettings({ cbar_shrink: value })}
                 />
                 <Slider
                   label="Width"
                   id="cbar-aspect"
-                  minValue={1}
+                  minValue={10}
                   maxValue={100}
                   step={1}
                   value={settings.cbar_aspect}

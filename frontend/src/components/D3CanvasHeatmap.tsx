@@ -1,6 +1,7 @@
 import * as d3 from "d3";
 import { useEffect, useRef, useState } from "react";
 import type { ColorScaleArray } from "../colorScales";
+import { ColorLegend } from "./ColorLegend";
 
 interface HeatmapCell {
   x: number;
@@ -17,6 +18,9 @@ interface D3HeatmapProps {
   width?: number;
   height?: number;
   cellSpace: number;
+  showscale?: boolean;
+  cbarWidth?: number;
+  cbarHeight?: number;
 }
 
 function createD3ColorScale(
@@ -45,6 +49,9 @@ export const D3CanvasHeatmap = ({
   width = 500,
   height = 500,
   cellSpace,
+  showscale = true,
+  cbarHeight = 200,
+  cbarWidth = 60,
 }: D3HeatmapProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [transform, setTransform] = useState(d3.zoomIdentity);
@@ -192,22 +199,38 @@ export const D3CanvasHeatmap = ({
   };
 
   return (
-    <div className="relative">
+    <div style={{ position: "relative" }}>
       <canvas
         ref={canvasRef}
+        style={{ background: "#fff" }}
+        width={width}
+        height={height}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        className="cursor-move"
       />
+      {showscale && (
+        <ColorLegend
+          colorScale={colorScale}
+          minVal={minVal}
+          maxVal={maxVal}
+          position={{ x: 20, y: height / 2 }}
+          cbarHeight={cbarHeight}
+          cbarWidth={cbarWidth}
+        />
+      )}
       {tooltipData && (
         <div
-          className="absolute bg-white px-2 py-1 rounded shadow-lg text-sm pointer-events-none"
           style={{
+            position: "absolute",
             left: tooltipData.x,
             top: tooltipData.y,
+            background: "white",
+            border: "1px solid black",
+            padding: "5px",
+            pointerEvents: "none",
           }}
         >
-          Value: {tooltipData.value.toFixed(1)}%
+          {tooltipData.value.toFixed(2)}
         </div>
       )}
     </div>
