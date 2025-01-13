@@ -9,7 +9,7 @@ interface ColorLegendProps {
   minVal: number;
   maxVal: number;
   showscale?: boolean;
-  tempHeatmapComponent: "canvas" | "svg" | "plotly"; 
+  tempHeatmapComponent: "canvas" | "svg" | "plotly";
   position?: { x: number; y: number };
   title?: string;
   ticks?: number;
@@ -22,7 +22,7 @@ export const ColorLegend: React.FC<ColorLegendProps> = ({
   minVal,
   maxVal,
   showscale = true,
-  tempHeatmapComponent = "svg", 
+  tempHeatmapComponent = "svg",
   cbarWidth = 60,
   cbarHeight = 200,
   position = { x: 0, y: 0 },
@@ -34,14 +34,21 @@ export const ColorLegend: React.FC<ColorLegendProps> = ({
 
   const dimensions = useMemo(
     () => ({ cbarWidth, cbarHeight }),
-    [cbarWidth, cbarHeight]
+    [cbarWidth, cbarHeight],
   );
 
   // Shared logic to compute gradient stops, scale, and ticks
-  const gradientStops = useMemo(() => colorScale.map(([stop, color]) => ({ stop, color })), [colorScale]);
+  const gradientStops = useMemo(
+    () => colorScale.map(([stop, color]) => ({ stop, color })),
+    [colorScale],
+  );
   const scale = useMemo(
-    () => d3.scaleLinear().domain([maxVal, minVal]).range([0, dimensions.cbarHeight]),
-    [minVal, maxVal, dimensions.cbarHeight]
+    () =>
+      d3
+        .scaleLinear()
+        .domain([maxVal, minVal])
+        .range([0, dimensions.cbarHeight]),
+    [minVal, maxVal, dimensions.cbarHeight],
   );
   const tickValues = useMemo(() => scale.ticks(ticks), [scale, ticks]);
 
@@ -68,12 +75,13 @@ export const ColorLegend: React.FC<ColorLegendProps> = ({
         .attr("x2", "0%")
         .attr("y2", "100%");
 
-      gradientStops.forEach(({ stop, color }) => {
+      // Replace first forEach
+      for (const { stop, color } of gradientStops) {
         gradient
           .append("stop")
           .attr("offset", `${stop * 100}%`)
           .attr("stop-color", color);
-      });
+      }
 
       // Add the rectangle
       const legendHeight = dimensions.cbarHeight - margin.top - margin.bottom;
@@ -115,9 +123,9 @@ export const ColorLegend: React.FC<ColorLegendProps> = ({
 
       // Create the gradient
       const gradient = context.createLinearGradient(0, 0, 0, cbarHeight);
-      gradientStops.forEach(({ stop, color }) => {
+      for (const { stop, color } of gradientStops) {
         gradient.addColorStop(stop, color);
-      });
+      }
 
       // Fill the gradient
       context.fillStyle = gradient;
@@ -128,7 +136,7 @@ export const ColorLegend: React.FC<ColorLegendProps> = ({
       context.font = "10px sans-serif";
       context.textAlign = "left";
 
-      tickValues.forEach((tick) => {
+      for (const tick of tickValues) {
         const y = scale(tick);
         context.fillText(tick.toFixed(2), cbarWidth + 5, y + 3);
         context.beginPath();
@@ -136,9 +144,19 @@ export const ColorLegend: React.FC<ColorLegendProps> = ({
         context.lineTo(cbarWidth - 6, y);
         context.strokeStyle = "#000";
         context.stroke();
-      });
+      }
     }
-  }, [gradientStops, scale, tickValues, tempHeatmapComponent, showscale, dimensions, title]);
+  }, [
+    gradientStops,
+    scale,
+    tickValues,
+    tempHeatmapComponent,
+    showscale,
+    dimensions,
+    title,
+    cbarWidth,
+    cbarHeight,
+  ]);
 
   if (!showscale) return null;
 

@@ -36,6 +36,7 @@ export const D3Heatmap = ({
   maxVal = 100,
   width = 500,
   height = 500,
+  // axis_labels = true,
   cellSpace,
   roundTo,
   showPercentIdentities = false,
@@ -61,13 +62,12 @@ export const D3Heatmap = ({
   showscale?: boolean;
   cbarWidth: number;
   cbarHeight: number;
-  axis_labels: boolean;
+  // axis_labels: boolean;
   axlabel_xfontsize: number;
   axlabel_yfontsize: number;
   axlabel_xrotation: number;
   axlabel_yrotation: number;
   tempHeatmapComponent: "canvas" | "svg" | "plotly";
-  
 }) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [svgTransform, setSvgTransform] = React.useState({});
@@ -152,21 +152,23 @@ export const D3Heatmap = ({
 
     // x-axis labels
     g.append("g")
-  .attr("transform", `translate(0, ${h})`)
-  .selectAll("text")
-  .data(tickText)
-  .join("text")
-  .attr("x", (_, i) => i * cellW + cellW / 2)
-  .attr("y", labelOffset)
-  .attr("dy", "1em")
-  .attr("text-anchor", "end")
-  .attr("font-family", "Roboto Mono")
-  .attr("font-size", axlabel_xfontsize)
-  .attr("font-weight", "bold")
-  .text((txt) => txt)
-  .attr("transform", (_, i) => 
-    `rotate(${axlabel_xrotation}, ${i * cellW + cellW / 2}, ${labelOffset})`
-  );
+      .attr("transform", `translate(0, ${h})`)
+      .selectAll("text")
+      .data(tickText)
+      .join("text")
+      .attr("x", (_, i) => i * cellW + cellW / 2)
+      .attr("y", labelOffset)
+      .attr("dy", "1em")
+      .attr("text-anchor", "end")
+      .attr("font-family", "Roboto Mono")
+      .attr("font-size", axlabel_xfontsize)
+      .attr("font-weight", "bold")
+      .text((txt) => txt)
+      .attr(
+        "transform",
+        (_, i) =>
+          `rotate(${axlabel_xrotation}, ${i * cellW + cellW / 2}, ${labelOffset})`,
+      );
 
     // y-axis labels
     g.append("g")
@@ -181,24 +183,27 @@ export const D3Heatmap = ({
       .attr("font-size", axlabel_yfontsize)
       .attr("font-weight", "bold")
       .text((txt) => txt)
-      .attr("transform", (_, i) => `rotate(${axlabel_yrotation}, ${-labelOffset}, ${i * cellH + cellH / 2})`);
-    }, [
-      data,
-      tickText,
-      colorScale,
-      minVal,
-      maxVal,
-      width,
-      height,
-      cellSpace,
-      roundTo,
-      showPercentIdentities,
-      showscale,
-      axlabel_xfontsize,
-      axlabel_yfontsize,
-      axlabel_xrotation,
-      axlabel_yrotation
-    ]);
+      .attr(
+        "transform",
+        (_, i) =>
+          `rotate(${axlabel_yrotation}, ${-labelOffset}, ${i * cellH + cellH / 2})`,
+      );
+  }, [
+    data,
+    tickText,
+    colorScale,
+    minVal,
+    maxVal,
+    width,
+    height,
+    cellSpace,
+    roundTo,
+    showPercentIdentities,
+    axlabel_xfontsize,
+    axlabel_yfontsize,
+    axlabel_xrotation,
+    axlabel_yrotation,
+  ]);
   console.log(svgTransform);
 
   return (
@@ -222,5 +227,4 @@ export const D3Heatmap = ({
       )}
     </div>
   );
-  
 };
