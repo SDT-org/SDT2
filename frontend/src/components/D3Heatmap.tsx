@@ -2,6 +2,7 @@ import * as d3 from "d3";
 import React, { useEffect, useRef } from "react";
 import tinycolor from "tinycolor2";
 import type { ColorScaleArray } from "../colorScales";
+import { ColorLegend } from "./ColorLegend";
 
 interface HeatmapCell {
   x: number;
@@ -38,6 +39,14 @@ export const D3Heatmap = ({
   cellSpace,
   roundTo,
   showPercentIdentities = false,
+  showscale,
+  cbarWidth,
+  cbarHeight,
+  axlabel_xfontsize,
+  axlabel_yfontsize,
+  axlabel_xrotation,
+  axlabel_yrotation,
+  tempHeatmapComponent,
 }: {
   data: HeatmapCell[];
   tickText: string[];
@@ -49,6 +58,16 @@ export const D3Heatmap = ({
   cellSpace: number;
   roundTo: number;
   showPercentIdentities: boolean;
+  showscale?: boolean;
+  cbarWidth: number;
+  cbarHeight: number;
+  axis_labels: boolean;
+  axlabel_xfontsize: number;
+  axlabel_yfontsize: number;
+  axlabel_xrotation: number;
+  axlabel_yrotation: number;
+  tempHeatmapComponent: "canvas" | "svg" | "plotly";
+  
 }) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [svgTransform, setSvgTransform] = React.useState({});
@@ -133,22 +152,21 @@ export const D3Heatmap = ({
 
     // x-axis labels
     g.append("g")
-      .attr("transform", `translate(0, ${h})`)
-      .selectAll("text")
-      .data(tickText)
-      .join("text")
-      .attr("y", cellH)
-      .attr("text-anchor", "middle")
-      .attr("font-family", "Roboto Mono")
-      .attr("font-size", `${fontSize}px`)
-      .attr("font-weight", "bold")
-      .attr("text-anchor", "end")
-      .attr(
-        "transform",
-        (_, i) =>
-          `translate(${i * cellW - cellW / 2}, ${labelOffset}) rotate(-90)`,
-      )
-      .text((txt) => txt);
+  .attr("transform", `translate(0, ${h})`)
+  .selectAll("text")
+  .data(tickText)
+  .join("text")
+  .attr("x", (_, i) => i * cellW + cellW / 2)
+  .attr("y", labelOffset)
+  .attr("dy", "1em")
+  .attr("text-anchor", "end")
+  .attr("font-family", "Roboto Mono")
+  .attr("font-size", axlabel_xfontsize)
+  .attr("font-weight", "bold")
+  .text((txt) => txt)
+  .attr("transform", (_, i) => 
+    `rotate(${axlabel_xrotation}, ${i * cellW + cellW / 2}, ${labelOffset})`
+  );
 
     // y-axis labels
     g.append("g")
@@ -160,30 +178,49 @@ export const D3Heatmap = ({
       .attr("dominant-baseline", "middle")
       .attr("text-anchor", "end")
       .attr("font-family", "Roboto Mono")
-      .attr("font-size", `${fontSize}px`)
+      .attr("font-size", axlabel_yfontsize)
       .attr("font-weight", "bold")
-      .text((txt) => txt);
-  }, [
-    data,
-    tickText,
-    colorScale,
-    minVal,
-    maxVal,
-    width,
-    height,
-    cellSpace,
-    roundTo,
-    showPercentIdentities,
-  ]);
-
+      .text((txt) => txt)
+      .attr("transform", (_, i) => `rotate(${axlabel_yrotation}, ${-labelOffset}, ${i * cellH + cellH / 2})`);
+    }, [
+      data,
+      tickText,
+      colorScale,
+      minVal,
+      maxVal,
+      width,
+      height,
+      cellSpace,
+      roundTo,
+      showPercentIdentities,
+      showscale,
+      axlabel_xfontsize,
+      axlabel_yfontsize,
+      axlabel_xrotation,
+      axlabel_yrotation
+    ]);
   console.log(svgTransform);
 
   return (
-    <svg
-      style={{ background: "#fff" }}
-      ref={svgRef}
-      width={"100%"}
-      height={"100%"}
-    />
+    <div style={{ position: "relative", width, height }}>
+      <svg
+        style={{ background: "#fff" }}
+        ref={svgRef}
+        width={"100%"}
+        height={"100%"}
+      />
+      {showscale && (
+        <ColorLegend
+          colorScale={colorScale}
+          minVal={minVal}
+          maxVal={maxVal}
+          position={{ x: width - cbarWidth - 20, y: height / 100 }}
+          cbarHeight={cbarHeight}
+          cbarWidth={cbarWidth}
+          tempHeatmapComponent={tempHeatmapComponent}
+        />
+      )}
+    </div>
   );
+  
 };

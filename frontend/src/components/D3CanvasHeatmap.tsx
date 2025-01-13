@@ -21,6 +21,11 @@ interface D3HeatmapProps {
   showscale?: boolean;
   cbarWidth?: number;
   cbarHeight?: number;
+  axlabel_xfontsize: number;
+  axlabel_yfontsize: number;
+  axlabel_xrotation: number;
+  axlabel_yrotation: number;
+  titleFont: "Sans Serif" | "Monospace" ;
 }
 
 function createD3ColorScale(
@@ -52,6 +57,11 @@ export const D3CanvasHeatmap = ({
   showscale = true,
   cbarHeight = 200,
   cbarWidth = 60,
+  axlabel_xfontsize= 15,
+  axlabel_yfontsize= 15,
+  axlabel_xrotation= 0,
+  axlabel_yrotation= 0,
+  titleFont = "Sans Serif",
 }: D3HeatmapProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [transform, setTransform] = useState(d3.zoomIdentity);
@@ -91,7 +101,7 @@ export const D3CanvasHeatmap = ({
     ctx.translate(transform.x, transform.y);
     ctx.scale(transform.k, transform.k);
     ctx.translate(margin.left, margin.top);
-
+    
     const filteredData = data.filter((d) => Number(d.value));
     for (const d of filteredData) {
       const x = d.x * cellW + cellSpace / 2;
@@ -106,22 +116,26 @@ export const D3CanvasHeatmap = ({
     ctx.fillStyle = "black";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-
+    ctx.font = `${axlabel_xfontsize}px ${titleFont}`;
+    ctx.textAlign = "right";
     for (let i = 0; i < tickText.length; i++) {
       const txt = tickText[i];
       if (txt === undefined) continue;
       ctx.save();
       ctx.translate(i * cellW + cellW / 2, h + 20);
+      ctx.rotate(axlabel_xrotation * Math.PI / 180);
       ctx.fillText(txt, 0, 0);
       ctx.restore();
-    }
 
+    }
+    ctx.font = `${axlabel_yfontsize}px ${titleFont}`;
     ctx.textAlign = "right";
     for (let i = 0; i < tickText.length; i++) {
       const txt = tickText[i];
       if (txt === undefined) continue;
       ctx.save();
       ctx.translate(-5, i * cellH + cellH / 2);
+      ctx.rotate(axlabel_yrotation * Math.PI / 180);
       ctx.fillText(txt, 0, 0);
       ctx.restore();
     }
@@ -137,6 +151,11 @@ export const D3CanvasHeatmap = ({
     height,
     cellSpace,
     transform,
+    axlabel_xrotation,
+    axlabel_yrotation,
+    axlabel_xfontsize,
+    axlabel_yrotation,
+    titleFont,
   ]);
 
   useEffect(() => {
@@ -213,7 +232,7 @@ export const D3CanvasHeatmap = ({
           colorScale={colorScale}
           minVal={minVal}
           maxVal={maxVal}
-          position={{ x: 20, y: height / 100 }}
+          position={{ x: width - cbarWidth - 20, y: height / 100 }}
           cbarHeight={cbarHeight}
           cbarWidth={cbarWidth}
         />
