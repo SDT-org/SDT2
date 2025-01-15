@@ -98,6 +98,11 @@ export const D3CanvasHeatmap = ({
     const cellW = w / n;
     const cellH = h / n;
 
+    const rows = [...new Set(data.map(d => d.x))];
+    const cols = [...new Set(data.map(d => d.y))];
+
+
+
     ctx.clearRect(0, 0, width, height);
     ctx.save();
 
@@ -107,13 +112,24 @@ export const D3CanvasHeatmap = ({
 
     const filteredData = data.filter((d) => Number(d.value));
     for (const d of filteredData) {
-      const x = d.x * cellW + cellSpace / 2;
-      const y = d.y * cellH + cellSpace / 2;
+      const x = cols.indexOf(d.x) * cellW + cellSpace / 2;
+      const y = rows.indexOf(d.y) * cellH + cellSpace / 2;
       const rectW = cellW - cellSpace;
       const rectH = cellH - cellSpace;
+      
+      
 
       ctx.fillStyle = colorFn(d.value);
       ctx.fillRect(x, y, rectW, rectH);
+      ctx.save();
+      ctx.fillStyle = "black";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+    
+    // Draw text in center of rectangle
+    ctx.fillText("" + d.value, x + rectW/2, y + rectH/2);
+      
+      ctx.fillText("" +d.value, rectW/2, rectH);
     }
 
     ctx.fillStyle = "black";
@@ -141,8 +157,6 @@ export const D3CanvasHeatmap = ({
       ctx.fillText(txt, 0, 0);
       ctx.restore();
     }
-
-    ctx.restore();
   }, [
     data,
     tickText,
