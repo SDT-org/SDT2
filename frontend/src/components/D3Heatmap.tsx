@@ -51,6 +51,9 @@ export const D3Heatmap = ({
   axlabel_yrotation = 180,
   tempHeatmapComponent,
   titleFont,
+  showTitles = true,
+  title = "",
+  subtitle = "",
 }: {
   data: HeatmapCell[];
   tickText: string[];
@@ -72,6 +75,9 @@ export const D3Heatmap = ({
   axlabel_yrotation: number;
   tempHeatmapComponent: "canvas" | "svg" | "plotly";
   titleFont: HeatmapSettings["titleFont"];
+  showTitles: boolean;
+  title: string;
+  subtitle: string;
 }) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [svgTransform, setSvgTransform] = React.useState({});
@@ -138,6 +144,7 @@ export const D3Heatmap = ({
           tinycolor(colorFn(d.value)).isLight() ? "#000" : "#fff",
         );
     }
+    
 
     d3Svg.call(
       d3
@@ -156,7 +163,33 @@ export const D3Heatmap = ({
           g.attr("transform", transform.toString());
         }),
     );
-
+    // titles
+    if (showTitles) {
+      console.log("Title props:", {
+        showTitles,
+        title,
+        width,
+        height,
+        fontSize,
+        plotFont,
+      });
+      g.append("g")
+        .attr("text-anchor", "middle") // try middle instead of end
+        .attr("font-family", plotFont.family)
+        .attr("font-size", `${fontSize}px`)
+        .attr("x", width / 2)
+        .attr("y", margin.top) // try margin.top instead of height
+        .text(`${title}`);
+    }
+    if (showTitles) {
+      g.append("text")
+        .attr("text-anchor", "middle") // try middle instead of end
+        .attr("font-family", plotFont.family)
+        .attr("font-size", `${fontSize}px`)
+        .attr("x", width / 2)
+        .attr("y", margin.top-labelOffset*2) // try margin.top instead of height
+        .text(`${subtitle}`);
+    }
     // x-axis labels
     g.append("g")
       .attr("transform", `translate(0, ${h})`)
@@ -209,6 +242,9 @@ export const D3Heatmap = ({
     axlabel_xrotation,
     axlabel_yrotation,
     titleFont,
+    showTitles,
+    title,
+    subtitle,
   ]);
   console.log(svgTransform);
 

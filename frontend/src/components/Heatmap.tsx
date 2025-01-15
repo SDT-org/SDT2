@@ -223,9 +223,9 @@ export const Heatmap = ({
                 axlabel_yrotation={settings.axlabel_yrotation}
                 axlabel_yfontsize={settings.axlabel_yfontsize}
                 titleFont={settings.titleFont}
-                // showTitles={settings.showTitles}
-                // title={settings.title}
-                // subtitle={settings.subtitle}
+                showTitles={settings.showTitles}
+                title={settings.title}
+                subtitle={settings.subtitle}
               />
             ) : (
               <Plot
