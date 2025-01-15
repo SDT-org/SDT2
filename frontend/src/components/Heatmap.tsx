@@ -121,12 +121,14 @@ export const Heatmap = ({
 
   React.useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
-      if (event.key === "d") {
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        [1, 2, 3].includes(Number(event.key))
+      ) {
+        console.log(event.key);
         event.preventDefault();
         const views = ["canvas", "svg", "plotly"];
-        tempSetHeatmapComponent(
-          (prev) => views[views.indexOf(prev) + 1] || "canvas",
-        );
+        tempSetHeatmapComponent(() => views[Number(event.key) - 1] || "canvas");
       }
     };
 
