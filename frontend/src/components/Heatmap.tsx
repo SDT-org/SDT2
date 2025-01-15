@@ -188,6 +188,7 @@ export const Heatmap = ({
                 width={size.width}
                 height={size.height}
                 cellSpace={settings.cellspace}
+                roundTo={settings.annotation_rounding}
                 showscale={settings.showscale}
                 cbarHeight={settings.cbar_shrink}
                 cbarWidth={settings.cbar_aspect}
@@ -197,6 +198,9 @@ export const Heatmap = ({
                 axlabel_yfontsize={settings.axlabel_yfontsize}
                 titleFont={settings.titleFont}
                 showPercentIdentities={settings.annotation}
+                showTitles={settings.showTitles}
+                title={settings.title}
+                subtitle={settings.subtitle}
               />
             ) : tempHeatmapComponent === "svg" ? (
               <D3Heatmap
@@ -219,6 +223,9 @@ export const Heatmap = ({
                 axlabel_yrotation={settings.axlabel_yrotation}
                 axlabel_yfontsize={settings.axlabel_yfontsize}
                 titleFont={settings.titleFont}
+                // showTitles={settings.showTitles}
+                // title={settings.title}
+                // subtitle={settings.subtitle}
               />
             ) : (
               <Plot

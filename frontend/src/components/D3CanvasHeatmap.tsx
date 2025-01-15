@@ -20,6 +20,7 @@ interface D3HeatmapProps {
   width?: number;
   height?: number;
   cellSpace: number;
+  roundTo: number;
   showscale?: boolean;
   cbarWidth?: number;
   cbarHeight?: number;
@@ -29,7 +30,11 @@ interface D3HeatmapProps {
   axlabel_yrotation: number;
   titleFont: HeatmapSettings["titleFont"];
   showPercentIdentities: boolean;
+  showTitles: boolean;
+  title: string;
+  subtitle: string;
 }
+
 function createD3ColorScale(
   colorArray: ColorScaleArray,
   minValue: number,
@@ -56,6 +61,7 @@ export const D3CanvasHeatmap = ({
   width = 500,
   height = 500,
   cellSpace,
+  roundTo,
   showscale = true,
   cbarHeight = 200,
   cbarWidth = 60,
@@ -65,6 +71,9 @@ export const D3CanvasHeatmap = ({
   axlabel_yrotation = 0,
   titleFont,
   showPercentIdentities = true,
+  showTitles = true,
+  title = "DOODOO",
+  subtitle = "",
 }: D3HeatmapProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [transform, setTransform] = useState(d3.zoomIdentity);
@@ -109,7 +118,6 @@ export const D3CanvasHeatmap = ({
     ctx.translate(transform.x, transform.y);
     ctx.scale(transform.k, transform.k);
     ctx.translate(margin.left, margin.top);
-
     const filteredData = data.filter((d) => Number(d.value));
     for (const d of filteredData) {
       const x = cols.indexOf(d.x) * cellW + cellSpace / 2;
@@ -117,20 +125,53 @@ export const D3CanvasHeatmap = ({
       const rectW = cellW - cellSpace;
       const rectH = cellH - cellSpace;
 
+      // draw rects fill color
       ctx.fillStyle = colorFn(d.value);
       ctx.fillRect(x, y, rectW, rectH);
+
       ctx.save();
+      // zoom logic not there yet for annos
+      const fontSizeMin = 1;
+      const fontSizeMax = 16;
+      const fontSizeFactor = 0.01;
+      const fontSize =
+        fontSizeMin +
+        (fontSizeMax - fontSizeMin) /
+          (fontSizeMin + fontSizeFactor * data.length);
+      // draw annotations
+
       ctx.fillStyle = "black";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
+      ctx.font = `${fontSize}px ${plotFont.family}`;
       if (showPercentIdentities) {
-        ctx.fillText(`${d.value}`, x + rectW / 2, y + rectH / 2);
+        ctx.fillText(
+          `${d.value.toFixed(roundTo)}`,
+          x + rectW / 2,
+          y + rectH / 2,
+        );
       }
       ctx.restore();
     }
 
+    // titles
     ctx.fillStyle = "black";
-    ctx.textAlign = "center";
+    ctx.textAlign = "center"; // Centers text horizontally
+    ctx.textBaseline = "top";
+    if (showTitles) {
+      ctx.font = `${axlabel_xfontsize}px ${plotFont.family}`;
+      ctx.fillText(`${title}`, w / 2, -margin.top + 20);
+    }
+
+    // subtitles
+    if (showTitles) {
+      ctx.textAlign = "center"; // Centers text horizontally
+      ctx.textBaseline = "top";
+      ctx.font = `${axlabel_xfontsize}px ${plotFont.family}`;
+      ctx.fillText(`${subtitle}`, w / 2, -margin.top + 40);
+    }
+    // x axis label
+    ctx.fillStyle = "black";
     ctx.textBaseline = "middle";
     ctx.font = `${axlabel_xfontsize}px ${plotFont.family}`;
     ctx.textAlign = "right";
@@ -143,6 +184,9 @@ export const D3CanvasHeatmap = ({
       ctx.fillText(txt, 0, 0);
       ctx.restore();
     }
+    // y axis label
+    ctx.fillStyle = "black";
+    ctx.textBaseline = "middle";
     ctx.font = `${axlabel_yfontsize}px ${plotFont.family}`;
     ctx.textAlign = "right";
     for (let i = 0; i < tickText.length; i++) {
@@ -163,6 +207,7 @@ export const D3CanvasHeatmap = ({
     width,
     height,
     cellSpace,
+    roundTo,
     transform,
     axlabel_xrotation,
     axlabel_yrotation,
@@ -170,6 +215,9 @@ export const D3CanvasHeatmap = ({
     axlabel_yfontsize,
     titleFont,
     showPercentIdentities,
+    showTitles,
+    title,
+    subtitle,
   ]);
 
   useEffect(() => {
