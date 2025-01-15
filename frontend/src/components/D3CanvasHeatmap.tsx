@@ -1,6 +1,8 @@
 import * as d3 from "d3";
 import { useEffect, useRef, useState } from "react";
 import type { ColorScaleArray } from "../colorScales";
+import { plotFontMonospace, plotFontSansSerif } from "../constants";
+import type { HeatmapSettings } from "../plotTypes";
 import { ColorLegend } from "./ColorLegend";
 
 interface HeatmapCell {
@@ -25,9 +27,8 @@ interface D3HeatmapProps {
   axlabel_yfontsize: number;
   axlabel_xrotation: number;
   axlabel_yrotation: number;
-  titleFont?: "Sans serif" | "Monospace";
+  titleFont: HeatmapSettings["titleFont"];
 }
-
 function createD3ColorScale(
   colorArray: ColorScaleArray,
   minValue: number,
@@ -61,7 +62,7 @@ export const D3CanvasHeatmap = ({
   axlabel_yfontsize = 15,
   axlabel_xrotation = 0,
   axlabel_yrotation = 0,
-  titleFont = "Sans serif",
+  titleFont,
 }: D3HeatmapProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [transform, setTransform] = useState(d3.zoomIdentity);
@@ -73,6 +74,8 @@ export const D3CanvasHeatmap = ({
 
   useEffect(() => {
     const canvas = canvasRef.current;
+    const plotFont =
+      titleFont === "Monospace" ? plotFontMonospace : plotFontSansSerif;
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
@@ -116,7 +119,7 @@ export const D3CanvasHeatmap = ({
     ctx.fillStyle = "black";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.font = `${axlabel_xfontsize}px ${titleFont}`;
+    ctx.font = `${axlabel_xfontsize}px ${plotFont.family}`;
     ctx.textAlign = "right";
     for (let i = 0; i < tickText.length; i++) {
       const txt = tickText[i];
@@ -127,7 +130,7 @@ export const D3CanvasHeatmap = ({
       ctx.fillText(txt, 0, 0);
       ctx.restore();
     }
-    ctx.font = `${axlabel_yfontsize}px ${titleFont}`;
+    ctx.font = `${axlabel_yfontsize}px ${plotFont.family}`;
     ctx.textAlign = "right";
     for (let i = 0; i < tickText.length; i++) {
       const txt = tickText[i];

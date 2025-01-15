@@ -149,7 +149,7 @@ export const initialDocState: DocState = {
     annotation_rounding: 0,
     annotation_alpha: "0",
     showscale: true,
-    titleFont: "sans-serif",
+    titleFont: "Sans Serif",
     showTitles: false,
     title: "",
     subtitle: "",

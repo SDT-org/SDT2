@@ -3,7 +3,6 @@ import type React from "react";
 import { useEffect, useMemo, useRef } from "react";
 import type { ColorScaleArray } from "../colorScales";
 
-//entirely based on https://observablehq.com/@d3/color-legend
 interface ColorLegendProps {
   colorScale: ColorScaleArray;
   minVal: number;
@@ -23,7 +22,7 @@ export const ColorLegend: React.FC<ColorLegendProps> = ({
   maxVal,
   showscale = true,
   tempHeatmapComponent = "svg",
-  cbarWidth = 60,
+  cbarWidth = 0,
   cbarHeight = 200,
   position = { x: 0, y: 0 },
   title = "",
@@ -31,13 +30,10 @@ export const ColorLegend: React.FC<ColorLegendProps> = ({
 }) => {
   const svgRef = useRef<SVGSVGElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
   const dimensions = useMemo(
     () => ({ cbarWidth, cbarHeight }),
     [cbarWidth, cbarHeight],
   );
-
-  // Shared logic to compute gradient stops, scale, and ticks
   const gradientStops = useMemo(
     () => colorScale.map(([stop, color]) => ({ stop, color })),
     [colorScale],
@@ -59,23 +55,20 @@ export const ColorLegend: React.FC<ColorLegendProps> = ({
       const svg = d3.select(svgRef.current);
       svg.selectAll("*").remove();
 
-      const margin = { top: 20, right: 30, bottom: 20, left: 0 };
+      const margin = { top: 20, right: 30, bottom: 20, left: 10 };
       const g = svg
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
-
-      //  gradient
       const defs = svg.append("defs");
       const gradientId = `legend-gradient-${Math.random().toString(36).substr(2, 9)}`;
       const gradient = defs
         .append("linearGradient")
         .attr("id", gradientId)
         .attr("x1", "0%")
-        .attr("y1", "0%")
+        .attr("y1", "100%")
         .attr("x2", "0%")
-        .attr("y2", "100%");
+        .attr("y2", "0%");
 
-      // Replace first forEach
       for (const { stop, color } of gradientStops) {
         gradient
           .append("stop")
@@ -83,30 +76,32 @@ export const ColorLegend: React.FC<ColorLegendProps> = ({
           .attr("stop-color", color);
       }
 
-      // Add the rectangle
       const legendHeight = dimensions.cbarHeight - margin.top - margin.bottom;
-      const legendWidth = dimensions.cbarWidth;
+      const legendWidth = dimensions.cbarWidth - margin.left - margin.right;
 
       g.append("rect")
         .attr("width", legendWidth)
         .attr("height", legendHeight)
         .attr("fill", `url(#${gradientId})`);
 
-      // Add the axis
       const axis = d3.axisRight(scale).tickValues(tickValues).tickSize(6);
+
       g.append("g")
         .attr("transform", `translate(${legendWidth},0)`)
         .call(axis)
         .call((g) => g.select(".domain").remove())
         .call((g) => g.selectAll(".tick line").attr("stroke-opacity", 0.5))
-        .call((g) => g.selectAll(".tick text").attr("font-size", "10px"));
+        .call((g) =>
+          g
+            .selectAll(".tick text")
+            .attr("font-size", "10px")
+            .attr("dx", "0.5em"),
+        );
 
-      // Add title
       if (title) {
         g.append("text")
-          .attr("class", "legend-title")
           .attr("x", -legendHeight / 2)
-          .attr("y", -margin.left - 10)
+          .attr("y", -margin.left - 5)
           .attr("transform", "rotate(-90)")
           .attr("text-anchor", "middle")
           .attr("font-size", "12px")
@@ -118,30 +113,42 @@ export const ColorLegend: React.FC<ColorLegendProps> = ({
       const context = canvas.getContext("2d");
       if (!context) return;
 
-      // Clear canvas
       context.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Create the gradient
-      const gradient = context.createLinearGradient(0, 0, 0, cbarHeight);
+      const marginLeft = 10;
+      const marginRight = 40;
+      const marginTop = 10;
+      const barHeight = cbarHeight - marginTop * 2;
+
+      const gradient = context.createLinearGradient(
+        0,
+        barHeight + marginTop,
+        0,
+        marginTop,
+      );
       for (const { stop, color } of gradientStops) {
         gradient.addColorStop(stop, color);
       }
 
-      // Fill the gradient
+      const barWidth = cbarWidth - marginLeft - marginRight;
       context.fillStyle = gradient;
-      context.fillRect(0, 0, cbarWidth, cbarHeight);
+      context.fillRect(marginLeft, marginTop, barWidth, barHeight);
 
-      // Draw ticks
+      const adjustedScale = scale
+        .copy()
+        .range([marginTop, barHeight + marginTop]);
+
       context.fillStyle = "#000";
-      context.font = "10px sans-serif";
+      context.font = "10px 'Roboto Mono'";
       context.textAlign = "left";
+      context.textBaseline = "middle";
 
       for (const tick of tickValues) {
-        const y = scale(tick);
-        context.fillText(tick.toFixed(2), cbarWidth + 5, y + 3);
+        const y = adjustedScale(tick);
+        context.fillText(tick.toFixed(2), marginLeft + barWidth + 5, y);
         context.beginPath();
-        context.moveTo(cbarWidth, y);
-        context.lineTo(cbarWidth - 6, y);
+        context.moveTo(marginLeft + barWidth, y);
+        context.lineTo(marginLeft + barWidth + 6, y);
         context.strokeStyle = "#000";
         context.stroke();
       }
@@ -182,7 +189,7 @@ export const ColorLegend: React.FC<ColorLegendProps> = ({
           ref={canvasRef}
           width={dimensions.cbarWidth}
           height={dimensions.cbarHeight}
-          style={{ overflow: "visible" }}
+          style={{ overflow: "hidden" }}
         />
       )}
     </div>

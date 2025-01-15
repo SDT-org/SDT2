@@ -3,6 +3,8 @@ import React, { useEffect, useRef } from "react";
 import tinycolor from "tinycolor2";
 import type { ColorScaleArray } from "../colorScales";
 import { ColorLegend } from "./ColorLegend";
+import type { HeatmapSettings } from "../plotTypes";
+import { plotFontMonospace, plotFontSansSerif } from "../constants";
 
 interface HeatmapCell {
   x: number;
@@ -39,15 +41,16 @@ export const D3Heatmap = ({
   // axis_labels = true,
   cellSpace,
   roundTo,
-  showPercentIdentities = false,
+  showPercentIdentities = true,
   showscale,
   cbarWidth,
   cbarHeight,
   axlabel_xfontsize,
   axlabel_yfontsize,
-  axlabel_xrotation,
-  axlabel_yrotation,
+  axlabel_xrotation =90,
+  axlabel_yrotation=180,
   tempHeatmapComponent,
+  titleFont,
 }: {
   data: HeatmapCell[];
   tickText: string[];
@@ -68,6 +71,7 @@ export const D3Heatmap = ({
   axlabel_xrotation: number;
   axlabel_yrotation: number;
   tempHeatmapComponent: "canvas" | "svg" | "plotly";
+  titleFont: HeatmapSettings["titleFont"];
 }) => {
   const svgRef = useRef<SVGSVGElement | null>(null);
   const [svgTransform, setSvgTransform] = React.useState({});
@@ -76,6 +80,9 @@ export const D3Heatmap = ({
     if (!svgRef.current) return;
     const d3Svg = d3.select(svgRef.current as Element);
     d3Svg.selectAll("*").remove();
+    
+    const plotFont =
+    titleFont === "Monospace" ? plotFontMonospace : plotFontSansSerif;
 
     const margin = { top: 60, right: 60, bottom: 60, left: 60 };
     // const margin = { top: 0, right: 0, bottom: 0, left: 0 };
@@ -160,9 +167,8 @@ export const D3Heatmap = ({
       .attr("y", labelOffset)
       .attr("dy", "1em")
       .attr("text-anchor", "end")
-      .attr("font-family", "Roboto Mono")
+      .attr("font-family", plotFont.family)
       .attr("font-size", axlabel_xfontsize)
-      .attr("font-weight", "bold")
       .text((txt) => txt)
       .attr(
         "transform",
@@ -179,9 +185,8 @@ export const D3Heatmap = ({
       .attr("y", (_, i) => i * cellH + cellH / 2)
       .attr("dominant-baseline", "middle")
       .attr("text-anchor", "end")
-      .attr("font-family", "Roboto Mono")
+      .attr("font-family", plotFont.family)
       .attr("font-size", axlabel_yfontsize)
-      .attr("font-weight", "bold")
       .text((txt) => txt)
       .attr(
         "transform",
@@ -203,6 +208,7 @@ export const D3Heatmap = ({
     axlabel_yfontsize,
     axlabel_xrotation,
     axlabel_yrotation,
+    titleFont,
   ]);
   console.log(svgTransform);
 

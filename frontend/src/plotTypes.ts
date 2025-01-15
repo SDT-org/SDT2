@@ -14,7 +14,7 @@ export interface HeatmapSettings {
   annotation_rounding: 0 | 1 | 2;
   annotation_alpha: string;
   showscale: boolean;
-  titleFont: "sans-serif" | "Monospace";
+  titleFont: "Sans Serif" | "Monospace";
   showTitles: boolean;
   title: string;
   subtitle: string;
@@ -64,7 +64,7 @@ export const HeatmapSettingsSchema = z.object({
   annotation_alpha: z.string(),
   showscale: z.boolean(),
   showTitles: z.boolean(),
-  titleFont: z.enum(["sans-serif", "Monospace"]),
+  titleFont: z.enum(["Sans Serif", "Monospace"]),
   title: z.string(),
   subtitle: z.string(),
   xtitle: z.string(),

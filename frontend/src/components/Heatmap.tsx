@@ -173,7 +173,9 @@ export const Heatmap = ({
             ref={elementRef}
             style={{ background: "#fff" }}
           >
-            <div style={{ position: "absolute", left: 10, top: 5 }}>
+            <div
+              style={{ position: "absolute", left: 10, top: 5, zIndex: "1000" }}
+            >
               {tempHeatmapComponent}
             </div>
             {tempHeatmapComponent === "canvas" ? (
@@ -193,7 +195,7 @@ export const Heatmap = ({
                 axlabel_xfontsize={settings.axlabel_xfontsize}
                 axlabel_yrotation={settings.axlabel_yrotation}
                 axlabel_yfontsize={settings.axlabel_yfontsize}
-                titleFont="Sans serif"
+                titleFont={settings.titleFont}
               />
             ) : tempHeatmapComponent === "svg" ? (
               <D3Heatmap
