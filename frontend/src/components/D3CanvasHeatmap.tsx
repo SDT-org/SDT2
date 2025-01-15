@@ -28,6 +28,7 @@ interface D3HeatmapProps {
   axlabel_xrotation: number;
   axlabel_yrotation: number;
   titleFont: HeatmapSettings["titleFont"];
+  showPercentIdentities: boolean;
 }
 function createD3ColorScale(
   colorArray: ColorScaleArray,
@@ -63,6 +64,7 @@ export const D3CanvasHeatmap = ({
   axlabel_xrotation = 0,
   axlabel_yrotation = 0,
   titleFont,
+  showPercentIdentities = true,
 }: D3HeatmapProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [transform, setTransform] = useState(d3.zoomIdentity);
@@ -121,9 +123,9 @@ export const D3CanvasHeatmap = ({
       ctx.fillStyle = "black";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-
-      ctx.fillText(`${d.value}`, x + rectW / 2, y + rectH / 2);
-
+      if (showPercentIdentities) {
+        ctx.fillText(`${d.value}`, x + rectW / 2, y + rectH / 2);
+      }
       ctx.restore();
     }
 
@@ -167,6 +169,7 @@ export const D3CanvasHeatmap = ({
     axlabel_xfontsize,
     axlabel_yfontsize,
     titleFont,
+    showPercentIdentities,
   ]);
 
   useEffect(() => {
