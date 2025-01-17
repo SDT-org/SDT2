@@ -89,6 +89,8 @@ def do_cancel_run():
         pool.terminate()
         pool.join()
 
+    set_state(active_run_document_id=None)
+
 
 def assert_window():
     assert window is not None
@@ -348,6 +350,8 @@ class Api:
             print("\nRun settings:", settings)
             print(f"Number of processes: {settings['num_processes']}")
 
+        set_state(active_run_document_id=doc_id)
+
         with Pool(
             settings["num_processes"],
         ) as pool:
@@ -378,7 +382,6 @@ class Api:
 
                 update_document(doc_id, view="loader")
 
-                # assert_window().title = f"SDT2 - Analyzing {doc.basename}"
                 process_data(
                     settings=settings,
                     pool=pool,
@@ -394,7 +397,7 @@ class Api:
 
                 if cancelled.value == False:
                     update_document(doc_id, view="viewer")
-                    # assert_window().title = f"SDT2 - {doc.basename}"
+                    set_state(active_run_document_id=None)
 
     def cancel_run(self, doc_id: str, run_settings: str):
         do_cancel_run()
@@ -471,7 +474,7 @@ class Api:
         if doc.filetype == "text/fasta" or doc.filetype == "application/vnd.sdt":
             stats_path = os.path.join(doc.tempdir_path, f"{file_base}_stats.csv")
             stats_df = read_csv(stats_path, header=0)
-            
+
         elif doc.filetype in matrix_filetypes:
             stats_df = DataFrame([])
         else:

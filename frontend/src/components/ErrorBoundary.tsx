@@ -87,7 +87,7 @@ export class ErrorBoundary extends React.Component<Props> {
 
   override render() {
     const activeRunDocState = findDoc(
-      this.props.appState.activeRunDocumentId,
+      this.props.appState.active_run_document_id || "",
       this.props.appState.documents,
     );
     const activeDocState = findDoc(

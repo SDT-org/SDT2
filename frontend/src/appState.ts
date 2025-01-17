@@ -54,7 +54,7 @@ export type DocState = {
 
 export type AppState = {
   activeDocumentId: DocState["id"];
-  activeRunDocumentId: DocState["id"];
+  active_run_document_id?: DocState["id"];
   documents: DocState[];
   // TODO: make platform info an api, doesn't need to be state at all
   platform: {
@@ -170,7 +170,6 @@ export const initialDocState: DocState = {
 
 export const initialAppState: AppState = {
   activeDocumentId: "",
-  activeRunDocumentId: "",
   debug: false,
   dataExportPath: "",
   alignmentExportPath: "",

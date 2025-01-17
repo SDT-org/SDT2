@@ -5,6 +5,7 @@ AppState = namedtuple(
     "AppState",
     [
         "debug",
+        "active_run_document_id",
         "platform",
         "documents"
     ],
@@ -13,12 +14,14 @@ AppState = namedtuple(
 
 def create_app_state(
     debug=False,
+    active_run_document_id=None,
     on_update=None,
     platform=None,
     documents=[]
 ):
     default_state = AppState(
         debug=debug,
+        active_run_document_id=active_run_document_id,
         platform=platform,
         documents=documents
     )
@@ -27,15 +30,6 @@ def create_app_state(
 
     def get_state():
         return state
-
-    # def set_state(updater=None, **kwargs):
-    #     nonlocal state
-    #     current_state = state
-    #     if callable(updater):
-    #        state = state._replace(**updater(current_state)._asdict())
-    #     else:
-    #        state = state._replace(**kwargs)
-    #        on_state_updated()
 
     def set_state(skip_callbacks=False, **kwargs):
         nonlocal state

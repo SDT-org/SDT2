@@ -57,6 +57,7 @@ const RunnerSettings = ({
 }) => {
   const { appState, setAppState } = useAppState();
   const startRun = useStartRun(docState, appState);
+  const [startingRun, setStartingRun] = React.useState(false);
   const openFileDialog = useOpenFileDialog(appState, setAppState);
   const fileName =
     docState.filename?.length && docState.filename
@@ -394,9 +395,14 @@ const RunnerSettings = ({
               <Button
                 data-primary
                 type="button"
-                onPress={startRun}
+                onPress={() => {
+                  setStartingRun(true);
+                  startRun();
+                }}
                 isDisabled={Boolean(
-                  !fileName ||
+                  startingRun ||
+                    appState.active_run_document_id ||
+                    !fileName ||
                     docState.validation_error_id ||
                     (appState.enableOutputAlignments &&
                       !appState.alignmentExportPath.length),
