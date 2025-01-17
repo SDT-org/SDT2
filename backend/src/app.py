@@ -529,7 +529,8 @@ class Api:
         doc = get_document(doc_id)
         return doc._asdict() if doc else None
 
-    def save_doc(self, doc_id: str, path: str):
+    def save_doc(self, doc_id: str, path: str, save_as: bool = False):
+        print(doc_id, path, save_as)
         doc = get_document(doc_id)
         if doc == None:
             raise Exception(f"Expected to find document: {doc_id}")
@@ -538,6 +539,16 @@ class Api:
             for file in os.listdir(doc.tempdir_path)
         ]
         pack_document(path, files)
+
+        if save_as == False:
+            basename = os.path.basename(path)
+            update_document(
+                doc_id,
+                filename=path,
+                basename=basename,
+                filetype="application/vnd.sdt"
+            )
+            add_recent_file(path)
 
     def save_doc_settings(self, args: dict):
         doc = get_document(args["id"])

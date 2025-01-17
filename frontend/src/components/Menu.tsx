@@ -130,7 +130,7 @@ export const MainMenu = createHideableComponent(() => {
   const onOpen = () => {
     openFileDialog();
   };
-  const onSave = () => saveDocument();
+  const onSave = () => saveDocument(false);
   const onSaveAs = () => saveDocument(true);
   const onClose = () => closeDocument(appState.activeDocumentId);
 
@@ -185,9 +185,14 @@ export const MainMenu = createHideableComponent(() => {
       <Separator />
       {activeDocState.view === "viewer" ? (
         <>
-          {sdtFile ? <AppMenuItem onAction={onSave}>Save</AppMenuItem> : null}
-
-          <AppMenuItem onAction={onSaveAs}>Save As...</AppMenuItem>
+          {
+            <AppMenuItem onAction={onSave}>
+              Save{!sdtFile ? "..." : null}
+            </AppMenuItem>
+          }
+          {sdtFile ? (
+            <AppMenuItem onAction={onSaveAs}>Save As...</AppMenuItem>
+          ) : null}
           <AppMenuItem
             isDisabled={activeDocState?.view !== "viewer"}
             onAction={onExport}

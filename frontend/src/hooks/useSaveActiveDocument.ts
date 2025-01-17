@@ -11,7 +11,7 @@ export const useSaveActiveDocument = (
     const saveable = doc && doc.view === "viewer";
 
     if (saveable) {
-      saveDocument(doc, saveAs || !isSDTFile(doc.filetype)).then(() => {
+      saveDocument(doc, saveAs, isSDTFile(doc.filetype)).then(() => {
         setAppState((prev) => ({
           ...prev,
           documents: prev.documents.map((prevDoc) => ({

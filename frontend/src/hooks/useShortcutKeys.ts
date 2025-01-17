@@ -18,8 +18,8 @@ export const useShortcutKeys = (
     () => ({
       o: openFileDialog,
       n: newDocument,
-      w: closeActiveDocument,
       s: saveActiveDocument,
+      w: closeActiveDocument,
     }),
     [openFileDialog, newDocument, closeActiveDocument, saveActiveDocument],
   );

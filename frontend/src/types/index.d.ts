@@ -19,7 +19,11 @@ declare global {
         reset_state: () => Promise<void>;
         new_doc: () => Promise<string>;
         get_doc: (doc_id: string) => Promise<DocState>;
-        save_doc: (doc_id: string, path: string) => Promise<boolean>;
+        save_doc: (
+          doc_id: string,
+          path: string,
+          save_as: boolean,
+        ) => Promise<boolean>;
         close_doc: (doc_id: string) => Promise<void>;
         save_doc_settings: (docState: DocState) => Promise<void>;
         open_file: (

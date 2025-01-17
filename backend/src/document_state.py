@@ -63,6 +63,8 @@ visualization_defaults = dict(
   showAxisLabels=True,
   showGrid=True,
   showTickLabels=True,
+  showTitles=True,
+  titleFont="Sans Serif",
 )
 
 default_distribution_state = dict(
@@ -82,13 +84,11 @@ default_distribution_state = dict(
     showMeanline=True,
     dtickx=5,
     dticky=1,
-    showTitles=True,
     subtitle="Histogram",
     title="Histogram",
     xtitle="Percent Identity",
     ytitle="Frequency",
     plotOrientation="vertical",
-    titleFont="Sans Serif",
   ),
   raincloud=dict(
     **visualization_defaults,
@@ -108,12 +108,10 @@ default_distribution_state = dict(
     showMeanline=True,
     makeEditable=True,
     dticks=5,
-    showTitles=True,
     subtitle="Raincloud Plot",
     title="Raincloud Plot",
     xtitle="Percent Identity",
     ytitle="Genome",
-    titleFont="Sans Serif",
   ),
   violin=dict(
     **visualization_defaults,
@@ -138,12 +136,10 @@ default_distribution_state = dict(
     showViolin=True,
     showZeroLine=False,
     whiskerWidth=0.2,
-    showTitles=True,
     title="Violin Plot",
     subtitle="Violin Plot",
     xtitle="",
     ytitle="",
-    titleFont="Sans Serif",
   ),
 )
 
