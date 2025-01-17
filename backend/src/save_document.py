@@ -8,6 +8,8 @@ def pack_document(output_file, files):
     with zipfile.ZipFile(output_file, "w") as zf:
         for file in files:
             basename = os.path.basename(file)
+            for suffix in data_file_suffixes:
+              print(file, os.path.splitext(basename)[0].endswith(suffix))
             if any(os.path.splitext(basename)[0].endswith(suffix) for suffix in data_file_suffixes) or basename == 'document.json':
                 zf.write(
                     os.path.join(os.path.dirname(output_file), file),

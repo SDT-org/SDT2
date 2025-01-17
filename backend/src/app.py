@@ -5,7 +5,7 @@ current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(current_file_path, "../../"))
 sys.path.append(os.path.join(current_file_path, "."))
 
-import multiprocessing
+from multiprocessing import Lock, Manager, Pool, cpu_count as get_cpu_count
 from tempfile import TemporaryDirectory
 from platformdirs import user_documents_dir
 from utils import get_child_process_info, make_doc_id
@@ -25,7 +25,7 @@ from pandas import read_csv, DataFrame
 from numpy import eye, where, nan, nanmin, nanmax
 import mimetypes
 from time import perf_counter
-from multiprocessing import Lock, Manager, Pool, cpu_count
+from shutil import copy
 
 from config import app_version, dev_frontend_host
 from constants import matrix_filetypes, default_window_title
@@ -37,7 +37,7 @@ temp_dir = TemporaryDirectory()
 window_title_suffix = "" if is_macos else " - SDT2"
 
 try:
-    cpu_count = cpu_count()
+    cpu_count = get_cpu_count()
 except:
     cpu_count = 1
 
@@ -61,11 +61,11 @@ def get_matrix_path(state: DocState):
             (
                 os.path.join(state.tempdir_path, file)
                 for file in os.listdir(state.tempdir_path)
-                if file.endswith("_mat.csv")
+                if file.endswith("_mat.csv") or file.endswith("_mat.txt")
             ),
             None,
         )
-        if path == None:
+        if not path:
             raise Exception(f"Failed to located matrix file")
         return path
     elif state.filetype == "text/fasta":
@@ -155,6 +155,8 @@ def handle_open_file(filepath: str, doc_id: str | None):
         return [doc_id, filepath]
 
     if filetype in matrix_filetypes:
+        copy(filepath, unique_dir)
+
         # Maybe can remove this if we can find a way to make pandas
         # infer the max column length based on the latest column length
         with open(filepath, "r") as temp_f:
@@ -342,7 +344,7 @@ class Api:
         compute_cores = args.get("compute_cores")
         assert isinstance(compute_cores, int)
         settings["num_processes"] = max(
-            min(compute_cores, multiprocessing.cpu_count()), 1
+            min(compute_cores, get_cpu_count()), 1
         )
 
         alignment_export_path = args.get("alignment_export_path")
@@ -475,16 +477,12 @@ class Api:
             col_count = [len(l.split(",")) for l in temp_f.readlines()]
             column_names = [i for i in range(0, max(col_count))]
 
-        if doc.filetype == "text/fasta" or doc.filetype == "application/vnd.sdt":
-            stats_path = os.path.join(doc.tempdir_path, f"{file_base}_stats.csv")
+        stats_path = os.path.join(doc.tempdir_path, f"{file_base}_stats.csv")
+        if os.path.exists(stats_path):
             stats_df = read_csv(stats_path, header=0)
-
-        elif doc.filetype in matrix_filetypes:
-            stats_df = DataFrame([])
         else:
-            raise Exception("unsupported file type")
+            stats_df = DataFrame([])
 
-        # cols_dir = doc.tempdir_path if doc.filetype == "text/fasta" else temp_dir.name
         cols_dir = doc.tempdir_path
         cols_file_base = file_base.removesuffix("_mat")
         cols_path = os.path.join(cols_dir, f"{cols_file_base}_cols.csv")
@@ -530,14 +528,15 @@ class Api:
         return doc._asdict() if doc else None
 
     def save_doc(self, doc_id: str, path: str, save_as: bool = False):
-        print(doc_id, path, save_as)
         doc = get_document(doc_id)
         if doc == None:
             raise Exception(f"Expected to find document: {doc_id}")
+
         files = [
             os.path.join(doc.tempdir_path, file)
             for file in os.listdir(doc.tempdir_path)
         ]
+
         pack_document(path, files)
 
         if save_as == False:
@@ -642,7 +641,7 @@ if __name__ == "__main__":
         debug=os.getenv("DEBUG", "false").lower() == "true",
         platform=dict(
             platform=platform.platform(),
-            cores=multiprocessing.cpu_count(),
+            cores=get_cpu_count(),
             memory=psutil.virtual_memory().total,
         ),
         on_update=lambda _: push_backend_state(window),
