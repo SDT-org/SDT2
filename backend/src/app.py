@@ -316,6 +316,10 @@ class Api:
 
     def start_run(self, args: dict):
         global pool, cancelled, start_time
+
+        if get_state().active_run_document_id:
+            raise Exception("Multiple runs are not supported")
+
         doc_id = args["doc_id"]
         doc = get_document(doc_id)
         if doc == None:
