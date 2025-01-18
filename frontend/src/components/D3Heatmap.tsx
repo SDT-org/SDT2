@@ -280,24 +280,13 @@ export const D3Heatmap = ({
     const axis = d3.axisRight(scale).tickValues(tickValues).tickSize(6);
 
     g.append("g")
-      .attr("transform", `translate(${scaleBarX + cbarWidth},0)`)
+      .attr("transform", `translate(${scaleBarX + cbarWidth},${margin.top})`)
       .call(axis)
       .call((g) => g.select(".domain").remove())
       .call((g) => g.selectAll(".tick line").attr("stroke-opacity", 0.5))
       .call((g) =>
         g.selectAll(".tick text").attr("font-size", "10px").attr("dx", "0.5em"),
       );
-
-    if (title) {
-      g.append("text")
-        .attr("x", -scaleBarX / 2)
-        .attr("y", scaleBarX - 5)
-        .attr("transform", "rotate(-90)")
-        .attr("text-anchor", "middle")
-        .attr("font-size", "12px")
-        .attr("font-weight", "bold")
-        .text(title);
-    }
   }, [
     tickValues,
     scale,
