@@ -88,6 +88,14 @@ export const D3Heatmap = ({
     [colorScale],
   );
 
+  const scale = React.useMemo(
+    () => d3.scaleLinear().domain([maxVal, minVal]).range([0, cbarHeight]),
+    [minVal, maxVal, cbarHeight],
+  );
+
+  const ticks = 5;
+  const tickValues = React.useMemo(() => scale.ticks(ticks), [scale]);
+
   React.useEffect(() => {
     if (!svgRef.current) return;
     const d3Svg = d3.select(svgRef.current as Element);
@@ -98,7 +106,6 @@ export const D3Heatmap = ({
 
     const size = Math.min(width, height);
     const margin = { top: 60, right: 60, bottom: 60, left: 60 };
-    // const margin = { top: 0, right: 0, bottom: 0, left: 0 };
     const w = size - margin.left - margin.right;
     const h = size - margin.top - margin.bottom;
 
@@ -232,13 +239,12 @@ export const D3Heatmap = ({
           `rotate(${axlabel_yrotation}, ${-labelOffset}, ${i * cellH + cellH / 2})`,
       );
 
+    const scaleBarX = width - cbarWidth - margin.left - margin.right;
+
     const gradientGroup = g
       .append("g")
-      .attr(
-        "transform",
-        `translate(${width - cbarWidth - margin.left - margin.right},${margin.top})`,
-      );
-    const defs = gradientGroup.append("defs");
+      .attr("transform", `translate(${scaleBarX},${margin.top})`);
+    const defs = d3Svg.append("defs");
     const gradientId = "heatmap-svg-linear-gradient";
     const gradient = defs
       .append("linearGradient")
@@ -265,13 +271,36 @@ export const D3Heatmap = ({
     // const legendHeight = cbarHeight - margin.top - margin.bottom;
     // const legendWidth = cbarWidth - margin.left - margin.right;
 
-    defs
+    gradientGroup
       .append("rect")
       .attr("width", cbarWidth)
       .attr("height", cbarHeight)
-      // .attr("fill", `url(#${gradientId})`)
-      .attr("fill", "black");
+      .attr("fill", `url(#${gradientId})`);
+
+    const axis = d3.axisRight(scale).tickValues(tickValues).tickSize(6);
+
+    g.append("g")
+      .attr("transform", `translate(${scaleBarX + cbarWidth},0)`)
+      .call(axis)
+      .call((g) => g.select(".domain").remove())
+      .call((g) => g.selectAll(".tick line").attr("stroke-opacity", 0.5))
+      .call((g) =>
+        g.selectAll(".tick text").attr("font-size", "10px").attr("dx", "0.5em"),
+      );
+
+    if (title) {
+      g.append("text")
+        .attr("x", -scaleBarX / 2)
+        .attr("y", scaleBarX - 5)
+        .attr("transform", "rotate(-90)")
+        .attr("text-anchor", "middle")
+        .attr("font-size", "12px")
+        .attr("font-weight", "bold")
+        .text(title);
+    }
   }, [
+    tickValues,
+    scale,
     gradientStops,
     cbarHeight,
     cbarWidth,
