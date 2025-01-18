@@ -85,6 +85,17 @@ export const D3CanvasHeatmap = ({
     value: number;
   } | null>(null);
 
+  const gradientStops = React.useMemo(
+    () => colorScale.map(([stop, color]) => ({ stop, color })),
+    [colorScale],
+  );
+  const scale = React.useMemo(
+    () => d3.scaleLinear().domain([maxVal, minVal]).range([0, cbarHeight]),
+    [minVal, maxVal, cbarHeight],
+  );
+  const ticks = 5;
+  const tickValues = React.useMemo(() => scale.ticks(ticks), [scale]);
+
   React.useEffect(() => {
     const canvas = canvasRef.current;
     const plotFont =
@@ -208,7 +219,48 @@ export const D3CanvasHeatmap = ({
       ctx.fillText(txt, 0, 0);
       ctx.restore();
     }
+
+    // colorbar
+    const positionX = width - cbarWidth - margin.left - margin.right;
+
+    const gradient = ctx.createLinearGradient(
+      0,
+      cbarHeight + margin.top,
+      0,
+      margin.top,
+    );
+
+    for (const { stop, color } of gradientStops) {
+      gradient.addColorStop(stop, color);
+    }
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(positionX, margin.top, cbarWidth, cbarHeight);
+
+    const adjustedScale = scale
+      .copy()
+      .range([margin.top, cbarHeight + margin.top]);
+
+    ctx.fillStyle = "#000";
+    ctx.font = "10px 'Roboto Mono'";
+    ctx.textAlign = "left";
+    ctx.textBaseline = "middle";
+
+    for (const tick of tickValues) {
+      const y = adjustedScale(tick);
+      ctx.fillText(tick.toFixed(2), positionX + cbarWidth + 5, y);
+      ctx.beginPath();
+      ctx.moveTo(positionX + cbarWidth, y);
+      ctx.lineTo(positionX + cbarWidth + 6, y);
+      ctx.strokeStyle = "#000";
+      ctx.stroke();
+    }
   }, [
+    cbarHeight,
+    cbarWidth,
+    scale,
+    gradientStops,
+    tickValues,
     canvasRef.current,
     data,
     tickText,
@@ -300,17 +352,6 @@ export const D3CanvasHeatmap = ({
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       />
-      {showscale && (
-        <ColorLegend
-          colorScale={colorScale}
-          minVal={minVal}
-          maxVal={maxVal}
-          position={{ x: width - cbarWidth - 20, y: height / 100 }}
-          cbarHeight={cbarHeight}
-          cbarWidth={cbarWidth}
-          tempHeatmapComponent="canvas"
-        />
-      )}
       {tooltipData && (
         <div
           style={{
