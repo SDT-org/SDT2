@@ -15,6 +15,7 @@ import useAppState, {
 import { useDistributionState } from "../distributionState";
 import { assertDefined } from "../helpers";
 import { useDocState } from "../hooks/useDocState";
+import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";
 import { Switch } from "./Switch";
@@ -85,28 +86,58 @@ export const ExportModal = () => {
     [updateDocState],
   );
 
+  const heatmapRef = useHeatmapRef();
+
   const getImages = React.useCallback(async () => {
-    const previousDataView = docState.dataView;
-    const renderTimeout = 400;
-    await new Promise((r) => setTimeout(r, 200));
-    swapDataView("heatmap");
-    await new Promise((r) => setTimeout(r, renderTimeout));
-
-    let element = getPlotlyElement();
-
     const config = {
       format: appState.saveFormat,
       width: 1000,
       height: 800,
     };
+    const previousDataView = docState.dataView;
+    const renderTimeout = 400;
+    let heatmapImage = "";
 
-    await Plotly.toImage(element, config);
-    const heatmapImage = await Plotly.toImage(element, config);
+    swapDataView("heatmap");
+    await new Promise((r) => setTimeout(r, renderTimeout));
+
+    if (config.format === "svg") {
+      if (!heatmapRef.current) {
+        throw new Error("Expected heatmapRef to have a current value");
+      }
+      const encoded64Svg = encodeURIComponent(heatmapRef.current.outerHTML);
+      heatmapImage = `data:image/svg+xml;base64,${encoded64Svg}`;
+    } else {
+      heatmapImage = await new Promise((resolve) => {
+        if (!heatmapRef.current) {
+          throw new Error("Expected heatmapRef to have a current value");
+        }
+
+        (heatmapRef.current as HTMLCanvasElement).toBlob(async (blob) => {
+          if (blob) {
+            const arrayBuffer = await blob.arrayBuffer();
+            const binary = Array.from(new Uint8Array(arrayBuffer))
+              .map((byte) => String.fromCharCode(byte))
+              .join("");
+            resolve(`data:image/${config.format};base64,${btoa(binary)}`);
+          } else {
+            resolve("");
+          }
+        }, `image/${config.format}`);
+      });
+    }
+
+    await new Promise((r) => setTimeout(r, renderTimeout));
+
+    // Plotly exports
 
     swapDataView("distribution_histogram");
     updateDistributionState({ visualization: "histogram" });
 
     await new Promise((r) => setTimeout(r, renderTimeout));
+
+    let element = getPlotlyElement();
+
     element = getPlotlyElement();
     await Plotly.toImage(element, config);
     const histogramImage = await Plotly.toImage(element, config);
@@ -129,7 +160,13 @@ export const ExportModal = () => {
 
     swapDataView(previousDataView);
     return { heatmapImage, histogramImage, violinImage, raincloudImage };
-  }, [appState, docState.dataView, swapDataView, updateDistributionState]);
+  }, [
+    heatmapRef,
+    appState,
+    docState.dataView,
+    swapDataView,
+    updateDistributionState,
+  ]);
 
   const doExport = React.useCallback(() => {
     setExportState("exporting");

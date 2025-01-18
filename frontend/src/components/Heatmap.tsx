@@ -1,7 +1,11 @@
 import Plotly from "plotly.js-cartesian-dist-min";
 import React from "react";
 import createPlotlyComponent from "react-plotly.js/factory";
-import type { DocState, SetDocState, UpdateDocState } from "../appState";
+import useAppState, {
+  type DocState,
+  type SetDocState,
+  type UpdateDocState,
+} from "../appState";
 import {
   type ColorScaleArray,
   colorScales as defaultColorScales,
@@ -32,6 +36,7 @@ export const Heatmap = ({
   tickText: string[];
 }) => {
   const { heatmap: settings, sequences_count } = docState;
+  const { appState } = useAppState();
   const updateSettings = React.useCallback(
     (values: Partial<DocState["heatmap"]>) =>
       setDocState((prev) => ({
@@ -125,7 +130,6 @@ export const Heatmap = ({
         (event.ctrlKey || event.metaKey) &&
         [1, 2, 3].includes(Number(event.key))
       ) {
-        console.log(event.key);
         event.preventDefault();
         const views = ["canvas", "svg", "plotly"];
         tempSetHeatmapComponent(() => views[Number(event.key) - 1] || "canvas");
@@ -180,7 +184,11 @@ export const Heatmap = ({
             >
               {tempHeatmapComponent}
             </div>
-            {tempHeatmapComponent === "canvas" ? (
+            {(
+              appState.showExportModal
+                ? appState.saveFormat !== "svg"
+                : tempHeatmapComponent === "canvas"
+            ) ? (
               <D3CanvasHeatmap
                 data={d3HeatmapData}
                 tickText={tickText}
@@ -204,7 +212,11 @@ export const Heatmap = ({
                 title={settings.title}
                 subtitle={settings.subtitle}
               />
-            ) : tempHeatmapComponent === "svg" ? (
+            ) : (
+                appState.showExportModal
+                  ? appState.saveFormat === "svg"
+                  : tempHeatmapComponent === "svg"
+              ) ? (
               <D3Heatmap
                 data={d3HeatmapData}
                 tickText={tickText}
@@ -219,7 +231,7 @@ export const Heatmap = ({
                 showscale={settings.showscale}
                 cbarHeight={settings.cbar_shrink}
                 cbarWidth={settings.cbar_aspect}
-                tempHeatmapComponent={tempHeatmapComponent}
+                tempHeatmapComponent={"svg"}
                 axlabel_xrotation={settings.axlabel_xrotation}
                 axlabel_xfontsize={settings.axlabel_xfontsize}
                 axlabel_yrotation={settings.axlabel_yrotation}

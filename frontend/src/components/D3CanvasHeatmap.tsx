@@ -1,7 +1,8 @@
 import * as d3 from "d3";
-import { useEffect, useRef, useState } from "react";
+import React from "react";
 import type { ColorScaleArray } from "../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
+import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapSettings } from "../plotTypes";
 import { ColorLegend } from "./ColorLegend";
 
@@ -75,15 +76,16 @@ export const D3CanvasHeatmap = ({
   title = "DOODOO",
   subtitle = "",
 }: D3HeatmapProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [transform, setTransform] = useState(d3.zoomIdentity);
-  const [tooltipData, setTooltipData] = useState<{
+  const canvasRef =
+    useHeatmapRef() as React.MutableRefObject<HTMLCanvasElement>;
+  const [transform, setTransform] = React.useState(d3.zoomIdentity);
+  const [tooltipData, setTooltipData] = React.useState<{
     x: number;
     y: number;
     value: number;
   } | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const canvas = canvasRef.current;
     const plotFont =
       titleFont === "Monospace" ? plotFontMonospace : plotFontSansSerif;
@@ -199,6 +201,7 @@ export const D3CanvasHeatmap = ({
       ctx.restore();
     }
   }, [
+    canvasRef.current,
     data,
     tickText,
     colorScale,
@@ -220,7 +223,7 @@ export const D3CanvasHeatmap = ({
     subtitle,
   ]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -237,7 +240,7 @@ export const D3CanvasHeatmap = ({
         selection: d3.Selection<HTMLCanvasElement, unknown, null, undefined>,
       ) => void,
     );
-  }, []);
+  }, [canvasRef]);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;

@@ -226,3 +226,7 @@ export const useAppState = () => {
 };
 
 export default useAppState;
+
+export type HeatmapRefType = HTMLCanvasElement | SVGSVGElement | null;
+export const HeatmapRefContext =
+  React.createContext<React.MutableRefObject<HeatmapRefType> | null>(null);

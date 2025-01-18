@@ -163,10 +163,7 @@ export const Viewer = ({
           <div className="app-sidebar-footer" />
         </div>
         <TabPanel id="heatmap" className="app-panel">
-          {docState.dataView === "heatmap" &&
-          !loading &&
-          heatmapData &&
-          metaData ? (
+          {!loading && heatmapData && metaData ? (
             <Heatmap
               data={heatmapData}
               tickText={tickText}

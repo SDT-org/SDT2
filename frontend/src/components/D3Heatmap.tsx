@@ -1,8 +1,9 @@
 import * as d3 from "d3";
-import React, { useEffect, useRef } from "react";
+import React from "react";
 import tinycolor from "tinycolor2";
 import type { ColorScaleArray } from "../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
+import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapSettings } from "../plotTypes";
 import { ColorLegend } from "./ColorLegend";
 
@@ -79,10 +80,10 @@ export const D3Heatmap = ({
   title: string;
   subtitle: string;
 }) => {
-  const svgRef = useRef<SVGSVGElement | null>(null);
+  const svgRef = useHeatmapRef() as React.MutableRefObject<SVGSVGElement>;
   const [svgTransform, setSvgTransform] = React.useState({});
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!svgRef.current) return;
     const d3Svg = d3.select(svgRef.current as Element);
     d3Svg.selectAll("*").remove();
@@ -225,6 +226,7 @@ export const D3Heatmap = ({
           `rotate(${axlabel_yrotation}, ${-labelOffset}, ${i * cellH + cellH / 2})`,
       );
   }, [
+    svgRef.current,
     data,
     tickText,
     colorScale,
@@ -249,6 +251,8 @@ export const D3Heatmap = ({
   return (
     <div style={{ position: "relative", width, height }}>
       <svg
+        xmlns="http://www.w3.org/2000/svg"
+        xmlnsXlink="http://www.w3.org/1999/xlink"
         style={{ background: "#fff" }}
         ref={svgRef}
         width={"100%"}
