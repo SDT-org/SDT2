@@ -82,6 +82,7 @@ export const D3Heatmap = ({
 }) => {
   const svgRef = useHeatmapRef() as React.MutableRefObject<SVGSVGElement>;
   const [svgTransform, setSvgTransform] = React.useState({});
+  console.log(svgTransform);
 
   const gradientStops = React.useMemo(
     () => colorScale.map(([stop, color]) => ({ stop, color })),
@@ -285,7 +286,11 @@ export const D3Heatmap = ({
       .call((g) => g.select(".domain").remove())
       .call((g) => g.selectAll(".tick line").attr("stroke-opacity", 0.5))
       .call((g) =>
-        g.selectAll(".tick text").attr("font-size", "10px").attr("dx", "0.5em"),
+        g
+          .selectAll(".tick text")
+          .attr("font-size", "10px")
+          .attr("font-family", "Roboto Mono")
+          .attr("dx", "0.5em"),
       );
   }, [
     tickValues,
@@ -313,29 +318,15 @@ export const D3Heatmap = ({
     title,
     subtitle,
   ]);
-  console.log(svgTransform);
 
   return (
-    <div style={{ position: "relative", width, height }}>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        xmlnsXlink="http://www.w3.org/1999/xlink"
-        style={{ background: "#fff" }}
-        ref={svgRef}
-        width={"100%"}
-        height={"100%"}
-      />
-      {!showscale && (
-        <ColorLegend
-          colorScale={colorScale}
-          minVal={minVal}
-          maxVal={maxVal}
-          position={{ x: width - cbarWidth - 20, y: height / 100 }}
-          cbarHeight={cbarHeight}
-          cbarWidth={cbarWidth}
-          tempHeatmapComponent={tempHeatmapComponent}
-        />
-      )}
-    </div>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
+      style={{ background: "#fff" }}
+      ref={svgRef}
+      width={"100%"}
+      height={"100%"}
+    />
   );
 };
