@@ -83,6 +83,11 @@ export const D3Heatmap = ({
   const svgRef = useHeatmapRef() as React.MutableRefObject<SVGSVGElement>;
   const [svgTransform, setSvgTransform] = React.useState({});
 
+  const gradientStops = React.useMemo(
+    () => colorScale.map(([stop, color]) => ({ stop, color })),
+    [colorScale],
+  );
+
   React.useEffect(() => {
     if (!svgRef.current) return;
     const d3Svg = d3.select(svgRef.current as Element);
@@ -226,7 +231,50 @@ export const D3Heatmap = ({
         (_, i) =>
           `rotate(${axlabel_yrotation}, ${-labelOffset}, ${i * cellH + cellH / 2})`,
       );
+
+    const gradientGroup = g
+      .append("g")
+      .attr(
+        "transform",
+        `translate(${width - cbarWidth - margin.left - margin.right},${margin.top})`,
+      );
+    const defs = gradientGroup.append("defs");
+    const gradientId = "heatmap-svg-linear-gradient";
+    const gradient = defs
+      .append("linearGradient")
+      .attr("id", gradientId)
+      .attr("x1", "0%")
+      .attr("y1", "100%")
+      .attr("x2", "0%")
+      .attr("y2", "0%");
+
+    for (const { stop, color } of gradientStops) {
+      gradient
+        .append("stop")
+        .attr("offset", `${stop * 100}%`)
+        .attr("stop-color", color);
+    }
+
+    // colorScale.map(([stop, color]) => {
+    //   gradient
+    //     .append("stop")
+    //     .attr("offset", `${stop * 100}%`)
+    //     .attr("stop-color", color);
+    // });
+
+    // const legendHeight = cbarHeight - margin.top - margin.bottom;
+    // const legendWidth = cbarWidth - margin.left - margin.right;
+
+    defs
+      .append("rect")
+      .attr("width", cbarWidth)
+      .attr("height", cbarHeight)
+      // .attr("fill", `url(#${gradientId})`)
+      .attr("fill", "black");
   }, [
+    gradientStops,
+    cbarHeight,
+    cbarWidth,
     svgRef.current,
     data,
     tickText,
@@ -259,7 +307,7 @@ export const D3Heatmap = ({
         width={"100%"}
         height={"100%"}
       />
-      {showscale && (
+      {!showscale && (
         <ColorLegend
           colorScale={colorScale}
           minVal={minVal}
