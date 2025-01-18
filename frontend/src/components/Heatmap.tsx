@@ -170,6 +170,11 @@ export const Heatmap = ({
   const updateTitles = useRelayoutUpdateTitles(updateSettings);
   useRelayoutHideSubtitle(!settings.showTitles);
 
+  console.log(settings.cbar_shrink);
+
+  const cbar_shrink = settings.cbar_shrink * 60;
+  const cbar_aspect = settings.cbar_aspect * 10;
+
   return (
     <>
       {data ? (
@@ -200,8 +205,8 @@ export const Heatmap = ({
                 cellSpace={settings.cellspace}
                 roundTo={settings.annotation_rounding}
                 showscale={settings.showscale}
-                cbarHeight={settings.cbar_shrink}
-                cbarWidth={settings.cbar_aspect}
+                cbarHeight={cbar_shrink}
+                cbarWidth={cbar_aspect}
                 axlabel_xrotation={settings.axlabel_xrotation}
                 axlabel_xfontsize={settings.axlabel_xfontsize}
                 axlabel_yrotation={settings.axlabel_yrotation}
@@ -229,8 +234,8 @@ export const Heatmap = ({
                 showPercentIdentities={settings.annotation}
                 roundTo={settings.annotation_rounding}
                 showscale={settings.showscale}
-                cbarHeight={settings.cbar_shrink}
-                cbarWidth={settings.cbar_aspect}
+                cbarHeight={cbar_shrink}
+                cbarWidth={cbar_aspect}
                 tempHeatmapComponent={"svg"}
                 axlabel_xrotation={settings.axlabel_xrotation}
                 axlabel_xfontsize={settings.axlabel_xfontsize}

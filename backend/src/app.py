@@ -215,6 +215,7 @@ def handle_open_file(filepath: str, doc_id: str | None):
                 progress=0,
                 compute_stats=compute_stats,
             )
+
             if len(get_state().documents) == 1:
                 remove_empty_documents()
 
