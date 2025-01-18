@@ -126,7 +126,7 @@ export const D3CanvasHeatmap = ({
       const x = cols.indexOf(d.x) * cellW + cellSpace / 2;
       const y = rows.indexOf(d.y) * cellH + cellSpace / 2;
       const rectW = cellW - cellSpace;
-      const rectH = cellH - cellSpace;
+      const rectH = cellH - cellSpace; // may just need one bcuz square
 
       // draw rects fill color
       ctx.fillStyle = colorFn(d.value);
@@ -137,10 +137,17 @@ export const D3CanvasHeatmap = ({
       const fontSizeMin = 1;
       const fontSizeMax = 16;
       const fontSizeFactor = 0.01;
-      const fontSize =
-        fontSizeMin +
-        (fontSizeMax - fontSizeMin) /
-          (fontSizeMin + fontSizeFactor * data.length);
+      const fontSize = Math.min(
+        fontSizeMax,
+        Math.max(
+          fontSizeMin,
+          rectH + fontSizeFactor *data.length,
+        )
+      );
+      // const fontSize =
+      //   fontSizeMin +
+      //   (fontSizeMax - fontSizeMin) /
+      //     (fontSizeMin + fontSizeFactor * data.length);
       // draw annotations
 
       ctx.fillStyle = "black";
