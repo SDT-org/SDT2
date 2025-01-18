@@ -94,6 +94,7 @@ export const D3CanvasHeatmap = ({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const size = Math.min(width, height);
     const pixelRatio = window.devicePixelRatio || 1;
     canvas.width = width * pixelRatio;
     canvas.height = height * pixelRatio;
@@ -102,8 +103,8 @@ export const D3CanvasHeatmap = ({
     ctx.scale(pixelRatio, pixelRatio);
 
     const margin = { top: 60, right: 60, bottom: 60, left: 60 };
-    const w = width - margin.left - margin.right;
-    const h = height - margin.top - margin.bottom;
+    const w = size - margin.left - margin.right;
+    const h = size - margin.top - margin.bottom;
 
     const n = tickText.length;
     const colorFn = createD3ColorScale(colorScale, minVal, maxVal);
