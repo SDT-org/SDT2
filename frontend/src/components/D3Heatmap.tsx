@@ -91,10 +91,11 @@ export const D3Heatmap = ({
     const plotFont =
       titleFont === "Monospace" ? plotFontMonospace : plotFontSansSerif;
 
+    const size = Math.min(width, height);
     const margin = { top: 60, right: 60, bottom: 60, left: 60 };
     // const margin = { top: 0, right: 0, bottom: 0, left: 0 };
-    const w = width - margin.left - margin.right;
-    const h = height - margin.top - margin.bottom;
+    const w = size - margin.left - margin.right;
+    const h = size - margin.top - margin.bottom;
 
     const n = tickText.length;
 
