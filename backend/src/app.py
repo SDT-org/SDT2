@@ -487,7 +487,11 @@ class Api:
         cols_dir = doc.tempdir_path
         cols_file_base = file_base.removesuffix("_mat")
         cols_path = os.path.join(cols_dir, f"{cols_file_base}_cols.csv")
-        identity_scores = read_csv(cols_path, skiprows=1).values.tolist()
+
+        if os.path.exists(cols_path):
+            identity_scores = read_csv(cols_path, skiprows=1).values.tolist()
+        else:
+           identity_scores = []
 
         df = read_csv(
             matrix_path, delimiter=",", index_col=0, header=None, names=column_names
