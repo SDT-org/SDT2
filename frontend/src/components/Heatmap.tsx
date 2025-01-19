@@ -236,7 +236,6 @@ export const Heatmap = ({
                 showscale={settings.showscale}
                 cbarHeight={cbar_shrink}
                 cbarWidth={cbar_aspect}
-                tempHeatmapComponent={"svg"}
                 axlabel_xrotation={settings.axlabel_xrotation}
                 axlabel_xfontsize={settings.axlabel_xfontsize}
                 axlabel_yrotation={settings.axlabel_yrotation}

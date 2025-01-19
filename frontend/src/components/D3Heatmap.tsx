@@ -5,7 +5,6 @@ import type { ColorScaleArray } from "../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapSettings } from "../plotTypes";
-import { ColorLegend } from "./ColorLegend";
 
 interface HeatmapCell {
   x: number;
@@ -43,14 +42,14 @@ export const D3Heatmap = ({
   cellSpace,
   roundTo,
   showPercentIdentities = true,
-  showscale,
+  // showscale,
   cbarWidth,
   cbarHeight,
   axlabel_xfontsize,
   axlabel_yfontsize,
   axlabel_xrotation = 90,
   axlabel_yrotation = 180,
-  tempHeatmapComponent,
+
   titleFont,
   showTitles = true,
   title = "",
@@ -74,7 +73,6 @@ export const D3Heatmap = ({
   axlabel_yfontsize: number;
   axlabel_xrotation: number;
   axlabel_yrotation: number;
-  tempHeatmapComponent: "canvas" | "svg" | "plotly";
   titleFont: HeatmapSettings["titleFont"];
   showTitles: boolean;
   title: string;

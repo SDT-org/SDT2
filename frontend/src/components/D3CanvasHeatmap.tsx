@@ -4,7 +4,6 @@ import type { ColorScaleArray } from "../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapSettings } from "../plotTypes";
-import { ColorLegend } from "./ColorLegend";
 
 interface HeatmapCell {
   x: number;
@@ -63,7 +62,7 @@ export const D3CanvasHeatmap = ({
   height = 500,
   cellSpace,
   roundTo,
-  showscale = true,
+  // showscale = true,
   cbarHeight = 200,
   cbarWidth = 60,
   axlabel_xfontsize = 15,
@@ -95,7 +94,7 @@ export const D3CanvasHeatmap = ({
   );
   const ticks = 5;
   const tickValues = React.useMemo(() => scale.ticks(ticks), [scale]);
-
+  const filteredData = data.filter((d) => Number(d.value));
   React.useEffect(() => {
     const canvas = canvasRef.current;
     const plotFont =
@@ -123,8 +122,8 @@ export const D3CanvasHeatmap = ({
     const cellW = w / n;
     const cellH = h / n;
 
-    const rows = [...new Set(data.map((d) => d.x))];
-    const cols = [...new Set(data.map((d) => d.y))];
+    const rows = [...new Set(filteredData.map((d) => d.x))];
+    const cols = [...new Set(filteredData.map((d) => d.y))];
 
     ctx.clearRect(0, 0, width, height);
     ctx.save();
@@ -132,7 +131,6 @@ export const D3CanvasHeatmap = ({
     ctx.translate(transform.x, transform.y);
     ctx.scale(transform.k, transform.k);
     ctx.translate(margin.left, margin.top);
-    const filteredData = data.filter((d) => Number(d.value));
     for (const d of filteredData) {
       const x = cols.indexOf(d.x) * cellW + cellSpace / 2;
       const y = rows.indexOf(d.y) * cellH + cellSpace / 2;
@@ -150,10 +148,7 @@ export const D3CanvasHeatmap = ({
       const fontSizeFactor = 0.01;
       const fontSize = Math.min(
         fontSizeMax,
-        Math.max(
-          fontSizeMin,
-          rectH + fontSizeFactor *data.length,
-        )
+        Math.max(fontSizeMin, rectH + fontSizeFactor * data.length),
       );
       // const fontSize =
       //   fontSizeMin +
@@ -281,6 +276,7 @@ export const D3CanvasHeatmap = ({
     showTitles,
     title,
     subtitle,
+    filteredData,
   ]);
 
   React.useEffect(() => {
@@ -325,7 +321,7 @@ export const D3CanvasHeatmap = ({
       (y - margin.top - transform.y) / (cellH * transform.k),
     );
 
-    const cell = data.find((d) => d.x === dataX && d.y === dataY);
+    const cell = filteredData.find((d) => d.x === dataX && d.y === dataY);
 
     if (cell) {
       setTooltipData({
