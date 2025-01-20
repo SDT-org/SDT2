@@ -225,7 +225,6 @@ export const D3CanvasHeatmap = ({
     colorFn,
     scale,
     tickValues,
-    size,
     cellSize,
     cellSpace,
     showPercentIdentities,
