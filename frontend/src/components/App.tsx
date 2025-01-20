@@ -26,7 +26,12 @@ export const App = () => {
   useSyncState(setAppState);
   useShortcutKeys(appState, setAppState);
   useAppBlur();
-  useWaitForPywebview(() => setInitialized(true));
+  useWaitForPywebview(() => {
+    window.pywebview.api.app_config().then((data) => {
+      setAppState((prev) => ({ ...prev, config: data }));
+      setInitialized(true);
+    });
+  });
   const tabListRef = React.useRef<HTMLDivElement>(null);
   const lastTabRef = React.useRef<HTMLDivElement>(null);
 

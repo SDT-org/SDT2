@@ -237,7 +237,7 @@ class Api:
         manual_window()
 
     def app_config(self):
-        return json.dumps({"appVersion": app_version})
+        return {"appVersion": app_version, "userPath": os.path.expanduser('~')}
 
     def app_settings(self):
         return load_app_settings()

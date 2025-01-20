@@ -13,7 +13,7 @@ declare global {
   interface Window {
     pywebview: {
       api: {
-        app_config: () => Promise<string>;
+        app_config: () => Promise<AppState["config"]>;
         app_settings: () => Promise<{ recent_files: string[] }>;
         get_state: () => Promise<AppState>;
         reset_state: () => Promise<void>;

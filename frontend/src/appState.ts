@@ -62,6 +62,10 @@ export type AppState = {
     memory: number;
     platform: string;
   };
+  config?: {
+    appVersion: string;
+    userPath: string;
+  };
   debug: boolean;
   enableClustering: boolean;
   enableOutputAlignments: boolean;

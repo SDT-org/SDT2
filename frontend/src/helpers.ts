@@ -40,3 +40,12 @@ export const arrayMinMax = (arr: number[]): [number, number] =>
 
 export const isSDTFile = (fileType: string) =>
   fileType === "application/vnd.sdt";
+
+export const splitFilePath = (filePath: string) => {
+  const parts = filePath.split(/(\/|\\)/);
+  const name = parts.pop();
+  // remove trailing slash
+  parts.pop();
+  const dir = parts.join("");
+  return { dir, name };
+};

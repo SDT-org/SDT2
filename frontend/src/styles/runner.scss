@@ -183,9 +183,56 @@
     }
   }
 
+  .field.file-selector {
+    border-bottom: 0;
+    button {
+      width: 100%;
+      font-weight: 500;
+      height: 4rem;
+    }
+    margin: 0.4rem 0;
+  }
+
   .recent-files {
     h2 {
+      margin: 1.2rem 0;
+      padding-bottom: 0.4rem;
       font-size: 1.4rem;
+      border-bottom: 0.1rem solid var(--border-color);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+
+    button {
+      display: block;
+      text-align: left;
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      border: 0.1rem solid #e5e5e5;
+      font-size: 1.2rem;
+      display: grid;
+      grid-template-columns: 1.4rem 1fr;
+      gap: 0.8rem;
+
+      * {
+        margin: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        line-height: 1.6rem;
+      }
+
+      svg {
+        color: #999;
+      }
+
+      .dir {
+        color: #666;
+      }
     }
   }
 }

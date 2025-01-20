@@ -17,11 +17,12 @@ import useAppState, {
   type UpdateDocState,
   clusterMethods,
 } from "../appState";
-import { formatBytes } from "../helpers";
+import { formatBytes, splitFilePath } from "../helpers";
 import useOpenFileDialog from "../hooks/useOpenFileDialog";
 import { useStartRun } from "../hooks/useStartRun";
 import messages from "../messages";
 import { openFile } from "../services/files";
+import Icons from "./Icons";
 import { Select, SelectItem } from "./Select";
 import { Switch } from "./Switch";
 
@@ -167,25 +168,28 @@ const RunnerSettings = ({
   return (
     <div className="form-wrapper runner-wrapper">
       <div className="form runner-form">
-        <div className="field">
-          <label htmlFor="data-file" className="header">
-            Data file{" "}
-            <span className="text-normal-weight">FASTA or SDT matrix</span>
-          </label>
-          <div className="setting input-with-button">
-            <Input
-              id="data-file"
-              type="text"
-              readOnly
-              value={docState.validation_error_id ? "" : (fileName ?? "")}
-            />
-            <Button type="button" onPress={() => openFileDialog(docState.id)}>
-              Select file&#8230;
-            </Button>
-          </div>
-        </div>
         {isFastaType && !docState.validation_error_id ? (
           <>
+            <div className="field">
+              <label htmlFor="data-file" className="header">
+                Data file{" "}
+                <span className="text-normal-weight">FASTA or SDT matrix</span>
+              </label>
+              <div className="setting input-with-button">
+                <Input
+                  id="data-file"
+                  type="text"
+                  readOnly
+                  value={docState.validation_error_id ? "" : (fileName ?? "")}
+                />
+                <Button
+                  type="button"
+                  onPress={() => openFileDialog(docState.id)}
+                >
+                  Select file&#8230;
+                </Button>
+              </div>
+            </div>
             <div className="field clustering inline-toggle">
               <Switch
                 isSelected={appState.enableClustering}
@@ -413,18 +417,38 @@ const RunnerSettings = ({
             </div>
           </>
         ) : (
-          <div className="recent-files">
-            <h2>Recent Files</h2>
-            {recentFiles.map((file) => (
-              <Button
-                className={"react-aria-Button flat compact"}
-                key={file}
-                onPress={() => openFile(file, docState.id)}
-              >
-                {file.split(/(\/|\\)/).pop()}
+          <>
+            <div className="field file-selector">
+              <Button type="button" onPress={() => openFileDialog(docState.id)}>
+                Select FASTA or SDT Matrix file&#8230;
               </Button>
-            ))}
-          </div>
+            </div>
+            {recentFiles.some(Boolean) ? (
+              <div className="recent-files">
+                <h2>Recent Files</h2>
+                <div className="grid">
+                  {recentFiles.map((file) => (
+                    <Button
+                      className={"react-aria-Button flat compact"}
+                      key={file}
+                      onPress={() => openFile(file, docState.id)}
+                    >
+                      <Icons.Document />
+                      <div className="file-info">
+                        <h4>{splitFilePath(file).name}</h4>
+                        <div className="dir">
+                          {splitFilePath(file).dir.replace(
+                            appState.config?.userPath || "",
+                            "~",
+                          )}
+                        </div>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </>
         )}
         {docState.validation_error_id ? (
           <div className="validation-error">
