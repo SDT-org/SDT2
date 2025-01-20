@@ -46,6 +46,8 @@ export const D3Heatmap = ({
   showTitles,
   title,
   subtitle,
+  showscale,
+  axis_labels,
 }: HeatmapRenderProps) => {
   const svgRef = useHeatmapRef() as React.MutableRefObject<SVGSVGElement>;
   const [svgTransform, setSvgTransform] = React.useState({});
@@ -164,86 +166,88 @@ export const D3Heatmap = ({
         .text(subtitle);
     }
     // x-axis labels
-    g.append("g")
-      .attr("transform", `translate(0, ${h})`)
-      .selectAll("text")
-      .data(tickText)
-      .join("text")
-      .attr("x", (_, i) => i * cellW + cellW / 2)
-      .attr("y", labelOffset)
-      .attr("dy", "1em")
-      .attr("text-anchor", "end")
-      .attr("font-family", plotFont.family)
-      .attr("font-size", `${axlabel_yfontsize}px`)
-      .attr("font-size", axlabel_xfontsize)
-      .text((txt) => txt)
-      .attr(
-        "transform",
-        (_, i) =>
-          `rotate(${axlabel_xrotation}, ${i * cellW + cellW / 2}, ${labelOffset})`,
-      );
-
-    // y-axis labels
-    g.append("g")
-      .selectAll("text")
-      .data(tickText)
-      .join("text")
-      .attr("x", -labelOffset)
-      .attr("y", (_, i) => i * cellH + cellH / 2)
-      .attr("dominant-baseline", "middle")
-      .attr("text-anchor", "end")
-      .attr("font-family", plotFont.family)
-      .attr("font-size", `${axlabel_yfontsize}px`)
-      .attr("font-size", axlabel_yfontsize)
-      .text((txt) => txt)
-      .attr(
-        "transform",
-        (_, i) =>
-          `rotate(${axlabel_yrotation}, ${-labelOffset}, ${i * cellH + cellH / 2})`,
-      );
-
-    const scaleBarX = width - cbarWidth - margin.left - margin.right;
-
-    const gradientGroup = g
-      .append("g")
-      .attr("transform", `translate(${scaleBarX},${margin.top})`);
-    const defs = d3Svg.append("defs");
-    const gradientId = "heatmap-svg-linear-gradient";
-    const gradient = defs
-      .append("linearGradient")
-      .attr("id", gradientId)
-      .attr("x1", "0%")
-      .attr("y1", "100%")
-      .attr("x2", "0%")
-      .attr("y2", "0%");
-
-    for (const { stop, color } of gradientStops) {
-      gradient
-        .append("stop")
-        .attr("offset", `${stop * 100}%`)
-        .attr("stop-color", color);
+    if (axis_labels) {
+      g.append("g")
+        .attr("transform", `translate(0, ${h})`)
+        .selectAll("text")
+        .data(tickText)
+        .join("text")
+        .attr("x", (_, i) => i * cellW + cellW / 2)
+        .attr("y", labelOffset)
+        .attr("dy", "1em")
+        .attr("text-anchor", "end")
+        .attr("font-family", plotFont.family)
+        .attr("font-size", `${axlabel_yfontsize}px`)
+        .attr("font-size", axlabel_xfontsize)
+        .text((txt) => txt)
+        .attr(
+          "transform",
+          (_, i) =>
+            `rotate(${axlabel_xrotation}, ${i * cellW + cellW / 2}, ${labelOffset})`,
+        );
+      // y-axis labels
+      g.append("g")
+        .selectAll("text")
+        .data(tickText)
+        .join("text")
+        .attr("x", -labelOffset)
+        .attr("y", (_, i) => i * cellH + cellH / 2)
+        .attr("dominant-baseline", "middle")
+        .attr("text-anchor", "end")
+        .attr("font-family", plotFont.family)
+        .attr("font-size", `${axlabel_yfontsize}px`)
+        .attr("font-size", axlabel_yfontsize)
+        .text((txt) => txt)
+        .attr(
+          "transform",
+          (_, i) =>
+            `rotate(${axlabel_yrotation}, ${-labelOffset}, ${i * cellH + cellH / 2})`,
+        );
     }
+    if (showscale) {
+      const scaleBarX = width - cbarWidth - margin.left - margin.right;
 
-    gradientGroup
-      .append("rect")
-      .attr("width", cbarWidth)
-      .attr("height", cbarHeight)
-      .attr("fill", `url(#${gradientId})`);
+      const gradientGroup = g
+        .append("g")
+        .attr("transform", `translate(${scaleBarX},${margin.top})`);
+      const defs = d3Svg.append("defs");
+      const gradientId = "heatmap-svg-linear-gradient";
+      const gradient = defs
+        .append("linearGradient")
+        .attr("id", gradientId)
+        .attr("x1", "0%")
+        .attr("y1", "100%")
+        .attr("x2", "0%")
+        .attr("y2", "0%");
 
-    const axis = d3.axisRight(scale).tickValues(tickValues).tickSize(6);
+      for (const { stop, color } of gradientStops) {
+        gradient
+          .append("stop")
+          .attr("offset", `${stop * 100}%`)
+          .attr("stop-color", color);
+      }
 
-    g.append("g")
-      .attr("transform", `translate(${scaleBarX + cbarWidth},${margin.top})`)
-      .call(axis)
-      .call((g) => g.select(".domain").remove())
-      .call((g) => g.selectAll(".tick line").attr("stroke-opacity", 0.5))
-      .call((g) =>
-        g
-          .selectAll(".tick text")
-          .attr("font-size", "10px")
-          .attr("font-family", "Roboto Mono")
-          .attr("dx", "0.5em"),
-      );
+      gradientGroup
+        .append("rect")
+        .attr("width", cbarWidth)
+        .attr("height", cbarHeight)
+        .attr("fill", `url(#${gradientId})`);
+
+      const axis = d3.axisRight(scale).tickValues(tickValues).tickSize(6);
+
+      g.append("g")
+        .attr("transform", `translate(${scaleBarX + cbarWidth},${margin.top})`)
+        .call(axis)
+        .call((g) => g.select(".domain").remove())
+        .call((g) => g.selectAll(".tick line").attr("stroke-opacity", 0.5))
+        .call((g) =>
+          g
+            .selectAll(".tick text")
+            .attr("font-size", "10px")
+            .attr("font-family", "Roboto Mono")
+            .attr("dx", "0.5em"),
+        );
+    }
   }, [
     tickValues,
     scale,
@@ -270,6 +274,8 @@ export const D3Heatmap = ({
     showTitles,
     title,
     subtitle,
+    showscale,
+    axis_labels,
   ]);
 
   return (

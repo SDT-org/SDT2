@@ -52,6 +52,8 @@ export const D3CanvasHeatmap = ({
   showTitles,
   title,
   subtitle,
+  axis_labels,
+  showscale,
 }: HeatmapRenderProps) => {
   const canvasRef =
     useHeatmapRef() as React.MutableRefObject<HTMLCanvasElement>;
@@ -151,75 +153,77 @@ export const D3CanvasHeatmap = ({
       ctx.font = `16px ${plotFont}`;
       ctx.fillText(subtitle, width / 2, 40);
     }
-
-    // X-axis labels
-    for (const [i, txt] of tickText.entries()) {
-      if (txt === undefined) continue;
-      ctx.save();
-      ctx.translate(
-        defaultMargin.left + //margin offset
-          i * cellSize * transform.k + //current tick position
-          (cellSize * transform.k) / 2 + //enter vertically within cell
-          transform.x,
-        height - defaultMargin.bottom + 20,
-      );
-      ctx.rotate((axlabel_xrotation * Math.PI) / 180);
-      ctx.fillStyle = "black";
-      ctx.textAlign = "left";
-      ctx.textBaseline = "middle";
-      ctx.font = `${axlabel_xfontsize}px ${plotFont}`;
-      ctx.fillText(txt, 0, 0);
-      ctx.restore();
-    }
-
-    // Y-axis labels
-    for (const [i, txt] of tickText.entries()) {
-      if (txt === undefined) continue;
-      ctx.save();
-      ctx.translate(
-        defaultMargin.left - 20, // X position: margin offset with spacing for labels
-        defaultMargin.top + // Y start position (top margin)
-          i * cellSize * transform.k + // Y position for current tick (accounting for zoom)
-          (cellSize * transform.k) / 2 + // Center vertically within cell
-          transform.y, // Y pan offset
-      );
-      ctx.rotate((axlabel_yrotation * Math.PI) / 180);
-      ctx.fillStyle = "black";
-      ctx.textAlign = "left";
-      ctx.textBaseline = "middle";
-      ctx.font = `${axlabel_yfontsize}px ${plotFont}`;
-      ctx.fillText(txt, 0, 0);
-      ctx.restore();
+    if (axis_labels) {
+      // X-axis labels
+      for (const [i, txt] of tickText.entries()) {
+        if (txt === undefined) continue;
+        ctx.save();
+        ctx.translate(
+          defaultMargin.left + //margin offset
+            i * cellSize * transform.k + //current tick position
+            (cellSize * transform.k) / 2 + //enter vertically within cell
+            transform.x,
+          height - defaultMargin.bottom + 20,
+        );
+        ctx.rotate((axlabel_xrotation * Math.PI) / 180);
+        ctx.fillStyle = "black";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.font = `${axlabel_xfontsize}px ${plotFont}`;
+        ctx.fillText(txt, 0, 0);
+        ctx.restore();
+      }
+      // Y-axis labels
+      for (const [i, txt] of tickText.entries()) {
+        if (txt === undefined) continue;
+        ctx.save();
+        ctx.translate(
+          defaultMargin.left - 20, // X position: margin offset with spacing for labels
+          defaultMargin.top + // Y start position (top margin)
+            i * cellSize * transform.k + // Y position for current tick (accounting for zoom)
+            (cellSize * transform.k) / 2 + // Center vertically within cell
+            transform.y, // Y pan offset
+        );
+        ctx.rotate((axlabel_yrotation * Math.PI) / 180);
+        ctx.fillStyle = "black";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.font = `${axlabel_yfontsize}px ${plotFont}`;
+        ctx.fillText(txt, 0, 0);
+        ctx.restore();
+      }
     }
 
     // Colorbar
-    const positionX = width - cbarWidth - defaultMargin.right;
-    const gradient = ctx.createLinearGradient(
-      0,
-      defaultMargin.top + cbarHeight,
-      0,
-      defaultMargin.top,
-    );
+    if (showscale) {
+      const positionX = width - cbarWidth - defaultMargin.right;
+      const gradient = ctx.createLinearGradient(
+        0,
+        defaultMargin.top + cbarHeight,
+        0,
+        defaultMargin.top,
+      );
 
-    for (const [stop, color] of colorScale) {
-      gradient.addColorStop(stop, color);
-    }
+      for (const [stop, color] of colorScale) {
+        gradient.addColorStop(stop, color);
+      }
 
-    ctx.fillStyle = gradient;
-    ctx.fillRect(positionX, defaultMargin.top, cbarWidth, cbarHeight);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(positionX, defaultMargin.top, cbarWidth, cbarHeight);
 
-    ctx.fillStyle = "black";
-    ctx.textAlign = "left";
-    ctx.textBaseline = "middle";
-    ctx.font = "10px 'Roboto Mono'";
+      ctx.fillStyle = "black";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.font = "10px 'Roboto Mono'";
 
-    for (const tick of tickValues) {
-      const y = scale(tick) + defaultMargin.top;
-      ctx.fillText(tick.toFixed(2), positionX + cbarWidth + 5, y);
-      ctx.beginPath();
-      ctx.moveTo(positionX + cbarWidth, y);
-      ctx.lineTo(positionX + cbarWidth + 6, y);
-      ctx.stroke();
+      for (const tick of tickValues) {
+        const y = scale(tick) + defaultMargin.top;
+        ctx.fillText(tick.toFixed(2), positionX + cbarWidth + 5, y);
+        ctx.beginPath();
+        ctx.moveTo(positionX + cbarWidth, y);
+        ctx.lineTo(positionX + cbarWidth + 6, y);
+        ctx.stroke();
+      }
     }
   }, [
     transform,
@@ -247,6 +251,8 @@ export const D3CanvasHeatmap = ({
     canvasRef,
     width,
     height,
+    axis_labels,
+    showscale,
   ]);
 
   React.useEffect(() => {

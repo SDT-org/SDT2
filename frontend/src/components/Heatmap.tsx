@@ -44,6 +44,7 @@ export type HeatmapRenderProps = {
   title: string;
   subtitle: string;
   showscale: boolean;
+  axis_labels: boolean;
 } & Pick<HeatmapSettings, "annotation_font_size" | "titleFont">;
 
 export const Heatmap = ({
@@ -249,6 +250,7 @@ export const Heatmap = ({
                 showTitles={settings.showTitles}
                 title={settings.title}
                 subtitle={settings.subtitle}
+                axis_labels={settings.axis_labels}
               />
             ) : (
                 appState.showExportModal
@@ -266,7 +268,6 @@ export const Heatmap = ({
                 cellSpace={settings.cellspace}
                 showPercentIdentities={settings.annotation}
                 roundTo={settings.annotation_rounding}
-                showscale={settings.showscale}
                 cbarHeight={cbar_shrink}
                 cbarWidth={cbar_aspect}
                 annotation_font_size={settings.annotation_font_size}
@@ -278,6 +279,8 @@ export const Heatmap = ({
                 showTitles={settings.showTitles}
                 title={settings.title}
                 subtitle={settings.subtitle}
+                axis_labels={settings.axis_labels}
+                showscale={settings.showscale}
               />
             ) : (
               <Plot
