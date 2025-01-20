@@ -16,12 +16,35 @@ import {
   useRelayoutHideSubtitle,
   useRelayoutUpdateTitles,
 } from "../hooks/useRelayoutUpdateTitles";
-import type { HeatmapData } from "../plotTypes";
+import type { HeatmapData, HeatmapSettings } from "../plotTypes";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3Heatmap } from "./D3Heatmap";
 import { HeatmapSidebar } from "./HeatmapSidebar";
 
 const Plot = createPlotlyComponent(Plotly);
+
+export type HeatmapRenderProps = {
+  data: { x: number; y: number; value: number }[];
+  tickText: string[];
+  colorScale: ColorScaleArray;
+  minVal: number;
+  maxVal: number;
+  width: number;
+  height: number;
+  cellSpace: number;
+  roundTo: number;
+  cbarWidth: number;
+  cbarHeight: number;
+  axlabel_xfontsize: number;
+  axlabel_yfontsize: number;
+  axlabel_xrotation: number;
+  axlabel_yrotation: number;
+  showPercentIdentities: boolean;
+  showTitles: boolean;
+  title: string;
+  subtitle: string;
+  showscale: boolean;
+} & Pick<HeatmapSettings, "annotation_font_size" | "titleFont">;
 
 export const Heatmap = ({
   data,
@@ -207,6 +230,7 @@ export const Heatmap = ({
                 showscale={settings.showscale}
                 cbarHeight={cbar_shrink}
                 cbarWidth={cbar_aspect}
+                annotation_font_size={settings.annotation_font_size}
                 axlabel_xrotation={settings.axlabel_xrotation}
                 axlabel_xfontsize={settings.axlabel_xfontsize}
                 axlabel_yrotation={settings.axlabel_yrotation}
@@ -236,6 +260,7 @@ export const Heatmap = ({
                 showscale={settings.showscale}
                 cbarHeight={cbar_shrink}
                 cbarWidth={cbar_aspect}
+                annotation_font_size={settings.annotation_font_size}
                 axlabel_xrotation={settings.axlabel_xrotation}
                 axlabel_xfontsize={settings.axlabel_xfontsize}
                 axlabel_yrotation={settings.axlabel_yrotation}

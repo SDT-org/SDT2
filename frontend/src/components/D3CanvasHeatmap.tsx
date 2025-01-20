@@ -4,37 +4,7 @@ import tinycolor from "tinycolor2";
 import type { ColorScaleArray } from "../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
-import type { HeatmapSettings } from "../plotTypes";
-
-interface HeatmapCell {
-  x: number;
-  y: number;
-  value: number;
-}
-
-interface D3HeatmapProps {
-  data: HeatmapCell[];
-  tickText: string[];
-  colorScale: ColorScaleArray;
-  minVal?: number;
-  maxVal?: number;
-  width?: number;
-  height?: number;
-  cellSpace: number;
-  roundTo: number;
-  cbarWidth?: number;
-  cbarHeight?: number;
-  axlabel_xfontsize: number;
-  axlabel_yfontsize: number;
-  axlabel_xrotation: number;
-  axlabel_yrotation: number;
-  titleFont: HeatmapSettings["titleFont"];
-  showPercentIdentities: boolean;
-  showTitles: boolean;
-  title: string;
-  subtitle: string;
-  showscale?: boolean;
-}
+import type { HeatmapRenderProps } from "./Heatmap";
 
 function createD3ColorScale(
   colorArray: ColorScaleArray,
@@ -64,24 +34,25 @@ export const D3CanvasHeatmap = ({
   data,
   tickText,
   colorScale,
-  minVal = 0,
-  maxVal = 100,
-  width = 500,
-  height = 500,
+  minVal,
+  maxVal,
+  width,
+  height,
   cellSpace,
   roundTo,
-  cbarHeight = 200,
-  cbarWidth = 60,
-  axlabel_xfontsize = 15,
-  axlabel_yfontsize = 15,
-  axlabel_xrotation = 0,
-  axlabel_yrotation = 0,
+  cbarHeight,
+  cbarWidth,
+  annotation_font_size,
+  axlabel_xfontsize,
+  axlabel_yfontsize,
+  axlabel_xrotation,
+  axlabel_yrotation,
   titleFont,
-  showPercentIdentities = true,
-  showTitles = true,
-  title = "DOODOO",
-  subtitle = "",
-}: D3HeatmapProps) => {
+  showPercentIdentities,
+  showTitles,
+  title,
+  subtitle,
+}: HeatmapRenderProps) => {
   const canvasRef =
     useHeatmapRef() as React.MutableRefObject<HTMLCanvasElement>;
   const [transform, setTransform] = React.useState(d3.zoomIdentity);
@@ -91,7 +62,7 @@ export const D3CanvasHeatmap = ({
     value: number;
   } | null>(null);
 
-  const filteredData = data.filter((d: HeatmapCell) => Number(d.value));
+  const filteredData = data.filter((d) => Number(d.value));
   const size = Math.min(width, height);
   const plotSize = size - defaultMargin.left - defaultMargin.right;
   const n = tickText.length;
@@ -133,8 +104,8 @@ export const D3CanvasHeatmap = ({
     );
     ctx.scale(transform.k, transform.k);
     //indexz data
-    const rows = [...new Set(filteredData.map((d: HeatmapCell) => d.x))];
-    const cols = [...new Set(filteredData.map((d: HeatmapCell) => d.y))];
+    const rows = [...new Set(filteredData.map((d) => d.x))];
+    const cols = [...new Set(filteredData.map((d) => d.y))];
 
     // Draw cells
     for (const d of filteredData) {
@@ -146,17 +117,13 @@ export const D3CanvasHeatmap = ({
       ctx.fillRect(x, y, rectSize, rectSize);
       // Percent ids
       if (showPercentIdentities) {
-        const fontSize = Math.min(
-          16,
-          Math.max(1, rectSize + 0.01 * data.length),
-        );
         const textColor = tinycolor(colorFn(d.value)).isLight()
           ? "#000"
           : "#fff";
         ctx.fillStyle = textColor;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.font = `${fontSize}px ${titleFont === "Monospace" ? plotFontMonospace.family : plotFontSansSerif.family}`;
+        ctx.font = `${annotation_font_size}px ${plotFontMonospace.family}`;
         ctx.fillText(
           d.value.toFixed(roundTo),
           x + rectSize / 2,
@@ -177,8 +144,9 @@ export const D3CanvasHeatmap = ({
       ctx.fillStyle = "black";
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
-      ctx.font = `${axlabel_xfontsize}px ${plotFont}`;
+      ctx.font = `Bold 16px ${plotFont}`;
       ctx.fillText(title, size / 2, 20);
+      ctx.font = `16px ${plotFont}`;
       ctx.fillText(subtitle, size / 2, 40);
     }
 
@@ -265,6 +233,7 @@ export const D3CanvasHeatmap = ({
     showTitles,
     title,
     subtitle,
+    annotation_font_size,
     axlabel_xfontsize,
     axlabel_yfontsize,
     axlabel_xrotation,
@@ -274,7 +243,6 @@ export const D3CanvasHeatmap = ({
     cbarWidth,
     cbarHeight,
     colorScale,
-    data.length,
     canvasRef,
   ]);
 
@@ -317,9 +285,7 @@ export const D3CanvasHeatmap = ({
       (y - defaultMargin.top - transform.y) / (cellSize * transform.k),
     );
 
-    const cell = filteredData.find(
-      (d: HeatmapCell) => d.x === dataX && d.y === dataY,
-    );
+    const cell = filteredData.find((d) => d.x === dataX && d.y === dataY);
 
     if (cell) {
       setTooltipData({ x, y, value: cell.value });

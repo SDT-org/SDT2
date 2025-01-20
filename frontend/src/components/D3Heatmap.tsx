@@ -4,13 +4,7 @@ import tinycolor from "tinycolor2";
 import type { ColorScaleArray } from "../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
-import type { HeatmapSettings } from "../plotTypes";
-
-interface HeatmapCell {
-  x: number;
-  y: number;
-  value: number;
-}
+import type { HeatmapRenderProps } from "./Heatmap";
 
 function createD3ColorScale(
   colorArray: ColorScaleArray,
@@ -34,50 +28,25 @@ export const D3Heatmap = ({
   data,
   tickText,
   colorScale,
-  minVal = 0,
-  maxVal = 100,
-  width = 500,
-  height = 500,
-  // axis_labels = true,
+  minVal,
+  maxVal,
+  width,
+  height,
   cellSpace,
   roundTo,
-  showPercentIdentities = true,
-  // showscale,
+  showPercentIdentities,
   cbarWidth,
   cbarHeight,
+  annotation_font_size,
   axlabel_xfontsize,
   axlabel_yfontsize,
-  axlabel_xrotation = 90,
-  axlabel_yrotation = 180,
-
+  axlabel_xrotation,
+  axlabel_yrotation,
   titleFont,
-  showTitles = true,
-  title = "",
-  subtitle = "",
-}: {
-  data: HeatmapCell[];
-  tickText: string[];
-  colorScale: ColorScaleArray;
-  minVal?: number;
-  maxVal?: number;
-  width?: number;
-  height?: number;
-  cellSpace: number;
-  roundTo: number;
-  showPercentIdentities: boolean;
-  showscale?: boolean;
-  cbarWidth: number;
-  cbarHeight: number;
-  // axis_labels: boolean;
-  axlabel_xfontsize: number;
-  axlabel_yfontsize: number;
-  axlabel_xrotation: number;
-  axlabel_yrotation: number;
-  titleFont: HeatmapSettings["titleFont"];
-  showTitles: boolean;
-  title: string;
-  subtitle: string;
-}) => {
+  showTitles,
+  title,
+  subtitle,
+}: HeatmapRenderProps) => {
   const svgRef = useHeatmapRef() as React.MutableRefObject<SVGSVGElement>;
   const [svgTransform, setSvgTransform] = React.useState({});
   console.log(svgTransform);
@@ -121,13 +90,6 @@ export const D3Heatmap = ({
     const cellH = h / n;
     const cellOffset = cellSpace > 0 ? cellSpace / 2 : 0;
     const labelOffset = 1;
-    const fontSizeMin = 1;
-    const fontSizeMax = 16;
-    const fontSizeFactor = 0.01;
-    const fontSize =
-      fontSizeMin +
-      (fontSizeMax - fontSizeMin) /
-        (fontSizeMin + fontSizeFactor * data.length);
 
     const groups = g
       .selectAll("g")
@@ -151,7 +113,7 @@ export const D3Heatmap = ({
         .attr("dy", ".35em")
         .attr("text-anchor", "middle")
         .attr("font-family", "Roboto Mono")
-        .attr("font-size", `${fontSize}px`)
+        .attr("font-size", `${annotation_font_size}px`)
         .text((d) => d.value.toFixed(roundTo))
         .attr("fill", (d) =>
           tinycolor(colorFn(d.value)).isLight() ? "#000" : "#fff",
@@ -182,24 +144,24 @@ export const D3Heatmap = ({
         title,
         width,
         height,
-        fontSize,
+        annotation_font_size,
         plotFont,
       });
       g.append("text")
         .attr("text-anchor", "middle") // try middle instead of end
         .attr("font-family", plotFont.family)
-        .attr("font-size", `${fontSize}px`)
+        .attr("font-size", "22px")
         .attr("x", width / 2)
         .attr("y", margin.top - 20) // try margin.top instead of height
-        .text(`${title}`);
+        .text(title);
 
       g.append("text")
         .attr("text-anchor", "middle") // try middle instead of end
         .attr("font-family", plotFont.family)
-        .attr("font-size", `${fontSize}px`)
+        .attr("font-size", "22px")
         .attr("x", width / 2)
         .attr("y", margin.top - labelOffset * 2) // try margin.top instead of height
-        .text(`${subtitle}`);
+        .text(subtitle);
     }
     // x-axis labels
     g.append("g")
@@ -212,6 +174,7 @@ export const D3Heatmap = ({
       .attr("dy", "1em")
       .attr("text-anchor", "end")
       .attr("font-family", plotFont.family)
+      .attr("font-size", `${axlabel_yfontsize}px`)
       .attr("font-size", axlabel_xfontsize)
       .text((txt) => txt)
       .attr(
@@ -230,6 +193,7 @@ export const D3Heatmap = ({
       .attr("dominant-baseline", "middle")
       .attr("text-anchor", "end")
       .attr("font-family", plotFont.family)
+      .attr("font-size", `${axlabel_yfontsize}px`)
       .attr("font-size", axlabel_yfontsize)
       .text((txt) => txt)
       .attr(
@@ -259,16 +223,6 @@ export const D3Heatmap = ({
         .attr("offset", `${stop * 100}%`)
         .attr("stop-color", color);
     }
-
-    // colorScale.map(([stop, color]) => {
-    //   gradient
-    //     .append("stop")
-    //     .attr("offset", `${stop * 100}%`)
-    //     .attr("stop-color", color);
-    // });
-
-    // const legendHeight = cbarHeight - margin.top - margin.bottom;
-    // const legendWidth = cbarWidth - margin.left - margin.right;
 
     gradientGroup
       .append("rect")
@@ -307,6 +261,7 @@ export const D3Heatmap = ({
     cellSpace,
     roundTo,
     showPercentIdentities,
+    annotation_font_size,
     axlabel_xfontsize,
     axlabel_yfontsize,
     axlabel_xrotation,

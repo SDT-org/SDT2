@@ -45,6 +45,10 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
         });
 
         const state = await getDocument(docState.id);
+        const scaledFontSize = getScaledFontSize(
+          initialDocState.heatmap.annotation_font_size,
+          parsedData.map(Boolean).length,
+        );
 
         setDocState(
           (prev) => ({
@@ -54,15 +58,20 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
               ...prev.heatmap,
               ...state.heatmap,
               vmin: metadata.minVal,
-              ...(docState.sequences_count > 99 && {
-                annotation: false,
-                axis_labels: false,
-                cellspace: 0,
-              }),
-              annotation_font_size: getScaledFontSize(
-                initialDocState.heatmap.annotation_font_size,
-                parsedData.length,
-              ),
+              ...(docState.sequences_count > 99
+                ? {
+                    annotation: false,
+                    axis_labels: false,
+                    cellspace: 0,
+                  }
+                : null),
+              ...(docState.filetype === "application/vnd.sdt"
+                ? null
+                : {
+                    annotation_font_size: scaledFontSize,
+                    axlabel_xfontsize: scaledFontSize,
+                    axlabel_yfontsize: scaledFontSize,
+                  }),
             },
           }),
           false,
@@ -71,7 +80,7 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
       .finally(() => {
         setLoading(false);
       });
-  }, [docState.id, docState.sequences_count, setDocState]);
+  }, [docState.id, docState.filetype, docState.sequences_count, setDocState]);
 
   return {
     loading,

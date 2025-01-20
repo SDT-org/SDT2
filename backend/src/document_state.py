@@ -68,7 +68,7 @@ visualization_defaults = dict(
 )
 
 default_distribution_state = dict(
-  visualization="histogram", # TODO: all of these need to be removed
+  visualization="distribution_histogram",
   dataSet="scores",
   histogram=dict(
     **visualization_defaults,
