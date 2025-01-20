@@ -193,8 +193,6 @@ export const Heatmap = ({
   const updateTitles = useRelayoutUpdateTitles(updateSettings);
   useRelayoutHideSubtitle(!settings.showTitles);
 
-  console.log(settings.cbar_shrink);
-
   const cbar_shrink = settings.cbar_shrink * 60;
   const cbar_aspect = settings.cbar_aspect * 10;
 

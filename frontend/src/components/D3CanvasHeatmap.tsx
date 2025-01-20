@@ -88,10 +88,10 @@ export const D3CanvasHeatmap = ({
     if (!ctx) return;
 
     const pixelRatio = window.devicePixelRatio || 1;
-    canvas.width = size * pixelRatio;
-    canvas.height = size * pixelRatio;
-    canvas.style.width = `${size}px`;
-    canvas.style.height = `${size}px`;
+    canvas.width = width * pixelRatio;
+    canvas.height = height * pixelRatio;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.scale(pixelRatio, pixelRatio);
@@ -145,9 +145,9 @@ export const D3CanvasHeatmap = ({
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
       ctx.font = `Bold 16px ${plotFont}`;
-      ctx.fillText(title, size / 2, 20);
+      ctx.fillText(title, width / 2, 20);
       ctx.font = `16px ${plotFont}`;
-      ctx.fillText(subtitle, size / 2, 40);
+      ctx.fillText(subtitle, width / 2, 40);
     }
 
     // X-axis labels
@@ -159,7 +159,7 @@ export const D3CanvasHeatmap = ({
           i * cellSize * transform.k + //current tick position
           (cellSize * transform.k) / 2 + //enter vertically within cell
           transform.x,
-        size - defaultMargin.bottom + 20, //margin offset with spacing for labels
+        height - defaultMargin.bottom + 20,
       );
       ctx.rotate((axlabel_xrotation * Math.PI) / 180);
       ctx.fillStyle = "black";
@@ -191,7 +191,7 @@ export const D3CanvasHeatmap = ({
     }
 
     // Colorbar
-    const positionX = size - cbarWidth - defaultMargin.right;
+    const positionX = width - cbarWidth - defaultMargin.right;
     const gradient = ctx.createLinearGradient(
       0,
       defaultMargin.top + cbarHeight,
@@ -244,6 +244,8 @@ export const D3CanvasHeatmap = ({
     cbarHeight,
     colorScale,
     canvasRef,
+    width,
+    height,
   ]);
 
   React.useEffect(() => {
