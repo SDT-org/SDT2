@@ -196,6 +196,17 @@ export const Heatmap = ({
   const cbar_shrink = settings.cbar_shrink * 60;
   const cbar_aspect = settings.cbar_aspect * 10;
 
+  let colorScale = colorScales[settings.colorScaleKey];
+
+  if (settings.reverse) {
+    colorScale = [...colorScale]
+      .reverse()
+      .map((data, i) => [
+        (colorScale[i] ?? colorScale[0])[0],
+        data[1],
+      ]) as ColorScaleArray;
+  }
+
   return (
     <>
       {data ? (
@@ -218,7 +229,7 @@ export const Heatmap = ({
               <D3CanvasHeatmap
                 data={d3HeatmapData}
                 tickText={tickText}
-                colorScale={colorScales[settings.colorScaleKey]}
+                colorScale={colorScale}
                 minVal={settings.vmin}
                 maxVal={settings.vmax}
                 width={size.width}
@@ -247,7 +258,7 @@ export const Heatmap = ({
               <D3Heatmap
                 data={d3HeatmapData}
                 tickText={tickText}
-                colorScale={colorScales[settings.colorScaleKey]}
+                colorScale={colorScale}
                 minVal={settings.vmin}
                 maxVal={settings.vmax}
                 width={size.width}
