@@ -314,22 +314,26 @@ export const D3CanvasHeatmap = ({
         onMouseLeave={() => setTooltipData(null)}
       />
       {tooltipData && (
-        <div
+        <dl
+          className="heatmap-tooltip"
           style={{
-            position: "absolute",
-            left: tooltipData.x,
-            top: tooltipData.y,
-            background: "white",
-            border: "2px solid black",
-            padding: "20px",
-            pointerEvents: "none",
-            backgroundColor: "rgba(255,255,255,0.75)", //change opacity percrentile for more or less transparency
+            left: tooltipData.x + 10,
+            top: tooltipData.y + 10,
           }}
         >
-          {" "}
-          <strong>SeqX: </strong>{tooltipData.xLabel} <br /><strong> SeqY:</strong> {tooltipData.yLabel} <br /> <strong>Percent ID: </strong>
-          {tooltipData.value.toFixed(2)} <strong>%</strong>
-        </div>
+          <div>
+            <dt>SeqX:</dt>
+            <dd>{tooltipData.xLabel}</dd>
+          </div>
+          <div>
+            <dt> SeqY:</dt>
+            <dd>{tooltipData.yLabel}</dd>
+          </div>
+          <div>
+            <dt>Percent ID:</dt>
+            <dd>{tooltipData.value.toFixed(2)}%</dd>
+          </div>
+        </dl>
       )}
     </div>
   );

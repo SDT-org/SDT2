@@ -69,3 +69,27 @@
     right: 0.4rem;
   }
 }
+
+.heatmap-tooltip {
+  display: block;
+  position: absolute;
+  background: #fff;
+  border-radius: 0.4rem;
+  padding: 0.8rem;
+  pointer-events: none;
+  background-color: rgba(255,255,255,0.9);
+  box-shadow: 0 0 0.3rem #444;
+  backdrop-filter: blur(0.3rem);
+  > * {
+    display: flex;
+    gap: 0.5ch;
+  }
+
+  dt {
+    font-weight: bold;
+  }
+
+  dd {
+    font-variant-numeric: tabular-nums;
+  }
+}
