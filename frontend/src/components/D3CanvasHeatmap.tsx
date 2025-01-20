@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import React from "react";
+import tinycolor from "tinycolor2";
 import type { ColorScaleArray } from "../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
@@ -149,7 +150,10 @@ export const D3CanvasHeatmap = ({
           16,
           Math.max(1, rectSize + 0.01 * data.length),
         );
-        ctx.fillStyle = "black";
+        const textColor = tinycolor(colorFn(d.value)).isLight()
+          ? "#000"
+          : "#fff";
+        ctx.fillStyle = textColor;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.font = `${fontSize}px ${titleFont === "Monospace" ? plotFontMonospace.family : plotFontSansSerif.family}`;
