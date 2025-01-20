@@ -157,13 +157,13 @@ export const D3CanvasHeatmap = ({
       ctx.translate(
         defaultMargin.left + //margin offset
           i * cellSize * transform.k + //current tick position
-          (cellSize * transform.k) / 2 + //
+          (cellSize * transform.k) / 2 + //enter vertically within cell
           transform.x,
-        size - defaultMargin.bottom + 20,
+        size - defaultMargin.bottom + 20, //margin offset with spacing for labels
       );
       ctx.rotate((axlabel_xrotation * Math.PI) / 180);
       ctx.fillStyle = "black";
-      ctx.textAlign = "right";
+      ctx.textAlign = "left";
       ctx.textBaseline = "middle";
       ctx.font = `${axlabel_xfontsize}px ${plotFont}`;
       ctx.fillText(txt, 0, 0);
@@ -183,7 +183,7 @@ export const D3CanvasHeatmap = ({
       );
       ctx.rotate((axlabel_yrotation * Math.PI) / 180);
       ctx.fillStyle = "black";
-      ctx.textAlign = "right";
+      ctx.textAlign = "left";
       ctx.textBaseline = "middle";
       ctx.font = `${axlabel_yfontsize}px ${plotFont}`;
       ctx.fillText(txt, 0, 0);
