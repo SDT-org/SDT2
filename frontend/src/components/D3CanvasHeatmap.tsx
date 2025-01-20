@@ -60,6 +60,8 @@ export const D3CanvasHeatmap = ({
     x: number;
     y: number;
     value: number;
+    xLabel?: string;
+    yLabel?: string;
   } | null>(null);
 
   const filteredData = data.filter((d) => Number(d.value));
@@ -289,7 +291,13 @@ export const D3CanvasHeatmap = ({
     const cell = filteredData.find((d) => d.x === dataX && d.y === dataY);
 
     if (cell) {
-      setTooltipData({ x, y, value: cell.value });
+      setTooltipData({
+        x,
+        y,
+        value: cell.value,
+        xLabel: tickText[cell.x] || "",
+        yLabel: tickText[cell.y] || "",
+      });
     } else {
       setTooltipData(null);
     }
@@ -312,12 +320,15 @@ export const D3CanvasHeatmap = ({
             left: tooltipData.x,
             top: tooltipData.y,
             background: "white",
-            border: "1px solid black",
+            border: "2px solid black",
             padding: "20px",
             pointerEvents: "none",
+            backgroundColor: "rgba(255,255,255,0.75)", //change opacity percrentile for more or less transparency
           }}
         >
-          {tooltipData.value.toFixed(2)}
+          {" "}
+          <strong>SeqX: </strong>{tooltipData.xLabel} <br /><strong> SeqY:</strong> {tooltipData.yLabel} <br /> <strong>Percent ID: </strong>
+          {tooltipData.value.toFixed(2)} <strong>%</strong>
         </div>
       )}
     </div>
