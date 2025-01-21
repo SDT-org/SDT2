@@ -116,7 +116,7 @@ default_distribution_state = dict(
   violin=dict(
     **visualization_defaults,
     bandwidth=5,
-    boxWidth=0.5,
+    boxWidth=0.05,
     boxfillColor="hsl(195, 53%, 79%)",
     boxlineColor="hsl(9, 100%, 64%)",
     boxlineWidth=3,

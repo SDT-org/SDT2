@@ -81,8 +81,7 @@ export const Violin = ({
   useRelayoutHideSubtitle(!settings.showTitles);
 
   const scoresText = data.identity_combos.map(
-    (ids) =>
-      `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]} <br>Percent Identity: %{${settings.plotOrientation === "vertical" ? "y" : "x"}}`,
+    (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}`,
   );
 
   const gcLengthIndex = dataSetKey === "gc" ? 1 : 2;
@@ -124,7 +123,7 @@ export const Violin = ({
         },
         hoveron: "points",
         scalemode: "width",
-        hovertemplate: "%{text}<extra></extra>",
+        hovertemplate: `%{text}<br> <br>Percent Identity: %{${settings.plotOrientation === "vertical" ? "y" : "x"}}<extra></extra>`,
         text: hoverText,
       }) as Partial<PlotData>,
     [dataSet, settings, hoverText],
@@ -156,8 +155,7 @@ export const Violin = ({
         fillcolor: settings.boxfillColor,
         hovermode: "closest",
         boxgap: 1 - settings.boxWidth,
-        hovertemplate:
-          "Percent Identity: %{x}<br>Percent Identity: %{y}<extra></extra>",
+        hoverinfo: "skip",
       }) as Partial<PlotData>,
     [dataSet, settings],
   );

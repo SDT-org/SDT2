@@ -240,7 +240,7 @@ export const initialDistributionState: DistributionState = {
   violin: {
     ...visualizationDefaults,
     bandwidth: 5,
-    boxWidth: 0.5,
+    boxWidth: 0.05,
     boxfillColor: Colors.LightBlue,
     boxlineColor: Colors.Tomato,
     boxlineWidth: 3,
