@@ -159,15 +159,15 @@ export const D3CanvasHeatmap = ({
         if (txt === undefined) continue;
         ctx.save();
         ctx.translate(
-          defaultMargin.left + //margin offset
-            i * cellSize * transform.k + //current tick position
-            (cellSize * transform.k) / 2 + //enter vertically within cell
-            transform.x,
-          height - defaultMargin.bottom + 20,
+          defaultMargin.left + // X starting position
+            i * cellSize * transform.k + // X position for current tick (accounting for zoom)
+            (cellSize * transform.k) / 2 + // Center tick horizontally within cell
+            transform.x, // X pan offset for cell
+          transform.y + +defaultMargin.top + +plotSize * transform.k + +20, // A small fixed gap below the heatmap
         );
         ctx.rotate((axlabel_xrotation * Math.PI) / 180);
         ctx.fillStyle = "black";
-        ctx.textAlign = "left";
+        ctx.textAlign = "right";
         ctx.textBaseline = "middle";
         ctx.font = `${axlabel_xfontsize}px ${plotFont}`;
         ctx.fillText(txt, 0, 0);
@@ -178,7 +178,7 @@ export const D3CanvasHeatmap = ({
         if (txt === undefined) continue;
         ctx.save();
         ctx.translate(
-          defaultMargin.left - 20, // X position: margin offset with spacing for labels
+          transform.x - 50, // X position: margin offset with spacing for labels
           defaultMargin.top + // Y start position (top margin)
             i * cellSize * transform.k + // Y position for current tick (accounting for zoom)
             (cellSize * transform.k) / 2 + // Center vertically within cell
@@ -253,6 +253,7 @@ export const D3CanvasHeatmap = ({
     height,
     axis_labels,
     showscale,
+    plotSize,
   ]);
 
   React.useEffect(() => {
