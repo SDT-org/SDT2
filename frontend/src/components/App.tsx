@@ -27,6 +27,9 @@ export const App = () => {
   useShortcutKeys(appState, setAppState);
   useAppBlur();
   useWaitForPywebview(() => {
+    if (initialized) {
+      return;
+    }
     window.pywebview.api.app_config().then((data) => {
       setAppState((prev) => ({ ...prev, config: data }));
       setInitialized(true);
