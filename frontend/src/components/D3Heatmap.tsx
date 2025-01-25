@@ -71,7 +71,16 @@ export const D3Heatmap = ({
     d3Svg.selectAll("*").remove();
 
     const size = Math.min(width, height);
-    const margin = { top: 60, right: 60, bottom: 60, left: 60 };
+
+    const maxTickLength = Math.max(...tickText.map((t) => t.length));
+
+    const margin = {
+      top: showTitles ? 120 : 60, //added some title space
+      right: showscale ? Math.max(120, cbarWidth + 60) : 60, //added some padding for colorbar
+      bottom: axis_labels ? Math.max(120 + maxTickLength * 6) : 60, // 6px per character min 120 if axis labels are shown
+      left: axis_labels ? Math.max(120 + maxTickLength * 6) : 60, //same
+    } as const;
+
     const w = size - margin.left - margin.right;
     const h = size - margin.top - margin.bottom;
 
