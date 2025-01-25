@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import React from "react";
 import tinycolor from "tinycolor2";
 import type { ColorScaleArray } from "../colorScales";
-import { plotFontMonospace, plotFontSansSerif } from "../constants";
+import { plotFontMonospace } from "../constants";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapRenderProps } from "./Heatmap";
 
@@ -50,8 +50,7 @@ export const D3Heatmap = ({
   axis_labels,
 }: HeatmapRenderProps) => {
   const svgRef = useHeatmapRef() as React.MutableRefObject<SVGSVGElement>;
-  const [svgTransform, setSvgTransform] = React.useState({});
-  console.log(svgTransform);
+  const [_, setSvgTransform] = React.useState({});
 
   const gradientStops = React.useMemo(
     () => colorScale.map(([stop, color]) => ({ stop, color })),
@@ -71,9 +70,6 @@ export const D3Heatmap = ({
     const d3Svg = d3.select(svgRef.current as Element);
     d3Svg.selectAll("*").remove();
 
-    const plotFont =
-      titleFont === "Monospace" ? plotFontMonospace : plotFontSansSerif;
-
     const size = Math.min(width, height);
     const margin = { top: 60, right: 60, bottom: 60, left: 60 };
     const w = size - margin.left - margin.right;
@@ -91,7 +87,7 @@ export const D3Heatmap = ({
     const cellW = w / n;
     const cellH = h / n;
     const cellOffset = cellSpace > 0 ? cellSpace / 2 : 0;
-    const labelOffset = 1;
+    const axisGap = 5;
 
     const groups = g
       .selectAll("g")
@@ -139,77 +135,72 @@ export const D3Heatmap = ({
           g.attr("transform", transform.toString());
         }),
     );
-    // titles
+
     if (showTitles) {
-      console.log("Title props:", {
-        showTitles,
-        title,
-        width,
-        height,
-        annotation_font_size,
-        plotFont,
-      });
       g.append("text")
-        .attr("text-anchor", "middle") // try middle instead of end
-        .attr("font-family", plotFont.family)
-        .attr("font-size", "22px")
-        .attr("x", width / 2)
-        .attr("y", margin.top - 20) // try margin.top instead of height
+        .attr("text-anchor", "middle")
+        .attr("font-family", titleFont.family)
+        .attr("font-size", "20px")
+        .attr("font-weight", "bold")
+        // .attr("text-align", "center")
+        .attr("x", (width - margin.left - margin.right) / 2)
+        .attr("y", margin.top - margin.bottom - 2)
         .text(title);
 
       g.append("text")
-        .attr("text-anchor", "middle") // try middle instead of end
-        .attr("font-family", plotFont.family)
-        .attr("font-size", "22px")
-        .attr("x", width / 2)
-        .attr("y", margin.top - labelOffset * 2) // try margin.top instead of height
+        .attr("text-anchor", "middle")
+        .attr("font-family", titleFont.family)
+        .attr("font-size", "20px")
+        .attr("x", (width - margin.left - margin.right) / 2)
+        .attr("y", margin.top - margin.bottom + 18)
         .text(subtitle);
     }
-    // x-axis labels
+
     if (axis_labels) {
+      // x-axis labels
       g.append("g")
         .attr("transform", `translate(0, ${h})`)
         .selectAll("text")
         .data(tickText)
         .join("text")
         .attr("x", (_, i) => i * cellW + cellW / 2)
-        .attr("y", labelOffset)
-        .attr("dy", "1em")
+        .attr("y", axisGap)
+        .attr("dominant-baseline", "middle")
         .attr("text-anchor", "end")
-        .attr("font-family", plotFont.family)
-        .attr("font-size", `${axlabel_yfontsize}px`)
-        .attr("font-size", axlabel_xfontsize)
+        .attr("font-family", plotFontMonospace.family)
+        .attr("font-size", `${axlabel_xfontsize}px`)
         .text((txt) => txt)
         .attr(
           "transform",
           (_, i) =>
-            `rotate(${axlabel_xrotation}, ${i * cellW + cellW / 2}, ${labelOffset})`,
+            `rotate(${axlabel_xrotation}, ${i * cellW + cellW / 2}, ${axisGap})`,
         );
+
       // y-axis labels
       g.append("g")
         .selectAll("text")
         .data(tickText)
         .join("text")
-        .attr("x", -labelOffset)
+        .attr("x", -axisGap)
         .attr("y", (_, i) => i * cellH + cellH / 2)
-        .attr("dominant-baseline", "middle")
+        .attr("dominant-baseline", "central")
         .attr("text-anchor", "end")
-        .attr("font-family", plotFont.family)
+        .attr("font-family", plotFontMonospace.family)
         .attr("font-size", `${axlabel_yfontsize}px`)
-        .attr("font-size", axlabel_yfontsize)
         .text((txt) => txt)
         .attr(
           "transform",
           (_, i) =>
-            `rotate(${axlabel_yrotation}, ${-labelOffset}, ${i * cellH + cellH / 2})`,
+            `rotate(${axlabel_yrotation}, ${-axisGap}, ${i * cellH + cellH / 2})`,
         );
     }
+
     if (showscale) {
       const scaleBarX = width - cbarWidth - margin.left - margin.right;
 
       const gradientGroup = g
         .append("g")
-        .attr("transform", `translate(${scaleBarX},${margin.top})`);
+        .attr("transform", `translate(${scaleBarX}, 0)`);
       const defs = d3Svg.append("defs");
       const gradientId = "heatmap-svg-linear-gradient";
       const gradient = defs
@@ -236,7 +227,7 @@ export const D3Heatmap = ({
       const axis = d3.axisRight(scale).tickValues(tickValues).tickSize(6);
 
       g.append("g")
-        .attr("transform", `translate(${scaleBarX + cbarWidth},${margin.top})`)
+        .attr("transform", `translate(${scaleBarX + cbarWidth}, 0)`)
         .call(axis)
         .call((g) => g.select(".domain").remove())
         .call((g) => g.selectAll(".tick line").attr("stroke-opacity", 0.5))
@@ -244,8 +235,7 @@ export const D3Heatmap = ({
           g
             .selectAll(".tick text")
             .attr("font-size", "10px")
-            .attr("font-family", "Roboto Mono")
-            .attr("dx", "0.5em"),
+            .attr("font-family", "Roboto Mono"),
         );
     }
   }, [

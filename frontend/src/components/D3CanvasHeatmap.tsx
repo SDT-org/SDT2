@@ -2,7 +2,7 @@ import * as d3 from "d3";
 import React from "react";
 import tinycolor from "tinycolor2";
 import type { ColorScaleArray } from "../colorScales";
-import { plotFontMonospace, plotFontSansSerif } from "../constants";
+import { plotFontMonospace } from "../constants";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapRenderProps } from "./Heatmap";
 
@@ -23,12 +23,12 @@ function createD3ColorScale(
     .interpolate(d3.interpolateRgb);
 }
 
-const defaultMargin = {
+const margin = {
   top: 60,
   right: 60,
   bottom: 60,
   left: 60,
-} as const;
+};
 
 export const D3CanvasHeatmap = ({
   data,
@@ -66,9 +66,12 @@ export const D3CanvasHeatmap = ({
     yLabel?: string;
   } | null>(null);
 
-  const filteredData = data.filter((d) => Number(d.value));
+  const filteredData = React.useMemo(
+    () => data.filter((d) => Number(d.value)),
+    [data],
+  );
   const size = Math.min(width, height);
-  const plotSize = size - defaultMargin.left - defaultMargin.right;
+  const plotSize = size - margin.left - margin.right;
   const n = tickText.length;
   const cellSize = plotSize / n;
 
@@ -85,6 +88,8 @@ export const D3CanvasHeatmap = ({
   const tickValues = React.useMemo(() => scale.ticks(5), [scale]);
 
   const drawCanvas = React.useCallback(() => {
+    console.count("drawCanvas");
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -102,10 +107,7 @@ export const D3CanvasHeatmap = ({
 
     // set zoom transform
     ctx.save();
-    ctx.translate(
-      transform.x + defaultMargin.left,
-      transform.y + defaultMargin.top,
-    );
+    ctx.translate(transform.x + margin.left, transform.y + margin.top);
     ctx.scale(transform.k, transform.k);
     //indexz data
     const rows = [...new Set(filteredData.map((d) => d.x))];
@@ -119,7 +121,7 @@ export const D3CanvasHeatmap = ({
 
       ctx.fillStyle = colorFn(d.value);
       ctx.fillRect(x, y, rectSize, rectSize);
-      // Percent ids
+
       if (showPercentIdentities) {
         const textColor = tinycolor(colorFn(d.value)).isLight()
           ? "#000"
@@ -137,58 +139,62 @@ export const D3CanvasHeatmap = ({
     }
     ctx.restore();
 
-    // font settings
-    const plotFont =
-      titleFont === "Monospace"
-        ? plotFontMonospace.family
-        : plotFontSansSerif.family;
-
     // Titles
     if (showTitles) {
       ctx.fillStyle = "black";
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
-      ctx.font = `Bold 16px ${plotFont}`;
-      ctx.fillText(title, width / 2, 20);
-      ctx.font = `16px ${plotFont}`;
-      ctx.fillText(subtitle, width / 2, 40);
+      ctx.font = `Bold 20px ${titleFont.family}`;
+      ctx.fillText(title, width / 2, margin.top - 20);
+      ctx.font = `20px ${titleFont.family}`;
+      ctx.fillText(subtitle, width / 2, margin.top);
     }
+
+    const axisGap = 5;
+
     if (axis_labels) {
       // X-axis labels
       for (const [i, txt] of tickText.entries()) {
         if (txt === undefined) continue;
         ctx.save();
         ctx.translate(
-          defaultMargin.left + // X starting position
+          margin.left + // X starting position
             i * cellSize * transform.k + // X position for current tick (accounting for zoom)
             (cellSize * transform.k) / 2 + // Center tick horizontally within cell
             transform.x, // X pan offset for cell
-          transform.y + +defaultMargin.top + +plotSize * transform.k + +20, // A small fixed gap below the heatmap
+          transform.y + margin.top + plotSize * transform.k + axisGap,
         );
         ctx.rotate((axlabel_xrotation * Math.PI) / 180);
         ctx.fillStyle = "black";
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
-        ctx.font = `${axlabel_xfontsize}px ${plotFont}`;
+        ctx.font = `${Math.max(
+          axlabel_xfontsize * transform.k,
+          axlabel_xfontsize,
+        )}px ${plotFontMonospace.family}`;
         ctx.fillText(txt, 0, 0);
         ctx.restore();
       }
+
       // Y-axis labels
       for (const [i, txt] of tickText.entries()) {
         if (txt === undefined) continue;
         ctx.save();
         ctx.translate(
-          transform.x - 50, // X position: margin offset with spacing for labels
-          defaultMargin.top + // Y start position (top margin)
+          transform.x + margin.left - axisGap,
+          margin.top + // Y start position (top margin)
             i * cellSize * transform.k + // Y position for current tick (accounting for zoom)
             (cellSize * transform.k) / 2 + // Center vertically within cell
             transform.y, // Y pan offset
         );
         ctx.rotate((axlabel_yrotation * Math.PI) / 180);
         ctx.fillStyle = "black";
-        ctx.textAlign = "left";
+        ctx.textAlign = "right";
         ctx.textBaseline = "middle";
-        ctx.font = `${axlabel_yfontsize}px ${plotFont}`;
+        ctx.font = `${Math.max(
+          axlabel_yfontsize * transform.k,
+          axlabel_yfontsize,
+        )}px ${plotFontMonospace.family}`;
         ctx.fillText(txt, 0, 0);
         ctx.restore();
       }
@@ -196,12 +202,12 @@ export const D3CanvasHeatmap = ({
 
     // Colorbar
     if (showscale) {
-      const positionX = width - cbarWidth - defaultMargin.right;
+      const positionX = width - cbarWidth - margin.right;
       const gradient = ctx.createLinearGradient(
         0,
-        defaultMargin.top + cbarHeight,
+        margin.top + cbarHeight,
         0,
-        defaultMargin.top,
+        margin.top,
       );
 
       for (const [stop, color] of colorScale) {
@@ -209,7 +215,7 @@ export const D3CanvasHeatmap = ({
       }
 
       ctx.fillStyle = gradient;
-      ctx.fillRect(positionX, defaultMargin.top, cbarWidth, cbarHeight);
+      ctx.fillRect(positionX, margin.top, cbarWidth, cbarHeight);
 
       ctx.fillStyle = "black";
       ctx.textAlign = "left";
@@ -217,8 +223,8 @@ export const D3CanvasHeatmap = ({
       ctx.font = "10px 'Roboto Mono'";
 
       for (const tick of tickValues) {
-        const y = scale(tick) + defaultMargin.top;
-        ctx.fillText(tick.toFixed(2), positionX + cbarWidth + 5, y);
+        const y = scale(tick) + margin.top;
+        ctx.fillText(tick.toString(), positionX + cbarWidth + 9, y);
         ctx.beginPath();
         ctx.moveTo(positionX + cbarWidth, y);
         ctx.lineTo(positionX + cbarWidth + 6, y);
@@ -289,10 +295,10 @@ export const D3CanvasHeatmap = ({
     const y = event.clientY - rect.top;
 
     const dataX = Math.floor(
-      (x - defaultMargin.left - transform.x) / (cellSize * transform.k),
+      (x - margin.left - transform.x) / (cellSize * transform.k),
     );
     const dataY = Math.floor(
-      (y - defaultMargin.top - transform.y) / (cellSize * transform.k),
+      (y - margin.top - transform.y) / (cellSize * transform.k),
     );
 
     const cell = filteredData.find((d) => d.x === dataX && d.y === dataY);

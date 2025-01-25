@@ -170,6 +170,7 @@ export const Viewer = ({
               docState={docState}
               setDocState={setDocState}
               updateDocState={updateDocState}
+              leftSidebarCollapsed={leftSidebarCollapsed}
             />
           ) : null}
         </TabPanel>

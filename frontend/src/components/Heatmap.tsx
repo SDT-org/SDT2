@@ -45,19 +45,22 @@ export type HeatmapRenderProps = {
   subtitle: string;
   showscale: boolean;
   axis_labels: boolean;
-} & Pick<HeatmapSettings, "annotation_font_size" | "titleFont">;
+  titleFont: typeof plotFontMonospace | typeof plotFontSansSerif;
+} & Pick<HeatmapSettings, "annotation_font_size" | "axis_labels">;
 
 export const Heatmap = ({
   data,
   tickText,
   docState,
   setDocState,
+  leftSidebarCollapsed,
 }: {
   docState: DocState;
   setDocState: SetDocState;
   updateDocState: UpdateDocState;
   data: HeatmapData;
   tickText: string[];
+  leftSidebarCollapsed: boolean;
 }) => {
   const { heatmap: settings, sequences_count } = docState;
   const { appState } = useAppState();
@@ -178,6 +181,7 @@ export const Heatmap = ({
     }
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies(leftSidebarCollapsed): trigger updateSize
   React.useEffect(() => {
     updateSize();
 
@@ -186,10 +190,11 @@ export const Heatmap = ({
     };
 
     window.addEventListener("resize", handleResize);
+
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, [updateSize]);
+  }, [updateSize, leftSidebarCollapsed]);
 
   const updateTitles = useRelayoutUpdateTitles(updateSettings);
   useRelayoutHideSubtitle(!settings.showTitles);
@@ -207,6 +212,9 @@ export const Heatmap = ({
         data[1],
       ]) as ColorScaleArray;
   }
+
+  const titleFont =
+    settings.titleFont === "Monospace" ? plotFontMonospace : plotFontSansSerif;
 
   return (
     <>
@@ -245,7 +253,7 @@ export const Heatmap = ({
                 axlabel_xfontsize={settings.axlabel_xfontsize}
                 axlabel_yrotation={settings.axlabel_yrotation}
                 axlabel_yfontsize={settings.axlabel_yfontsize}
-                titleFont={settings.titleFont}
+                titleFont={titleFont}
                 showPercentIdentities={settings.annotation}
                 showTitles={settings.showTitles}
                 title={settings.title}
@@ -275,7 +283,7 @@ export const Heatmap = ({
                 axlabel_xfontsize={settings.axlabel_xfontsize}
                 axlabel_yrotation={settings.axlabel_yrotation}
                 axlabel_yfontsize={settings.axlabel_yfontsize}
-                titleFont={settings.titleFont}
+                titleFont={titleFont}
                 showTitles={settings.showTitles}
                 title={settings.title}
                 subtitle={settings.subtitle}
