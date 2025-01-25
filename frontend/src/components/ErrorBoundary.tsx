@@ -154,9 +154,9 @@ export class ErrorBoundary extends React.Component<Props> {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  send us an email
+                  send an email
                 </a>{" "}
-                with the error details, or{" "}
+                with the error details to SDT_admin@proton.me, or{" "}
                 <a
                   href={this.getIssueUrl(error, errorDetails)}
                   target="_blank"

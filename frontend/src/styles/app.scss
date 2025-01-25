@@ -849,6 +849,13 @@ small {
   height: 80vh;
   position: relative;
 
+  * {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+  }
+
   h1 {
     color: red;
     margin: 0;
