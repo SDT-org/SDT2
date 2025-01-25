@@ -70,8 +70,12 @@ export const D3CanvasHeatmap = ({
     () => data.filter((d) => Number(d.value)),
     [data],
   );
-  const size = Math.min(width, height);
-  const plotSize = size - margin.left - margin.right;
+
+  const plotSize = Math.max(
+    width - margin.left - margin.right,
+    height - margin.top - margin.bottom,
+  ); //force square
+
   const n = tickText.length;
   const cellSize = plotSize / n;
 
