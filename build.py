@@ -94,8 +94,6 @@ def make_platform_build_command(settings):
         case _:
             pass
 
-    if not platform.system() == "Darwin" and not settings.disable_onefile:
-        command.append("--onefile")
 
     command.append(path)
 
