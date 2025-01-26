@@ -60,8 +60,8 @@ export const D3CanvasHeatmap = ({
   } | null>(null);
   const maxTickLength = Math.max(...tickText.map((t) => t.length));
   const margin = {
-    top: showTitles ? 120 : 60, //added some title space
-    right: showscale ? Math.max(120, cbarWidth + 60) : 60, //added some padding for colorbar
+    top: 60,
+    right: 60, //added some padding for colorbar
     bottom: axis_labels ? Math.max(120 + maxTickLength * 6) : 60, // 6px per character min 120 if axis labels are shown
     left: axis_labels ? Math.max(120 + maxTickLength * 6) : 60, //same
   } as const;
@@ -71,7 +71,7 @@ export const D3CanvasHeatmap = ({
     [data],
   );
 
-  const plotSize = Math.max(
+  const plotSize = Math.min(
     width - margin.left - margin.right,
     height - margin.top - margin.bottom,
   ); //force square
