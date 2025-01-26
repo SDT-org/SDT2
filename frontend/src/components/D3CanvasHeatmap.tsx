@@ -47,6 +47,7 @@ export const D3CanvasHeatmap = ({
   subtitle,
   axis_labels,
   showscale,
+  margin,
 }: HeatmapRenderProps) => {
   const canvasRef =
     useHeatmapRef() as React.MutableRefObject<HTMLCanvasElement>;
@@ -58,23 +59,14 @@ export const D3CanvasHeatmap = ({
     xLabel?: string;
     yLabel?: string;
   } | null>(null);
-  const maxTickLength = Math.max(...tickText.map((t) => t.length));
-  const margin = {
-    top: 60,
-    right: 60, //added some padding for colorbar
-    bottom: axis_labels ? Math.max(120 + maxTickLength * 6) : 60, // 6px per character min 120 if axis labels are shown
-    left: axis_labels ? Math.max(120 + maxTickLength * 6) : 60, //same
-  } as const;
 
   const filteredData = React.useMemo(
     () => data.filter((d) => Number(d.value)),
     [data],
   );
 
-  const plotSize = Math.min(
-    width - margin.left - margin.right,
-    height - margin.top - margin.bottom,
-  ); //force square
+  const size = Math.min(width, height);
+  const plotSize = size - margin.left - margin.right;
 
   const n = tickText.length;
   const cellSize = plotSize / n;

@@ -48,6 +48,7 @@ export const D3Heatmap = ({
   subtitle,
   showscale,
   axis_labels,
+  margin,
 }: HeatmapRenderProps) => {
   const svgRef = useHeatmapRef() as React.MutableRefObject<SVGSVGElement>;
   const [_, setSvgTransform] = React.useState({});
@@ -71,16 +72,6 @@ export const D3Heatmap = ({
     d3Svg.selectAll("*").remove();
 
     const size = Math.min(width, height);
-
-    const maxTickLength = Math.max(...tickText.map((t) => t.length));
-
-    const margin = {
-      top: showTitles ? 120 : 60, //added some title space
-      right: showscale ? Math.max(120, cbarWidth + 60) : 60, //added some padding for colorbar
-      bottom: axis_labels ? Math.max(120 + maxTickLength * 6) : 60, // 6px per character min 120 if axis labels are shown
-      left: axis_labels ? Math.max(120 + maxTickLength * 6) : 60, //same
-    } as const;
-
     const w = size - margin.left - margin.right;
     const h = size - margin.top - margin.bottom;
 
@@ -275,6 +266,7 @@ export const D3Heatmap = ({
     subtitle,
     showscale,
     axis_labels,
+    margin,
   ]);
 
   return (
