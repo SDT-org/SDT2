@@ -48,6 +48,7 @@ export const D3Heatmap = ({
   subtitle,
   showscale,
   axis_labels,
+  margin,
 }: HeatmapRenderProps) => {
   const svgRef = useHeatmapRef() as React.MutableRefObject<SVGSVGElement>;
   const [_, setSvgTransform] = React.useState({});
@@ -71,7 +72,6 @@ export const D3Heatmap = ({
     d3Svg.selectAll("*").remove();
 
     const size = Math.min(width, height);
-    const margin = { top: 60, right: 60, bottom: 60, left: 60 };
     const w = size - margin.left - margin.right;
     const h = size - margin.top - margin.bottom;
 
@@ -266,6 +266,7 @@ export const D3Heatmap = ({
     subtitle,
     showscale,
     axis_labels,
+    margin,
   ]);
 
   return (

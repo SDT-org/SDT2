@@ -23,13 +23,6 @@ function createD3ColorScale(
     .interpolate(d3.interpolateRgb);
 }
 
-const margin = {
-  top: 60,
-  right: 60,
-  bottom: 60,
-  left: 60,
-};
-
 export const D3CanvasHeatmap = ({
   data,
   tickText,
@@ -54,6 +47,7 @@ export const D3CanvasHeatmap = ({
   subtitle,
   axis_labels,
   showscale,
+  margin,
 }: HeatmapRenderProps) => {
   const canvasRef =
     useHeatmapRef() as React.MutableRefObject<HTMLCanvasElement>;
@@ -260,6 +254,7 @@ export const D3CanvasHeatmap = ({
     axis_labels,
     showscale,
     plotSize,
+    margin,
   ]);
 
   React.useEffect(() => {

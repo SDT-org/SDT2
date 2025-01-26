@@ -46,6 +46,7 @@ export type HeatmapRenderProps = {
   showscale: boolean;
   axis_labels: boolean;
   titleFont: typeof plotFontMonospace | typeof plotFontSansSerif;
+  margin: { top: number; bottom: number; left: number; right: number };
 } & Pick<HeatmapSettings, "annotation_font_size" | "axis_labels">;
 
 export const Heatmap = ({
@@ -216,6 +217,17 @@ export const Heatmap = ({
   const titleFont =
     settings.titleFont === "Monospace" ? plotFontMonospace : plotFontSansSerif;
 
+  const longestTickWidth =
+    Math.max(...tickText.map((tick) => tick.length)) *
+    (settings.axlabel_yfontsize * 1.25);
+
+  const margin = {
+    top: 60,
+    right: 60,
+    bottom: longestTickWidth,
+    left: longestTickWidth,
+  };
+
   return (
     <>
       {data ? (
@@ -259,6 +271,7 @@ export const Heatmap = ({
                 title={settings.title}
                 subtitle={settings.subtitle}
                 axis_labels={settings.axis_labels}
+                margin={margin}
               />
             ) : (
                 appState.showExportModal
@@ -288,6 +301,7 @@ export const Heatmap = ({
                 title={settings.title}
                 subtitle={settings.subtitle}
                 axis_labels={settings.axis_labels}
+                margin={margin}
                 showscale={settings.showscale}
               />
             ) : (
