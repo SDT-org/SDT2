@@ -80,16 +80,32 @@ export const Violin = ({
   const updateTitles = useRelayoutUpdateTitles(updateSettings);
   useRelayoutHideSubtitle(!settings.showTitles);
 
-  const scoresText = data.identity_combos.map(
-    (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}`,
-  );
+  const hoverData = {
+    scores: {
+      index: 0,
+      suffix: "%",
+      title: "Identity Score",
+    },
+    gc: {
+      index: 1,
+      suffix: "%",
+      title: "GC Content",
+    },
+    length: {
+      index: 2,
+      suffix: "nt",
+      title: "Sequence Length",
+    },
+  };
 
-  const gcLengthIndex = dataSetKey === "gc" ? 1 : 2;
-  const gcLengthSuffix = dataSetKey === "gc" ? "%" : " nt";
-  const gcLengthTitle = dataSetKey === "gc" ? "GC" : "Length";
+  const scoresText = data.identity_combos.map(
+    (ids) =>
+      `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}<br><br>${hoverData.scores.title}: `,
+  );
+  const { index, suffix, title } = hoverData[dataSetKey];
+
   const gcLengthText = data.full_stats.map(
-    (stats) =>
-      `${stats[0]}: ${gcLengthTitle} = ${stats[gcLengthIndex]}${gcLengthSuffix}`,
+    (stats) => `${stats[0]}:<br>${title} = ${stats[index]}${suffix}`,
   );
 
   const hoverText = dataSetKey === "scores" ? scoresText : gcLengthText;
@@ -123,10 +139,11 @@ export const Violin = ({
         },
         hoveron: "points",
         scalemode: "width",
-        hovertemplate: `%{text}<br> <br>Percent Identity: %{${settings.plotOrientation === "vertical" ? "y" : "x"}}<extra></extra>`,
+        // we are going to rip this nonsense out for D3 ASAP
+        hovertemplate: `%{text}${dataSetKey === "scores" && `%{${settings.plotOrientation === "vertical" ? "y" : "x"}}${hoverData.scores.suffix}`}<extra></extra>`,
         text: hoverText,
       }) as Partial<PlotData>,
-    [dataSet, settings, hoverText],
+    [dataSet, dataSetKey, settings, hoverText],
   );
 
   const boxTrace = React.useMemo(
