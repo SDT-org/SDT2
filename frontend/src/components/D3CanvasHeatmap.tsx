@@ -84,7 +84,7 @@ export const D3CanvasHeatmap = ({
   const tickValues = React.useMemo(() => scale.ticks(5), [scale]);
 
   const drawCanvas = React.useCallback(() => {
-    console.count("drawCanvas");
+    // console.count("drawCanvas");
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -269,10 +269,12 @@ export const D3CanvasHeatmap = ({
 
     const zoom = d3
       .zoom()
-      .scaleExtent([0.5, 5])
-      .on("zoom", (event) => {
-        setTransform(event.transform);
-      });
+      .scaleExtent([1, 5])
+      .translateExtent([
+        [-margin.left, -margin.top],
+        [width, height],
+      ])
+      .on("zoom", (event) => setTransform(event.transform));
 
     d3.select(canvas).call(
       zoom as unknown as d3.ZoomBehavior<HTMLCanvasElement, unknown>,
@@ -281,7 +283,7 @@ export const D3CanvasHeatmap = ({
     return () => {
       d3.select(canvas).on(".zoom", null);
     };
-  }, [canvasRef]);
+  }, [canvasRef, width, height, margin]);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
