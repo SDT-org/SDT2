@@ -12,7 +12,6 @@ import useAppState, {
   type SaveableImageFormat,
   saveableImageFormats,
 } from "../appState";
-import { useDistributionState } from "../distributionState";
 import { assertDefined } from "../helpers";
 import { useDocState } from "../hooks/useDocState";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
@@ -68,15 +67,10 @@ export const ExportModal = () => {
   >("idle");
   const [outputCluster, setOutputCluster] = React.useState(false);
   const [thresholds, setThresholds] = React.useState({ one: 79, two: 0 });
-  const { docState, setDocState, updateDocState } = useDocState(
+  const { docState, updateDocState } = useDocState(
     appState.activeDocumentId,
     appState,
     setAppState,
-  );
-
-  const { updateDistributionState } = useDistributionState(
-    docState,
-    setDocState,
   );
 
   const swapDataView = React.useCallback(
@@ -132,7 +126,6 @@ export const ExportModal = () => {
     // Plotly exports
 
     swapDataView("distribution_histogram");
-    updateDistributionState({ visualization: "histogram" });
 
     await new Promise((r) => setTimeout(r, renderTimeout));
 
@@ -143,7 +136,6 @@ export const ExportModal = () => {
     const histogramImage = await Plotly.toImage(element, config);
 
     swapDataView("distribution_violin");
-    updateDistributionState({ visualization: "violin" });
 
     await new Promise((r) => setTimeout(r, renderTimeout));
     element = getPlotlyElement();
@@ -151,7 +143,6 @@ export const ExportModal = () => {
     const violinImage = await Plotly.toImage(element, config);
 
     swapDataView("distribution_raincloud");
-    updateDistributionState({ visualization: "raincloud" });
 
     await new Promise((r) => setTimeout(r, renderTimeout));
     element = getPlotlyElement();
@@ -160,13 +151,7 @@ export const ExportModal = () => {
 
     swapDataView(previousDataView);
     return { heatmapImage, histogramImage, violinImage, raincloudImage };
-  }, [
-    heatmapRef,
-    appState,
-    docState.dataView,
-    swapDataView,
-    updateDistributionState,
-  ]);
+  }, [heatmapRef, appState, docState.dataView, swapDataView]);
 
   const doExport = React.useCallback(() => {
     setExportState("exporting");

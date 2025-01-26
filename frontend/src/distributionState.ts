@@ -2,7 +2,10 @@ import { z } from "zod";
 import type { DocState, SetDocState } from "./appState";
 import { type ColorString, ColorStringSchema, Colors } from "./colors";
 
-export type Visualization = "histogram" | "violin" | "raincloud";
+export type Visualization =
+  | "distribution_histogram"
+  | "distribution_violin"
+  | "distribution_raincloud";
 type DataSet = number[];
 export type DataSets = {
   scores: DataSet;
@@ -24,7 +27,6 @@ type VisualizationBase = {
 };
 
 export type DistributionState = {
-  visualization: Visualization;
   dataSet: keyof DataSets;
   histogram: VisualizationBase & {
     binColor: ColorString;
@@ -108,7 +110,6 @@ const VisualizationBaseSchema = z.object({
 });
 
 export const DistributionStateSchema = z.object({
-  visualization: z.enum(["histogram", "violin", "raincloud"]),
   dataSet: z.enum(["scores", "gc", "length"]),
   histogram: VisualizationBaseSchema.extend({
     binColor: ColorStringSchema,
@@ -188,7 +189,6 @@ const visualizationDefaults = {
 };
 
 export const initialDistributionState: DistributionState = {
-  visualization: "histogram",
   dataSet: "scores",
   histogram: {
     ...visualizationDefaults,
@@ -284,7 +284,7 @@ export const useDistributionState = (
     }));
 
   const updateVisualization =
-    (key: DistributionState["visualization"]) =>
+    (key: "histogram" | "violin" | "raincloud") =>
     (
       values: Partial<DistributionState["histogram" | "violin" | "raincloud"]>,
     ) =>

@@ -1,10 +1,6 @@
 import { TabPanel } from "react-aria-components";
 import type { DocState, SetDocState } from "../appState";
-import {
-  type DataSets,
-  type Visualization,
-  useDistributionState,
-} from "../distributionState";
+import { type DataSets, useDistributionState } from "../distributionState";
 import type { DistributionData, MetaData } from "../plotTypes";
 import { Histogram } from "./Histogram";
 import { Raincloud } from "./Raincloud";
@@ -17,8 +13,6 @@ const VisualizationSwitcher = ({
 }: {
   activeDataSet: keyof DataSets;
   setActiveDataSet: React.Dispatch<keyof DataSets>;
-  visualization: Visualization;
-  setVisualization: React.Dispatch<Visualization>;
 }) => (
   <>
     <div className="group padded">
@@ -94,10 +88,6 @@ export const DistributionPanels = ({
         activeDataSet={distributionState.dataSet}
         setActiveDataSet={(value: keyof DataSets) =>
           updateDistributionState({ dataSet: value })
-        }
-        visualization={distributionState.visualization}
-        setVisualization={(value: Visualization) =>
-          updateDistributionState({ visualization: value })
         }
       />
     </>

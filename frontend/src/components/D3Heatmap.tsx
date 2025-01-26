@@ -50,6 +50,7 @@ export const D3Heatmap = ({
   axis_labels,
   margin,
 }: HeatmapRenderProps) => {
+  // console.count("drawSVG");
   const svgRef = useHeatmapRef() as React.MutableRefObject<SVGSVGElement>;
   const [_, setSvgTransform] = React.useState({});
 
@@ -67,7 +68,7 @@ export const D3Heatmap = ({
   const tickValues = React.useMemo(() => scale.ticks(ticks), [scale]);
 
   React.useEffect(() => {
-    if (!svgRef.current) return;
+    if (!(svgRef.current && height && width)) return;
     const d3Svg = d3.select(svgRef.current as Element);
     d3Svg.selectAll("*").remove();
 
@@ -97,8 +98,8 @@ export const D3Heatmap = ({
 
     groups
       .append("rect")
-      .attr("width", cellW - cellSpace)
-      .attr("height", cellH - cellSpace)
+      .attr("width", Math.max(cellW - cellSpace, 1))
+      .attr("height", Math.max(cellH - cellSpace, 1))
       .attr("x", cellOffset)
       .attr("y", cellOffset)
       .attr("fill", (d) => colorFn(d.value));

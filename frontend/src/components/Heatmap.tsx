@@ -1,6 +1,4 @@
-import Plotly from "plotly.js-cartesian-dist-min";
 import React from "react";
-import createPlotlyComponent from "react-plotly.js/factory";
 import useAppState, {
   type DocState,
   type SetDocState,
@@ -11,17 +9,10 @@ import {
   colorScales as defaultColorScales,
 } from "../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
-import { useAnnotations } from "../hooks/useAnnotations";
-import {
-  useRelayoutHideSubtitle,
-  useRelayoutUpdateTitles,
-} from "../hooks/useRelayoutUpdateTitles";
 import type { HeatmapData, HeatmapSettings } from "../plotTypes";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3Heatmap } from "./D3Heatmap";
 import { HeatmapSidebar } from "./HeatmapSidebar";
-
-const Plot = createPlotlyComponent(Plotly);
 
 export type HeatmapRenderProps = {
   data: { x: number; y: number; value: number }[];
@@ -99,44 +90,6 @@ export const Heatmap = ({
     [discreteColorScale],
   );
 
-  const annotations = useAnnotations(
-    settings.annotation,
-    data,
-    settings.vmin,
-    settings.vmax,
-    colorScales[settings.colorScaleKey],
-    settings.reverse,
-    settings.annotation_rounding,
-  );
-
-  const [textScale, setTextScale] = React.useState(1);
-
-  const updateTextScale = React.useCallback(
-    (event: Plotly.PlotRelayoutEvent) => {
-      if (event["xaxis.autorange"]) {
-        setTextScale(1);
-        return;
-      }
-      if (!event["xaxis.range[0]"]) {
-        return;
-      }
-
-      const dataLength = data.length;
-      const earlyRamp = dataLength < 10 ? 0 : dataLength < 50 ? 10 : 0;
-      const initialRange = -2;
-      const x0 = event["xaxis.range[0]"] || initialRange;
-      const x1 = event["xaxis.range[1]"] || initialRange;
-
-      const length = dataLength + 2 + earlyRamp;
-      const scale = Math.max(
-        1,
-        Math.min(4, Number((length / ((x1 - x0) * 1.5)).toFixed(1))),
-      );
-      setTextScale(scale);
-    },
-    [data.length],
-  );
-
   const d3HeatmapData = React.useMemo(
     () =>
       data.flatMap((row, y) =>
@@ -148,26 +101,6 @@ export const Heatmap = ({
       ),
     [data],
   );
-
-  const [tempHeatmapComponent, tempSetHeatmapComponent] =
-    React.useState("canvas");
-
-  React.useEffect(() => {
-    const handleKeydown = (event: KeyboardEvent) => {
-      if (
-        (event.ctrlKey || event.metaKey) &&
-        [1, 2, 3].includes(Number(event.key))
-      ) {
-        event.preventDefault();
-        const views = ["canvas", "svg", "plotly"];
-        tempSetHeatmapComponent(() => views[Number(event.key) - 1] || "canvas");
-      }
-    };
-
-    document.addEventListener("keydown", handleKeydown);
-
-    return () => document.removeEventListener("keydown", handleKeydown);
-  }, []);
 
   const elementRef = React.useRef<HTMLDivElement | null>(null);
   const [size, setSize] = React.useState<{ width: number; height: number }>({
@@ -196,9 +129,6 @@ export const Heatmap = ({
       window.removeEventListener("resize", handleResize);
     };
   }, [updateSize, leftSidebarCollapsed]);
-
-  const updateTitles = useRelayoutUpdateTitles(updateSettings);
-  useRelayoutHideSubtitle(!settings.showTitles);
 
   const cbar_shrink = settings.cbar_shrink * 60;
   const cbar_aspect = settings.cbar_aspect * 10;
@@ -237,16 +167,34 @@ export const Heatmap = ({
             ref={elementRef}
             style={{ background: "#fff" }}
           >
-            <div
-              style={{ position: "absolute", left: 10, top: 5, zIndex: "1000" }}
-            >
-              {tempHeatmapComponent}
-            </div>
-            {(
-              appState.showExportModal
-                ? appState.saveFormat !== "svg"
-                : tempHeatmapComponent === "canvas"
-            ) ? (
+            {appState.showExportModal && appState.saveFormat === "svg" ? (
+              <D3Heatmap
+                data={d3HeatmapData}
+                tickText={tickText}
+                colorScale={colorScale}
+                minVal={settings.vmin}
+                maxVal={settings.vmax}
+                width={size.width}
+                height={size.height}
+                cellSpace={settings.cellspace}
+                showPercentIdentities={settings.annotation}
+                roundTo={settings.annotation_rounding}
+                cbarHeight={cbar_shrink}
+                cbarWidth={cbar_aspect}
+                annotation_font_size={settings.annotation_font_size}
+                axlabel_xrotation={settings.axlabel_xrotation}
+                axlabel_xfontsize={settings.axlabel_xfontsize}
+                axlabel_yrotation={settings.axlabel_yrotation}
+                axlabel_yfontsize={settings.axlabel_yfontsize}
+                titleFont={titleFont}
+                showTitles={settings.showTitles}
+                title={settings.title}
+                subtitle={settings.subtitle}
+                axis_labels={settings.axis_labels}
+                showscale={settings.showscale}
+                margin={margin}
+              />
+            ) : (
               <D3CanvasHeatmap
                 data={d3HeatmapData}
                 tickText={tickText}
@@ -272,216 +220,6 @@ export const Heatmap = ({
                 subtitle={settings.subtitle}
                 axis_labels={settings.axis_labels}
                 margin={margin}
-              />
-            ) : (
-                appState.showExportModal
-                  ? appState.saveFormat === "svg"
-                  : tempHeatmapComponent === "svg"
-              ) ? (
-              <D3Heatmap
-                data={d3HeatmapData}
-                tickText={tickText}
-                colorScale={colorScale}
-                minVal={settings.vmin}
-                maxVal={settings.vmax}
-                width={size.width}
-                height={size.height}
-                cellSpace={settings.cellspace}
-                showPercentIdentities={settings.annotation}
-                roundTo={settings.annotation_rounding}
-                cbarHeight={cbar_shrink}
-                cbarWidth={cbar_aspect}
-                annotation_font_size={settings.annotation_font_size}
-                axlabel_xrotation={settings.axlabel_xrotation}
-                axlabel_xfontsize={settings.axlabel_xfontsize}
-                axlabel_yrotation={settings.axlabel_yrotation}
-                axlabel_yfontsize={settings.axlabel_yfontsize}
-                titleFont={titleFont}
-                showTitles={settings.showTitles}
-                title={settings.title}
-                subtitle={settings.subtitle}
-                axis_labels={settings.axis_labels}
-                margin={margin}
-                showscale={settings.showscale}
-              />
-            ) : (
-              <Plot
-                id="plot"
-                onRelayout={(e) => {
-                  updateTitles(e);
-                  updateTextScale(e);
-                }}
-                data={[
-                  {
-                    z: data,
-                    colorscale: colorScales[settings.colorScaleKey],
-                    reversescale: settings.reverse,
-                    type: "heatmap",
-                    hovertemplate:
-                      "Seq 1: %{y}<br>Seq 2: %{x}<br>Percent Pairwise Identity: %{z}<extra></extra>",
-                    // @ts-ignore
-                    hoverongaps: false,
-                    transpose: false,
-                    zsmooth: false,
-                    autosize: true,
-                    set_aspect: 3,
-                    showscale: settings.showscale,
-                    zmin:
-                      settings.colorScaleKey === "Discrete" ? 0 : settings.vmin,
-                    zmax:
-                      settings.colorScaleKey === "Discrete"
-                        ? 100
-                        : settings.vmax,
-                    // Gap between columns of cells. Actual 0 values cause blurriness on macOS
-                    xgap: settings.cellspace || 0.001,
-                    ygap: settings.cellspace || 0.001,
-                    colorbar: {
-                      len: settings.cbar_shrink,
-                      thickness: settings.cbar_aspect,
-                      xpad: settings.cbar_pad,
-                      title: "",
-                      // @ts-ignore
-                      tickfont: {
-                        ...plotFontMonospace,
-                      },
-                    },
-                  },
-                  {
-                    type: "scatter",
-                    mode: "text",
-                    // @ts-ignore
-                    scrollZoom: true,
-                    textfont: {
-                      ...plotFontMonospace,
-                      size: settings.annotation_font_size * textScale,
-                      color: annotations?.textColors ?? "white",
-                    },
-                    hoverinfo: "skip",
-                    ...(settings.annotation
-                      ? {
-                          x: annotations.x,
-                          y: annotations.y,
-                          text: annotations.text,
-                        }
-                      : {}),
-                  },
-                ]}
-                config={{
-                  responsive: true,
-                  displayModeBar: false,
-                  scrollZoom: true,
-                  displaylogo: false,
-                  editable: false,
-                }}
-                layout={{
-                  ...(settings.showTitles
-                    ? {
-                        title: {
-                          text: settings.title,
-                          pad: {
-                            t: 0,
-                            r: 0,
-                            b: 0,
-                            l: 0,
-                          },
-                          subtitle: {
-                            text: settings.subtitle,
-                          },
-                        },
-                      }
-                    : {}),
-                  font: {
-                    ...(settings.titleFont === "Monospace"
-                      ? plotFontMonospace
-                      : plotFontSansSerif),
-                    // @ts-ignore
-                    weight: "bold",
-                  },
-                  plot_bgcolor: "rgba(0,0,0,0)",
-                  paper_bgcolor: "rgba(0,0,0,0)",
-                  uirevision: "true",
-                  autosize: true,
-                  dragmode: "pan",
-                  hovermode: "closest",
-                  aspectratio: { x: 1, y: 1 },
-                  xaxis: {
-                    ...(settings.showTitles
-                      ? {
-                          title: {
-                            text: settings.xtitle,
-                            font: {
-                              ...(settings.titleFont === "Monospace"
-                                ? plotFontMonospace
-                                : plotFontSansSerif),
-                              weight: "bold",
-                            },
-                          },
-                          scaleratio: 1,
-                        }
-                      : {}),
-                    minallowed: -2,
-                    maxallowed: tickText.length + 2,
-
-                    tickfont: {
-                      ...plotFontMonospace,
-                      size: settings.axlabel_xfontsize,
-                      color: "black",
-                    },
-                    tickangle: settings.axlabel_xrotation,
-                    tickvals: [...Array(tickText.length).keys()],
-                    ticktext: tickText,
-                    showticklabels: settings.axis_labels,
-                    ticklabelpadding: 0,
-                    // @ts-ignore
-                    ticks: settings.axis_labels ? false : "",
-                    autorange: true,
-                    showline: false,
-                    zeroline: false,
-                    showgrid: false,
-                  },
-                  yaxis: {
-                    ...(settings.showTitles
-                      ? {
-                          title: {
-                            text: settings.ytitle,
-                            font: {
-                              ...(settings.titleFont === "Monospace"
-                                ? plotFontMonospace
-                                : plotFontSansSerif),
-                              weight: "bold",
-                            },
-                            pad: {
-                              r: 15,
-                            },
-                          },
-                        }
-                      : {}),
-                    minallowed: -2,
-                    maxallowed: tickText.length + 2,
-                    automargin: true,
-                    range: [tickText.length - 1, 0],
-                    autorange: false,
-                    tickfont: {
-                      ...plotFontMonospace,
-                      size: settings.axlabel_yfontsize,
-                      color: "black",
-                    },
-                    tickangle: settings.axlabel_yrotation,
-                    tickvals: [...Array(tickText.length).keys()],
-                    ticktext: tickText,
-                    tickson: "all",
-                    showticklabels: settings.axis_labels,
-                    ticklabelpadding: 0,
-                    // @ts-ignore
-                    ticks: settings.axis_labels ? false : "",
-                    showline: false,
-                    zeroline: false,
-                    showgrid: false,
-                    scaleanchor: "x",
-                    scaleratio: 1,
-                  },
-                }}
-                style={{ width: "100%", height: "100%" }}
               />
             )}
           </div>
