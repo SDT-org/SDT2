@@ -142,15 +142,15 @@ export const ExportModal = () => {
     await Plotly.toImage(element, config);
     const violinImage = await Plotly.toImage(element, config);
 
-    swapDataView("distribution_raincloud");
+    // swapDataView("distribution_raincloud");
 
-    await new Promise((r) => setTimeout(r, renderTimeout));
-    element = getPlotlyElement();
-    await Plotly.toImage(element, config);
-    const raincloudImage = await Plotly.toImage(element, config);
+    // await new Promise((r) => setTimeout(r, renderTimeout));
+    // element = getPlotlyElement();
+    // await Plotly.toImage(element, config);
+    // const raincloudImage = await Plotly.toImage(element, config);
 
     swapDataView(previousDataView);
-    return { heatmapImage, histogramImage, violinImage, raincloudImage };
+    return { heatmapImage, histogramImage, violinImage };
   }, [heatmapRef, appState, docState.dataView, swapDataView]);
 
   const doExport = React.useCallback(() => {
@@ -166,7 +166,6 @@ export const ExportModal = () => {
           heatmap_image_data: images.heatmapImage,
           histogram_image_data: images.histogramImage,
           violin_image_data: images.violinImage,
-          raincloud_image_data: images.raincloudImage,
           image_format: appState.saveFormat,
         })
         .then((result) =>

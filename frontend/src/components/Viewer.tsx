@@ -128,36 +128,6 @@ export const Viewer = ({
                 <span>Violin</span>
               </div>
             </Tab>
-            <Tab id="distribution_raincloud">
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.8rem",
-                }}
-              >
-                <svg
-                  height={12}
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 30 30"
-                  aria-hidden={true}
-                  color="currentcolor"
-                >
-                  {/* <path */}
-                  {/*   d="M4 20 Q10 12, 13 6 L17 6 Q20 12, 26 20 Z" */}
-                  {/*   fill="black" */}
-                  {/* /> */}
-                  <path
-                    d="M4 20 Q10 12, 13 8 Q15 6, 17 8 Q20 12, 26 20 Z"
-                    fill="black"
-                  />
-                  <circle cx="7" cy="27" r="2" fill="black" />
-                  <circle cx="15" cy="27" r="2" fill="black" />
-                  <circle cx="24" cy="27" r="2" fill="black" />
-                </svg>
-                <span>Raincloud</span>
-              </div>
-            </Tab>
           </TabList>
           <div className="app-sidebar-body" />
           <div className="app-sidebar-footer" />

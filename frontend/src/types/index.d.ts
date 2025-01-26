@@ -48,7 +48,6 @@ declare global {
           heatmap_image_data: string;
           histogram_image_data: string;
           violin_image_data: string;
-          raincloud_image_data: string;
           image_format: SaveableImageFormat;
         }) => Promise<boolean>;
         start_run: (args: RunProcessDataArgs) => Promise<void>;

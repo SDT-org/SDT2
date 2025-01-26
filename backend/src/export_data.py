@@ -6,7 +6,7 @@ from document_state import DocState
 import cluster
 from constants import data_file_suffixes
 
-image_types = ["heatmap", "histogram", "violin", "raincloud"]
+image_types = ["heatmap", "histogram", "violin"]
 
 def find_source_files(state: DocState, prefix, suffixes):
     with os.scandir(state.tempdir_path) as entries:
