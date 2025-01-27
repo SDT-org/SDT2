@@ -94,7 +94,7 @@ jobs:
         run: chmod +x build/SDT2 && tar -czvf build/SDT2.tar.gz -C build SDT2
 
       - name: Windows - Prepare standalone artifact
-        if: ${{ matrix.name == 'windows-default' }}
+        if: ${{ matrix.os == 'windows' }}
         run: |
           powershell Compress-Archive -Path build\\app.dist\\* -DestinationPath SDT2.zip
 
