@@ -59,9 +59,9 @@ jobs:
           azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
           azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
           endpoint: ${{ secrets.AZURE_ENDPOINT }}
-          code-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-          files-folder: build
+          files-folder: ${{ matrix.name == 'windows-default' && 'build//app.dist' || 'build' }}
           files-folder-filter: exe
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
@@ -93,10 +93,15 @@ jobs:
         if: matrix.os == 'ubuntu-latest' || (matrix.os == 'ubuntu-22.04' && matrix.arch == 'arm64')
         run: chmod +x build/SDT2 && tar -czvf build/SDT2.tar.gz -C build SDT2
 
+      - name: Windows - Prepare standalone artifact
+        if: ${{ matrix.name == 'windows-default' }}
+        run: |
+          powershell Compress-Archive -Path build\\app.dist\\* -DestinationPath SDT2.zip
+
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-build-output
           path: |
-            ${{ matrix.os == 'windows-latest' && 'build/SDT2.exe' || '' }}
+            ${{ matrix.os == 'windows-latest' && SDT2.zip || '' }}
             ${{ matrix.os == 'macos-latest' && 'build/SDT2.app.zip' || '' }}
             ${{ (matrix.os == 'ubuntu-latest' || (matrix.os == 'ubuntu-22.04' && matrix.arch == 'arm64')) && 'build/SDT2.tar.gz' || '' }}
