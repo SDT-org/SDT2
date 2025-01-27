@@ -92,8 +92,11 @@ def make_platform_build_command(settings):
                 ]
             )
         case _:
-            pass
-
+            command.extend(
+                [
+                    "--onefile"
+                ]
+            )
 
     command.append(path)
 
