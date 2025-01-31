@@ -19,6 +19,8 @@
 
 - Run `bun run init`
 
+pip install -r requirements.txt
+
 ## License
 
 This project is licensed under the terms of the GNU General Public License v3.0 (GPL-3.0).
