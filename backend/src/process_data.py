@@ -299,13 +299,16 @@ def process_data(
 
         aln_reordered = aln_scores[reorder_index, :][:, reorder_index]
         aln_lowt = tril(around(aln_reordered, 2))
+        aln_lowt[triu_indices(aln_lowt.shape[0], k=1)] = nan
+        df = DataFrame(
+        aln_lowt, index=new_order)
     else:
         aln_lowt = tril(around(aln_scores, 2))
+        aln_lowt[triu_indices(aln_lowt.shape[0], k=1)] = nan
+        df = DataFrame(
+        aln_lowt, index=order)
 
-    aln_lowt[triu_indices(aln_lowt.shape[0], k=1)] = nan
-    df = DataFrame(
-        aln_lowt, index=order
-    )  # Create a DataFrame from the lower triangular matrix
+
     save_cols_to_csv(df, os.path.join(out_dir, file_base))
     save_stats_to_csv(seq_stats, os.path.join(out_dir, file_base))
     save_matrix_to_csv(df, os.path.join(out_dir, file_base))
