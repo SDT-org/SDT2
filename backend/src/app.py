@@ -163,37 +163,45 @@ def handle_open_file(filepath: str, doc_id: str | None):
             col_count = [len(l.split(",")) for l in temp_f.readlines()]
             column_names = [i for i in range(0, max(col_count))]
 
-        df = read_csv(
-            filepath,
-            delimiter=",",
-            index_col=0,
-            header=None,
-            names=column_names,
-        )
+            df = read_csv(
+                filepath,
+                delimiter=",",
+                index_col=0,
+                header=None,
+                names=column_names,
+            )
 
-        new_document(
-            doc_id,
-            view="viewer",
-            filename=filepath,
-            filemtime=os.path.getmtime(filepath),
-            tempdir_path=unique_dir,
-            basename=basename,
-            pair_progress=0,
-            pair_count=0,
-            filetype=filetype,
-        )
+            # Test that the file is gonna work in get_data
+            tick_text = df.index.tolist()
+            data = df.to_numpy()
+            diag_mask = eye(data.shape[0], dtype=bool)
+            data_no_diag = where(diag_mask, nan, data)
+            int(nanmin(data_no_diag))
+            int(nanmax(data_no_diag))
 
-        save_cols_to_csv(
-            df,
-            os.path.join(
-                unique_dir,
-                os.path.splitext(basename)[0].removesuffix("_mat"),
-            ),
-        )
+            save_cols_to_csv(
+                df,
+                os.path.join(
+                    unique_dir,
+                    os.path.splitext(basename)[0].removesuffix("_mat"),
+                ),
+            )
 
-        add_recent_file(filepath)
+            new_document(
+                doc_id,
+                view="viewer",
+                filename=filepath,
+                filemtime=os.path.getmtime(filepath),
+                tempdir_path=unique_dir,
+                basename=basename,
+                pair_progress=0,
+                pair_count=0,
+                filetype=filetype,
+            )
 
-        return [doc_id, filepath]
+            add_recent_file(filepath)
+
+            return [doc_id, filepath]
 
     else:
         valid, message = validate_fasta(filepath, filetype)

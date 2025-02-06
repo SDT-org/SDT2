@@ -115,15 +115,11 @@ export const MainMenu = createHideableComponent(() => {
     [appState],
   );
 
-  if (!activeDocState) {
-    throw new Error(`Could not locate document: ${appState.activeDocumentId}`);
-  }
-
   const newDocument = useNewDocument(setAppState);
   const closeDocument = useCloseDocument(appState, setAppState);
   const saveDocument = useSaveActiveDocument(appState, setAppState);
 
-  const sdtFile = isSDTFile(activeDocState.filetype);
+  const sdtFile = activeDocState && isSDTFile(activeDocState.filetype);
 
   const openFileDialog = useOpenFileDialog(appState, setAppState);
   const onNew = newDocument;
@@ -183,7 +179,7 @@ export const MainMenu = createHideableComponent(() => {
         </Popover>
       </SubmenuTrigger>
       <Separator />
-      {activeDocState.view === "viewer" ? (
+      {activeDocState?.view === "viewer" ? (
         <>
           {
             <AppMenuItem onAction={onSave}>
