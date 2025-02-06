@@ -97,9 +97,13 @@ export class ErrorBoundary extends React.Component<Props> {
     const error = this.props.appState.error;
     const errorInfo = this.props.appState.errorInfo;
     const platform = this.props.appState.platform;
-    const objectToHuman = (obj?: unknown) =>
+    const objectToHuman = (obj?: unknown, indent = 0): string =>
       Object.entries(obj ?? {})
-        .map((v) => `${v[0].toUpperCase()}: ${v[1]}`)
+        .map(([key, value]) =>
+          typeof value === "object" && value !== null
+            ? `${" ".repeat(indent)}${key}:\n${objectToHuman(value, indent + 2)}`
+            : `${" ".repeat(indent)}${key}: ${value}`,
+        )
         .join("\n");
 
     const errorDetails = [
@@ -108,8 +112,8 @@ export class ErrorBoundary extends React.Component<Props> {
       errorInfo?.componentStack,
       objectToHuman({ ...platform, memory: formatBytes(platform.memory) }),
       objectToHuman({
-        activeDoc: activeDocState,
-        activeRunDoc: activeRunDocState,
+        activeDoc: objectToHuman(activeDocState),
+        activeRunDoc: objectToHuman(activeRunDocState),
         run_available_memory: formatBytes(
           activeRunDocState?.compute_stats?.available_memory || 0,
         ),
