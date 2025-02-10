@@ -82,6 +82,7 @@ export const D3CanvasHeatmap = ({
   );
 
   const tickValues = React.useMemo(() => scale.ticks(5), [scale]);
+  const minValue = Math.min(...filteredData.map((item) => item.value));
 
   const drawCanvas = React.useCallback(() => {
     // console.count("drawCanvas");
@@ -200,9 +201,9 @@ export const D3CanvasHeatmap = ({
     if (showscale) {
       const positionX = width - cbarWidth - margin.right;
       const gradient = ctx.createLinearGradient(
-        0,
+        minValue,
         margin.top + cbarHeight,
-        0,
+        minValue,
         margin.top,
       );
 
@@ -257,6 +258,7 @@ export const D3CanvasHeatmap = ({
     showscale,
     plotSize,
     margin,
+    minValue,
   ]);
 
   React.useEffect(() => {
