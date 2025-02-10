@@ -161,7 +161,7 @@ def tree_clustering(settings, dm, filename):
     tree_file = filename + "_tree.nwk"
     tree = clustering_method(dm)
     
-    if settings["cluster_method"] == "nj":  # NJ method does not inherently reorder
+    if settings["cluster_method"] == "nj":  # NJ method does not inherently reorder, need ladderize, It sorts clades in-place according to the number of terminal nodes
         tree.ladderize(reverse=True) 
     
     Phylo.write(tree, tree_file, "newick")
