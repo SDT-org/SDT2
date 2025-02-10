@@ -35,12 +35,12 @@ export const Histogram = ({
       </div>
     );
   }
-
+  console.log(dataSetKey);
+  console.log(dataSets[dataSetKey]);
   const dataSet = dataSets[dataSetKey];
 
   const updateTitles = useRelayoutUpdateTitles(updateSettings);
   useRelayoutHideSubtitle(!settings.showTitles);
-
   const histogramTrace = React.useMemo(() => {
     const orientation = settings.plotOrientation;
     return {
@@ -49,6 +49,10 @@ export const Histogram = ({
         ? { x: dataSet, xbins: { size: settings.binSize } }
         : { y: dataSet, ybins: { size: settings.binSize } }),
       histnorm: "percent",
+      line: {
+        width: 0,
+        color: settings.histlineColor,
+      },
       marker: {
         color: settings.binColor,
         line: {
@@ -94,8 +98,9 @@ export const Histogram = ({
               weight: "bold",
             },
             uirevision: "true",
+            bargap: settings.barGap,
             xaxis: {
-              ...(settings.showTitles
+              ...(settings.showAxisLabels
                 ? {
                     title: {
                       text: settings.xtitle,
@@ -107,10 +112,13 @@ export const Histogram = ({
                         weight: "bold",
                       },
                     },
+                    tickfont: { weight: "normal" },
                     scaleratio: 1,
                   }
                 : {}),
               side: "bottom",
+              linecolor: settings.histlineColor,
+              linewidth: settings.histOutlineWidth,
               rangemode:
                 settings.plotOrientation === "vertical" ? "normal" : "tozero",
               fixedrange: true,
@@ -122,7 +130,7 @@ export const Histogram = ({
               autotick: true,
             },
             yaxis: {
-              ...(settings.showTitles
+              ...(settings.showAxisLabels
                 ? {
                     title: {
                       text: settings.ytitle,
@@ -137,9 +145,12 @@ export const Histogram = ({
                         r: 15,
                       },
                     },
+                    tickfont: { weight: "normal" },
                   }
                 : {}),
               side: "left",
+              linecolor: settings.histlineColor,
+              linewidth: settings.histOutlineWidth,
               rangemode:
                 settings.plotOrientation === "vertical" ? "tozero" : "normal",
               fixedrange: true,
@@ -147,6 +158,7 @@ export const Histogram = ({
               showgrid: settings.showGrid,
               showticklabels: settings.showTickLabels,
               showline: settings.showAxisLines,
+
               tickmode: "auto",
               autotick: true,
             },

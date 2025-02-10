@@ -74,8 +74,8 @@ default_distribution_state = dict(
     **visualization_defaults,
     binColor="hsl(195, 53%, 79%)",
     binSize=1,
-    histOutlineWidth=1,
-    histlineColor="hsl(9, 100%, 64%)",
+    histOutlineWidth=0,
+    histlineColor="hsl(0, 0%, 0%)"
     histnorm="probability",
     showHistogram=True,
     showLine=True,
@@ -89,6 +89,7 @@ default_distribution_state = dict(
     xtitle="Percent Identity",
     ytitle="Frequency",
     plotOrientation="vertical",
+    barGap = 0.1,
   ),
   raincloud=dict(
     **visualization_defaults,

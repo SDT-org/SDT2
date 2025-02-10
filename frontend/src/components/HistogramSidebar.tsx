@@ -205,11 +205,20 @@ export const HistogramSidebar = ({
                   onChange={(value) =>
                     updateSettings({ histOutlineWidth: value })
                   }
-                  minValue={1}
-                  maxValue={15}
-                  step={1}
+                  minValue={0}
+                  maxValue={5}
+                  step={0.5}
                 />
               </div>
+              <hr className="compact" />
+              <Slider
+                label="Bar Gap"
+                defaultValue={settings.barGap}
+                onChange={(value) => updateSettings({ barGap: value })}
+                minValue={0}
+                maxValue={1}
+                step={0.05}
+              />
             </div>
           </div>
           <div className="group">

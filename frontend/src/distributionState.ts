@@ -44,6 +44,7 @@ export type DistributionState = {
     ytitle: string;
     plotOrientation: "horizontal" | "vertical";
     titleFont: "Monospace" | "Sans Serif";
+    barGap: number;
   };
   raincloud: VisualizationBase & {
     bandwidth: number;
@@ -127,6 +128,7 @@ export const DistributionStateSchema = z.object({
     ytitle: z.string(),
     plotOrientation: z.enum(["horizontal", "vertical"]),
     titleFont: z.enum(["Monospace", "Sans Serif"]),
+    barGap: z.number(),
   }),
   raincloud: VisualizationBaseSchema.extend({
     bandwidth: z.number(),
@@ -194,7 +196,7 @@ export const initialDistributionState: DistributionState = {
     ...visualizationDefaults,
     binColor: Colors.LightBlue,
     binSize: 1,
-    histOutlineWidth: 1,
+    histOutlineWidth: 0,
     histlineColor: Colors.Tomato,
     histnorm: "probability",
     showHistogram: true,
@@ -211,6 +213,7 @@ export const initialDistributionState: DistributionState = {
     ytitle: "Frequency",
     plotOrientation: "horizontal",
     titleFont: "Sans Serif",
+    barGap: 0.1,
   },
   raincloud: {
     ...visualizationDefaults,
