@@ -70,17 +70,18 @@ export const Heatmap = ({
 
   const discreteColorScale: ColorScaleArray = React.useMemo(() => {
     const scales = [
-      [0, "#CDF0FF"],
-      [Math.max(0, settings.cutoff_2 / 100 - 0.01), "#20B9FF"],
-      [settings.cutoff_2 / 100, "#C3E8D3"],
-      [settings.cutoff_1 / 100, "#009942"],
-      [Math.min(1, settings.cutoff_1 / 100 + 0.01), "#FFDCDD"],
+      [settings.vmin, "#CDF0FF"],
+      [settings.cutoff_2 - 1, "#20B9FF"],
+      [settings.cutoff_2, "#C3E8D3"],
+      [settings.cutoff_1, "#009942"],
+      [Math.min(100, settings.cutoff_1 + 1), "#FFDCDD"],
     ];
+
     if (settings.cutoff_1 < 100) {
-      scales.push([1, "#FF6167"]);
+      scales.push([100, "#FF6167"]);
     }
     return scales as ColorScaleArray;
-  }, [settings.cutoff_1, settings.cutoff_2]);
+  }, [settings.cutoff_1, settings.cutoff_2, settings.vmin]);
 
   const colorScales = React.useMemo(
     () => ({
@@ -198,7 +199,7 @@ export const Heatmap = ({
               <D3CanvasHeatmap
                 data={d3HeatmapData}
                 tickText={tickText}
-                colorScale={colorScale}
+                colorScale={discreteColorScale}
                 minVal={settings.vmin}
                 maxVal={settings.vmax}
                 width={size.width}

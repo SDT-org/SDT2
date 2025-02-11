@@ -8,12 +8,8 @@ import type { HeatmapRenderProps } from "./Heatmap";
 
 function createD3ColorScale(
   colorArray: ColorScaleArray,
-  minValue: number,
-  maxValue: number,
 ): d3.ScaleLinear<string, string> {
-  const domain = colorArray.map(
-    ([stop]) => stop * (maxValue - minValue) + minValue,
-  );
+  const domain = colorArray.map(([stop]) => stop);
   const range = colorArray.map(([_, color]) => color);
 
   return d3
@@ -72,8 +68,8 @@ export const D3CanvasHeatmap = ({
   const cellSize = plotSize / n;
 
   const colorFn = React.useMemo(
-    () => createD3ColorScale(colorScale, minVal, maxVal),
-    [colorScale, minVal, maxVal],
+    () => createD3ColorScale(colorScale),
+    [colorScale],
   );
 
   const scale = React.useMemo(
@@ -82,11 +78,8 @@ export const D3CanvasHeatmap = ({
   );
 
   const tickValues = React.useMemo(() => scale.ticks(5), [scale]);
-  const minValue = Math.min(...filteredData.map((item) => item.value));
 
   const drawCanvas = React.useCallback(() => {
-    // console.count("drawCanvas");
-
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -197,18 +190,20 @@ export const D3CanvasHeatmap = ({
       }
     }
 
-    // Colorbar
+    // Colorbar gradient
     if (showscale) {
       const positionX = width - cbarWidth - margin.right;
       const gradient = ctx.createLinearGradient(
-        minValue,
+        margin.left,
         margin.top + cbarHeight,
-        minValue,
+        margin.left,
         margin.top,
       );
-
+      // addded normalize to min max to fix gradient not matching colorscale
       for (const [stop, color] of colorScale) {
-        gradient.addColorStop(stop, color);
+        const normalizedStop = (stop - minVal) / (maxVal - minVal);
+
+        gradient.addColorStop(normalizedStop, color);
       }
 
       ctx.fillStyle = gradient;
@@ -258,7 +253,8 @@ export const D3CanvasHeatmap = ({
     showscale,
     plotSize,
     margin,
-    minValue,
+    minVal,
+    maxVal,
   ]);
 
   React.useEffect(() => {
