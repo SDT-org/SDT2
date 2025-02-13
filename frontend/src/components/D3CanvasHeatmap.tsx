@@ -55,15 +55,11 @@ export const D3CanvasHeatmap = ({
   const n = tickText.length;
   const cellSize = plotSize / n;
 
-  const colorFn = React.useMemo(
-    () =>
-      createD3ColorScale(
-        colorScale,
-        settings.colorScaleKey === "Discrete",
-        settings.vmax,
-        settings.vmin,
-      ),
-    [colorScale, settings.colorScaleKey, settings.vmax, settings.vmin],
+  const colorFn = createD3ColorScale(
+    colorScale,
+    settings.colorScaleKey === "Discrete",
+    settings.vmax,
+    settings.vmin,
   );
 
   const scale = React.useMemo(

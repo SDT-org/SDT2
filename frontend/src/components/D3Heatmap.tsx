@@ -60,15 +60,11 @@ export const D3Heatmap = ({
 
     const n = tickText.length;
 
-    const colorFn = React.useMemo(
-      () =>
-        createD3ColorScale(
-          colorScale,
-          settings.colorScaleKey === "Discrete",
-          settings.vmax,
-          settings.vmin,
-        ),
-      [colorScale, settings.colorScaleKey, settings.vmax, settings.vmin],
+    const colorFn = createD3ColorScale(
+      colorScale,
+      settings.colorScaleKey === "Discrete",
+      settings.vmax,
+      settings.vmin,
     );
 
     const g = d3
