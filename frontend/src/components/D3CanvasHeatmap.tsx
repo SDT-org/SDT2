@@ -4,12 +4,20 @@ import tinycolor from "tinycolor2";
 import type { ColorScaleArray } from "../colorScales";
 import { plotFontMonospace } from "../constants";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
+import type { HeatmapSettings } from "../plotTypes";
 import type { HeatmapRenderProps } from "./Heatmap";
 
 function createD3ColorScale(
   colorArray: ColorScaleArray,
+  settings: HeatmapSettings,
 ): d3.ScaleLinear<string, string> {
-  const domain = colorArray.map(([stop]) => stop);
+  const domain =
+    settings.colorScaleKey === "Discrete"
+      ? colorArray.map(([stop]) => stop)
+      : colorArray.map(
+          ([stop]) => stop * (settings.vmax - settings.vmin) + settings.vmin,
+        );
+
   const range = colorArray.map(([_, color]) => color);
 
   return d3
@@ -44,6 +52,7 @@ export const D3CanvasHeatmap = ({
   axis_labels,
   showscale,
   margin,
+  settings,
 }: HeatmapRenderProps) => {
   const canvasRef =
     useHeatmapRef() as React.MutableRefObject<HTMLCanvasElement>;
@@ -68,8 +77,8 @@ export const D3CanvasHeatmap = ({
   const cellSize = plotSize / n;
 
   const colorFn = React.useMemo(
-    () => createD3ColorScale(colorScale),
-    [colorScale],
+    () => createD3ColorScale(colorScale, settings),
+    [colorScale, settings],
   );
 
   const scale = React.useMemo(
@@ -201,9 +210,12 @@ export const D3CanvasHeatmap = ({
       );
       // addded normalize to min max to fix gradient not matching colorscale
       for (const [stop, color] of colorScale) {
-        const normalizedStop = (stop - minVal) / (maxVal - minVal);
-
-        gradient.addColorStop(normalizedStop, color);
+        let stopValue = stop;
+        if (settings?.colorScaleKey === "Discrete") {
+          stopValue = (stop - minVal) / (maxVal - minVal);
+        }
+        console.log(stopValue);
+        gradient.addColorStop(stopValue, color);
       }
 
       ctx.fillStyle = gradient;
@@ -255,6 +267,7 @@ export const D3CanvasHeatmap = ({
     margin,
     minVal,
     maxVal,
+    settings?.colorScaleKey,
   ]);
 
   React.useEffect(() => {

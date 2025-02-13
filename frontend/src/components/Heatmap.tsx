@@ -9,13 +9,16 @@ import {
   colorScales as defaultColorScales,
 } from "../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
-import type { HeatmapData, HeatmapSettings } from "../plotTypes";
+import type { HeatmapData, HeatmapSettings, MetaData } from "../plotTypes";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3Heatmap } from "./D3Heatmap";
 import { HeatmapSidebar } from "./HeatmapSidebar";
 
 export type HeatmapRenderProps = {
+  // TODO: just use settings
   data: { x: number; y: number; value: number }[];
+  metaData: MetaData;
+  settings: HeatmapSettings;
   tickText: string[];
   colorScale: ColorScaleArray;
   minVal: number;
@@ -42,6 +45,7 @@ export type HeatmapRenderProps = {
 
 export const Heatmap = ({
   data,
+  metaData,
   tickText,
   docState,
   setDocState,
@@ -51,6 +55,7 @@ export const Heatmap = ({
   setDocState: SetDocState;
   updateDocState: UpdateDocState;
   data: HeatmapData;
+  metaData: MetaData;
   tickText: string[];
   leftSidebarCollapsed: boolean;
 }) => {
@@ -70,7 +75,7 @@ export const Heatmap = ({
 
   const discreteColorScale: ColorScaleArray = React.useMemo(() => {
     const scales = [
-      [settings.vmin, "#CDF0FF"],
+      [metaData.minVal, "#CDF0FF"],
       [settings.cutoff_2 - 1, "#20B9FF"],
       [settings.cutoff_2, "#C3E8D3"],
       [settings.cutoff_1, "#009942"],
@@ -81,7 +86,7 @@ export const Heatmap = ({
       scales.push([100, "#FF6167"]);
     }
     return scales as ColorScaleArray;
-  }, [settings.cutoff_1, settings.cutoff_2, settings.vmin]);
+  }, [settings.cutoff_1, settings.cutoff_2, metaData.minVal]);
 
   const colorScales = React.useMemo(
     () => ({
@@ -171,6 +176,8 @@ export const Heatmap = ({
             {appState.showExportModal && appState.saveFormat === "svg" ? (
               <D3Heatmap
                 data={d3HeatmapData}
+                metaData={metaData}
+                settings={settings}
                 tickText={tickText}
                 colorScale={colorScale}
                 minVal={settings.vmin}
@@ -198,8 +205,10 @@ export const Heatmap = ({
             ) : (
               <D3CanvasHeatmap
                 data={d3HeatmapData}
+                metaData={metaData}
+                settings={settings}
                 tickText={tickText}
-                colorScale={discreteColorScale}
+                colorScale={colorScale}
                 minVal={settings.vmin}
                 maxVal={settings.vmax}
                 width={size.width}

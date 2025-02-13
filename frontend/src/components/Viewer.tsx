@@ -136,6 +136,7 @@ export const Viewer = ({
           {!loading && heatmapData && metaData ? (
             <Heatmap
               data={heatmapData}
+              metaData={metaData}
               tickText={tickText}
               docState={docState}
               setDocState={setDocState}
