@@ -93,6 +93,14 @@ export const D3CanvasHeatmap = ({
     const rows = [...new Set(filteredData.map((d) => d.x))];
     const cols = [...new Set(filteredData.map((d) => d.y))];
 
+    ctx.font = `${annotation_font_size}px ${plotFontMonospace.family}`;
+    const maxTextWidth = ctx.measureText("100.00").width;
+    let textFontSize = annotation_font_size;
+
+    if (maxTextWidth > cellSize) {
+      textFontSize = annotation_font_size / (1 + 1.25 * roundTo);
+    }
+
     // Draw cells
     for (const d of filteredData) {
       const x = cols.indexOf(d.x) * cellSize + cellSpace / 2;
@@ -109,7 +117,8 @@ export const D3CanvasHeatmap = ({
         ctx.fillStyle = textColor;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.font = `${annotation_font_size}px ${plotFontMonospace.family}`;
+
+        ctx.font = `${textFontSize}px ${plotFontMonospace.family}`;
         ctx.fillText(
           d.value.toFixed(roundTo),
           x + rectSize / 2,
