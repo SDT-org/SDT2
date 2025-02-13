@@ -98,7 +98,7 @@ export const D3CanvasHeatmap = ({
     let textFontSize = annotation_font_size;
 
     if (maxTextWidth > cellSize) {
-      textFontSize = annotation_font_size / (1 + 1.25 * roundTo);
+      textFontSize = annotation_font_size / (1 + 0.35 * roundTo);
     }
 
     // Draw cells
