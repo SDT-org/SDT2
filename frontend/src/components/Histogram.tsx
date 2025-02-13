@@ -35,8 +35,7 @@ export const Histogram = ({
       </div>
     );
   }
-  console.log(dataSetKey);
-  console.log(dataSets[dataSetKey]);
+
   const dataSet = dataSets[dataSetKey];
 
   const updateTitles = useRelayoutUpdateTitles(updateSettings);

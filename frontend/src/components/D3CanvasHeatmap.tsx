@@ -1,31 +1,10 @@
 import * as d3 from "d3";
 import React from "react";
 import tinycolor from "tinycolor2";
-import type { ColorScaleArray } from "../colorScales";
+import { createD3ColorScale } from "../colors";
 import { plotFontMonospace } from "../constants";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
-import type { HeatmapSettings } from "../plotTypes";
 import type { HeatmapRenderProps } from "./Heatmap";
-
-function createD3ColorScale(
-  colorArray: ColorScaleArray,
-  settings: HeatmapSettings,
-): d3.ScaleLinear<string, string> {
-  const domain =
-    settings.colorScaleKey === "Discrete"
-      ? colorArray.map(([stop]) => stop)
-      : colorArray.map(
-          ([stop]) => stop * (settings.vmax - settings.vmin) + settings.vmin,
-        );
-
-  const range = colorArray.map(([_, color]) => color);
-
-  return d3
-    .scaleLinear<string>()
-    .domain(domain)
-    .range(range)
-    .interpolate(d3.interpolateRgb);
-}
 
 export const D3CanvasHeatmap = ({
   data,
@@ -77,8 +56,14 @@ export const D3CanvasHeatmap = ({
   const cellSize = plotSize / n;
 
   const colorFn = React.useMemo(
-    () => createD3ColorScale(colorScale, settings),
-    [colorScale, settings],
+    () =>
+      createD3ColorScale(
+        colorScale,
+        settings.colorScaleKey === "Discrete",
+        settings.vmax,
+        settings.vmin,
+      ),
+    [colorScale, settings.colorScaleKey, settings.vmax, settings.vmin],
   );
 
   const scale = React.useMemo(
@@ -214,7 +199,6 @@ export const D3CanvasHeatmap = ({
         if (settings?.colorScaleKey === "Discrete") {
           stopValue = (stop - minVal) / (maxVal - minVal);
         }
-        console.log(stopValue);
         gradient.addColorStop(stopValue, color);
       }
 

@@ -1,31 +1,14 @@
 import * as d3 from "d3";
 import React from "react";
 import tinycolor from "tinycolor2";
-import type { ColorScaleArray } from "../colorScales";
+import { createD3ColorScale } from "../colors";
 import { plotFontMonospace } from "../constants";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapRenderProps } from "./Heatmap";
 
-function createD3ColorScale(
-  colorArray: ColorScaleArray,
-  minValue: number,
-  maxValue: number,
-): d3.ScaleLinear<string, string> {
-  const domain = colorArray.map(
-    ([stop]) => stop * (maxValue - minValue) + minValue,
-  );
-  const range = colorArray.map(([_, color]) => color);
-
-  // Build a piecewise linear scale
-  return d3
-    .scaleLinear<string>()
-    .domain(domain)
-    .range(range)
-    .interpolate(d3.interpolateRgb);
-}
-
 export const D3Heatmap = ({
   data,
+  settings,
   tickText,
   colorScale,
   minVal,
@@ -50,7 +33,6 @@ export const D3Heatmap = ({
   axis_labels,
   margin,
 }: HeatmapRenderProps) => {
-  // console.count("drawSVG");
   const svgRef = useHeatmapRef() as React.MutableRefObject<SVGSVGElement>;
   const [_, setSvgTransform] = React.useState({});
 
@@ -78,7 +60,16 @@ export const D3Heatmap = ({
 
     const n = tickText.length;
 
-    const colorFn = createD3ColorScale(colorScale, minVal, maxVal);
+    const colorFn = React.useMemo(
+      () =>
+        createD3ColorScale(
+          colorScale,
+          settings.colorScaleKey === "Discrete",
+          settings.vmax,
+          settings.vmin,
+        ),
+      [colorScale, settings.colorScaleKey, settings.vmax, settings.vmin],
+    );
 
     const g = d3
       .select(svgRef.current)
@@ -249,8 +240,9 @@ export const D3Heatmap = ({
     data,
     tickText,
     colorScale,
-    minVal,
-    maxVal,
+    settings.colorScaleKey,
+    settings.vmin,
+    settings.vmax,
     width,
     height,
     cellSpace,

@@ -1,4 +1,5 @@
 import Color from "colorjs.io";
+import * as d3 from "d3";
 import tinycolor from "tinycolor2";
 import { z } from "zod";
 import type { ColorScaleArray } from "./colorScales";
@@ -77,6 +78,26 @@ export const makeLinearGradient = (scale: ColorScaleArray) => {
   const values = Array.from({ length: 10 }, (_, i) => i / 10);
   return values.map((v) => interpolateColor(scale, v).value);
 };
+
+export function createD3ColorScale(
+  colorArray: ColorScaleArray,
+  discrete: boolean,
+  max: number,
+  min: number,
+): d3.ScaleLinear<string, string> {
+  const domain = discrete
+    ? colorArray.map(([stop]) => stop)
+    : colorArray.map(([stop]) => stop * (max - min) + min);
+
+  const range = colorArray.map(([_, color]) => color);
+
+  return d3
+    .scaleLinear<string>()
+    .domain(domain)
+    .range(range)
+    .interpolate(d3.interpolateRgb)
+    .clamp(true);
+}
 
 type ColorName =
   | "White"
