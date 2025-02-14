@@ -284,7 +284,16 @@ export const D3CanvasHeatmap = ({
       d3.select(canvas).on(".zoom", null);
     };
   }, [canvasRef, width, height, margin]);
-
+  console.log(
+    margin.left,
+    "left",
+    margin.right,
+    "right",
+    margin.top,
+    "top",
+    margin.bottom,
+    "bottom",
+  );
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;

@@ -155,13 +155,13 @@ export const Heatmap = ({
 
   const longestTickWidth =
     Math.max(...tickText.map((tick) => tick.length)) *
-    (settings.axlabel_yfontsize * 1.25);
-
+    settings.axlabel_yfontsize;
+  console.log("longestTickWidth", longestTickWidth);
   const margin = {
     top: 60,
     right: 60,
-    bottom: longestTickWidth,
-    left: longestTickWidth,
+    bottom: settings.axis_labels ? Math.max(longestTickWidth, 60) : 60,
+    left: settings.axis_labels ? Math.max(longestTickWidth, 60) : 60,
   };
 
   return (
