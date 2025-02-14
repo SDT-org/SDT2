@@ -160,10 +160,11 @@ def tree_clustering(settings, dm, filename):
     clustering_method = getattr(constructor, settings["cluster_method"])
     tree_file = filename + "_tree.nwk"
     tree = clustering_method(dm)
-    
+    if not tree.rooted:
+        tree.root_at_midpoint()
     if settings["cluster_method"] == "nj":  # NJ method does not inherently reorder, need ladderize, It sorts clades in-place according to the number of terminal nodes
         tree.ladderize(reverse=True) 
-    
+
     Phylo.write(tree, tree_file, "newick")
     tree = Phylo.read(tree_file, "newick")
     new_order = [leaf.name for leaf in tree.get_terminals()]
