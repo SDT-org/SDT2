@@ -87,7 +87,7 @@ def make_platform_build_command(settings):
         case "Darwin":
             command.extend(
                 [
-                    "--onefile",
+                    "--macos-create-app-bundle",
                     f"--macos-app-icon={os.path.join(assets_path, 'app.icns')}",
                 ]
             )
