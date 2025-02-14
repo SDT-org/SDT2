@@ -61,7 +61,6 @@ def make_platform_build_command(settings):
         python_executable,
         "-m",
         "nuitka",
-        "--standalone",
         "--include-package-data=webview",
         f"--include-data-dir={bio_data_src_path}={bio_data_dest_path}",
         f"--include-data-file={parasail_library_path}={os.path.join('parasail', parasail_library_name)}",
@@ -80,6 +79,7 @@ def make_platform_build_command(settings):
         case "Windows":
             command.extend(
                 [
+                    "--standalone",
                     f"--windows-icon-from-ico={os.path.join(assets_path, 'app.ico')}",
                     "--windows-console-mode=disable",
                 ]
@@ -87,13 +87,14 @@ def make_platform_build_command(settings):
         case "Darwin":
             command.extend(
                 [
-                    "--onefile",
+                    "--mode=app",
                     f"--macos-app-icon={os.path.join(assets_path, 'app.icns')}",
                 ]
             )
         case _:
             command.extend(
                 [
+                    "--standalone",
                     "--onefile"
                 ]
             )
