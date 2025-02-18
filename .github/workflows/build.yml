@@ -49,6 +49,7 @@ jobs:
         run: |
           venv-pywebview\\Scripts\\activate
           bun run build
+
       - name: Windows - Sign artifact
         if: matrix.os == 'windows-latest'
         uses: azure/trusted-signing-action@v0.4.0
@@ -72,7 +73,7 @@ jobs:
       - name: Windows - Create Installer
         if: matrix.os == 'windows-latest'
         run: |
-          "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsi
+          & "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsi
 
       - name: Windows - Sign Installer
         if: matrix.os == 'windows-latest'
