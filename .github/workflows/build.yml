@@ -73,7 +73,7 @@ jobs:
       - name: Windows - Create Installer
         if: matrix.os == 'windows-latest'
         run: |
-          & "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsi
+          & "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsis
 
       - name: Windows - Sign Installer
         if: matrix.os == 'windows-latest'
@@ -102,6 +102,7 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${{ secrets.MACOS_CI_KEYCHAIN_PWD }}" build.keychain
           /usr/bin/codesign -f -o runtime --timestamp -s "${{ secrets.MACOS_CERTIFICATE_NAME }}" --deep ./build/SDT2.app
           /usr/bin/codesign -vvv ./build/SDT2.app
+
       - name: macOS - Notarize artifact
         if: matrix.os == 'macos-latest'
         run: |
@@ -109,6 +110,7 @@ jobs:
           xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}" --team-id "${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}" --password "${{ secrets.MACOS_NOTARIZATION_PWD }}" > /dev/null
           xcrun notarytool submit "build/SDT2.app.zip" --keychain-profile "notarytool-profile" --wait
           xcrun stapler staple "./build/SDT2.app"
+
       - name: Ubuntu - Prepare artifact
         if: matrix.os == 'ubuntu-latest' || (matrix.os == 'ubuntu-22.04' && matrix.arch == 'arm64')
         run: chmod +x build/SDT2 && tar -czvf build/SDT2.tar.gz -C build SDT2
@@ -117,6 +119,7 @@ jobs:
         if: ${{ matrix.os == 'windows-latest' }}
         run: |
           powershell Compress-Archive -Path build\\app.dist\\* -DestinationPath SDT2.zip
+
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-build-output
