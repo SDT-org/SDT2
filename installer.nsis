@@ -1,0 +1,44 @@
+!include "MUI2.nsh"
+!include "FileFunc.nsh"
+
+Name "SDT2"
+OutFile "SDT2_Installer.exe"
+InstallDir "$PROGRAMFILES64\SDT2"
+
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_DIRECTORY
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
+!insertmacro MUI_LANGUAGE "English"
+
+Section "MainSection" SEC01
+    SetOutPath "$INSTDIR"
+
+    ; Copy EVERYTHING - all files and directories recursively
+    File /r "build\app.dist\*.*"
+
+    ; Create shortcuts
+    CreateDirectory "$SMPROGRAMS\SDT2"
+    CreateShortcut "$SMPROGRAMS\SDT2\SDT2.lnk" "$INSTDIR\SDT2.exe"
+    CreateShortcut "$DESKTOP\SDT2.lnk" "$INSTDIR\SDT2.exe"
+
+    ; Write uninstaller
+    WriteUninstaller "$INSTDIR\Uninstall.exe"
+
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SDT2" \
+                     "DisplayName" "SDT2"
+    WriteRegStr HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SDT2" \
+                     "UninstallString" "$INSTDIR\Uninstall.exe"
+SectionEnd
+
+Section "Uninstall"
+    ; Remove everything
+    RMDir /r "$INSTDIR"
+
+    ; Remove shortcuts
+    Delete "$SMPROGRAMS\SDT2\SDT2.lnk"
+    Delete "$DESKTOP\SDT2.lnk"
+    RMDir "$SMPROGRAMS\SDT2"
+
+    DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\SDT2"
+SectionEnd
