@@ -196,9 +196,6 @@ export const Violin = ({
                       b: 0,
                       l: 0,
                     },
-                    subtitle: {
-                      text: settings.subtitle,
-                    },
                   },
                 }
               : {}),

@@ -84,11 +84,7 @@ export const Raincloud = ({
             ...(settings.showTitles
               ? {
                   title: {
-                    text:
-                      settings.title +
-                      (settings.subtitle
-                        ? `<br><span style="font-size:0.8em;">${settings.subtitle}</span>`
-                        : ""),
+                    text: settings.title,
                     pad: {
                       t: 100,
                       r: 0,

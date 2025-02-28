@@ -39,7 +39,6 @@ export type DistributionState = {
     dtickx: number;
     dticky: number;
     title: string;
-    subtitle: string;
     xtitle: string;
     ytitle: string;
     plotOrientation: "horizontal" | "vertical";
@@ -63,7 +62,6 @@ export type DistributionState = {
     editable: boolean;
     dticks: number;
     title: string;
-    subtitle: string;
     xtitle: string;
     ytitle: string;
     titleFont: "Monospace" | "Sans Serif";
@@ -90,7 +88,6 @@ export type DistributionState = {
     whiskerWidth: number;
     plotOrientation: "horizontal" | "vertical";
     title: string;
-    subtitle: string;
     xtitle: string;
     ytitle: string;
     titleFont: "Monospace" | "Sans Serif";
@@ -123,7 +120,6 @@ export const DistributionStateSchema = z.object({
     dtickx: z.number(),
     dticky: z.number(),
     title: z.string(),
-    subtitle: z.string(),
     xtitle: z.string(),
     ytitle: z.string(),
     plotOrientation: z.enum(["horizontal", "vertical"]),
@@ -147,7 +143,6 @@ export const DistributionStateSchema = z.object({
     editable: z.boolean(),
     dticks: z.number(),
     title: z.string(),
-    subtitle: z.string(),
     xtitle: z.string(),
     ytitle: z.string(),
     titleFont: z.enum(["Monospace", "Sans Serif"]),
@@ -174,7 +169,6 @@ export const DistributionStateSchema = z.object({
     whiskerWidth: z.number(),
     plotOrientation: z.enum(["horizontal", "vertical"]),
     title: z.string(),
-    subtitle: z.string(),
     xtitle: z.string(),
     ytitle: z.string(),
     titleFont: z.enum(["Monospace", "Sans Serif"]),
@@ -207,7 +201,6 @@ export const initialDistributionState: DistributionState = {
     dtickx: 5,
     dticky: 1,
     showTitles: true,
-    subtitle: "Histogram",
     title: "Histogram",
     xtitle: "Percent Identity",
     ytitle: "Frequency",
@@ -234,7 +227,6 @@ export const initialDistributionState: DistributionState = {
     makeEditable: true,
     dticks: 5,
     showTitles: true,
-    subtitle: "Raincloud Plot",
     title: "Raincloud Plot",
     xtitle: "Percent Identity",
     ytitle: "Genome",
@@ -266,7 +258,6 @@ export const initialDistributionState: DistributionState = {
     showTitles: true,
     showTickLabels: true,
     title: "Violin Plot",
-    subtitle: "Violin Plot",
     xtitle: "",
     ytitle: "",
     titleFont: "Sans Serif",

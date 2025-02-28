@@ -301,15 +301,7 @@ export const RaincloudSidebar = ({
               <Label>Title</Label>
               <Input />
             </TextField>
-            <div className="field">
-              <TextField
-                onChange={(value) => updateSettings({ subtitle: value })}
-                value={settings.subtitle}
-              >
-                <Label>Subtitle</Label>
-                <Input />
-              </TextField>
-            </div>
+
             <div className="field">
               <TextField
                 onChange={(value) => updateSettings({ xtitle: value })}

@@ -28,7 +28,6 @@ export const D3Heatmap = ({
   titleFont,
   showTitles,
   title,
-  subtitle,
   showscale,
   axis_labels,
   margin,
@@ -140,8 +139,7 @@ export const D3Heatmap = ({
         .attr("font-family", titleFont.family)
         .attr("font-size", "20px")
         .attr("x", (width - margin.left - margin.right) / 2)
-        .attr("y", margin.top - margin.bottom + 18)
-        .text(subtitle);
+        .attr("y", margin.top - margin.bottom + 18);
     }
 
     if (axis_labels) {
@@ -252,7 +250,6 @@ export const D3Heatmap = ({
     titleFont,
     showTitles,
     title,
-    subtitle,
     showscale,
     axis_labels,
     margin,

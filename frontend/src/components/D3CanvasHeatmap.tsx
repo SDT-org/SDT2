@@ -27,7 +27,6 @@ export const D3CanvasHeatmap = ({
   showPercentIdentities,
   showTitles,
   title,
-  subtitle,
   axis_labels,
   showscale,
   margin,
@@ -98,7 +97,7 @@ export const D3CanvasHeatmap = ({
     let textFontSize = annotation_font_size;
 
     if (maxTextWidth > cellSize) {
-      textFontSize = annotation_font_size / (1 + 0.35 * roundTo);
+      textFontSize = annotation_font_size / (cellSize * roundTo);
     }
 
     // Draw cells
@@ -135,8 +134,6 @@ export const D3CanvasHeatmap = ({
       ctx.textBaseline = "top";
       ctx.font = `Bold 20px ${titleFont.family}`;
       ctx.fillText(title, width / 2, margin.top - 20);
-      ctx.font = `20px ${titleFont.family}`;
-      ctx.fillText(subtitle, width / 2, margin.top);
     }
 
     const axisGap = 5;
@@ -236,7 +233,6 @@ export const D3CanvasHeatmap = ({
     roundTo,
     showTitles,
     title,
-    subtitle,
     annotation_font_size,
     axlabel_xfontsize,
     axlabel_yfontsize,
