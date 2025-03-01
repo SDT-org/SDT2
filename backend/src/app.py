@@ -1,6 +1,9 @@
 import os
 import sys
 
+##test
+import cluster
+
 current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(current_file_path, "../../"))
 sys.path.append(os.path.join(current_file_path, "."))
@@ -530,6 +533,49 @@ class Api:
             full_stats=stats_df.values.tolist()
         )
         return json.dumps(data_to_dump)
+
+    ###cluster apio test
+
+    def getClusterData(self, doc_id: str):
+        doc = get_document(doc_id)
+        if doc is None:
+            raise Exception(f"Could not find document: {doc_id}")
+        matrix_path = get_matrix_path(doc)
+        file_base = os.path.splitext(os.path.basename(matrix_path))[0].removesuffix("_mat")
+        cluster_file =os.path.join(doc.tempdir_path,f"{file_base}_cluster.csv")
+        if not os.path.exists(cluster_file):
+            return {"exists": False}
+        try:
+            df=read_csv(cluster_file)
+            return {"exists": True,
+                    "data": df.to_dict(orient="records")
+                    }
+        except Exception as e:
+            print(f"Error reading cluster file: {e}")
+            return {"exists": False, "error": str(e)}
+            
+          
+        
+    def generateClusterData(self, doc_id: str, threshold_one: float, threshold_two: float = 0): ## T2 set to zero for now to just get one working
+        doc = get_document(doc_id)  
+        if doc is None:
+            raise Exception(f"Could not find document: {doc_id}")
+        matrix_path = get_matrix_path(doc)
+        try:
+            cluster.export(matrix_path, threshold_one, threshold_two)
+            file_base = os.path.splitext(os.path.basename(matrix_path))[0].removesuffix("_mat")
+            cluster_file = os.path.join(doc.tempdir_path, f"{file_base}_cluster.csv")
+
+            # Check if the file was created
+            if os.path.exists(cluster_file):
+                return {"success": True, "path": cluster_file}
+            else:
+                return {"success": False, "error": "Cluster file not created"}
+        except Exception as e:
+            print(f"Error generating cluster data: {e}")
+        return {"success": False, "error": str(e)}
+
+
 
     def new_doc(self):
         id = make_doc_id()
