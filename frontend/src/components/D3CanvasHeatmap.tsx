@@ -285,6 +285,7 @@ export const D3CanvasHeatmap = ({
     minVal,
     maxVal,
     settings?.colorScaleKey,
+    clusterData,
   ]);
 
   React.useEffect(() => {
