@@ -107,37 +107,53 @@ export const D3CanvasHeatmap = ({
       const y = rows.indexOf(d.y) * cellSize + cellSpace / 2;
       const rectSize = cellSize - cellSpace;
 
-      const clusterGroup = clusterData
-        ? clusterData.find(
-            (i) => i.id === tickText[d.x] && i.id === tickText[d.y],
-          )?.group
-        : null;
+      // Get  X-Y cluster data
+      const clusterX = clusterData?.find((i) => i.id === tickText[d.x])?.group;
+      const clusterY = clusterData?.find((i) => i.id === tickText[d.y])?.group;
+
+      //check for group match
+      const clusterGroup =
+        clusterX !== undefined &&
+        clusterY !== undefined &&
+        clusterX === clusterY;
+
+      const clusterMatch = clusterGroup ? clusterX : null;
 
       const TEMP_clusterGroupColors = [
         "red",
-        "red",
-        "#222",
-        "#333",
-        "#444",
-        "#555",
-        "#666",
-        "#777",
-        "#888",
-        "#999",
-        "#aaa",
-        "#bbb",
-        "#aaa",
-        "#bbb",
-        "#ccc",
-        "#ddd",
-        "#eee",
-        "#fff",
         "pink",
         "blue",
+        "green",
+        "purple",
+        "orange",
+        "lime",
+        "teal",
+        "navy",
+        "yellow",
+        "aqua",
+        "fuchsia",
+        "gold",
+        "chocolate",
+        "tomato",
+        "salmon",
+        "magenta",
+        "hotpink",
+        "cornflowerblue",
+        "darkgreen",
+        "darkslategray",
+        "coral",
+        "orchid",
+        "turquoise",
+        "silver",
+        "maroon",
+        "olive",
+        "black",
+        "white",
+        "gray",
       ];
 
-      ctx.fillStyle = clusterGroup
-        ? TEMP_clusterGroupColors[clusterGroup] || "red"
+      ctx.fillStyle = clusterMatch
+        ? TEMP_clusterGroupColors[clusterMatch] || "red"
         : colorFn(d.value);
       ctx.fillRect(x, y, rectSize, rectSize);
 

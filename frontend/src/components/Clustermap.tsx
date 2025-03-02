@@ -27,7 +27,7 @@ export const Clustermap = ({
 
   React.useEffect(() => {
     window.pywebview.api
-      .generate_cluster_data(docState.id, 75, 0)
+      .generate_cluster_data(docState.id, 85, 0)
       .then((clusterData) => {
         setClusterData(clusterData);
       })
