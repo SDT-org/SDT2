@@ -107,18 +107,6 @@ export const D3CanvasHeatmap = ({
       const y = rows.indexOf(d.y) * cellSize + cellSpace / 2;
       const rectSize = cellSize - cellSpace;
 
-      // Get  X-Y cluster data
-      const clusterX = clusterData?.find((i) => i.id === tickText[d.x])?.group;
-      const clusterY = clusterData?.find((i) => i.id === tickText[d.y])?.group;
-
-      //check for group match
-      const clusterGroup =
-        clusterX !== undefined &&
-        clusterY !== undefined &&
-        clusterX === clusterY;
-
-      const clusterMatch = clusterGroup ? clusterX : null;
-
       const TEMP_clusterGroupColors = [
         "red",
         "pink",
@@ -152,8 +140,18 @@ export const D3CanvasHeatmap = ({
         "gray",
       ];
 
-      ctx.fillStyle = clusterMatch
-        ? TEMP_clusterGroupColors[clusterMatch] || "red"
+      const clusterX = clusterData?.find((i) => i.id === tickText[d.x])?.group;
+      const clusterY = clusterData?.find((i) => i.id === tickText[d.y])?.group;
+
+      const clusterMatch =
+        clusterX !== undefined &&
+        clusterY !== undefined &&
+        clusterX === clusterY;
+
+      const clusterGroup = clusterMatch ? clusterX : null;
+
+      ctx.fillStyle = clusterGroup
+        ? TEMP_clusterGroupColors[clusterGroup] || "red"
         : colorFn(d.value);
       ctx.fillRect(x, y, rectSize, rectSize);
 
