@@ -2,6 +2,7 @@ import React from "react";
 import { type Key, Tab, TabList, TabPanel, Tabs } from "react-aria-components";
 import type { DocState, SetDocState, UpdateDocState } from "../appState";
 import { useGetData } from "../hooks/useGetData";
+import { Clustermap } from "./Clustermap";
 import { DistributionPanels } from "./DistributionPanels";
 import { Heatmap } from "./Heatmap";
 
@@ -70,6 +71,25 @@ export const Viewer = ({
                   <rect x="20" y="20" width={8} height={8} />
                 </svg>
                 <span>Heatmap</span>
+              </div>
+            </Tab>
+            <Tab id="cluster">
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}
+              >
+                <svg
+                  height={12}
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 30 30"
+                  aria-hidden={true}
+                  color="currentcolor"
+                >
+                  <rect x="0" y="0" width={4} height={4} />
+                  <rect x="10" y="10" width={4} height={4} />
+                  <rect x="10" y="0" width={4} height={4} />
+                  <rect x="0" y="40" width={4} height={4} />
+                </svg>
+                <span>Clustermap</span>
               </div>
             </Tab>
             <Tab
@@ -141,6 +161,16 @@ export const Viewer = ({
               docState={docState}
               setDocState={setDocState}
               updateDocState={updateDocState}
+              leftSidebarCollapsed={leftSidebarCollapsed}
+            />
+          ) : null}
+        </TabPanel>
+        <TabPanel id="cluster" className="app-panel">
+          {!loading && heatmapData ? (
+            <Clustermap
+              data={heatmapData}
+              docState={docState}
+              tickText={tickText}
               leftSidebarCollapsed={leftSidebarCollapsed}
             />
           ) : null}

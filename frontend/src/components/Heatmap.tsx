@@ -9,6 +9,7 @@ import {
   colorScales as defaultColorScales,
 } from "../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
+import { useHeatmapData, useMetrics, useSize } from "../hooks/map";
 import type { HeatmapData, HeatmapSettings, MetaData } from "../plotTypes";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3Heatmap } from "./D3Heatmap";
@@ -17,7 +18,6 @@ import { HeatmapSidebar } from "./HeatmapSidebar";
 export type HeatmapRenderProps = {
   // TODO: just use settings
   data: { x: number; y: number; value: number }[];
-  metaData: MetaData;
   settings: HeatmapSettings;
   tickText: string[];
   colorScale: ColorScaleArray;
@@ -73,6 +73,9 @@ export const Heatmap = ({
     [setDocState],
   );
 
+  console.log(data);
+  console.log(tickText);
+
   const discreteColorScale: ColorScaleArray = React.useMemo(() => {
     const scales = [
       [metaData.minVal, "#CDF0FF"],
@@ -96,48 +99,12 @@ export const Heatmap = ({
     [discreteColorScale],
   );
 
-  const d3HeatmapData = React.useMemo(
-    () =>
-      data.flatMap((row, y) =>
-        row.map((value, x) => ({
-          x,
-          y,
-          value: Number(value),
-        })),
-      ),
-    [data],
-  );
+  const d3HeatmapData = useHeatmapData(data);
+
+  const { cbar_shrink, cbar_aspect, margin } = useMetrics(settings, tickText);
 
   const elementRef = React.useRef<HTMLDivElement | null>(null);
-  const [size, setSize] = React.useState<{ width: number; height: number }>({
-    width: 0,
-    height: 0,
-  });
-
-  const updateSize = React.useCallback(() => {
-    if (elementRef.current) {
-      const { offsetWidth, offsetHeight } = elementRef.current;
-      setSize({ width: offsetWidth, height: offsetHeight });
-    }
-  }, []);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies(leftSidebarCollapsed): trigger updateSize
-  React.useEffect(() => {
-    updateSize();
-
-    const handleResize = () => {
-      updateSize();
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [updateSize, leftSidebarCollapsed]);
-
-  const cbar_shrink = settings.cbar_shrink * 60;
-  const cbar_aspect = settings.cbar_aspect * 10;
+  const size = useSize(elementRef, leftSidebarCollapsed);
 
   let colorScale = colorScales[settings.colorScaleKey];
 
@@ -153,17 +120,6 @@ export const Heatmap = ({
   const titleFont =
     settings.titleFont === "Monospace" ? plotFontMonospace : plotFontSansSerif;
 
-  const longestTickWidth =
-    Math.max(...tickText.map((tick) => tick.length)) *
-    settings.axlabel_yfontsize;
-  console.log("longestTickWidth", longestTickWidth);
-  const margin = {
-    top: 60,
-    right: 60,
-    bottom: settings.axis_labels ? Math.max(longestTickWidth, 60) : 60,
-    left: settings.axis_labels ? Math.max(longestTickWidth, 60) : 60,
-  };
-
   return (
     <>
       {data ? (
@@ -176,7 +132,6 @@ export const Heatmap = ({
             {appState.showExportModal && appState.saveFormat === "svg" ? (
               <D3Heatmap
                 data={d3HeatmapData}
-                metaData={metaData}
                 settings={settings}
                 tickText={tickText}
                 colorScale={colorScale}
@@ -205,7 +160,6 @@ export const Heatmap = ({
             ) : (
               <D3CanvasHeatmap
                 data={d3HeatmapData}
-                metaData={metaData}
                 settings={settings}
                 tickText={tickText}
                 colorScale={colorScale}

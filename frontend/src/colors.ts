@@ -99,6 +99,11 @@ export function createD3ColorScale(
     .clamp(true);
 }
 
+export const distinctColor = (value: number) => {
+  const hue = value * 137.508; // use golden angle approximation
+  return `hsl(${hue},50%,75%)`;
+};
+
 type ColorName =
   | "White"
   | "Black"

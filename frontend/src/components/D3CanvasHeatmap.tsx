@@ -8,6 +8,7 @@ import type { HeatmapRenderProps } from "./Heatmap";
 
 export const D3CanvasHeatmap = ({
   data,
+  clusterData,
   tickText,
   colorScale,
   minVal,
@@ -31,14 +32,14 @@ export const D3CanvasHeatmap = ({
   showscale,
   margin,
   settings,
-}: HeatmapRenderProps) => {
+}: HeatmapRenderProps & { clusterData?: { id: string; group: number }[] }) => {
   const canvasRef =
     useHeatmapRef() as React.MutableRefObject<HTMLCanvasElement>;
   const [transform, setTransform] = React.useState(d3.zoomIdentity);
   const [tooltipData, setTooltipData] = React.useState<{
     x: number;
     y: number;
-    value: number;
+    value: number | null;
     xLabel?: string;
     yLabel?: string;
   } | null>(null);
@@ -106,7 +107,38 @@ export const D3CanvasHeatmap = ({
       const y = rows.indexOf(d.y) * cellSize + cellSpace / 2;
       const rectSize = cellSize - cellSpace;
 
-      ctx.fillStyle = colorFn(d.value);
+      const clusterGroup = clusterData
+        ? clusterData.find(
+            (i) => i.id === tickText[d.x] && i.id === tickText[d.y],
+          )?.group
+        : null;
+
+      const TEMP_clusterGroupColors = [
+        "red",
+        "red",
+        "#222",
+        "#333",
+        "#444",
+        "#555",
+        "#666",
+        "#777",
+        "#888",
+        "#999",
+        "#aaa",
+        "#bbb",
+        "#aaa",
+        "#bbb",
+        "#ccc",
+        "#ddd",
+        "#eee",
+        "#fff",
+        "pink",
+        "blue",
+      ];
+
+      ctx.fillStyle = clusterGroup
+        ? TEMP_clusterGroupColors[clusterGroup]
+        : colorFn(d.value);
       ctx.fillRect(x, y, rectSize, rectSize);
 
       if (showPercentIdentities) {
@@ -280,16 +312,7 @@ export const D3CanvasHeatmap = ({
       d3.select(canvas).on(".zoom", null);
     };
   }, [canvasRef, width, height, margin]);
-  console.log(
-    margin.left,
-    "left",
-    margin.right,
-    "right",
-    margin.top,
-    "top",
-    margin.bottom,
-    "bottom",
-  );
+
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -307,11 +330,16 @@ export const D3CanvasHeatmap = ({
 
     const cell = filteredData.find((d) => d.x === dataX && d.y === dataY);
 
+    const clusterGroup =
+      clusterData && cell
+        ? clusterData.find((i) => i.id === tickText[cell.x])?.group
+        : null;
+
     if (cell) {
       setTooltipData({
         x,
         y,
-        value: cell.value,
+        value: clusterData ? (clusterGroup ?? null) : cell.value,
         xLabel: tickText[cell.x] || "",
         yLabel: tickText[cell.y] || "",
       });
@@ -347,8 +375,18 @@ export const D3CanvasHeatmap = ({
             <dd>{tooltipData.yLabel}</dd>
           </div>
           <div>
-            <dt>Percent ID:</dt>
-            <dd>{tooltipData.value.toFixed(2)}%</dd>
+            <dt>
+              {clusterData
+                ? tooltipData.value
+                  ? "Group:"
+                  : ""
+                : "Percent ID:"}
+            </dt>
+            <dd>
+              {clusterData
+                ? tooltipData.value || ""
+                : `${tooltipData?.value?.toFixed(2)}%`}
+            </dd>
           </div>
         </dl>
       )}

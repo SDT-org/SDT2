@@ -29,7 +29,7 @@ export const colorScales: {
 } = {
   Greys: [
     [0, "rgb(0,0,0)"],
-    [1, "rgb(255,255,255)"],
+    [1, "rgb(235,235,235)"],
   ],
 
   Yellow_Green_Blue: [

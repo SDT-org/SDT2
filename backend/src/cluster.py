@@ -51,7 +51,7 @@ def cluster_by_identity(clusters, nodes):
     return output
 
 
-def export(matrix_path, threshold_1=79, threshold_2=0):
+def export(matrix_path, threshold_1=79, threshold_2=0, save_csv=True):
     output_dir = os.path.dirname(matrix_path)
     file_name = os.path.basename(matrix_path)
     file_base, _ = os.path.splitext(file_name)
@@ -83,7 +83,7 @@ def export(matrix_path, threshold_1=79, threshold_2=0):
             (item, key + 1) for key, sublist in output.items() for item in sublist
         ]
         df = pd.DataFrame(flattened_output)
-        df.columns = ["ID", "Group 1 - Theshold: " + str(threshold_1)]
+        df.columns = ["SeqID", "Group - Theshold: " + str(threshold_1)]
 
     else:
         clusters = process_groups(threshold_1, data, index)
@@ -92,7 +92,11 @@ def export(matrix_path, threshold_1=79, threshold_2=0):
         df = pd.DataFrame(output)
         df.columns = [
             "ID",
-            "Group 1 - Theshold: " + str(threshold_1),
-            "Group 2 - Theshold: " + str(threshold_2),
+            "Group - Theshold: " + str(threshold_1),
+            "Subgroup - Theshold: " + str(threshold_2),
         ]
-    df.to_csv(output_file, index=False)
+
+    if save_csv:
+        df.to_csv(output_file, index=False)
+
+    return df
