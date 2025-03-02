@@ -137,7 +137,7 @@ export const D3CanvasHeatmap = ({
       ];
 
       ctx.fillStyle = clusterGroup
-        ? TEMP_clusterGroupColors[clusterGroup]
+        ? TEMP_clusterGroupColors[clusterGroup] || "red"
         : colorFn(d.value);
       ctx.fillRect(x, y, rectSize, rectSize);
 
