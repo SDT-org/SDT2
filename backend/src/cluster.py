@@ -23,7 +23,7 @@ def process_groups(data, index, threshold_1, threshold_2=0):
         
         return groups_dict
     else:
-        # create two adjacency matrices, one for each threshold
+        # Create two adjacency matrices, one for each threshold ~ is the bitwise 'not' operator
         adjacency_1 = (~np.isnan(data) & (data >= threshold_1)).astype(int)
         adjacency_2 = (~np.isnan(data) & (data >= threshold_2)).astype(int)
         
@@ -37,7 +37,7 @@ def process_groups(data, index, threshold_1, threshold_2=0):
             for node_idx in component:
                 groups_dict_1[i].append(index[node_idx])
         
-        # find subclusters with threshold_2 (higher threshold)
+        # find subclusters with threshold_2 
         groups_dict_2 = defaultdict(list)
         for i, component in enumerate(nx.connected_components(G2)):
             for node_idx in component:
