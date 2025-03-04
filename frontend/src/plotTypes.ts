@@ -105,3 +105,43 @@ export type DistributionData = Omit<
   gc_stats: number[];
   length_stats: number[];
 };
+
+export interface ClustermapSettings {
+  threshold_one: number;
+  threshold_two: number;
+  annotation: boolean;
+  annotation_font_size: number;
+  annotation_rounding: 0 | 1 | 2;
+  annotation_alpha: string;
+  titleFont: "Sans Serif" | "Monospace";
+  showTitles: boolean;
+  title: string;
+  subtitle: string;
+  xtitle: string;
+  ytitle: string;
+  axis_labels: boolean;
+  axlabel_xrotation: number;
+  axlabel_xfontsize: number;
+  axlabel_yrotation: number;
+  axlabel_yfontsize: number;
+}
+
+export const ClustermapSettingsSchema = z.object({
+  threshold_one: z.number(),
+  threshold_two: z.number(),
+  annotation: z.boolean(),
+  annotation_font_size: z.number(),
+  annotation_rounding: z.union([z.literal(0), z.literal(1), z.literal(2)]),
+  annotation_alpha: z.string(),
+  showTitles: z.boolean(),
+  titleFont: z.enum(["Sans Serif", "Monospace"]),
+  title: z.string(),
+  subtitle: z.string(),
+  xtitle: z.string(),
+  ytitle: z.string(),
+  axis_labels: z.boolean(),
+  axlabel_xrotation: z.number(),
+  axlabel_xfontsize: z.number(),
+  axlabel_yrotation: z.number(),
+  axlabel_yfontsize: z.number(),
+});

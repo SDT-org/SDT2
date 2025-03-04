@@ -31,6 +31,10 @@ export const parseDocState = (state: DocState) => {
         ...initialDocState.heatmap,
         ...validData.heatmap,
       },
+      clustermap: {
+        ...initialDocState.clustermap,
+        ...validData.clustermap,
+      },
       parsed: true,
     };
 

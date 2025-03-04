@@ -1,5 +1,5 @@
 import React from "react";
-import type { HeatmapSettings } from "../plotTypes";
+import type { ClustermapSettings, HeatmapSettings } from "../plotTypes";
 
 export const useSize = (
   elementRef: React.MutableRefObject<HTMLDivElement | null>,
@@ -36,10 +36,10 @@ export const useSize = (
   return size;
 };
 
-export const useMetrics = (settings: HeatmapSettings, tickText: string[]) => {
-  const cbar_shrink = settings.cbar_shrink * 60;
-  const cbar_aspect = settings.cbar_aspect * 10;
-
+export const useMetrics = (
+  settings: HeatmapSettings | ClustermapSettings,
+  tickText: string[],
+) => {
   const longestTickWidth = React.useMemo(
     () =>
       Math.max(...tickText.map((tick) => tick.length)) *
@@ -57,7 +57,15 @@ export const useMetrics = (settings: HeatmapSettings, tickText: string[]) => {
     [longestTickWidth, settings.axis_labels],
   );
 
-  return { cbar_shrink, cbar_aspect, margin };
+  return {
+    ...("cbar_shrink" in settings && {
+      cbar_shrink: settings.cbar_shrink * 60,
+    }),
+    ...("cbar_aspect" in settings && {
+      cbar_aspect: settings.cbar_aspect * 10,
+    }),
+    margin,
+  };
 };
 
 export const useHeatmapData = (data: string[][]) =>

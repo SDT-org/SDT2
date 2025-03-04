@@ -1,19 +1,48 @@
 import React from "react";
-import type { DocState } from "../appState";
+import type { DocState, SetDocState } from "../appState";
 import type { ColorScaleArray } from "../colorScales";
-import { plotFontMonospace } from "../constants";
+import { plotFontMonospace, type plotFontSansSerif } from "../constants";
 import { useHeatmapData, useMetrics, useSize } from "../hooks/map";
-import type { HeatmapData } from "../plotTypes";
+import type { ClustermapSettings, HeatmapData } from "../plotTypes";
+import { ClustermapSidebar } from "./ClustermapSidebar";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
+
+export type ClustermapRenderProps = {
+  data: { x: number; y: number; value: number }[];
+  settings: ClustermapSettings;
+  tickText: string[];
+  width: number;
+  height: number;
+  roundTo: number;
+  axlabel_xfontsize: number;
+  axlabel_yfontsize: number;
+  axlabel_xrotation: number;
+  axlabel_yrotation: number;
+  showPercentIdentities: boolean;
+  showTitles: boolean;
+  title: string;
+  subtitle: string;
+  showscale: boolean;
+  axis_labels: boolean;
+  titleFont: typeof plotFontMonospace | typeof plotFontSansSerif;
+  margin: { top: number; bottom: number; left: number; right: number };
+} & Pick<ClustermapSettings, "annotation_font_size" | "axis_labels"> & {
+    clusterData?: {
+      id: string;
+      group: number;
+    }[];
+  };
 
 export const Clustermap = ({
   data,
   docState,
+  setDocState,
   tickText,
   leftSidebarCollapsed,
 }: {
   data: HeatmapData;
   docState: DocState;
+  setDocState: SetDocState;
   tickText: string[];
   leftSidebarCollapsed: boolean;
 }) => {
@@ -26,22 +55,33 @@ export const Clustermap = ({
     >();
 
   React.useEffect(() => {
+    console.log("fetching...", docState.clustermap);
     window.pywebview.api
-      .generate_cluster_data(docState.id, 85, 0)
+      .generate_cluster_data(
+        docState.id,
+        docState.clustermap.threshold_one,
+        docState.clustermap.threshold_two,
+      )
       .then((clusterData) => {
         setClusterData(clusterData);
-      })
-      .catch((e) => {
-        alert(e);
-        throw e;
       });
-  }, [docState.id]);
+  }, [docState.id, docState.clustermap]);
 
   const elementRef = React.useRef<HTMLDivElement | null>(null);
   const size = useSize(elementRef, leftSidebarCollapsed);
-  // TODO: make this cluster settings
-  const { heatmap: settings } = docState;
-  const { cbar_aspect, cbar_shrink, margin } = useMetrics(settings, tickText);
+  const { clustermap: settings } = docState;
+  const { margin } = useMetrics(settings, tickText);
+  const updateSettings = React.useCallback(
+    (values: Partial<DocState["clustermap"]>) =>
+      setDocState((prev) => ({
+        ...prev,
+        clustermap: {
+          ...prev.clustermap,
+          ...values,
+        },
+      })),
+    [setDocState],
+  );
 
   const colorScale: ColorScaleArray = [
     [0, "rgb(0,0,0)"],
@@ -50,36 +90,45 @@ export const Clustermap = ({
 
   const d3HeatmapData = useHeatmapData(data);
 
-  return data && clusterData ? (
-    <div className="app-main" ref={elementRef} style={{ background: "#fff" }}>
-      <D3CanvasHeatmap
-        data={d3HeatmapData}
-        clusterData={clusterData}
+  return (
+    <>
+      <div className="app-main" ref={elementRef} style={{ background: "#fff" }}>
+        {data && clusterData ? (
+          <D3CanvasHeatmap
+            data={d3HeatmapData}
+            clusterData={clusterData}
+            settings={{ ...docState.heatmap, ...settings }}
+            tickText={tickText}
+            colorScale={colorScale}
+            cbarHeight={0}
+            cbarWidth={0}
+            minVal={0}
+            maxVal={100}
+            width={size.width}
+            height={size.height}
+            cellSpace={1}
+            roundTo={settings.annotation_rounding}
+            showscale={false}
+            annotation_font_size={settings.annotation_font_size}
+            axlabel_xrotation={settings.axlabel_xrotation}
+            axlabel_xfontsize={settings.axlabel_xfontsize}
+            axlabel_yrotation={settings.axlabel_yrotation}
+            axlabel_yfontsize={settings.axlabel_yfontsize}
+            titleFont={plotFontMonospace}
+            showPercentIdentities={settings.annotation}
+            showTitles={settings.showTitles}
+            title={settings.title}
+            subtitle={settings.subtitle}
+            axis_labels={settings.axis_labels}
+            margin={margin}
+          />
+        ) : null}
+      </div>
+      <ClustermapSidebar
         settings={settings}
-        tickText={tickText}
-        colorScale={colorScale}
-        minVal={settings.vmin}
-        maxVal={settings.vmax}
-        width={size.width}
-        height={size.height}
-        cellSpace={settings.cellspace}
-        roundTo={settings.annotation_rounding}
-        showscale={false}
-        cbarHeight={cbar_shrink}
-        cbarWidth={cbar_aspect}
-        annotation_font_size={settings.annotation_font_size}
-        axlabel_xrotation={settings.axlabel_xrotation}
-        axlabel_xfontsize={settings.axlabel_xfontsize}
-        axlabel_yrotation={settings.axlabel_yrotation}
-        axlabel_yfontsize={settings.axlabel_yfontsize}
-        titleFont={plotFontMonospace}
-        showPercentIdentities={settings.annotation}
-        showTitles={settings.showTitles}
-        title={settings.title}
-        subtitle={settings.subtitle}
-        axis_labels={settings.axis_labels}
-        margin={margin}
+        updateSettings={updateSettings}
+        sequences_count={docState.sequences_count}
       />
-    </div>
-  ) : null;
+    </>
+  );
 };

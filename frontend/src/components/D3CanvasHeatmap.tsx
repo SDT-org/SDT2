@@ -1,7 +1,7 @@
 import * as d3 from "d3";
 import React from "react";
 import tinycolor from "tinycolor2";
-import { createD3ColorScale } from "../colors";
+import { clusterGroupColors, createD3ColorScale } from "../colors";
 import { plotFontMonospace } from "../constants";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapRenderProps } from "./Heatmap";
@@ -71,10 +71,16 @@ export const D3CanvasHeatmap = ({
 
   const drawCanvas = React.useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas) {
+      console.warn("Failed to find canvas");
+      return;
+    }
 
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!ctx) {
+      console.warn("Failed to get 2d context");
+      return;
+    }
 
     const pixelRatio = window.devicePixelRatio || 1;
     canvas.width = width * pixelRatio;
@@ -107,39 +113,6 @@ export const D3CanvasHeatmap = ({
       const y = rows.indexOf(d.y) * cellSize + cellSpace / 2;
       const rectSize = cellSize - cellSpace;
 
-      const TEMP_clusterGroupColors = [
-        "red",
-        "pink",
-        "blue",
-        "green",
-        "purple",
-        "orange",
-        "lime",
-        "teal",
-        "navy",
-        "yellow",
-        "aqua",
-        "fuchsia",
-        "gold",
-        "chocolate",
-        "tomato",
-        "salmon",
-        "magenta",
-        "hotpink",
-        "cornflowerblue",
-        "darkgreen",
-        "darkslategray",
-        "coral",
-        "orchid",
-        "turquoise",
-        "silver",
-        "maroon",
-        "olive",
-        "black",
-        "white",
-        "gray",
-      ];
-
       const clusterX = clusterData?.find((i) => i.id === tickText[d.x])?.group;
       const clusterY = clusterData?.find((i) => i.id === tickText[d.y])?.group;
 
@@ -151,14 +124,15 @@ export const D3CanvasHeatmap = ({
       const clusterGroup = clusterMatch ? clusterX : null;
 
       ctx.fillStyle = clusterGroup
-        ? TEMP_clusterGroupColors[clusterGroup] || "red"
+        ? clusterGroupColors[clusterGroup] || "red"
         : colorFn(d.value);
       ctx.fillRect(x, y, rectSize, rectSize);
 
       if (showPercentIdentities) {
-        const textColor = tinycolor(colorFn(d.value)).isLight()
-          ? "#000"
-          : "#fff";
+        const rectColor = clusterGroup
+          ? clusterGroupColors[clusterGroup]
+          : colorFn(d.value);
+        const textColor = tinycolor(rectColor).isLight() ? "#000" : "#fff";
         ctx.fillStyle = textColor;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";

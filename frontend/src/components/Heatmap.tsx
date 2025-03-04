@@ -73,9 +73,6 @@ export const Heatmap = ({
     [setDocState],
   );
 
-  console.log(data);
-  console.log(tickText);
-
   const discreteColorScale: ColorScaleArray = React.useMemo(() => {
     const scales = [
       [metaData.minVal, "#CDF0FF"],
@@ -142,8 +139,8 @@ export const Heatmap = ({
                 cellSpace={settings.cellspace}
                 showPercentIdentities={settings.annotation}
                 roundTo={settings.annotation_rounding}
-                cbarHeight={cbar_shrink}
-                cbarWidth={cbar_aspect}
+                cbarHeight={cbar_shrink ?? settings.cbar_shrink}
+                cbarWidth={cbar_aspect ?? settings.cbar_aspect}
                 annotation_font_size={settings.annotation_font_size}
                 axlabel_xrotation={settings.axlabel_xrotation}
                 axlabel_xfontsize={settings.axlabel_xfontsize}
@@ -170,8 +167,8 @@ export const Heatmap = ({
                 cellSpace={settings.cellspace}
                 roundTo={settings.annotation_rounding}
                 showscale={settings.showscale}
-                cbarHeight={cbar_shrink}
-                cbarWidth={cbar_aspect}
+                cbarHeight={cbar_shrink ?? settings.cbar_shrink}
+                cbarWidth={cbar_aspect ?? settings.cbar_aspect}
                 annotation_font_size={settings.annotation_font_size}
                 axlabel_xrotation={settings.axlabel_xrotation}
                 axlabel_xfontsize={settings.axlabel_xfontsize}

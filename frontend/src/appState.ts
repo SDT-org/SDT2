@@ -6,7 +6,12 @@ import {
   initialDistributionState,
 } from "./distributionState";
 import type messages from "./messages";
-import { type HeatmapSettings, HeatmapSettingsSchema } from "./plotTypes";
+import {
+  type ClustermapSettings,
+  ClustermapSettingsSchema,
+  type HeatmapSettings,
+  HeatmapSettingsSchema,
+} from "./plotTypes";
 export const clusterMethods = ["Neighbor-Joining", "UPGMA"] as const;
 
 export const clusterMethodDescriptions = [
@@ -50,6 +55,7 @@ export type DocState = {
     | "distribution_raincloud";
   distribution: DistributionState;
   heatmap: HeatmapSettings;
+  clustermap: ClustermapSettings;
 };
 
 export type AppState = {
@@ -123,6 +129,7 @@ export const docStateSchema = z.object({
   ]),
   distribution: DistributionStateSchema,
   heatmap: HeatmapSettingsSchema,
+  clustermap: ClustermapSettingsSchema,
 });
 
 export const initialDocState: DocState = {
@@ -169,6 +176,25 @@ export const initialDocState: DocState = {
     axlabel_yfontsize: 12,
     cutoff_1: 95,
     cutoff_2: 75,
+  },
+  clustermap: {
+    threshold_one: 85,
+    threshold_two: 0,
+    annotation: false,
+    annotation_font_size: 10,
+    annotation_rounding: 0,
+    annotation_alpha: "0",
+    titleFont: "Sans Serif",
+    showTitles: false,
+    title: "",
+    subtitle: "",
+    xtitle: "",
+    ytitle: "",
+    axis_labels: false,
+    axlabel_xrotation: 270,
+    axlabel_xfontsize: 12,
+    axlabel_yrotation: 360,
+    axlabel_yfontsize: 12,
   },
 };
 

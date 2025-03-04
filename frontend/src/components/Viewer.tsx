@@ -84,10 +84,11 @@ export const Viewer = ({
                   aria-hidden={true}
                   color="currentcolor"
                 >
-                  <rect x="0" y="0" width={4} height={4} />
-                  <rect x="10" y="10" width={4} height={4} />
-                  <rect x="10" y="0" width={4} height={4} />
-                  <rect x="0" y="40" width={4} height={4} />
+                  <circle cx="6" cy="6" r="5" />
+                  <circle cx="25" cy="6" r="5" />
+                  <circle cx="6" cy="24" r="5" />
+                  <circle cx="25" cy="24" r="5" />
+                  <circle cx="16" cy="15" r="4" />
                 </svg>
                 <span>Clustermap</span>
               </div>
@@ -170,6 +171,7 @@ export const Viewer = ({
             <Clustermap
               data={heatmapData}
               docState={docState}
+              setDocState={setDocState}
               tickText={tickText}
               leftSidebarCollapsed={leftSidebarCollapsed}
             />

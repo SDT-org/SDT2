@@ -23,6 +23,7 @@ DocState = namedtuple(
         "validation_error_id",
         "compute_stats",
         "heatmap",
+        "clustermap",
         "distribution"
     ],
 )
@@ -54,6 +55,26 @@ default_heatmap_state = dict(
     axlabel_yfontsize=12,
     cutoff_1=95,
     cutoff_2=75
+)
+
+default_clustermap_state = dict(
+    threshold_one=85,
+    threshold_two=0,
+    annotation=False,
+    annotation_font_size=10,
+    annotation_rounding=0,
+    annotation_alpha="0",
+    titleFont="Sans Serif",
+    showTitles=False,
+    title="",
+    subtitle="",
+    xtitle="",
+    ytitle="",
+    axis_labels=False,
+    axlabel_xrotation=270,
+    axlabel_xfontsize=12,
+    axlabel_yrotation=360,
+    axlabel_yfontsize=12,
 )
 
 visualization_defaults = dict(
@@ -163,6 +184,7 @@ def create_document_state(
     validation_error_id=None,
     compute_stats=None,
     heatmap=default_heatmap_state,
+    clustermap=default_clustermap_state,
     distribution=default_distribution_state
 ):
     if filetype == "application/vnd.sdt" and tempdir_path:
@@ -191,6 +213,7 @@ def create_document_state(
         validation_error_id=validation_error_id,
         compute_stats=compute_stats,
         heatmap=heatmap,
+        clustermap=clustermap,
         distribution=distribution
     )
 
@@ -210,6 +233,7 @@ def save_doc_settings(doc_state: DocState):
         settings = {
             "dataView": doc_state.dataView,
             "heatmap": doc_state.heatmap,
+            "clustermap": doc_state.clustermap,
             "distribution": doc_state.distribution
         }
         json.dump(settings, f, indent=2)

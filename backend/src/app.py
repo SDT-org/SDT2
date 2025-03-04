@@ -532,7 +532,7 @@ class Api:
         )
         return json.dumps(data_to_dump)
 
-    def generate_cluster_data(self, doc_id: str, threshold_one: int, threshold_two: int = 0): ## T2 set to zero for now to just get one working
+    def generate_cluster_data(self, doc_id: str, threshold_one: int, threshold_two: int = 0):
         doc = get_document(doc_id)
         if doc is None:
             raise Exception(f"Could not find document: {doc_id}")
@@ -583,6 +583,7 @@ class Api:
             args["id"],
             dataView=args["dataView"],
             heatmap=args["heatmap"],
+            clustermap=args["clustermap"],
             distribution=args["distribution"],
         )
         doc = get_document(args["id"])
