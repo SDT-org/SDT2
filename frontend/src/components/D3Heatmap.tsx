@@ -159,7 +159,7 @@ export const D3Heatmap = ({
         .attr(
           "transform",
           (_, i) =>
-            `rotate(${axlabel_xrotation}, ${i * cellW + cellW / 2}, ${axisGap})`,
+            `rotate(${360 - axlabel_xrotation}, ${i * cellW + cellW / 2}, ${axisGap})`,
         );
 
       // y-axis labels
@@ -177,7 +177,7 @@ export const D3Heatmap = ({
         .attr(
           "transform",
           (_, i) =>
-            `rotate(${axlabel_yrotation}, ${-axisGap}, ${i * cellH + cellH / 2})`,
+            `rotate(${270 - axlabel_yrotation}, ${-axisGap}, ${i * cellH + cellH / 2})`,
         );
     }
 

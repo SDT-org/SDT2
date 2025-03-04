@@ -238,8 +238,8 @@ export const HeatmapSidebar = ({
                   field="axlabel_xrotation"
                   value={settings.axlabel_xrotation}
                   updateValue={updateSettings}
-                  min={0}
-                  max={360}
+                  min={-90}
+                  max={90}
                   step={10}
                 />
                 <NumberInput
@@ -256,8 +256,8 @@ export const HeatmapSidebar = ({
                   field="axlabel_yrotation"
                   value={settings.axlabel_yrotation}
                   updateValue={updateSettings}
-                  min={0}
-                  max={360}
+                  min={-90}
+                  max={90}
                   step={10}
                 />
               </div>

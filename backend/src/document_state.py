@@ -49,9 +49,9 @@ default_heatmap_state = dict(
     cbar_aspect=2.5,
     cbar_pad=10,
     axis_labels=False,
-    axlabel_xrotation=270,
+    axlabel_xrotation=0,
     axlabel_xfontsize=12,
-    axlabel_yrotation=360,
+    axlabel_yrotation=0,
     axlabel_yfontsize=12,
     cutoff_1=95,
     cutoff_2=75
@@ -71,9 +71,9 @@ default_clustermap_state = dict(
     xtitle="",
     ytitle="",
     axis_labels=False,
-    axlabel_xrotation=270,
+    axlabel_xrotation=0,
     axlabel_xfontsize=12,
-    axlabel_yrotation=360,
+    axlabel_yrotation=0,
     axlabel_yfontsize=12,
 )
 

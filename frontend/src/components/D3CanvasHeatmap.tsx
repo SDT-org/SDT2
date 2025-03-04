@@ -191,7 +191,7 @@ export const D3CanvasHeatmap = ({
             transform.x, // X pan offset for cell
           transform.y + margin.top + plotSize * transform.k + axisGap,
         );
-        ctx.rotate((axlabel_xrotation * Math.PI) / 180);
+        ctx.rotate(((axlabel_xrotation + 270) * Math.PI) / 180);
         ctx.fillStyle = "black";
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
@@ -214,7 +214,7 @@ export const D3CanvasHeatmap = ({
             (cellSize * transform.k) / 2 + // Center vertically within cell
             transform.y, // Y pan offset
         );
-        ctx.rotate((axlabel_yrotation * Math.PI) / 180);
+        ctx.rotate(((axlabel_yrotation + 360) * Math.PI) / 180);
         ctx.fillStyle = "black";
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
