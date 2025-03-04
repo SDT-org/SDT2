@@ -84,8 +84,8 @@ export const Clustermap = ({
   );
 
   const colorScale: ColorScaleArray = [
-    [0, "rgb(0,0,0)"],
-    [1, "rgb(235,235,235)"],
+    [0, "rgb(245,245,245)"],
+    [1, "rgb(245,245,245)"],
   ];
 
   const d3HeatmapData = useHeatmapData(data);
