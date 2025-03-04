@@ -95,23 +95,24 @@ export const D3CanvasHeatmap = ({
     ctx.save();
     ctx.translate(transform.x + margin.left, transform.y + margin.top);
     ctx.scale(transform.k, transform.k);
-    //indexz data
+    //index data
     const rows = [...new Set(filteredData.map((d) => d.x))];
     const cols = [...new Set(filteredData.map((d) => d.y))];
 
-    ctx.font = `${annotation_font_size}px ${plotFontMonospace.family}`;
-    const maxTextWidth = ctx.measureText("100.00").width;
-    let textFontSize = annotation_font_size;
-
-    if (maxTextWidth > cellSize) {
-      textFontSize = annotation_font_size / (cellSize * roundTo);
-    }
+    // Calculate cell size accounting for cellspace parameter
+    const rectSize = cellSize - cellSpace;
+    // calculate the miminimum font size based netween 20% of the calculated rectsize but will never be smaller than 1
+    //prevents 0s and negatives
+    const minFontSize = Math.max(1, Math.floor(0.2 * rectSize));
+    //max is set to 70% of rectsize
+    const maxFontSize = Math.floor(0.7 * rectSize);
+    // set font size to the smaller of the two
+    const fontSize = Math.min(maxFontSize, annotation_font_size);
 
     // Draw cells
     for (const d of filteredData) {
       const x = cols.indexOf(d.x) * cellSize + cellSpace / 2;
       const y = rows.indexOf(d.y) * cellSize + cellSpace / 2;
-      const rectSize = cellSize - cellSpace;
 
       const clusterX = clusterData?.find((i) => i.id === tickText[d.x])?.group;
       const clusterY = clusterData?.find((i) => i.id === tickText[d.y])?.group;
@@ -129,25 +130,45 @@ export const D3CanvasHeatmap = ({
       ctx.fillRect(x, y, rectSize, rectSize);
 
       if (showPercentIdentities) {
+        // set text to  current percision value
+        const formattedText = d.value.toFixed(roundTo);
+
+        // Gonnjaprobably get rid of user input. not very helpful and will be overriden with any large or zoomed graphs
+        ctx.font = `${fontSize}px ${plotFontMonospace.family}`;
+
+        // Measure text width of user setting/default
+        const textWidth = ctx.measureText(formattedText).width;
+
+        //calculate 80% of cell width
+        const availableWidth = rectSize * 0.8; // 80% of cell width
+
+        // Calculate the final font size for this cell's text, let allows for dynamic change
+        let textFontSize = fontSize;
+        // If text is too wide make the font smaller if small make it the minimum
+        if (textWidth > availableWidth) {
+          textFontSize = Math.max(
+            minFontSize,
+            Math.floor((availableWidth / textWidth) * fontSize),
+          );
+        }
+
+        // set text color dynamically based on background
         const rectColor = clusterGroup
           ? clusterGroupColors[clusterGroup]
           : colorFn(d.value);
         const textColor = tinycolor(rectColor).isLight() ? "#000" : "#fff";
+
+        // Render text
         ctx.fillStyle = textColor;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-
         ctx.font = `${textFontSize}px ${plotFontMonospace.family}`;
-        ctx.fillText(
-          d.value.toFixed(roundTo),
-          x + rectSize / 2,
-          y + rectSize / 2,
-        );
+        ctx.fillText(formattedText, x + rectSize / 2, y + rectSize / 2);
       }
     }
     ctx.restore();
 
-    // Titles
+    // Rest of your drawing code (titles, axes, colorbar)
     if (showTitles) {
       ctx.fillStyle = "black";
       ctx.textAlign = "center";
@@ -286,7 +307,7 @@ export const D3CanvasHeatmap = ({
 
     const zoom = d3
       .zoom()
-      .scaleExtent([1, 5])
+      .scaleExtent([0.5, 10])
       .translateExtent([
         [-margin.left, -margin.top],
         [width, height],
