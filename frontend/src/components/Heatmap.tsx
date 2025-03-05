@@ -36,7 +36,6 @@ export type HeatmapRenderProps = {
   showPercentIdentities: boolean;
   showTitles: boolean;
   title: string;
-  subtitle: string;
   showscale: boolean;
   axis_labels: boolean;
   titleFont: typeof plotFontMonospace | typeof plotFontSansSerif;
@@ -149,7 +148,6 @@ export const Heatmap = ({
                 titleFont={titleFont}
                 showTitles={settings.showTitles}
                 title={settings.title}
-                subtitle={settings.subtitle}
                 axis_labels={settings.axis_labels}
                 showscale={settings.showscale}
                 margin={margin}
@@ -178,7 +176,6 @@ export const Heatmap = ({
                 showPercentIdentities={settings.annotation}
                 showTitles={settings.showTitles}
                 title={settings.title}
-                subtitle={settings.subtitle}
                 axis_labels={settings.axis_labels}
                 margin={margin}
               />

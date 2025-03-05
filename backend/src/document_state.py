@@ -75,6 +75,7 @@ default_clustermap_state = dict(
     axlabel_xfontsize=12,
     axlabel_yrotation=0,
     axlabel_yfontsize=12,
+    cellspace=1,
 )
 
 visualization_defaults = dict(

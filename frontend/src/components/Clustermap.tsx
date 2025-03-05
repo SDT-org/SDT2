@@ -21,7 +21,6 @@ export type ClustermapRenderProps = {
   showPercentIdentities: boolean;
   showTitles: boolean;
   title: string;
-  subtitle: string;
   showscale: boolean;
   axis_labels: boolean;
   titleFont: typeof plotFontMonospace | typeof plotFontSansSerif;
@@ -106,7 +105,6 @@ export const Clustermap = ({
             maxVal={100}
             width={size.width}
             height={size.height}
-            cellSpace={1}
             roundTo={settings.annotation_rounding}
             showscale={false}
             annotation_font_size={settings.annotation_font_size}
@@ -118,9 +116,9 @@ export const Clustermap = ({
             showPercentIdentities={settings.annotation}
             showTitles={settings.showTitles}
             title={settings.title}
-            subtitle={settings.subtitle}
             axis_labels={settings.axis_labels}
             margin={margin}
+            cellSpace={settings.cellspace}
           />
         ) : null}
       </div>

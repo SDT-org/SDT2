@@ -163,7 +163,6 @@ export const initialDocState: DocState = {
     titleFont: "Sans Serif",
     showTitles: false,
     title: "",
-    subtitle: "",
     xtitle: "",
     ytitle: "",
     cbar_shrink: 5,
@@ -187,7 +186,6 @@ export const initialDocState: DocState = {
     titleFont: "Sans Serif",
     showTitles: false,
     title: "",
-    subtitle: "",
     xtitle: "",
     ytitle: "",
     axis_labels: false,
@@ -195,6 +193,7 @@ export const initialDocState: DocState = {
     axlabel_xfontsize: 12,
     axlabel_yrotation: 0,
     axlabel_yfontsize: 12,
+    cellspace: 1,
   },
 };
 

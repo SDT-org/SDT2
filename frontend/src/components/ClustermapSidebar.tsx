@@ -4,6 +4,7 @@ import type { DocState } from "../appState";
 import type { HeatmapSettings } from "../plotTypes";
 import { NumberInput } from "./NumberInput";
 import { Select, SelectItem } from "./Select";
+import { Slider } from "./Slider";
 import { Switch } from "./Switch";
 
 export const ClustermapSidebar = ({
@@ -63,6 +64,17 @@ export const ClustermapSidebar = ({
                     step={1}
                   />
                 </div>
+              </div>
+              <div className="field" style={{ paddingTop: "0.4rem" }}>
+                <Slider
+                  label="Cell Spacing"
+                  labelClassName="sublabel"
+                  id="cellspace"
+                  onChange={(value) => updateSettings({ cellspace: value })}
+                  minValue={0}
+                  maxValue={20}
+                  value={settings.cellspace}
+                />
               </div>
             </div>
           </div>
