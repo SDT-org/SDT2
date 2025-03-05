@@ -125,34 +125,3 @@ def export(matrix_path, threshold_1=79, threshold_2=0, save_csv=True):
     
     return df_result
 
-def main():
-    import argparse
-    
-    parser = argparse.ArgumentParser(description='Sequence clustering with two thresholds')
-    parser.add_argument('matrix_file', type=str, help='Path to the similarity matrix CSV file')
-    parser.add_argument('--threshold1', type=float, default=79, help='Primary clustering threshold (default: 79)')
-    parser.add_argument('--threshold2', type=float, default=0, help='Secondary clustering threshold (default: 0)')
-    parser.add_argument('--no-save-csv', action='store_false', dest='save_csv', help='Do not save CSV results')
-    
-    args = parser.parse_args()
-    
-    df_results = export(
-        args.matrix_file, 
-        threshold_1=args.threshold1, 
-        threshold_2=args.threshold2,
-        save_csv=args.save_csv
-    )
-    
-    if args.threshold2 is None or args.threshold2 == 0:
-        num_groups = df_results["Group - Threshold: " + str(args.threshold1)].nunique()
-        print(f"Found {num_groups} groups using threshold {args.threshold1}")
-    else:
-        num_groups = df_results["Group - Threshold: " + str(args.threshold1)].nunique()
-        num_subgroups = df_results.groupby("Group - Threshold: " + str(args.threshold1))["Subgroup - Threshold: " + str(args.threshold2)].nunique().sum()
-        print(f"Found {num_groups} primary groups using threshold {args.threshold1}")
-        print(f"Found {num_subgroups} total subgroups using threshold {args.threshold2}")
-    
-    print(f"Results saved for {len(df_results)} sequences")
-
-if __name__ == "__main__":
-    main()
