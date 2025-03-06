@@ -54,7 +54,6 @@ export const Clustermap = ({
     >();
 
   React.useEffect(() => {
-    console.log("fetching...", docState.clustermap);
     window.pywebview.api
       .generate_cluster_data(
         docState.id,

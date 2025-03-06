@@ -50,6 +50,7 @@ export type DocState = {
   };
   dataView:
     | "heatmap"
+    | "clustermap"
     | "distribution_histogram"
     | "distribution_violin"
     | "distribution_raincloud";
@@ -123,6 +124,7 @@ export const docStateSchema = z.object({
   ]),
   dataView: z.enum([
     "heatmap",
+    "clustermap",
     "distribution_histogram",
     "distribution_violin",
     "distribution_raincloud",

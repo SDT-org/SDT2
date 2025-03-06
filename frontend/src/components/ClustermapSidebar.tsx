@@ -38,7 +38,7 @@ export const ClustermapSidebar = ({
         <div className="form">
           <div className="group">
             <label className="setting-header" htmlFor="colorscale">
-              Thresholds
+              Clusters
             </label>
             <div className="drawer">
               <div className="col-2">
@@ -65,7 +65,8 @@ export const ClustermapSidebar = ({
                   />
                 </div>
               </div>
-              <div className="field" style={{ paddingTop: "0.4rem" }}>
+              <hr className="compact" />
+              <div className="field">
                 <Slider
                   label="Cell Spacing"
                   labelClassName="sublabel"
