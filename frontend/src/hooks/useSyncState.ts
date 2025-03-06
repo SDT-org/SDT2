@@ -24,6 +24,10 @@ export const useSyncState = (setAppState: SetAppState) => {
               ...beDoc.heatmap,
               ...feDoc?.heatmap,
             },
+            clustermap: {
+              ...beDoc.clustermap,
+              ...feDoc?.clustermap,
+            },
             distribution: {
               ...beDoc.distribution,
               ...feDoc?.distribution,

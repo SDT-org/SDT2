@@ -51,6 +51,7 @@ declare global {
           cluster_threshold_one: number;
           cluster_threshold_two: number;
           heatmap_image_data: string;
+          clustermap_image_data: string;
           histogram_image_data: string;
           violin_image_data: string;
           image_format: SaveableImageFormat;

@@ -73,7 +73,7 @@ export const Viewer = ({
                 <span>Heatmap</span>
               </div>
             </Tab>
-            <Tab id="cluster">
+            <Tab id="clustermap">
               <div
                 style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}
               >
@@ -166,7 +166,7 @@ export const Viewer = ({
             />
           ) : null}
         </TabPanel>
-        <TabPanel id="cluster" className="app-panel">
+        <TabPanel id="clustermap" className="app-panel">
           {!loading && heatmapData ? (
             <Clustermap
               data={heatmapData}

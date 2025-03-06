@@ -123,6 +123,28 @@ export const ExportModal = () => {
 
     await new Promise((r) => setTimeout(r, renderTimeout));
 
+    swapDataView("clustermap");
+    await new Promise((r) => setTimeout(r, renderTimeout));
+
+    const clustermapImage: string = await new Promise((resolve) => {
+      // clustermap uses the heatmap component + ref
+      if (!heatmapRef.current) {
+        throw new Error("Expected heatmapRef to have a current value");
+      }
+
+      (heatmapRef.current as HTMLCanvasElement).toBlob(async (blob) => {
+        if (blob) {
+          const arrayBuffer = await blob.arrayBuffer();
+          const binary = Array.from(new Uint8Array(arrayBuffer))
+            .map((byte) => String.fromCharCode(byte))
+            .join("");
+          resolve(`data:image/png;base64,${btoa(binary)}`);
+        } else {
+          resolve("");
+        }
+      }, "image/png");
+    });
+
     // Plotly exports
 
     swapDataView("distribution_histogram");
@@ -142,15 +164,8 @@ export const ExportModal = () => {
     await Plotly.toImage(element, config);
     const violinImage = await Plotly.toImage(element, config);
 
-    // swapDataView("distribution_raincloud");
-
-    // await new Promise((r) => setTimeout(r, renderTimeout));
-    // element = getPlotlyElement();
-    // await Plotly.toImage(element, config);
-    // const raincloudImage = await Plotly.toImage(element, config);
-
     swapDataView(previousDataView);
-    return { heatmapImage, histogramImage, violinImage };
+    return { heatmapImage, clustermapImage, histogramImage, violinImage };
   }, [heatmapRef, appState, docState.dataView, swapDataView]);
 
   const doExport = React.useCallback(() => {
@@ -164,6 +179,7 @@ export const ExportModal = () => {
           cluster_threshold_one: thresholds.one,
           cluster_threshold_two: thresholds.two,
           heatmap_image_data: images.heatmapImage,
+          clustermap_image_data: images.clustermapImage,
           histogram_image_data: images.histogramImage,
           violin_image_data: images.violinImage,
           image_format: appState.saveFormat,

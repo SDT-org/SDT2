@@ -1,7 +1,7 @@
 import React from "react";
 import type { DocState, SetDocState } from "../appState";
 import type { ColorScaleArray } from "../colorScales";
-import { plotFontMonospace, type plotFontSansSerif } from "../constants";
+import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import { useHeatmapData, useMetrics, useSize } from "../hooks/map";
 import type { ClustermapSettings, HeatmapData } from "../plotTypes";
 import { ClustermapSidebar } from "./ClustermapSidebar";
@@ -111,7 +111,11 @@ export const Clustermap = ({
             axlabel_xfontsize={settings.axlabel_xfontsize}
             axlabel_yrotation={settings.axlabel_yrotation}
             axlabel_yfontsize={settings.axlabel_yfontsize}
-            titleFont={plotFontMonospace}
+            titleFont={
+              settings.titleFont === "Monospace"
+                ? plotFontMonospace
+                : plotFontSansSerif
+            }
             showPercentIdentities={settings.annotation}
             showTitles={settings.showTitles}
             title={settings.title}

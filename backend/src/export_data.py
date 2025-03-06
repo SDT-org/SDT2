@@ -6,7 +6,7 @@ from document_state import DocState
 import cluster
 from constants import data_file_suffixes
 
-image_types = ["heatmap", "histogram", "violin"]
+image_types = ["heatmap", "clustermap", "histogram", "violin"]
 
 def find_source_files(state: DocState, prefix, suffixes):
     with os.scandir(state.tempdir_path) as entries:
@@ -44,7 +44,6 @@ def prepare_export_data(export_path: str, matrix_path: str, doc: DocState, args:
 
     if args["output_cluster"] == True:
         suffixes.append("_cluster")
-        # TODO: it's not intuitive that an export happens in here, move it outside?
         cluster.export(
             matrix_path,
             args["cluster_threshold_one"],
@@ -62,7 +61,8 @@ def prepare_export_data(export_path: str, matrix_path: str, doc: DocState, args:
     )
 
     image_filenames = {
-        img_type: f"{base_filename}_{img_type}.{image_format}"
+        img_type: f"{base_filename}_{img_type}."
+        + ("png" if img_type == "clustermap" else image_format) # TODO: remove when clustermap supports SVG
         for img_type in image_types
     }
 
@@ -87,8 +87,9 @@ def do_export_data(export_path, image_destinations, image_format, doc, prefix, s
         os.replace(temp_destination_path, destination_path)
 
     for img_type in image_types:
+        format = "png" if img_type == "clustermap" else image_format
         save_image_from_api(
             data=args[f"{img_type}_image_data"],
-            format=image_format,
+            format=format,
             destination=image_destinations[img_type],
         )
