@@ -125,7 +125,6 @@ export const HeatmapSidebar = ({
                   value={settings.cellspace}
                 />
               </div>
-
               {settings.colorScaleKey === "Discrete" ? (
                 <div className="col-2">
                   <div className="field">
@@ -145,7 +144,7 @@ export const HeatmapSidebar = ({
                       field="cutoff_2"
                       value={settings.cutoff_2}
                       updateValue={updateSettings}
-                      min={0}
+                      min={settings.vmin + 1}
                       max={settings.cutoff_1 - 1}
                       step={1}
                     />
