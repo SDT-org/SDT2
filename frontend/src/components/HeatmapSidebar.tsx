@@ -223,31 +223,37 @@ export const HeatmapSidebar = ({
               aria-hidden={!settings.axis_labels}
             >
               <div className="col-2">
-                <NumberInput
-                  label="Font Size"
-                  field="axlabel_xfontsize"
+                <Slider
+                  label="X Font Size"
+                  labelClassName="sublabel"
+                  onChange={(value) =>
+                    updateSettings({ axlabel_xfontsize: value })
+                  }
                   value={settings.axlabel_xfontsize}
-                  updateValue={updateSettings}
-                  min={1}
-                  max={40}
+                  minValue={1}
+                  maxValue={40}
                   step={1}
                 />
-                <NumberInput
+                <Slider
                   label="X Rotation"
-                  field="axlabel_xrotation"
+                  labelClassName="sublabel"
+                  onChange={(value) =>
+                    updateSettings({ axlabel_xrotation: value })
+                  }
                   value={settings.axlabel_xrotation}
-                  updateValue={updateSettings}
-                  min={-90}
-                  max={90}
+                  minValue={-90}
+                  maxValue={90}
                   step={10}
                 />
-                <NumberInput
+                <Slider
                   label="Y Rotation"
-                  field="axlabel_yrotation"
+                  labelClassName="sublabel"
+                  onChange={(value) =>
+                    updateSettings({ axlabel_yrotation: value })
+                  }
                   value={settings.axlabel_yrotation}
-                  updateValue={updateSettings}
-                  min={-90}
-                  max={90}
+                  minValue={-90}
+                  maxValue={90}
                   step={10}
                 />
               </div>
