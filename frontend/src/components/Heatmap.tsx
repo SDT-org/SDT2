@@ -116,6 +116,23 @@ export const Heatmap = ({
   const titleFont =
     settings.titleFont === "Monospace" ? plotFontMonospace : plotFontSansSerif;
 
+  const [forced3SvgRender, setForceD3SvgRender] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.altKey) && event.key === "1") {
+        setForceD3SvgRender(true);
+      } else if ((event.metaKey || event.altKey) && event.key === "2") {
+        setForceD3SvgRender(false);
+      }
+
+      event.preventDefault();
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   return (
     <>
       {data ? (
@@ -125,7 +142,8 @@ export const Heatmap = ({
             ref={elementRef}
             style={{ background: "#fff" }}
           >
-            {appState.showExportModal && appState.saveFormat === "svg" ? (
+            {forced3SvgRender ||
+            (appState.showExportModal && appState.saveFormat === "svg") ? (
               <D3Heatmap
                 data={d3HeatmapData}
                 settings={settings}

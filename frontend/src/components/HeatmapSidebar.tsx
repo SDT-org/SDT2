@@ -304,7 +304,7 @@ export const HeatmapSidebar = ({
                   value={settings.vmin}
                   updateValue={updateSettings}
                   min={1}
-                  max={settings.vmax - 1}
+                  max={settings.vmax}
                   step={1}
                   isDisabled={settings.colorScaleKey === "Discrete"}
                 />
@@ -313,7 +313,7 @@ export const HeatmapSidebar = ({
                   field="vmax"
                   value={settings.vmax}
                   updateValue={updateSettings}
-                  min={settings.vmin + 1}
+                  min={settings.vmin}
                   max={100}
                   step={1}
                   isDisabled={settings.colorScaleKey === "Discrete"}

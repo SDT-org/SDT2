@@ -262,6 +262,31 @@ export const D3CanvasHeatmap = ({
         ctx.stroke();
       }
     }
+
+    if (clusterData) {
+      const legendWidth = 80;
+      const cellSize = 10;
+      const lineGap = 20;
+      const labelGap = 5;
+      const positionX = width - legendWidth - margin.right;
+
+      [...new Set(clusterData.map((i) => i.group))].map((cluster, index) => {
+        const positionY = margin.top + lineGap * index;
+
+        ctx.fillStyle = clusterGroupColors[index] || "red";
+        ctx.fillRect(positionX, positionY, cellSize, cellSize);
+
+        ctx.fillStyle = "black";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "middle";
+        ctx.font = "10px 'Roboto Mono'";
+        ctx.fillText(
+          `Cluster ${cluster.toString()}`,
+          positionX + cellSize + labelGap,
+          positionY + cellSize / 2,
+        );
+      });
+    }
   }, [
     transform,
     filteredData,
