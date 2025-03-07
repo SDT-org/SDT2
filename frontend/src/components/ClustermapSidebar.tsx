@@ -150,7 +150,7 @@ export const ClustermapSidebar = ({
             >
               <div className="col-2">
                 <NumberInput
-                  label="X Font Size"
+                  label="Font Size"
                   field="axlabel_xfontsize"
                   value={settings.axlabel_xfontsize}
                   updateValue={updateSettings}
@@ -166,15 +166,6 @@ export const ClustermapSidebar = ({
                   min={-90}
                   max={90}
                   step={10}
-                />
-                <NumberInput
-                  label="Y Font Size"
-                  field="axlabel_yfontsize"
-                  value={settings.axlabel_yfontsize}
-                  updateValue={updateSettings}
-                  min={1}
-                  max={40}
-                  step={1}
                 />
                 <NumberInput
                   label="Y Rotation"

@@ -15,7 +15,6 @@ export type ClustermapRenderProps = {
   height: number;
   roundTo: number;
   axlabel_xfontsize: number;
-  axlabel_yfontsize: number;
   axlabel_xrotation: number;
   axlabel_yrotation: number;
   showPercentIdentities: boolean;
@@ -110,7 +109,6 @@ export const Clustermap = ({
             axlabel_xrotation={settings.axlabel_xrotation}
             axlabel_xfontsize={settings.axlabel_xfontsize}
             axlabel_yrotation={settings.axlabel_yrotation}
-            axlabel_yfontsize={settings.axlabel_yfontsize}
             titleFont={
               settings.titleFont === "Monospace"
                 ? plotFontMonospace

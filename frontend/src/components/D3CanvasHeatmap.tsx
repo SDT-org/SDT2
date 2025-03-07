@@ -21,7 +21,6 @@ export const D3CanvasHeatmap = ({
   cbarWidth,
   annotation_font_size,
   axlabel_xfontsize,
-  axlabel_yfontsize,
   axlabel_xrotation,
   axlabel_yrotation,
   titleFont,
@@ -134,7 +133,7 @@ export const D3CanvasHeatmap = ({
         const formattedText = d.value.toFixed(roundTo);
 
         // Gonnjaprobably get rid of user input. not very helpful and will be overriden with any large or zoomed graphs
-        ctx.font = `${fontSize}px ${plotFontMonospace.family}`;
+        ctx.font = `${10}px ${plotFontMonospace.family}`;
 
         // Measure text width of user setting/default
         const textWidth = ctx.measureText(formattedText).width;
@@ -219,8 +218,8 @@ export const D3CanvasHeatmap = ({
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
         ctx.font = `${Math.max(
-          axlabel_yfontsize * transform.k,
-          axlabel_yfontsize,
+          axlabel_xfontsize * transform.k,
+          axlabel_xfontsize,
         )}px ${plotFontMonospace.family}`;
         ctx.fillText(txt, 0, 0);
         ctx.restore();
@@ -268,22 +267,37 @@ export const D3CanvasHeatmap = ({
       const cellSize = 10;
       const lineGap = 20;
       const labelGap = 5;
-      const positionX = width - legendWidth - margin.right;
+      const columnGap = 20;
+      const positionX = width - legendWidth * 2 - columnGap - margin.right;
 
-      [...new Set(clusterData.map((i) => i.group))].map((cluster, index) => {
-        const positionY = margin.top + lineGap * index;
+      const uniqueClusters = [
+        ...new Set(clusterData.map((i) => i.group)),
+      ].slice(0, 50);
 
+      uniqueClusters.forEach((cluster, index) => {
+        // Determine column (0 for left, 1 for right)
+        const column = index % 2;
+
+        // Calculate row position (every two items share the same row)
+        const row = Math.floor(index / 2);
+
+        // Calculate position based on column and row
+        const itemX = positionX + column * (legendWidth + columnGap);
+        const itemY = margin.top + lineGap * row;
+
+        // Draw colored square
         ctx.fillStyle = clusterGroupColors[index] || "red";
-        ctx.fillRect(positionX, positionY, cellSize, cellSize);
+        ctx.fillRect(itemX, itemY, cellSize, cellSize);
 
+        // Draw text
         ctx.fillStyle = "black";
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
-        ctx.font = "10px 'Roboto Mono'";
+        ctx.font = `${10}px 'Roboto Mono'`;
         ctx.fillText(
           `Cluster ${cluster.toString()}`,
-          positionX + cellSize + labelGap,
-          positionY + cellSize / 2,
+          itemX + cellSize + labelGap,
+          itemY + cellSize / 2,
         );
       });
     }
@@ -301,7 +315,6 @@ export const D3CanvasHeatmap = ({
     title,
     annotation_font_size,
     axlabel_xfontsize,
-    axlabel_yfontsize,
     axlabel_xrotation,
     axlabel_yrotation,
     titleFont,

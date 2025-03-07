@@ -64,7 +64,7 @@ def cluster_by_identity(clusters, nodes):
             # get first node to determine which primary cluster this belongs to
             first_value = node_list[0]
             if first_value in reverse_clusters:
-                # get primary cluster ID (add 1 for 1-based indexing)
+                # get primary cluster ID (add 1 for human-readable indexing)
                 group_number = reverse_clusters[first_value] + 1
                 # get next available subgroup number for this primary cluster
                 subgroup_number = subgroup_counters[reverse_clusters[first_value]]

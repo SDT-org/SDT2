@@ -22,7 +22,6 @@ export const D3Heatmap = ({
   cbarHeight,
   annotation_font_size,
   axlabel_xfontsize,
-  axlabel_yfontsize,
   axlabel_xrotation,
   axlabel_yrotation,
   titleFont,
@@ -172,7 +171,7 @@ export const D3Heatmap = ({
         .attr("dominant-baseline", "central")
         .attr("text-anchor", "end")
         .attr("font-family", plotFontMonospace.family)
-        .attr("font-size", `${axlabel_yfontsize}px`)
+        .attr("font-size", `${axlabel_xfontsize}px`)
         .text((txt) => txt)
         .attr(
           "transform",
@@ -244,7 +243,6 @@ export const D3Heatmap = ({
     showPercentIdentities,
     annotation_font_size,
     axlabel_xfontsize,
-    axlabel_yfontsize,
     axlabel_xrotation,
     axlabel_yrotation,
     titleFont,
