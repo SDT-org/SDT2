@@ -16,7 +16,6 @@ export const D3CanvasHeatmap = ({
   width,
   height,
   cellSpace,
-  roundTo,
   cbarHeight,
   cbarWidth,
   annotation_font_size,
@@ -130,8 +129,8 @@ export const D3CanvasHeatmap = ({
 
       if (showPercentIdentities) {
         // set text to  current percision value
-        const formattedText = d.value.toFixed(roundTo);
 
+        const formattedText = d.value === 100 ? "100" : d.value.toFixed(2);
         // Gonnjaprobably get rid of user input. not very helpful and will be overriden with any large or zoomed graphs
         ctx.font = `${10}px ${plotFontMonospace.family}`;
 
@@ -310,7 +309,7 @@ export const D3CanvasHeatmap = ({
     cellSize,
     cellSpace,
     showPercentIdentities,
-    roundTo,
+
     showTitles,
     title,
     annotation_font_size,
