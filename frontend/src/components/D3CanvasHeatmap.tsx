@@ -82,15 +82,22 @@ export const D3CanvasHeatmap = ({
     ctx.scale(transform.k, transform.k);
 
     //index data
-    const rows = [...new Set(data.map((d) => d.x))];
-    const cols = [...new Set(data.map((d) => d.y))];
+    const rows = new Map();
+    const cols = new Map();
+    let rowIndex = 0;
+    let colIndex = 0;
+
+    for (const { x, y } of data) {
+      if (!rows.has(x)) rows.set(x, rowIndex++);
+      if (!cols.has(y)) cols.set(y, colIndex++);
+    }
 
     const cellMetrics = getCellMetrics(cellSize, cellSpace, roundTo + 3);
 
     // Draw cells
     for (const d of data) {
-      const x = cols.indexOf(d.x) * cellSize + cellMetrics.cellOffset;
-      const y = rows.indexOf(d.y) * cellSize + cellMetrics.cellOffset;
+      const x = rows.get(d.x) * cellSize + cellMetrics.cellOffset;
+      const y = cols.get(d.y) * cellSize + cellMetrics.cellOffset;
 
       ctx.fillStyle = d.backgroundColor;
       ctx.fillRect(x, y, cellMetrics.cellSize, cellMetrics.cellSize);
