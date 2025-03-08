@@ -227,7 +227,7 @@ export const HeatmapSidebar = ({
                 }
                 value={settings.axlabel_fontsize}
                 minValue={1}
-                maxValue={40}
+                maxValue={20}
                 step={1}
               />
               <Slider

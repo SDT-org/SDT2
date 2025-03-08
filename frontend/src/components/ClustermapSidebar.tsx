@@ -110,38 +110,41 @@ export const ClustermapSidebar = ({
               data-hidden={!settings.axis_labels}
               aria-hidden={!settings.axis_labels}
             >
-              <div className="col-2">
-                <NumberInput
-                  label="Font Size"
-                  field="axlabel_fontsize"
-                  value={settings.axlabel_fontsize}
-                  updateValue={updateSettings}
-                  min={1}
-                  max={40}
-                  step={1}
-                />
-                <NumberInput
-                  label="X Rotation"
-                  field="axlabel_xrotation"
-                  value={settings.axlabel_xrotation}
-                  updateValue={updateSettings}
-                  min={-90}
-                  max={90}
-                  step={10}
-                />
-                <NumberInput
-                  label="Y Rotation"
-                  field="axlabel_yrotation"
-                  value={settings.axlabel_yrotation}
-                  updateValue={updateSettings}
-                  min={-90}
-                  max={90}
-                  step={10}
-                />
-              </div>
+              <Slider
+                label="Font Size"
+                labelClassName="sublabel"
+                onChange={(value) =>
+                  updateSettings({ axlabel_fontsize: value })
+                }
+                value={settings.axlabel_fontsize}
+                minValue={1}
+                maxValue={20}
+                step={1}
+              />
+              <Slider
+                label="X Rotation"
+                labelClassName="sublabel"
+                onChange={(value) =>
+                  updateSettings({ axlabel_xrotation: value })
+                }
+                value={settings.axlabel_xrotation}
+                minValue={-90}
+                maxValue={90}
+                step={10}
+              />
+              <Slider
+                label="Y Rotation"
+                labelClassName="sublabel"
+                onChange={(value) =>
+                  updateSettings({ axlabel_yrotation: value })
+                }
+                value={settings.axlabel_yrotation}
+                minValue={-90}
+                maxValue={90}
+                step={10}
+              />
             </div>
           </div>
-
           <div className="group">
             <Switch
               isSelected={settings.showTitles}
