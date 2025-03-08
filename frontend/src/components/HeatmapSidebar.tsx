@@ -191,16 +191,6 @@ export const HeatmapSidebar = ({
                     <option value={2}>2</option>
                   </select>
                 </div>
-                <NumberInput
-                  label="Font Size"
-                  field="annotation_font_size"
-                  value={settings.annotation_font_size}
-                  updateValue={updateSettings}
-                  min={1}
-                  max={20}
-                  step={1}
-                  isDisabled={!settings.annotation}
-                />
               </div>
             </div>
           </div>

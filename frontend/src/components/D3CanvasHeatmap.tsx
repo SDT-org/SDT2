@@ -1,8 +1,9 @@
 import * as d3 from "d3";
 import React from "react";
 import tinycolor from "tinycolor2";
-import { clusterGroupColors, createD3ColorScale } from "../colors";
+import { createD3ColorScale, distinctColor } from "../colors";
 import { plotFontMonospace } from "../constants";
+import { getFontSizeForCell } from "../heatmapUtils";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapRenderProps } from "./Heatmap";
 
@@ -16,9 +17,9 @@ export const D3CanvasHeatmap = ({
   width,
   height,
   cellSpace,
+  roundTo,
   cbarHeight,
   cbarWidth,
-  annotation_font_size,
   axlabel_xfontsize,
   axlabel_xrotation,
   axlabel_yrotation,
@@ -89,6 +90,8 @@ export const D3CanvasHeatmap = ({
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.scale(pixelRatio, pixelRatio);
 
+    ctx.textRendering = "optimizeSpeed";
+
     // set zoom transform
     ctx.save();
     ctx.translate(transform.x + margin.left, transform.y + margin.top);
@@ -99,13 +102,10 @@ export const D3CanvasHeatmap = ({
 
     // Calculate cell size accounting for cellspace parameter
     const rectSize = cellSize - cellSpace;
-    // calculate the miminimum font size based netween 20% of the calculated rectsize but will never be smaller than 1
-    //prevents 0s and negatives
-    const minFontSize = Math.max(1, Math.floor(0.2 * rectSize));
-    //max is set to 70% of rectsize
-    const maxFontSize = Math.floor(0.7 * rectSize);
-    // set font size to the smaller of the two
-    const fontSize = Math.min(maxFontSize, annotation_font_size);
+    const fontSize = getFontSizeForCell(
+      rectSize,
+      settings.annotation_rounding + 3,
+    );
 
     // Draw cells
     for (const d of filteredData) {
@@ -129,26 +129,8 @@ export const D3CanvasHeatmap = ({
 
       if (showPercentIdentities) {
         // set text to  current percision value
-
-        const formattedText = d.value === 100 ? "100" : d.value.toFixed(2);
-        // Gonnjaprobably get rid of user input. not very helpful and will be overriden with any large or zoomed graphs
-        ctx.font = `${10}px ${plotFontMonospace.family}`;
-
-        // Measure text width of user setting/default
-        const textWidth = ctx.measureText(formattedText).width;
-
-        //calculate 80% of cell width
-        const availableWidth = rectSize * 0.8; // 80% of cell width
-
-        // Calculate the final font size for this cell's text, let allows for dynamic change
-        let textFontSize = fontSize;
-        // If text is too wide make the font smaller if small make it the minimum
-        if (textWidth > availableWidth) {
-          textFontSize = Math.max(
-            minFontSize,
-            Math.floor((availableWidth / textWidth) * fontSize),
-          );
-        }
+        const roundedValue = d.value.toFixed(roundTo);
+        const formattedText = d.value === 100 ? "100" : roundedValue;
 
         // set text color dynamically based on background
         const rectColor = clusterGroup
@@ -160,7 +142,7 @@ export const D3CanvasHeatmap = ({
         ctx.fillStyle = textColor;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.font = `${textFontSize}px ${plotFontMonospace.family}`;
+        ctx.font = `${fontSize}px ${plotFontMonospace.family}`;
         ctx.fillText(formattedText, x + rectSize / 2, y + rectSize / 2);
       }
     }
@@ -309,13 +291,13 @@ export const D3CanvasHeatmap = ({
     cellSize,
     cellSpace,
     showPercentIdentities,
-
+    roundTo,
     showTitles,
     title,
-    annotation_font_size,
     axlabel_xfontsize,
     axlabel_xrotation,
     axlabel_yrotation,
+    settings.annotation_rounding,
     titleFont,
     tickText,
     cbarWidth,
@@ -356,7 +338,7 @@ export const D3CanvasHeatmap = ({
     );
 
     return () => {
-      d3.select(canvas).on(".zoom", null);
+      d3.select(canvas).on("zoom", null);
     };
   }, [canvasRef, width, height, margin]);
 

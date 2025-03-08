@@ -39,7 +39,7 @@ export type HeatmapRenderProps = {
   axis_labels: boolean;
   titleFont: typeof plotFontMonospace | typeof plotFontSansSerif;
   margin: { top: number; bottom: number; left: number; right: number };
-} & Pick<HeatmapSettings, "annotation_font_size" | "axis_labels">;
+} & Pick<HeatmapSettings, "axis_labels">;
 
 export const Heatmap = ({
   data,
@@ -157,7 +157,6 @@ export const Heatmap = ({
                 roundTo={settings.annotation_rounding}
                 cbarHeight={cbar_shrink ?? settings.cbar_shrink}
                 cbarWidth={cbar_aspect ?? settings.cbar_aspect}
-                annotation_font_size={settings.annotation_font_size}
                 axlabel_xrotation={settings.axlabel_xrotation}
                 axlabel_xfontsize={settings.axlabel_xfontsize}
                 axlabel_yrotation={settings.axlabel_yrotation}
@@ -183,7 +182,6 @@ export const Heatmap = ({
                 showscale={settings.showscale}
                 cbarHeight={cbar_shrink ?? settings.cbar_shrink}
                 cbarWidth={cbar_aspect ?? settings.cbar_aspect}
-                annotation_font_size={settings.annotation_font_size}
                 axlabel_xrotation={settings.axlabel_xrotation}
                 axlabel_xfontsize={settings.axlabel_xfontsize}
                 axlabel_yrotation={settings.axlabel_yrotation}

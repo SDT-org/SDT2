@@ -45,8 +45,8 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
         });
 
         const state = await getDocument(docState.id);
-        const scaledFontSize = getScaledFontSize(
-          initialDocState.heatmap.annotation_font_size,
+        const scaledAxisLabelFontSize = getScaledFontSize(
+          initialDocState.heatmap.axlabel_xfontsize,
           parsedData.map(Boolean).length,
         );
 
@@ -68,9 +68,8 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
               ...(docState.filetype === "application/vnd.sdt"
                 ? null
                 : {
-                    annotation_font_size: scaledFontSize,
-                    axlabel_xfontsize: scaledFontSize,
-                    axlabel_yfontsize: scaledFontSize,
+                    axlabel_xfontsize: scaledAxisLabelFontSize,
+                    axlabel_yfontsize: scaledAxisLabelFontSize,
                   }),
             },
           }),

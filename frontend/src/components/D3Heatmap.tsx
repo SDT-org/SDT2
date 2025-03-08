@@ -3,6 +3,7 @@ import React from "react";
 import tinycolor from "tinycolor2";
 import { createD3ColorScale } from "../colors";
 import { plotFontMonospace } from "../constants";
+import { getFontSizeForCell } from "../heatmapUtils";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapRenderProps } from "./Heatmap";
 
@@ -20,7 +21,6 @@ export const D3Heatmap = ({
   showPercentIdentities,
   cbarWidth,
   cbarHeight,
-  annotation_font_size,
   axlabel_xfontsize,
   axlabel_xrotation,
   axlabel_yrotation,
@@ -74,6 +74,10 @@ export const D3Heatmap = ({
     const cellH = h / n;
     const cellOffset = cellSpace > 0 ? cellSpace / 2 : 0;
     const axisGap = 5;
+    const fontSize = getFontSizeForCell(
+      cellW,
+      settings.annotation_rounding + 3,
+    );
 
     const groups = g
       .selectAll("g")
@@ -97,7 +101,7 @@ export const D3Heatmap = ({
         .attr("dy", ".35em")
         .attr("text-anchor", "middle")
         .attr("font-family", "Roboto Mono")
-        .attr("font-size", `${annotation_font_size}px`)
+        .attr("font-size", `${fontSize}px`)
         .text((d) => d.value.toFixed(roundTo))
         .attr("fill", (d) =>
           tinycolor(colorFn(d.value)).isLight() ? "#000" : "#fff",
@@ -236,12 +240,12 @@ export const D3Heatmap = ({
     settings.colorScaleKey,
     settings.vmin,
     settings.vmax,
+    settings.annotation_rounding,
     width,
     height,
     cellSpace,
     roundTo,
     showPercentIdentities,
-    annotation_font_size,
     axlabel_xfontsize,
     axlabel_xrotation,
     axlabel_yrotation,

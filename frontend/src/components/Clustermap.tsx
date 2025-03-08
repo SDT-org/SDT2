@@ -24,7 +24,7 @@ export type ClustermapRenderProps = {
   axis_labels: boolean;
   titleFont: typeof plotFontMonospace | typeof plotFontSansSerif;
   margin: { top: number; bottom: number; left: number; right: number };
-} & Pick<ClustermapSettings, "annotation_font_size" | "axis_labels"> & {
+} & Pick<ClustermapSettings, "axis_labels"> & {
     clusterData?: {
       id: string;
       group: number;
@@ -105,7 +105,6 @@ export const Clustermap = ({
             height={size.height}
             roundTo={settings.annotation_rounding}
             showscale={false}
-            annotation_font_size={settings.annotation_font_size}
             axlabel_xrotation={settings.axlabel_xrotation}
             axlabel_xfontsize={settings.axlabel_xfontsize}
             axlabel_yrotation={settings.axlabel_yrotation}

@@ -10,7 +10,6 @@ export interface HeatmapSettings {
   vmin: number;
   cellspace: number;
   annotation: boolean;
-  annotation_font_size: number;
   annotation_rounding: 0 | 1 | 2;
   showscale: boolean;
   titleFont: "Sans Serif" | "Monospace";
@@ -56,7 +55,6 @@ export const HeatmapSettingsSchema = z.object({
   vmin: z.number(),
   cellspace: z.number(),
   annotation: z.boolean(),
-  annotation_font_size: z.number(),
   annotation_rounding: z.union([z.literal(0), z.literal(1), z.literal(2)]),
   showscale: z.boolean(),
   showTitles: z.boolean(),
@@ -104,7 +102,6 @@ export interface ClustermapSettings {
   threshold_one: number;
   threshold_two: number;
   annotation: boolean;
-  annotation_font_size: number;
   annotation_rounding: 0 | 1 | 2;
   titleFont: "Sans Serif" | "Monospace";
   showTitles: boolean;
@@ -122,7 +119,6 @@ export const ClustermapSettingsSchema = z.object({
   threshold_one: z.number(),
   threshold_two: z.number(),
   annotation: z.boolean(),
-  annotation_font_size: z.number(),
   annotation_rounding: z.union([z.literal(0), z.literal(1), z.literal(2)]),
   showTitles: z.boolean(),
   titleFont: z.enum(["Sans Serif", "Monospace"]),
