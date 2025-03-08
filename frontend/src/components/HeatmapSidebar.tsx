@@ -212,41 +212,39 @@ export const HeatmapSidebar = ({
               data-hidden={!settings.axis_labels}
               aria-hidden={!settings.axis_labels}
             >
-              <div className="col-2">
-                <Slider
-                  label="X Font Size"
-                  labelClassName="sublabel"
-                  onChange={(value) =>
-                    updateSettings({ axlabel_xfontsize: value })
-                  }
-                  value={settings.axlabel_xfontsize}
-                  minValue={1}
-                  maxValue={40}
-                  step={1}
-                />
-                <Slider
-                  label="X Rotation"
-                  labelClassName="sublabel"
-                  onChange={(value) =>
-                    updateSettings({ axlabel_xrotation: value })
-                  }
-                  value={settings.axlabel_xrotation}
-                  minValue={-90}
-                  maxValue={90}
-                  step={10}
-                />
-                <Slider
-                  label="Y Rotation"
-                  labelClassName="sublabel"
-                  onChange={(value) =>
-                    updateSettings({ axlabel_yrotation: value })
-                  }
-                  value={settings.axlabel_yrotation}
-                  minValue={-90}
-                  maxValue={90}
-                  step={10}
-                />
-              </div>
+              <Slider
+                label="Font Size"
+                labelClassName="sublabel"
+                onChange={(value) =>
+                  updateSettings({ axlabel_xfontsize: value })
+                }
+                value={settings.axlabel_xfontsize}
+                minValue={1}
+                maxValue={40}
+                step={1}
+              />
+              <Slider
+                label="X Rotation"
+                labelClassName="sublabel"
+                onChange={(value) =>
+                  updateSettings({ axlabel_xrotation: value })
+                }
+                value={settings.axlabel_xrotation}
+                minValue={-90}
+                maxValue={90}
+                step={10}
+              />
+              <Slider
+                label="Y Rotation"
+                labelClassName="sublabel"
+                onChange={(value) =>
+                  updateSettings({ axlabel_yrotation: value })
+                }
+                value={settings.axlabel_yrotation}
+                minValue={-90}
+                maxValue={90}
+                step={10}
+              />
             </div>
           </div>
           <div className="group">
