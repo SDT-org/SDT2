@@ -3,7 +3,7 @@ import React from "react";
 import tinycolor from "tinycolor2";
 import { createD3ColorScale, distinctColor } from "../colors";
 import { plotFontMonospace } from "../constants";
-import { getFontSizeForCell } from "../heatmapUtils";
+import { getCellMetrics, getFontSizeForCell } from "../heatmapUtils";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapRenderProps } from "./Heatmap";
 
@@ -48,11 +48,8 @@ export const D3CanvasHeatmap = ({
     [data],
   );
 
-  const size = Math.min(width, height);
-  const plotSize = size - margin.left - margin.right;
-
-  const n = tickText.length;
-  const cellSize = plotSize / n;
+  const plotSize = Math.min(width, height) - margin.left - margin.right;
+  const cellSize = plotSize / tickText.length;
 
   const colorFn = createD3ColorScale(
     colorScale,
@@ -96,21 +93,21 @@ export const D3CanvasHeatmap = ({
     ctx.save();
     ctx.translate(transform.x + margin.left, transform.y + margin.top);
     ctx.scale(transform.k, transform.k);
+
     //index data
     const rows = [...new Set(filteredData.map((d) => d.x))];
     const cols = [...new Set(filteredData.map((d) => d.y))];
 
-    // Calculate cell size accounting for cellspace parameter;
-    const rectSize = Math.max(1, cellSize - cellSpace);
-    const fontSize = getFontSizeForCell(
-      rectSize,
+    const cellMetrics = getCellMetrics(
+      cellSize,
+      cellSpace,
       settings.annotation_rounding + 3,
     );
 
     // Draw cells
     for (const d of filteredData) {
-      const x = cols.indexOf(d.x) * cellSize + cellSpace / 2;
-      const y = rows.indexOf(d.y) * cellSize + cellSpace / 2;
+      const x = cols.indexOf(d.x) * cellSize + cellMetrics.cellOffset;
+      const y = rows.indexOf(d.y) * cellSize + cellMetrics.cellOffset;
 
       const clusterX = clusterData?.find((i) => i.id === tickText[d.x])?.group;
       const clusterY = clusterData?.find((i) => i.id === tickText[d.y])?.group;
@@ -125,7 +122,7 @@ export const D3CanvasHeatmap = ({
       ctx.fillStyle = clusterGroup
         ? distinctColor(clusterGroup)
         : colorFn(d.value);
-      ctx.fillRect(x, y, rectSize, rectSize);
+      ctx.fillRect(x, y, cellMetrics.cellSize, cellMetrics.cellSize);
 
       if (showPercentIdentities) {
         const roundedValue = d.value.toFixed(roundTo);
@@ -141,8 +138,12 @@ export const D3CanvasHeatmap = ({
         ctx.fillStyle = textColor;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.font = `${fontSize}px ${plotFontMonospace.family}`;
-        ctx.fillText(formattedText, x + rectSize / 2, y + rectSize / 2);
+        ctx.font = `${cellMetrics.fontSize}px ${plotFontMonospace.family}`;
+        ctx.fillText(
+          formattedText,
+          x + cellMetrics.textOffset,
+          y + cellMetrics.textOffset,
+        );
       }
     }
     ctx.restore();

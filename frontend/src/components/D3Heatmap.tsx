@@ -3,7 +3,7 @@ import React from "react";
 import tinycolor from "tinycolor2";
 import { createD3ColorScale } from "../colors";
 import { plotFontMonospace } from "../constants";
-import { getFontSizeForCell } from "../heatmapUtils";
+import { getCellMetrics, getFontSizeForCell } from "../heatmapUtils";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapRenderProps } from "./Heatmap";
 
@@ -52,11 +52,15 @@ export const D3Heatmap = ({
     const d3Svg = d3.select(svgRef.current as Element);
     d3Svg.selectAll("*").remove();
 
-    const size = Math.min(width, height);
-    const w = size - margin.left - margin.right;
-    const h = size - margin.top - margin.bottom;
-
-    const n = tickText.length;
+    const plotSize = Math.min(width, height);
+    const plotWidth = plotSize - margin.left - margin.right;
+    const plotHeight = plotSize - margin.top - margin.bottom;
+    const cellSize = plotWidth / tickText.length;
+    const cellMetrics = getCellMetrics(
+      cellSize,
+      cellSpace,
+      settings.annotation_rounding + 3,
+    );
 
     const colorFn = createD3ColorScale(
       colorScale,
@@ -70,39 +74,35 @@ export const D3Heatmap = ({
       .append("g")
       .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    const cellW = w / n;
-    const cellH = h / n;
-    const cellOffset = cellSpace > 0 ? cellSpace / 2 : 0;
     const axisGap = 5;
-    const fontSize = getFontSizeForCell(
-      cellW,
-      settings.annotation_rounding + 3,
-    );
 
     const groups = g
       .selectAll("g")
       .data(data.filter((d) => Number(d.value)))
       .join("g")
-      .attr("transform", (d) => `translate(${d.x * cellW}, ${d.y * cellH})`);
+      .attr(
+        "transform",
+        (d) => `translate(${d.x * cellSize}, ${d.y * cellSize})`,
+      );
 
     groups
       .append("rect")
-      .attr("width", Math.max(cellW - cellSpace, 1))
-      .attr("height", Math.max(cellH - cellSpace, 1))
-      .attr("x", cellOffset)
-      .attr("y", cellOffset)
+      .attr("width", Math.max(cellMetrics.cellSize, 1))
+      .attr("height", Math.max(cellMetrics.cellSize, 1))
+      .attr("x", cellMetrics.cellOffset)
+      .attr("y", cellMetrics.cellOffset)
       .attr("fill", (d) => colorFn(d.value));
 
     if (showPercentIdentities) {
       groups
         .append("text")
-        .attr("x", cellW / 2)
-        .attr("y", cellH / 2)
+        .attr("x", cellSize / 2)
+        .attr("y", cellSize / 2)
         .attr("dy", ".35em")
         .attr("text-anchor", "middle")
         .attr("font-family", "Roboto Mono")
-        .attr("font-size", `${fontSize}px`)
-        .text((d) => d.value.toFixed(roundTo))
+        .attr("font-size", `${cellMetrics.fontSize}px`)
+        .text((d) => (d.value === 100 ? "100" : d.value.toFixed(roundTo)))
         .attr("fill", (d) =>
           tinycolor(colorFn(d.value)).isLight() ? "#000" : "#fff",
         );
@@ -148,7 +148,7 @@ export const D3Heatmap = ({
     if (axis_labels) {
       // x-axis labels
       g.append("g")
-        .attr("transform", `translate(0, ${h})`)
+        .attr("transform", `translate(0, ${plotHeight})`)
         .selectAll("text")
         .data(tickText)
         .join("text")

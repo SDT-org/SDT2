@@ -1,12 +1,22 @@
 import { describe, expect, it } from "bun:test";
-import { getFontSizeForCell } from "../src/heatmapUtils";
+import { getCellMetrics } from "../src/heatmapUtils";
 
-describe("getFontSizeForCell", () => {
-  it("should return the correct font size for a cell", () => {
-    expect(getFontSizeForCell(100, 5)).toBe(20);
-    expect(getFontSizeForCell(50, 5)).toBe(13);
-    expect(getFontSizeForCell(25, 3)).toBe(11);
-    expect(getFontSizeForCell(1, 3)).toBe(0.25);
-    expect(getFontSizeForCell(0, 1)).toBe(0.25);
+describe("getCellMetrics", () => {
+  it("should return the correct metrics", () => {
+    expect(getCellMetrics(20, 1, 5)).toEqual({
+      cellSize: 19.5,
+      cellSpace: 0.5,
+      cellOffset: 0.25,
+      fontSize: 5.2,
+      textOffset: 9.75,
+    });
+  });
+  it("should throw an error if characterCount is less than or equal to 0", () => {
+    expect(() => getCellMetrics(10, 2, 0)).toThrowError(
+      "characterCount must be > 0",
+    );
+    expect(() => getCellMetrics(10, 2, -1)).toThrowError(
+      "characterCount must be > 0",
+    );
   });
 });
