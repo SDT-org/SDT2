@@ -527,6 +527,7 @@ class Api:
         data_to_dump = dict(
             metadata=dict(minVal=min_val, maxVal=max_val),
             data=([tick_text] + parsedData),
+            # TODO: return indexes to strings not the strings themselves
             identity_scores=identity_scores,
             full_stats=stats_df.values.tolist()
         )

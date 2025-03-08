@@ -73,11 +73,11 @@ export const HeatmapSettingsSchema = z.object({
   cutoff_2: z.number(),
 });
 
-export type HeatmapData = GetDataResponse["data"];
+export type HeatmapData = Array<Array<number | null>>;
 export type MetaData = GetDataResponse["metadata"];
 
 export type GetDataResponse = {
-  data: string[][];
+  data: HeatmapData & string[][];
   metadata: {
     minVal: number;
     maxVal: number;

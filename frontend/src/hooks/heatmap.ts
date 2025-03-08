@@ -67,16 +67,3 @@ export const useMetrics = (
     margin,
   };
 };
-
-export const useHeatmapData = (data: string[][]) =>
-  React.useMemo(
-    () =>
-      data.flatMap((row, y) =>
-        row.map((value, x) => ({
-          x,
-          y,
-          value: Number(value),
-        })),
-      ),
-    [data],
-  );

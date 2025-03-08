@@ -6,7 +6,7 @@ import type {
 } from "../appState";
 import type { RunProcessDataArgs } from "../components/Runner";
 import { DistributionState } from "../distributionState";
-import { HeatmapSettings } from "../plotTypes";
+import { type GetDataResponse, HeatmapSettings } from "../plotTypes";
 import type { AppState } from "../src/appState";
 
 declare global {

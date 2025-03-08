@@ -1,7 +1,5 @@
 import * as d3 from "d3";
 import React from "react";
-import tinycolor from "tinycolor2";
-import { createD3ColorScale } from "../colors";
 import { plotFontMonospace } from "../constants";
 import { getCellMetrics } from "../heatmapUtils";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
@@ -9,7 +7,6 @@ import type { HeatmapRenderProps } from "./Heatmap";
 
 export const D3Heatmap = ({
   data,
-  settings,
   tickText,
   colorScale,
   minVal,
@@ -58,13 +55,6 @@ export const D3Heatmap = ({
     const cellSize = plotWidth / tickText.length;
     const cellMetrics = getCellMetrics(cellSize, cellSpace, roundTo + 3);
 
-    const colorFn = createD3ColorScale(
-      colorScale,
-      settings.colorScaleKey === "Discrete",
-      settings.vmax,
-      settings.vmin,
-    );
-
     const g = d3
       .select(svgRef.current)
       .append("g")
@@ -87,7 +77,7 @@ export const D3Heatmap = ({
       .attr("height", Math.max(cellMetrics.cellSize, 1))
       .attr("x", cellMetrics.cellOffset)
       .attr("y", cellMetrics.cellOffset)
-      .attr("fill", (d) => colorFn(d.value));
+      .attr("fill", (d) => d.backgroundColor);
 
     if (showPercentIdentities) {
       groups
@@ -99,9 +89,7 @@ export const D3Heatmap = ({
         .attr("font-family", "Roboto Mono")
         .attr("font-size", `${cellMetrics.fontSize}px`)
         .text((d) => (d.value === 100 ? "100" : d.value.toFixed(roundTo)))
-        .attr("fill", (d) =>
-          tinycolor(colorFn(d.value)).isLight() ? "#000" : "#fff",
-        );
+        .attr("fill", (d) => d.foregroundColor);
     }
 
     d3Svg.call(
@@ -232,10 +220,6 @@ export const D3Heatmap = ({
     svgRef.current,
     data,
     tickText,
-    colorScale,
-    settings.colorScaleKey,
-    settings.vmin,
-    settings.vmax,
     width,
     height,
     cellSpace,

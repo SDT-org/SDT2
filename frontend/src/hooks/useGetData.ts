@@ -30,6 +30,7 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
         const parsedResponse: GetDataResponse = JSON.parse(
           rawData.replace(/\bNaN\b/g, "null"),
         );
+
         const { data, metadata, identity_scores, full_stats } = parsedResponse;
         const [tickText, ...parsedData] = data;
 
@@ -41,6 +42,7 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
           gc_stats: full_stats.map((row) => row[1]),
           length_stats: full_stats.map((row) => row[2]),
           raw_mat: identity_scores.map((i) => i[2]),
+          // TODO: this could be an index that points to the strings, not the strings themselves to prevent large memory allocations
           identity_combos: identity_scores.map((i) => [i[0], i[1]]),
         });
 

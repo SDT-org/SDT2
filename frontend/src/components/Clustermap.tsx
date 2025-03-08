@@ -2,7 +2,8 @@ import React from "react";
 import type { DocState, SetDocState } from "../appState";
 import type { ColorScaleArray } from "../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
-import { useHeatmapData, useMetrics, useSize } from "../hooks/map";
+import { formatClustermapData } from "../heatmapUtils";
+import { useMetrics, useSize } from "../hooks/heatmap";
 import type { ClustermapSettings, HeatmapData } from "../plotTypes";
 import { ClustermapSidebar } from "./ClustermapSidebar";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
@@ -85,14 +86,17 @@ export const Clustermap = ({
     [1, "rgb(245,245,245)"],
   ];
 
-  const d3HeatmapData = useHeatmapData(data);
+  const clustermapData = React.useMemo(
+    () => formatClustermapData(data, tickText, clusterData),
+    [data, clusterData, tickText],
+  );
 
   return (
     <>
       <div className="app-main" ref={elementRef} style={{ background: "#fff" }}>
         {data && clusterData ? (
           <D3CanvasHeatmap
-            data={d3HeatmapData}
+            data={clustermapData}
             clusterData={clusterData}
             settings={{ ...docState.heatmap, ...settings }}
             tickText={tickText}

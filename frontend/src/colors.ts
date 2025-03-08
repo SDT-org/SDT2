@@ -17,13 +17,6 @@ export const ColorStringSchema = z
     },
   );
 
-export const originalRgbFormat = {
-  name: "rgb",
-  commas: true,
-  noAlpha: true,
-  coords: ["<number>[0, 255]", "<number>[0, 255]", "<number>[0, 255]"],
-};
-
 export function createD3ColorScale(
   colorArray: ColorScaleArray,
   discrete: boolean,

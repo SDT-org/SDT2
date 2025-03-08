@@ -1,7 +1,6 @@
 import * as d3 from "d3";
 import React from "react";
-import tinycolor from "tinycolor2";
-import { createD3ColorScale, distinctColor } from "../colors";
+import { distinctColor } from "../colors";
 import { plotFontMonospace } from "../constants";
 import { getCellMetrics } from "../heatmapUtils";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
@@ -43,20 +42,8 @@ export const D3CanvasHeatmap = ({
     yLabel?: string;
   } | null>(null);
 
-  const filteredData = React.useMemo(
-    () => data.filter((d) => Number(d.value)),
-    [data],
-  );
-
   const plotSize = Math.min(width, height) - margin.left - margin.right;
   const cellSize = plotSize / tickText.length;
-
-  const colorFn = createD3ColorScale(
-    colorScale,
-    settings.colorScaleKey === "Discrete",
-    settings.vmax,
-    settings.vmin,
-  );
 
   const scale = React.useMemo(
     () => d3.scaleLinear().domain([maxVal, minVal]).range([0, cbarHeight]),
@@ -95,43 +82,24 @@ export const D3CanvasHeatmap = ({
     ctx.scale(transform.k, transform.k);
 
     //index data
-    const rows = [...new Set(filteredData.map((d) => d.x))];
-    const cols = [...new Set(filteredData.map((d) => d.y))];
+    const rows = [...new Set(data.map((d) => d.x))];
+    const cols = [...new Set(data.map((d) => d.y))];
 
     const cellMetrics = getCellMetrics(cellSize, cellSpace, roundTo + 3);
 
     // Draw cells
-    for (const d of filteredData) {
+    for (const d of data) {
       const x = cols.indexOf(d.x) * cellSize + cellMetrics.cellOffset;
       const y = rows.indexOf(d.y) * cellSize + cellMetrics.cellOffset;
 
-      const clusterX = clusterData?.find((i) => i.id === tickText[d.x])?.group;
-      const clusterY = clusterData?.find((i) => i.id === tickText[d.y])?.group;
-
-      const clusterMatch =
-        clusterX !== undefined &&
-        clusterY !== undefined &&
-        clusterX === clusterY;
-
-      const clusterGroup = clusterMatch ? clusterX : null;
-
-      ctx.fillStyle = clusterGroup
-        ? distinctColor(clusterGroup)
-        : colorFn(d.value);
+      ctx.fillStyle = d.backgroundColor;
       ctx.fillRect(x, y, cellMetrics.cellSize, cellMetrics.cellSize);
 
       if (showPercentIdentities) {
         const roundedValue = d.value.toFixed(roundTo);
         const formattedText = d.value === 100 ? "100" : roundedValue;
 
-        // set text color dynamically based on background
-        const rectColor = clusterGroup
-          ? distinctColor(clusterGroup)
-          : colorFn(d.value);
-        const textColor = tinycolor(rectColor).isLight() ? "#000" : "#fff";
-
-        // Render text
-        ctx.fillStyle = textColor;
+        ctx.fillStyle = d.foregroundColor;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.font = `${cellMetrics.fontSize}px ${plotFontMonospace.family}`;
@@ -144,7 +112,6 @@ export const D3CanvasHeatmap = ({
     }
     ctx.restore();
 
-    // Rest of your drawing code (titles, axes, colorbar)
     if (showTitles) {
       ctx.fillStyle = "black";
       ctx.textAlign = "center";
@@ -153,9 +120,9 @@ export const D3CanvasHeatmap = ({
       ctx.fillText(title, width / 2, margin.top - 20);
     }
 
-    const axisGap = 5;
-
     if (axis_labels) {
+      const axisGap = 5;
+
       // X-axis labels
       for (const [i, txt] of tickText.entries()) {
         if (txt === undefined) continue;
@@ -203,7 +170,6 @@ export const D3CanvasHeatmap = ({
       }
     }
 
-    // Colorbar gradient
     if (showscale) {
       const positionX = width - cbarWidth - margin.right;
       const gradient = ctx.createLinearGradient(
@@ -280,8 +246,7 @@ export const D3CanvasHeatmap = ({
     }
   }, [
     transform,
-    filteredData,
-    colorFn,
+    data,
     scale,
     tickValues,
     cellSize,
@@ -352,7 +317,7 @@ export const D3CanvasHeatmap = ({
       (y - margin.top - transform.y) / (cellSize * transform.k),
     );
 
-    const cell = filteredData.find((d) => d.x === dataX && d.y === dataY);
+    const cell = data.find((d) => d.x === dataX && d.y === dataY);
 
     const clusterGroup =
       clusterData && cell
