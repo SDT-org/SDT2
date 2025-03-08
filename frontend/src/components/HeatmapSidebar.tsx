@@ -1,5 +1,11 @@
 import React from "react";
-import { Input, Label, TextField, ToggleButton } from "react-aria-components";
+import {
+  Input,
+  Label,
+  TextField,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "react-aria-components";
 import type { DocState } from "../appState";
 import type { ColorScaleArray } from "../colorScales";
 import { formatTitle } from "../helpers";
@@ -171,26 +177,27 @@ export const HeatmapSidebar = ({
               data-hidden={!settings.annotation}
               aria-hidden={!settings.annotation}
             >
-              <div className="col-2">
-                <div className="field">
-                  <label htmlFor="round-vals">Precision</label>
-                  <select
-                    id="round-vals"
-                    value={settings.annotation_rounding}
-                    onChange={(event) =>
+              <div className="field">
+                <label htmlFor="annotation-precision">
+                  Precision
+                  <ToggleButtonGroup
+                    data-compact
+                    selectionMode="single"
+                    disallowEmptySelection={true}
+                    selectedKeys={[settings.annotation_rounding]}
+                    isDisabled={!settings.annotation}
+                    onSelectionChange={(value) =>
                       updateSettings({
-                        annotation_rounding: Number.parseInt(
-                          event.target.value,
-                        ) as HeatmapSettings["annotation_rounding"],
+                        annotation_rounding: value.values().next()
+                          .value as typeof settings.annotation_rounding,
                       })
                     }
-                    disabled={!settings.annotation}
                   >
-                    <option value={0}>0</option>
-                    <option value={1}>1</option>
-                    <option value={2}>2</option>
-                  </select>
-                </div>
+                    <ToggleButton id={0}>0</ToggleButton>
+                    <ToggleButton id={1}>1</ToggleButton>
+                    <ToggleButton id={2}>2</ToggleButton>
+                  </ToggleButtonGroup>
+                </label>
               </div>
             </div>
           </div>
