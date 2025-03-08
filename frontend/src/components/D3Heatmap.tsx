@@ -56,11 +56,7 @@ export const D3Heatmap = ({
     const plotWidth = plotSize - margin.left - margin.right;
     const plotHeight = plotSize - margin.top - margin.bottom;
     const cellSize = plotWidth / tickText.length;
-    const cellMetrics = getCellMetrics(
-      cellSize,
-      cellSpace,
-      settings.annotation_rounding + 3,
-    );
+    const cellMetrics = getCellMetrics(cellSize, cellSpace, roundTo + 3);
 
     const colorFn = createD3ColorScale(
       colorScale,

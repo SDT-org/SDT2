@@ -98,11 +98,7 @@ export const D3CanvasHeatmap = ({
     const rows = [...new Set(filteredData.map((d) => d.x))];
     const cols = [...new Set(filteredData.map((d) => d.y))];
 
-    const cellMetrics = getCellMetrics(
-      cellSize,
-      cellSpace,
-      settings.annotation_rounding + 3,
-    );
+    const cellMetrics = getCellMetrics(cellSize, cellSpace, roundTo + 3);
 
     // Draw cells
     for (const d of filteredData) {
@@ -297,7 +293,6 @@ export const D3CanvasHeatmap = ({
     axlabel_xfontsize,
     axlabel_xrotation,
     axlabel_yrotation,
-    settings.annotation_rounding,
     titleFont,
     tickText,
     cbarWidth,
