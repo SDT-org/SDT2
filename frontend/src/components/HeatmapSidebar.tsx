@@ -312,53 +312,53 @@ export const HeatmapSidebar = ({
                 />
               </div>
             </div>
-            <div className="group">
-              <Switch
-                isSelected={settings.showTitles}
-                onChange={(value) => {
-                  updateSettings({
-                    showTitles: value,
-                  });
-                }}
-              >
-                Plot Titles
-              </Switch>
-              <div
-                className="drawer"
-                data-hidden={!settings.showTitles}
-                aria-hidden={!settings.showTitles}
-              >
-                <div className="col-2 auto-onefr align-items-center">
-                  <Label htmlFor="font">Font Type</Label>
-                  <Select
-                    id="font"
-                    data-compact
-                    selectedKey={settings.titleFont}
-                    onSelectionChange={(value) =>
-                      updateSettings({
-                        titleFont: value as typeof settings.titleFont,
-                      })
-                    }
-                    items={["Sans Serif", "Monospace"].map((name) => ({
-                      id: name,
-                      name,
-                    }))}
-                  >
-                    {(item) => (
-                      <SelectItem textValue={item.name}>{item.name}</SelectItem>
-                    )}
-                  </Select>
-                </div>
+          </div>
+          <div className="group">
+            <Switch
+              isSelected={settings.showTitles}
+              onChange={(value) => {
+                updateSettings({
+                  showTitles: value,
+                });
+              }}
+            >
+              Plot Titles
+            </Switch>
+            <div
+              className="drawer"
+              data-hidden={!settings.showTitles}
+              aria-hidden={!settings.showTitles}
+            >
+              <div className="col-2 auto-onefr align-items-center">
+                <Label htmlFor="font">Font Type</Label>
+                <Select
+                  id="font"
+                  data-compact
+                  selectedKey={settings.titleFont}
+                  onSelectionChange={(value) =>
+                    updateSettings({
+                      titleFont: value as typeof settings.titleFont,
+                    })
+                  }
+                  items={["Sans Serif", "Monospace"].map((name) => ({
+                    id: name,
+                    name,
+                  }))}
+                >
+                  {(item) => (
+                    <SelectItem textValue={item.name}>{item.name}</SelectItem>
+                  )}
+                </Select>
+              </div>
 
-                <div className="field">
-                  <TextField
-                    onChange={(value) => updateSettings({ title: value })}
-                    value={settings.title}
-                  >
-                    <Label>Title</Label>
-                    <Input />
-                  </TextField>
-                </div>
+              <div className="field">
+                <TextField
+                  onChange={(value) => updateSettings({ title: value })}
+                  value={settings.title}
+                >
+                  <Label>Title</Label>
+                  <Input />
+                </TextField>
               </div>
             </div>
           </div>

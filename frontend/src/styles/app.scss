@@ -140,6 +140,7 @@ body {
   overflow: auto;
   border-radius: 0.6rem;
   box-shadow: 0 0 0 0.1rem var(--border-color);
+  z-index: 1;
 }
 
 .app-sidebar {
