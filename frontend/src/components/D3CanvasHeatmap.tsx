@@ -100,8 +100,8 @@ export const D3CanvasHeatmap = ({
     const rows = [...new Set(filteredData.map((d) => d.x))];
     const cols = [...new Set(filteredData.map((d) => d.y))];
 
-    // Calculate cell size accounting for cellspace parameter
-    const rectSize = cellSize - cellSpace;
+    // Calculate cell size accounting for cellspace parameter;
+    const rectSize = Math.max(1, cellSize - cellSpace);
     const fontSize = getFontSizeForCell(
       rectSize,
       settings.annotation_rounding + 3,
