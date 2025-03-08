@@ -320,7 +320,10 @@ export const D3CanvasHeatmap = ({
     const cell = data.find((d) => d.x === dataX && d.y === dataY);
 
     const clusterGroup =
-      clusterData && cell
+      clusterData &&
+      cell &&
+      clusterData.find((i) => i.id === tickText[cell.x])?.group ===
+        clusterData.find((i) => i.id === tickText[cell.y])?.group
         ? clusterData.find((i) => i.id === tickText[cell.x])?.group
         : null;
 
