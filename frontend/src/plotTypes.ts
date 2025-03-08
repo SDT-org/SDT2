@@ -102,7 +102,6 @@ export interface ClustermapSettings {
   threshold_one: number;
   threshold_two: number;
   annotation: boolean;
-  annotation_rounding: 0 | 1 | 2;
   titleFont: "Sans Serif" | "Monospace";
   showTitles: boolean;
   title: string;
@@ -119,7 +118,6 @@ export const ClustermapSettingsSchema = z.object({
   threshold_one: z.number(),
   threshold_two: z.number(),
   annotation: z.boolean(),
-  annotation_rounding: z.union([z.literal(0), z.literal(1), z.literal(2)]),
   showTitles: z.boolean(),
   titleFont: z.enum(["Sans Serif", "Monospace"]),
   title: z.string(),

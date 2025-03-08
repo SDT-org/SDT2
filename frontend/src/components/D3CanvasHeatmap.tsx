@@ -128,7 +128,6 @@ export const D3CanvasHeatmap = ({
       ctx.fillRect(x, y, rectSize, rectSize);
 
       if (showPercentIdentities) {
-        // set text to  current percision value
         const roundedValue = d.value.toFixed(roundTo);
         const formattedText = d.value === 100 ? "100" : roundedValue;
 

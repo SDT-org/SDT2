@@ -179,7 +179,6 @@ export const initialDocState: DocState = {
     threshold_one: 85,
     threshold_two: 0,
     annotation: false,
-    annotation_rounding: 0,
     titleFont: "Sans Serif",
     showTitles: false,
     title: "",

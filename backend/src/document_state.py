@@ -58,7 +58,6 @@ default_clustermap_state = dict(
     threshold_one=85,
     threshold_two=0,
     annotation=False,
-    annotation_rounding=0,
     titleFont="Sans Serif",
     showTitles=False,
     title="",

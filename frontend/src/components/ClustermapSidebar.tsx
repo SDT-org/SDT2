@@ -92,33 +92,6 @@ export const ClustermapSidebar = ({
             >
               Percent Identities
             </Switch>
-            <div
-              className="drawer"
-              data-hidden={!settings.annotation}
-              aria-hidden={!settings.annotation}
-            >
-              <div className="col-2">
-                <div className="field">
-                  <label htmlFor="round-vals">Precision</label>
-                  <select
-                    id="round-vals"
-                    value={settings.annotation_rounding}
-                    onChange={(event) =>
-                      updateSettings({
-                        annotation_rounding: Number.parseInt(
-                          event.target.value,
-                        ) as HeatmapSettings["annotation_rounding"],
-                      })
-                    }
-                    disabled={!settings.annotation}
-                  >
-                    <option value={0}>0</option>
-                    <option value={1}>1</option>
-                    <option value={2}>2</option>
-                  </select>
-                </div>
-              </div>
-            </div>
           </div>
           <div className="group">
             <Switch
