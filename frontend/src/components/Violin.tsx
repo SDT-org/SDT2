@@ -99,8 +99,8 @@ export const Violin = ({
   };
 
   const scoresText = data.identity_combos.map(
-    (ids) =>
-      `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}<br><br>${hoverData.scores.title}: `,
+    (idIndexes) =>
+      `Seq 1: ${data.ids[idIndexes[0]]}<br>Seq 2: ${data.ids[idIndexes[1]]}<br><br>${hoverData.scores.title}: `,
   );
   const { index, suffix, title } = hoverData[dataSetKey];
 

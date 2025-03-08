@@ -82,7 +82,8 @@ export type GetDataResponse = {
     minVal: number;
     maxVal: number;
   };
-  identity_scores: [string, string, number][];
+  ids: string[];
+  identity_scores: [number, number, number][];
   stat_ids: string[];
   full_stats: [string, number, number][];
 };
@@ -93,7 +94,8 @@ export type DistributionData = Omit<
   "data" | "identity_scores" | "metadata" | "stat_ids"
 > & {
   raw_mat: number[];
-  identity_combos: [string, string][];
+  ids: string[];
+  identity_combos: [number, number][];
   gc_stats: number[];
   length_stats: number[];
 };

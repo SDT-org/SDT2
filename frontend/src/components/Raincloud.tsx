@@ -70,10 +70,11 @@ export const Raincloud = ({
         hoveron: "points",
         hovertemplate: "%{text}<br> <br>Percent Identity: %{x}<extra></extra>",
         text: data.identity_combos.map(
-          (ids) => `Seq 1: ${ids[0]}<br>Seq 2: ${ids[1]}`,
+          (idIndexes) =>
+            `Seq 1: ${data.ids[idIndexes[0]]}<br>Seq 2: ${data.ids[idIndexes[1]]}`,
         ),
       }) as Partial<PlotData>,
-    [data.identity_combos, dataSet, settings],
+    [data.identity_combos, data.ids, dataSet, settings],
   );
   return (
     <>

@@ -498,8 +498,22 @@ class Api:
         cols_path = os.path.join(cols_dir, f"{cols_file_base}_cols.csv")
 
         if os.path.exists(cols_path):
-            identity_scores = read_csv(cols_path, skiprows=1).values.tolist()
+            cols_data = read_csv(cols_path, skiprows=1).values.tolist()
+
+            id_map = {}
+            identity_scores = []
+
+            for row in cols_data:
+                a, b = row[:2]
+                if a not in id_map:
+                    id_map[a] = len(id_map)
+                if b not in id_map:
+                    id_map[b] = len(id_map)
+                identity_scores.append([id_map[a], id_map[b]] + list(row[2:]))
+
+            ids = list(id_map.keys())
         else:
+           ids = []
            identity_scores = []
 
         df = read_csv(
@@ -515,10 +529,10 @@ class Api:
         max_val = int(nanmax(data_no_diag))
 
         # TODO might be able to make one tick text object for both to use?
-        return data, tick_text, min_val, max_val, identity_scores, stats_df
+        return data, tick_text, min_val, max_val, ids, identity_scores, stats_df
 
     def get_data(self, doc_id: str):
-        data, tick_text, min_val, max_val, identity_scores, stats_df = (
+        data, tick_text, min_val, max_val, ids, identity_scores, stats_df = (
             self.load_data_and_stats(doc_id)
         )
         heat_data = DataFrame(data, index=tick_text)
@@ -527,7 +541,7 @@ class Api:
         data_to_dump = dict(
             metadata=dict(minVal=min_val, maxVal=max_val),
             data=([tick_text] + parsedData),
-            # TODO: return indexes to strings not the strings themselves
+            ids=ids,
             identity_scores=identity_scores,
             full_stats=stats_df.values.tolist()
         )
