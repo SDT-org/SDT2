@@ -1,7 +1,6 @@
 import React from "react";
 import { Input, Label, TextField } from "react-aria-components";
 import type { DocState } from "../appState";
-import type { HeatmapSettings } from "../plotTypes";
 import { NumberInput } from "./NumberInput";
 import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";

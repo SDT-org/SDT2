@@ -3,7 +3,7 @@ import React from "react";
 import tinycolor from "tinycolor2";
 import { createD3ColorScale } from "../colors";
 import { plotFontMonospace } from "../constants";
-import { getCellMetrics, getFontSizeForCell } from "../heatmapUtils";
+import { getCellMetrics } from "../heatmapUtils";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapRenderProps } from "./Heatmap";
 
@@ -152,7 +152,7 @@ export const D3Heatmap = ({
         .selectAll("text")
         .data(tickText)
         .join("text")
-        .attr("x", (_, i) => i * cellW + cellW / 2)
+        .attr("x", (_, i) => i * cellSize + cellSize / 2)
         .attr("y", axisGap)
         .attr("dominant-baseline", "middle")
         .attr("text-anchor", "end")
@@ -162,7 +162,7 @@ export const D3Heatmap = ({
         .attr(
           "transform",
           (_, i) =>
-            `rotate(${270 + axlabel_xrotation}, ${i * cellW + cellW / 2}, ${axisGap})`,
+            `rotate(${270 + axlabel_xrotation}, ${i * cellSize + cellSize / 2}, ${axisGap})`,
         );
 
       // y-axis labels
@@ -171,7 +171,7 @@ export const D3Heatmap = ({
         .data(tickText)
         .join("text")
         .attr("x", -axisGap)
-        .attr("y", (_, i) => i * cellH + cellH / 2)
+        .attr("y", (_, i) => i * cellSize + cellSize / 2)
         .attr("dominant-baseline", "central")
         .attr("text-anchor", "end")
         .attr("font-family", plotFontMonospace.family)
@@ -180,7 +180,7 @@ export const D3Heatmap = ({
         .attr(
           "transform",
           (_, i) =>
-            `rotate(${360 + axlabel_yrotation}, ${-axisGap}, ${i * cellH + cellH / 2})`,
+            `rotate(${360 + axlabel_yrotation}, ${-axisGap}, ${i * cellSize + cellSize / 2})`,
         );
     }
 

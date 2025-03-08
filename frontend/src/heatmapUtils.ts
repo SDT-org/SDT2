@@ -1,6 +1,9 @@
 export const getPlotMetrics = (width: number, height: number) => {
   // WIP
-  return {};
+  return {
+    width: width,
+    height: height,
+  };
 };
 
 export const getCellMetrics = (

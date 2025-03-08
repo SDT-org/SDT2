@@ -3,7 +3,7 @@ import React from "react";
 import tinycolor from "tinycolor2";
 import { createD3ColorScale, distinctColor } from "../colors";
 import { plotFontMonospace } from "../constants";
-import { getCellMetrics, getFontSizeForCell } from "../heatmapUtils";
+import { getCellMetrics } from "../heatmapUtils";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapRenderProps } from "./Heatmap";
 
