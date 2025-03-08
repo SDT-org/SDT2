@@ -20,7 +20,7 @@ export const D3CanvasHeatmap = ({
   roundTo,
   cbarHeight,
   cbarWidth,
-  axlabel_xfontsize,
+  axlabel_fontsize,
   axlabel_xrotation,
   axlabel_yrotation,
   titleFont,
@@ -172,8 +172,8 @@ export const D3CanvasHeatmap = ({
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
         ctx.font = `${Math.max(
-          axlabel_xfontsize * transform.k,
-          axlabel_xfontsize,
+          axlabel_fontsize * transform.k,
+          axlabel_fontsize,
         )}px ${plotFontMonospace.family}`;
         ctx.fillText(txt, 0, 0);
         ctx.restore();
@@ -195,8 +195,8 @@ export const D3CanvasHeatmap = ({
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
         ctx.font = `${Math.max(
-          axlabel_xfontsize * transform.k,
-          axlabel_xfontsize,
+          axlabel_fontsize * transform.k,
+          axlabel_fontsize,
         )}px ${plotFontMonospace.family}`;
         ctx.fillText(txt, 0, 0);
         ctx.restore();
@@ -290,7 +290,7 @@ export const D3CanvasHeatmap = ({
     roundTo,
     showTitles,
     title,
-    axlabel_xfontsize,
+    axlabel_fontsize,
     axlabel_xrotation,
     axlabel_yrotation,
     titleFont,

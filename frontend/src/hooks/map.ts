@@ -43,8 +43,8 @@ export const useMetrics = (
   const longestTickWidth = React.useMemo(
     () =>
       Math.max(...tickText.map((tick) => tick.length)) *
-      settings.axlabel_xfontsize,
-    [tickText, settings.axlabel_xfontsize],
+      settings.axlabel_fontsize,
+    [tickText, settings.axlabel_fontsize],
   );
 
   const margin = React.useMemo(

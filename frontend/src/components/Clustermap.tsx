@@ -14,7 +14,7 @@ export type ClustermapRenderProps = {
   width: number;
   height: number;
   roundTo: number;
-  axlabel_xfontsize: number;
+  axlabel_fontsize: number;
   axlabel_xrotation: number;
   axlabel_yrotation: number;
   showPercentIdentities: boolean;
@@ -106,7 +106,7 @@ export const Clustermap = ({
             roundTo={2}
             showscale={false}
             axlabel_xrotation={settings.axlabel_xrotation}
-            axlabel_xfontsize={settings.axlabel_xfontsize}
+            axlabel_fontsize={settings.axlabel_fontsize}
             axlabel_yrotation={settings.axlabel_yrotation}
             titleFont={
               settings.titleFont === "Monospace"

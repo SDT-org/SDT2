@@ -22,7 +22,7 @@ export interface HeatmapSettings {
   cbar_aspect: number;
   axis_labels: boolean;
   axlabel_xrotation: number;
-  axlabel_xfontsize: number;
+  axlabel_fontsize: number;
   axlabel_yrotation: number;
   cutoff_1: number;
   cutoff_2: number;
@@ -67,7 +67,7 @@ export const HeatmapSettingsSchema = z.object({
   cbar_aspect: z.number(),
   axis_labels: z.boolean(),
   axlabel_xrotation: z.number(),
-  axlabel_xfontsize: z.number(),
+  axlabel_fontsize: z.number(),
   axlabel_yrotation: z.number(),
   cutoff_1: z.number(),
   cutoff_2: z.number(),
@@ -109,7 +109,7 @@ export interface ClustermapSettings {
   ytitle: string;
   axis_labels: boolean;
   axlabel_xrotation: number;
-  axlabel_xfontsize: number;
+  axlabel_fontsize: number;
   axlabel_yrotation: number;
   cellspace: number;
 }
@@ -125,7 +125,7 @@ export const ClustermapSettingsSchema = z.object({
   ytitle: z.string(),
   axis_labels: z.boolean(),
   axlabel_xrotation: z.number(),
-  axlabel_xfontsize: z.number(),
+  axlabel_fontsize: z.number(),
   axlabel_yrotation: z.number(),
   cellspace: z.number(),
 });

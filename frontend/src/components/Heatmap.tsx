@@ -29,7 +29,7 @@ export type HeatmapRenderProps = {
   roundTo: number;
   cbarWidth: number;
   cbarHeight: number;
-  axlabel_xfontsize: number;
+  axlabel_fontsize: number;
   axlabel_xrotation: number;
   axlabel_yrotation: number;
   showPercentIdentities: boolean;
@@ -158,7 +158,7 @@ export const Heatmap = ({
                 cbarHeight={cbar_shrink ?? settings.cbar_shrink}
                 cbarWidth={cbar_aspect ?? settings.cbar_aspect}
                 axlabel_xrotation={settings.axlabel_xrotation}
-                axlabel_xfontsize={settings.axlabel_xfontsize}
+                axlabel_fontsize={settings.axlabel_fontsize}
                 axlabel_yrotation={settings.axlabel_yrotation}
                 titleFont={titleFont}
                 showTitles={settings.showTitles}
@@ -183,7 +183,7 @@ export const Heatmap = ({
                 cbarHeight={cbar_shrink ?? settings.cbar_shrink}
                 cbarWidth={cbar_aspect ?? settings.cbar_aspect}
                 axlabel_xrotation={settings.axlabel_xrotation}
-                axlabel_xfontsize={settings.axlabel_xfontsize}
+                axlabel_fontsize={settings.axlabel_fontsize}
                 axlabel_yrotation={settings.axlabel_yrotation}
                 titleFont={titleFont}
                 showPercentIdentities={settings.annotation}

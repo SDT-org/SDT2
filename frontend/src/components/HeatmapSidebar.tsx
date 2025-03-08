@@ -216,9 +216,9 @@ export const HeatmapSidebar = ({
                 label="Font Size"
                 labelClassName="sublabel"
                 onChange={(value) =>
-                  updateSettings({ axlabel_xfontsize: value })
+                  updateSettings({ axlabel_fontsize: value })
                 }
-                value={settings.axlabel_xfontsize}
+                value={settings.axlabel_fontsize}
                 minValue={1}
                 maxValue={40}
                 step={1}

@@ -113,8 +113,8 @@ export const ClustermapSidebar = ({
               <div className="col-2">
                 <NumberInput
                   label="Font Size"
-                  field="axlabel_xfontsize"
-                  value={settings.axlabel_xfontsize}
+                  field="axlabel_fontsize"
+                  value={settings.axlabel_fontsize}
                   updateValue={updateSettings}
                   min={1}
                   max={40}
