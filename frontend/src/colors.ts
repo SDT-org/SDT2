@@ -44,9 +44,12 @@ export function createD3ColorScale(
     .clamp(true);
 }
 
-export const distinctColor = (value: number) => {
-  const hue = value * 137.508; // use golden angle approximation
-  return `hsl(${hue},50%,75%)`;
+export const distinctColor = (index: number) => {
+  if (!index) {
+    return "hsl(245, 245, 245)";
+  }
+  const hue = (index * 137.5) % 360;
+  return `hsl(${hue}, 85%, 50%)`;
 };
 
 type ColorName =

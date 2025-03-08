@@ -123,7 +123,7 @@ export const D3CanvasHeatmap = ({
       const clusterGroup = clusterMatch ? clusterX : null;
 
       ctx.fillStyle = clusterGroup
-        ? clusterGroupColors[clusterGroup] || "red"
+        ? distinctColor(clusterGroup)
         : colorFn(d.value);
       ctx.fillRect(x, y, rectSize, rectSize);
 
@@ -152,7 +152,7 @@ export const D3CanvasHeatmap = ({
 
         // set text color dynamically based on background
         const rectColor = clusterGroup
-          ? clusterGroupColors[clusterGroup]
+          ? distinctColor(clusterGroup)
           : colorFn(d.value);
         const textColor = tinycolor(rectColor).isLight() ? "#000" : "#fff";
 
@@ -285,7 +285,7 @@ export const D3CanvasHeatmap = ({
         const itemY = margin.top + lineGap * row;
 
         // Draw colored square
-        ctx.fillStyle = clusterGroupColors[index] || "red";
+        ctx.fillStyle = distinctColor(index + 1);
         ctx.fillRect(itemX, itemY, cellSize, cellSize);
 
         // Draw text
