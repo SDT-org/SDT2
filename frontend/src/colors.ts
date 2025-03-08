@@ -1,4 +1,3 @@
-import Color from "colorjs.io";
 import * as d3 from "d3";
 import tinycolor from "tinycolor2";
 import { z } from "zod";
@@ -18,65 +17,11 @@ export const ColorStringSchema = z
     },
   );
 
-export const findScaleLower = (colorScale: ColorScaleArray, value: number) =>
-  colorScale
-    .filter((curr) => curr[0] <= value)
-    .reduce((prev, curr) => (curr[0] > prev[0] ? curr : prev), colorScale[0]);
-
-export const findScaleUpper = (colorScale: ColorScaleArray, value: number) =>
-  colorScale
-    .filter((curr) => curr[0] >= value)
-    .reduce((prev, curr) => (curr[0] < prev[0] ? curr : prev), colorScale[0]);
-
 export const originalRgbFormat = {
   name: "rgb",
   commas: true,
   noAlpha: true,
   coords: ["<number>[0, 255]", "<number>[0, 255]", "<number>[0, 255]"],
-};
-
-export const interpolateColor = (
-  colorScale: ColorScaleArray,
-  value: number,
-  format?: {
-    name: string;
-    commas: boolean;
-    noAlpha: boolean;
-    coords: string[];
-  },
-): {
-  value: ColorScaleArray[number];
-  upper: ColorScaleArray[number];
-  lower: ColorScaleArray[number];
-} => {
-  const lower = findScaleLower(colorScale, value);
-  const upper = findScaleUpper(colorScale, value);
-
-  const ratio =
-    lower[0] === upper[0] ? 0 : (value - lower[0]) / (upper[0] - lower[0]);
-  const lowerColor = new Color(lower[1]);
-  const upperColor = new Color(upper[1]);
-  const interpolator = lowerColor.range(upperColor, {
-    space: "srgb",
-    outputSpace: "srgb",
-  });
-  const interpolatedColor =
-    ratio === 0
-      ? value === lower[0]
-        ? lower[1]
-        : upper[1]
-      : interpolator(ratio).toString({ format, precision: 0 });
-
-  return {
-    value: [ratio, interpolatedColor],
-    lower,
-    upper,
-  };
-};
-
-export const makeLinearGradient = (scale: ColorScaleArray) => {
-  const values = Array.from({ length: 10 }, (_, i) => i / 10);
-  return values.map((v) => interpolateColor(scale, v).value);
 };
 
 export function createD3ColorScale(
@@ -200,36 +145,3 @@ export const Colors: Record<ColorName, ColorString> = {
   MediumOrchid: "hsl(288, 59%, 58%)",
   None: "hsla(0, 0%, 0%, 0)",
 } as const;
-
-export const clusterGroupColors = [
-  "red",
-  "pink",
-  "blue",
-  "green",
-  "purple",
-  "orange",
-  "lime",
-  "teal",
-  "navy",
-  "yellow",
-  "aqua",
-  "fuchsia",
-  "gold",
-  "chocolate",
-  "tomato",
-  "salmon",
-  "magenta",
-  "hotpink",
-  "cornflowerblue",
-  "darkgreen",
-  "darkslategray",
-  "coral",
-  "orchid",
-  "turquoise",
-  "silver",
-  "maroon",
-  "olive",
-  "black",
-  "white",
-  "gray",
-];
