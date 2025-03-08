@@ -69,7 +69,6 @@ export const formatHeatmapData = (
         x,
         y,
         value: roundedValue,
-        displayValue: roundedValue === 100 ? "100" : roundedValue,
         backgroundColor,
         foregroundColor,
       };
@@ -106,7 +105,6 @@ export const formatClustermapData = (
         x,
         y,
         value: roundedValue,
-        displayValue: roundedValue === 100 ? "100" : roundedValue,
         backgroundColor,
         foregroundColor,
       };
