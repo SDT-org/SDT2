@@ -13,7 +13,7 @@ import { formatHeatmapData } from "../heatmapUtils";
 import { useMetrics, useSize } from "../hooks/heatmap";
 import type { HeatmapData, HeatmapSettings, MetaData } from "../plotTypes";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
-import { D3Heatmap } from "./D3Heatmap";
+import { D3SvgHeatmap } from "./D3SvgHeatmap";
 import { HeatmapSidebar } from "./HeatmapSidebar";
 
 export type HeatmapRenderProps = {
@@ -145,7 +145,7 @@ export const Heatmap = ({
           >
             {forceSvgRender ||
             (appState.showExportModal && appState.saveFormat === "svg") ? (
-              <D3Heatmap
+              <D3SvgHeatmap
                 data={heatmapData}
                 settings={settings}
                 tickText={tickText}

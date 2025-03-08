@@ -5,7 +5,7 @@ import { getCellMetrics } from "../heatmapUtils";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapRenderProps } from "./Heatmap";
 
-export const D3Heatmap = ({
+export const D3SvgHeatmap = ({
   data,
   tickText,
   colorScale,
