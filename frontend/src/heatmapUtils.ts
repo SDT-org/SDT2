@@ -61,15 +61,15 @@ export const formatHeatmapData = (
       const foregroundColor = tinycolor(backgroundColor).isLight()
         ? "#000"
         : "#fff";
-      const roundedValue = Number(
-        Number(value).toFixed(settings.annotation_rounding),
+      const roundedValue = (value as number).toFixed(
+        settings.annotation_rounding,
       );
 
       return {
         x,
         y,
-        value: roundedValue,
-        displayValue: roundedValue.toString(),
+        value: value as number,
+        displayValue: value === 100 ? "100" : roundedValue.toString(),
         backgroundColor,
         foregroundColor,
       };

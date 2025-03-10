@@ -81,6 +81,11 @@ export const D3CanvasHeatmap = ({
     ctx.translate(transform.x + margin.left, transform.y + margin.top);
     ctx.scale(transform.k, transform.k);
 
+    const cellMetrics = getCellMetrics(cellSize, cellSpace, roundTo + 3);
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = `${cellMetrics.fontSize}px ${plotFontMonospace.family}`;
+
     //index data
     const rows = new Map();
     const cols = new Map();
@@ -92,8 +97,6 @@ export const D3CanvasHeatmap = ({
       if (!cols.has(y)) cols.set(y, colIndex++);
     }
 
-    const cellMetrics = getCellMetrics(cellSize, cellSpace, roundTo + 3);
-
     // Draw cells
     for (const d of data) {
       const x = rows.get(d.x) * cellSize + cellMetrics.cellOffset;
@@ -104,9 +107,6 @@ export const D3CanvasHeatmap = ({
 
       if (showPercentIdentities) {
         ctx.fillStyle = d.foregroundColor;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.font = `${cellMetrics.fontSize}px ${plotFontMonospace.family}`;
         ctx.fillText(
           d.displayValue,
           x + cellMetrics.textOffset,
