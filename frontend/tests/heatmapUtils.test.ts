@@ -40,6 +40,7 @@ describe("formatHeatmapData", () => {
       colorScaleKey: "Test",
       vmax: 100,
       vmin: 8.2,
+      annotation_rounding: 2,
     };
 
     const colorScale: ColorScaleArray = [
