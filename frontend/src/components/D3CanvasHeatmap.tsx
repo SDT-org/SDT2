@@ -103,15 +103,12 @@ export const D3CanvasHeatmap = ({
       ctx.fillRect(x, y, cellMetrics.cellSize, cellMetrics.cellSize);
 
       if (showPercentIdentities) {
-        const roundedValue = d.value.toFixed(roundTo);
-        const formattedText = d.value === 100 ? "100" : roundedValue;
-
         ctx.fillStyle = d.foregroundColor;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.font = `${cellMetrics.fontSize}px ${plotFontMonospace.family}`;
         ctx.fillText(
-          formattedText,
+          d.displayValue,
           x + cellMetrics.textOffset,
           y + cellMetrics.textOffset,
         );
