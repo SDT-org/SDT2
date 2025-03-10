@@ -5,7 +5,7 @@ import {
   formatHeatmapData,
   getCellMetrics,
 } from "../src/heatmapUtils";
-import type { HeatmapSettings } from "../src/plotTypes";
+import type { ColorScaleKey, HeatmapSettings } from "../src/plotTypes";
 
 describe("getCellMetrics", () => {
   it("should return the correct metrics", () => {
@@ -28,29 +28,59 @@ describe("getCellMetrics", () => {
 });
 
 describe("formatHeatmapData", () => {
+  const data = [
+    [100, null, null, null],
+    [72.6, 100, null, null],
+    [72.62, 97.61, 100, null],
+    [8.2, 66.99, 66.88, 100],
+  ];
+
+  const settings: Pick<
+    HeatmapSettings,
+    "colorScaleKey" | "vmax" | "vmin" | "annotation_rounding"
+  > = {
+    colorScaleKey: "Test" as ColorScaleKey,
+    vmax: 100,
+    vmin: 8.2,
+    annotation_rounding: 2,
+  };
+
+  const colorScale: ColorScaleArray = [
+    [0, "rgb(0, 0, 0)"],
+    [1, "rgb(255, 255, 255)"],
+  ];
+
   it("should return formatted data", () => {
-    const data = [
-      [100, null, null, null],
-      [72.6, 100, null, null],
-      [72.62, 97.61, 100, null],
-      [8.2, 66.99, 66.88, 100],
-    ];
+    expect(formatHeatmapData(data, settings, colorScale)).toMatchSnapshot();
+  });
 
-    const settings = {
-      colorScaleKey: "Test",
-      vmax: 100,
-      vmin: 8.2,
-      annotation_rounding: 2,
-    };
-
-    const colorScale: ColorScaleArray = [
-      [0, "rgb(0, 0, 0)"],
-      [1, "rgb(255, 255, 255)"],
-    ];
+  it("should round values", () => {
+    expect(
+      formatHeatmapData(
+        data,
+        { ...settings, annotation_rounding: 1 },
+        colorScale,
+      ).map((i) => i.displayValue),
+    ).toEqual([
+      "100",
+      "72.6",
+      "100",
+      "72.6",
+      "97.6",
+      "100",
+      "8.2",
+      "67.0",
+      "66.9",
+      "100",
+    ]);
 
     expect(
-      formatHeatmapData(data, settings as HeatmapSettings, colorScale),
-    ).toMatchSnapshot();
+      formatHeatmapData(
+        data,
+        { ...settings, annotation_rounding: 0 },
+        colorScale,
+      ).map((i) => i.displayValue),
+    ).toEqual(["100", "73", "100", "73", "98", "100", "8", "67", "67", "100"]);
   });
 });
 

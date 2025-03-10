@@ -45,7 +45,10 @@ export const getCellMetrics = (
 
 export const formatHeatmapData = (
   data: HeatmapData,
-  settings: HeatmapSettings,
+  settings: Pick<
+    HeatmapSettings,
+    "colorScaleKey" | "vmax" | "vmin" | "annotation_rounding"
+  >,
   colorScale: ColorScaleArray,
 ) => {
   const colorFn = createD3ColorScale(
