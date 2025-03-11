@@ -55,8 +55,8 @@ default_heatmap_state = dict(
 )
 
 default_clustermap_state = dict(
-    threshold_one=85,
-    threshold_two=0,
+    threshold=70,
+    method="average",
     annotation=False,
     titleFont="Sans Serif",
     showTitles=False,

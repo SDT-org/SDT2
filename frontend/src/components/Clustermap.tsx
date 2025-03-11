@@ -35,8 +35,8 @@ export const Clustermap = ({
     window.pywebview.api
       .generate_cluster_data(
         docState.id,
-        docState.clustermap.threshold_one,
-        docState.clustermap.threshold_two,
+        docState.clustermap.threshold,
+        docState.clustermap.method,
       )
       .then(setClusterData);
   }, [docState.id, docState.clustermap]);

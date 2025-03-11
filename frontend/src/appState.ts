@@ -176,8 +176,8 @@ export const initialDocState: DocState = {
     cutoff_2: 75,
   },
   clustermap: {
-    threshold_one: 85,
-    threshold_two: 0,
+    threshold: 70,
+    method: "average",
     annotation: false,
     titleFont: "Sans Serif",
     showTitles: false,

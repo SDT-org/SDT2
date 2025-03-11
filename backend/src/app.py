@@ -547,13 +547,13 @@ class Api:
         )
         return json.dumps(data_to_dump)
 
-    def generate_cluster_data(self, doc_id: str, threshold_one: int, threshold_two: int = 0):
+    def generate_cluster_data(self, doc_id: str, threshold: float, method: str):
         doc = get_document(doc_id)
         if doc is None:
             raise Exception(f"Could not find document: {doc_id}")
         matrix_path = get_matrix_path(doc)
 
-        df = cluster.export(matrix_path, threshold_one, threshold_two, False)
+        df = cluster.export(matrix_path, threshold, method, False)
         df = df.rename(columns={str(df.columns[0]): 'id', str(df.columns[1]): 'group'})
         if len(df.columns) > 2 and df.columns[2] is not None:
             df = df.rename(columns={str(df.columns[2]): 'subgroup'})

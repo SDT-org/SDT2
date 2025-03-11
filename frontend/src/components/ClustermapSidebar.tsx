@@ -43,39 +43,66 @@ export const ClustermapSidebar = ({
               <div className="col-2">
                 <div className="field">
                   <NumberInput
-                    label="Threshold 1"
-                    field="threshold_one"
-                    value={settings.threshold_one}
+                    label="Threshold"
+                    field="threshold"
+                    value={settings.threshold}
                     updateValue={updateSettings}
-                    min={settings.threshold_two + 1}
+                    min={0}
                     max={100}
                     step={1}
                   />
                 </div>
-                <div className="field">
-                  <NumberInput
-                    label="Threshold 2"
-                    field="threshold_two"
-                    value={settings.threshold_two}
-                    updateValue={updateSettings}
-                    min={0}
-                    max={settings.threshold_one - 1}
-                    step={1}
-                  />
-                </div>
               </div>
-              <hr className="compact" />
-              <div className="field">
-                <Slider
-                  label="Cell Spacing"
-                  labelClassName="sublabel"
-                  id="cellspace"
-                  onChange={(value) => updateSettings({ cellspace: value })}
-                  minValue={0}
-                  maxValue={20}
-                  value={settings.cellspace}
-                />
-              </div>
+            </div>
+            <div className="col-2 auto-onefr align-items-center">
+              <Label htmlFor="method">Linkage Method</Label>
+              <Select
+                id="method"
+                data-compact
+                selectedKey={settings.method}
+                onSelectionChange={(value) =>
+                  updateSettings({
+                    ...settings,
+                    method: value as
+                      | "single"
+                      | "complete"
+                      | "average"
+                      | "weighted"
+                      | "centroid"
+                      | "median"
+                      | "ward",
+                  })
+                }
+                items={[
+                  "single",
+                  "complete",
+                  "average",
+                  "weighted",
+                  "ward",
+                  "centroid",
+                  "median",
+                  "ward",
+                ].map((method) => ({
+                  id: method,
+                  name: method.charAt(0).toUpperCase() + method.slice(1),
+                }))}
+              >
+                {(item) => (
+                  <SelectItem textValue={item.id}>{item.name}</SelectItem>
+                )}
+              </Select>
+            </div>
+            <hr className="compact" />
+            <div className="field">
+              <Slider
+                label="Cell Spacing"
+                labelClassName="sublabel"
+                id="cellspace"
+                onChange={(value) => updateSettings({ cellspace: value })}
+                minValue={0}
+                maxValue={20}
+                value={settings.cellspace}
+              />
             </div>
           </div>
           <div className="group">

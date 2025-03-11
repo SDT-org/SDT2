@@ -41,8 +41,8 @@ declare global {
         select_path_dialog: (defaultDirectory?: string) => Promise<string>;
         generate_cluster_data: (
           doc_id: string,
-          threshold_one: number,
-          threshold_two: number,
+          threshold: number,
+          method: str,
         ) => Promise<{ id: string; group: number }[]>;
         export_data: (args: {
           doc_id: string;
