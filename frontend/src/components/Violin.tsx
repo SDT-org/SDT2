@@ -124,6 +124,8 @@ export const Violin = ({
         fillcolor: settings.fillColor,
         meanline: {
           visible: settings.showMeanline,
+          width: settings.showBox ? settings.boxlineWidth : settings.lineWidth,
+          color: settings.lineColor,
         },
         points:
           settings.showPoints &&
@@ -140,7 +142,10 @@ export const Violin = ({
         hoveron: "points",
         scalemode: "width",
         // we are going to rip this nonsense out for D3 ASAP
-        hovertemplate: `%{text}${dataSetKey === "scores" && `%{${settings.plotOrientation === "vertical" ? "y" : "x"}}${hoverData.scores.suffix}`}<extra></extra>`,
+        hovertemplate:
+          dataSetKey === "scores"
+            ? `%{text}%{${settings.plotOrientation === "vertical" ? "y" : "x"}}${hoverData.scores.suffix}<extra></extra>`
+            : "%{text}<extra></extra>",
         text: hoverText,
       }) as Partial<PlotData>,
     [dataSet, dataSetKey, settings, hoverText],
@@ -165,16 +170,21 @@ export const Violin = ({
         },
         whiskerwidth: settings.whiskerWidth,
         marker: {
-          visible: settings.showBox,
+          visible: settings.showPoints,
           color: settings.markerColor,
           size: settings.markerSize,
         },
         fillcolor: settings.boxfillColor,
-        hovermode: "closest",
         boxgap: 1 - settings.boxWidth,
-        hoverinfo: "skip",
+        hoverinfo: "text",
+        hovertemplate:
+          dataSetKey === "scores"
+            ? `%{text}%{${settings.plotOrientation === "vertical" ? "y" : "x"}}${hoverData.scores.suffix}<extra></extra>`
+            : "%{text}<extra></extra>",
+        text: hoverText,
+        hoveron: "points",
       }) as Partial<PlotData>,
-    [dataSet, settings],
+    [dataSet, dataSetKey, settings, hoverText],
   );
 
   return (
