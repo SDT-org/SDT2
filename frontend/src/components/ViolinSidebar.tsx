@@ -436,15 +436,15 @@ export const ViolinSidebar = ({
               )}
             </Select>
           </div>
-
-          <TextField
-            onChange={(value) => updateSettings({ title: value })}
-            value={settings.title}
-          >
-            <Label>Title</Label>
-            <Input />
-          </TextField>
-
+          <div className="field">
+            <TextField
+              onChange={(value) => updateSettings({ title: value })}
+              value={settings.title}
+            >
+              <Label>Title</Label>
+              <Input />
+            </TextField>
+          </div>
           <div className="field">
             <TextField
               onChange={(value) => updateSettings({ xtitle: value })}
