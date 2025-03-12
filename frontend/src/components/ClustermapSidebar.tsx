@@ -41,7 +41,7 @@ export const ClustermapSidebar = ({
             <div className="drawer">
               <div className="field">
                 <Slider
-                  label={`Threshold: ${settings.threshold}`}
+                  label="Threshold"
                   id="threshold"
                   onChange={(value) => updateSettings({ threshold: value })}
                   minValue={0}
@@ -52,11 +52,13 @@ export const ClustermapSidebar = ({
               </div>
               <div className="field">
                 <div className="col-2 onefr-atuo">
-                  <div className="col-2 auto-onefr align-items-center">
+                  <div className="col-2 auto-onefr align-items-center linkage-method-container">
                     <Label htmlFor="method">Linkage Method</Label>
                     <Select
                       id="method"
                       data-compact
+                      className="method-select"
+                      style={{ width: "120px" }}
                       selectedKey={settings.method}
                       onSelectionChange={(value: React.Key) =>
                         updateSettings({
@@ -83,7 +85,13 @@ export const ClustermapSidebar = ({
                   </div>
                 </div>
               </div>
-              <div className="group">
+            </div>
+
+            <div className="group">
+              {/* <label className="setting-header" htmlFor="cellspace">
+                Cell Spacing
+              </label> */}
+              <div className="drawer">
                 <div className="field">
                   <Slider
                     label="Cell Spacing"
@@ -97,6 +105,7 @@ export const ClustermapSidebar = ({
                 </div>
               </div>
             </div>
+
             <div className="group">
               <Switch
                 isSelected={settings.annotation}
@@ -201,15 +210,15 @@ export const ClustermapSidebar = ({
                     )}
                   </Select>
                 </div>
-              </div>
-              <div className="field">
-                <TextField
-                  onChange={(value) => updateSettings({ title: value })}
-                  value={settings.title}
-                >
-                  <Label>Title</Label>
-                  <Input />
-                </TextField>
+                <div className="field">
+                  <TextField
+                    onChange={(value) => updateSettings({ title: value })}
+                    value={settings.title}
+                  >
+                    <Label>Title</Label>
+                    <Input />
+                  </TextField>
+                </div>
               </div>
             </div>
           </div>
