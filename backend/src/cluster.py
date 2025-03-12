@@ -10,7 +10,6 @@ def process_groups( data, index,threshold, method):
     i_upper = np.triu_indices(data.shape[0], 1)
     data[i_upper] = data.T[i_upper]
     distance_mat = 100 - data
-    np.fill_diagonal(distance_mat, 0)
     condensed_dist = squareform(distance_mat)
     Z = linkage(condensed_dist, method=method, metric='precomputed')
     cutby = 100 - threshold
@@ -32,7 +31,7 @@ def export(matrix_path, threshold, method, save_csv = True):
     df = pd.read_csv(matrix_path, delimiter=",", index_col=0, header=None, names=column_names)
     index = df.index.tolist()
     data = df.to_numpy()
-    data = np.round(data, 2)
+    data = np.round(data, 2) ## if we want to add a percision argument we cna do that here at some point
     output = process_groups(data, index,threshold, method)
     flattened_output = [(item, key + 1) for key, sublist in output.items() for item in sublist]
     df_result = pd.DataFrame(flattened_output)
