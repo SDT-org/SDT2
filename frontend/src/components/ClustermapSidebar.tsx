@@ -67,16 +67,24 @@ export const ClustermapSidebar = ({
                             | "single"
                             | "complete"
                             | "average"
-                            | "weighted",
+                            | "weighted"
+                            | "centroid"
+                            | "median"
+                            | "ward",
                         })
                       }
-                      items={["single", "complete", "average", "weighted"].map(
-                        (method) => ({
-                          id: method,
-                          name:
-                            method.charAt(0).toUpperCase() + method.slice(1),
-                        }),
-                      )}
+                      items={[
+                        "single",
+                        "complete",
+                        "average",
+                        "weighted",
+                        "centroid",
+                        "median",
+                        "ward",
+                      ].map((method) => ({
+                        id: method,
+                        name: method.charAt(0).toUpperCase() + method.slice(1),
+                      }))}
                     >
                       {(item) => (
                         <SelectItem textValue={item.id}>{item.name}</SelectItem>

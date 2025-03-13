@@ -197,7 +197,7 @@ const RunnerSettings = ({
                   updateAppState({ enableClustering: value });
                 }}
               >
-                Cluster sequences
+                Reorder sequences by:
               </Switch>
               <div
                 className="setting clustering-method"
@@ -225,7 +225,7 @@ const RunnerSettings = ({
               </div>
             </div>
 
-            <div className="field output inline-toggle">
+            {/* <div className="field output inline-toggle">
               <Switch
                 isSelected={appState.enableOutputAlignments}
                 onChange={(value) => {
@@ -263,7 +263,7 @@ const RunnerSettings = ({
                   </Button>
                 </div>
               ) : null}
-            </div>
+            </div> */}
 
             <div className="field performance">
               <label className="header" htmlFor="compute-cores">

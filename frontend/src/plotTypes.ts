@@ -102,7 +102,14 @@ export type DistributionData = Omit<
 
 export interface ClustermapSettings {
   threshold: number;
-  method: "single" | "complete" | "average" | "weighted";
+  method:
+    | "single"
+    | "complete"
+    | "average"
+    | "weighted"
+    | "centroid"
+    | "median"
+    | "ward";
   annotation: boolean;
   titleFont: "Sans Serif" | "Monospace";
   showTitles: boolean;
@@ -118,7 +125,15 @@ export interface ClustermapSettings {
 
 export const ClustermapSettingsSchema = z.object({
   threshold_: z.number(),
-  method: z.enum(["single", "complete", "average", "weighted"]),
+  method: z.enum([
+    "single",
+    "complete",
+    "average",
+    "weighted",
+    "centroid",
+    "median",
+    "ward",
+  ]),
   annotation: z.boolean(),
   showTitles: z.boolean(),
   titleFont: z.enum(["Sans Serif", "Monospace"]),

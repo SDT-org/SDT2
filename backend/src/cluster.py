@@ -3,17 +3,32 @@ import numpy as np
 from scipy.cluster.hierarchy import linkage, fcluster
 import pandas as pd
 from collections import defaultdict
-from scipy.spatial.distance import squareform
+from scipy.spatial.distance import squareform, pdist
 import matplotlib.pyplot as plt
+from sklearn.manifold import MDS
 
 def process_groups( data, index,threshold, method):
+    # SET the upp triangle to zero
     i_upper = np.triu_indices(data.shape[0], 1)
+    #transpost data to upper triangle
     data[i_upper] = data.T[i_upper]
+    # convert to distance matrix
     distance_mat = 100 - data
-    condensed_dist = squareform(distance_mat)
-    Z = linkage(condensed_dist, method=method, metric='precomputed')
+    
+    # create linkage matrix
+    if method =="ward" or method == "centroid" or method == "complete":
+        mds_coords = MDS(n_components=2, dissimilarity='precomputed', random_state=42).fit_transform(distance_mat)
+        mds_distances = pdist(mds_coords)
+        Z = linkage(mds_distances, method=method, metric='euclidean')
+    else:
+        condensed_dist = squareform(distance_mat)
+        Z = linkage(condensed_dist, method=method, metric='precomputed')
+        
+    #set cut threshold
     cutby = 100 - threshold
+    #identify clusters from threshold cut
     labels = fcluster(Z, t=cutby, criterion='distance')
+    # store as dict
     groups_dict = defaultdict(list)
     for i, label in enumerate(labels):
         groups_dict[label-1].append(index[i])
