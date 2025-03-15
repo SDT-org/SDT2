@@ -30,7 +30,7 @@ export const D3CanvasHeatmap = ({
   showscale,
   margin,
   settings,
-}: HeatmapRenderProps & { clusterData?: { id: string; group: number }[] }) => {
+}: HeatmapRenderProps) => {
   const canvasRef =
     useHeatmapRef() as React.MutableRefObject<HTMLCanvasElement>;
   const [transform, setTransform] = React.useState(d3.zoomIdentity);
@@ -240,7 +240,7 @@ export const D3CanvasHeatmap = ({
         ctx.fillStyle = "black";
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
-        ctx.font = `${10}px 'Roboto Mono'`;
+        ctx.font = `10px 'Roboto Mono'`;
         ctx.fillText(
           `Cluster ${cluster.toString()}`,
           itemX + cellSize + labelGap,

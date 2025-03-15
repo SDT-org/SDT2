@@ -9,8 +9,9 @@ import {
   colorScales as defaultColorScales,
 } from "../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
-import { formatHeatmapData } from "../heatmapUtils";
+import { type formatClustermapData, formatHeatmapData } from "../heatmapUtils";
 import { useMetrics, useSize } from "../hooks/heatmap";
+import { useHeatmapRenderToggle } from "../hooks/useHeatmapRenderToggle";
 import type { HeatmapData, HeatmapSettings, MetaData } from "../plotTypes";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3SvgHeatmap } from "./D3SvgHeatmap";
@@ -18,7 +19,9 @@ import { HeatmapSidebar } from "./HeatmapSidebar";
 
 export type HeatmapRenderProps = {
   // TODO: just use settings
-  data: ReturnType<typeof formatHeatmapData>;
+  data:
+    | ReturnType<typeof formatHeatmapData>
+    | ReturnType<typeof formatClustermapData>;
   settings: HeatmapSettings;
   tickText: string[];
   colorScale: ColorScaleArray;
@@ -40,6 +43,7 @@ export type HeatmapRenderProps = {
   axis_labels: boolean;
   titleFont: typeof plotFontMonospace | typeof plotFontSansSerif;
   margin: { top: number; bottom: number; left: number; right: number };
+  clusterData?: { id: string; group: number }[];
 } & Pick<HeatmapSettings, "axis_labels">;
 
 export const Heatmap = ({
@@ -117,32 +121,14 @@ export const Heatmap = ({
   const titleFont =
     settings.titleFont === "Monospace" ? plotFontMonospace : plotFontSansSerif;
 
-  const [forceSvgRender, setForceSvgRender] = React.useState(false);
-
-  React.useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if ((event.metaKey || event.altKey) && event.key === "1") {
-        setForceSvgRender(true);
-        event.preventDefault();
-      } else if ((event.metaKey || event.altKey) && event.key === "2") {
-        setForceSvgRender(false);
-        event.preventDefault();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  const forceSvgRender = useHeatmapRenderToggle();
 
   return (
     <>
       {data ? (
         <>
-          <div
-            className="app-main"
-            ref={elementRef}
-            style={{ background: "#fff" }}
-          >
+          <div className="app-main" ref={elementRef}>
+            {forceSvgRender ? <div className="debug-toast">SVG</div> : null}
             {forceSvgRender ||
             (appState.showExportModal && appState.saveFormat === "svg") ? (
               <D3SvgHeatmap

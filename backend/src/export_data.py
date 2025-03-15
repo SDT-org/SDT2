@@ -61,9 +61,8 @@ def prepare_export_data(export_path: str, matrix_path: str, doc: DocState, args:
     )
 
     image_filenames = {
-        img_type: f"{base_filename}_{img_type}."
-        + ("png" if img_type == "clustermap" else image_format) # TODO: remove when clustermap supports SVG
-        for img_type in image_types
+        image_type: f"{base_filename}_{image_type}.{image_format}"
+        for image_type in image_types
     }
 
     image_destinations = {
@@ -86,10 +85,9 @@ def do_export_data(export_path, image_destinations, image_format, doc, prefix, s
         shutil.copy2(entry.path, temp_destination_path)
         os.replace(temp_destination_path, destination_path)
 
-    for img_type in image_types:
-        format = "png" if img_type == "clustermap" else image_format
+    for image_type in image_types:
         save_image_from_api(
-            data=args[f"{img_type}_image_data"],
-            format=format,
-            destination=image_destinations[img_type],
+            data=args[f"{image_type}_image_data"],
+            format=image_format,
+            destination=image_destinations[image_type],
         )

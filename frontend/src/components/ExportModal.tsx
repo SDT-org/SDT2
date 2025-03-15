@@ -125,25 +125,34 @@ export const ExportModal = () => {
 
     swapDataView("clustermap");
     await new Promise((r) => setTimeout(r, renderTimeout));
+    let clustermapImage = "";
 
-    const clustermapImage: string = await new Promise((resolve) => {
-      // clustermap uses the heatmap component + ref
+    // Clustermap reuses the heatmap component
+    if (config.format === "svg") {
       if (!heatmapRef.current) {
         throw new Error("Expected heatmapRef to have a current value");
       }
-
-      (heatmapRef.current as HTMLCanvasElement).toBlob(async (blob) => {
-        if (blob) {
-          const arrayBuffer = await blob.arrayBuffer();
-          const binary = Array.from(new Uint8Array(arrayBuffer))
-            .map((byte) => String.fromCharCode(byte))
-            .join("");
-          resolve(`data:image/png;base64,${btoa(binary)}`);
-        } else {
-          resolve("");
+      const encoded64Svg = encodeURIComponent(heatmapRef.current.outerHTML);
+      clustermapImage = `data:image/svg+xml;base64,${encoded64Svg}`;
+    } else {
+      clustermapImage = await new Promise((resolve) => {
+        if (!heatmapRef.current) {
+          throw new Error("Expected heatmapRef to have a current value");
         }
-      }, "image/png");
-    });
+
+        (heatmapRef.current as HTMLCanvasElement).toBlob(async (blob) => {
+          if (blob) {
+            const arrayBuffer = await blob.arrayBuffer();
+            const binary = Array.from(new Uint8Array(arrayBuffer))
+              .map((byte) => String.fromCharCode(byte))
+              .join("");
+            resolve(`data:image/${config.format};base64,${btoa(binary)}`);
+          } else {
+            resolve("");
+          }
+        }, `image/${config.format}`);
+      });
+    }
 
     // Plotly exports
 

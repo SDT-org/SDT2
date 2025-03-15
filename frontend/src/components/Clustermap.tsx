@@ -1,36 +1,14 @@
 import React from "react";
-import type { DocState, SetDocState } from "../appState";
+import { type DocState, type SetDocState, useAppState } from "../appState";
 import type { ColorScaleArray } from "../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import { formatClustermapData } from "../heatmapUtils";
 import { useMetrics, useSize } from "../hooks/heatmap";
-import type { ClustermapSettings, HeatmapData } from "../plotTypes";
+import { useHeatmapRenderToggle } from "../hooks/useHeatmapRenderToggle";
+import type { HeatmapData } from "../plotTypes";
 import { ClustermapSidebar } from "./ClustermapSidebar";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
-
-export type ClustermapRenderProps = {
-  data: { x: number; y: number; value: number }[];
-  settings: ClustermapSettings;
-  tickText: string[];
-  width: number;
-  height: number;
-  roundTo: number;
-  axlabel_fontsize: number;
-  axlabel_xrotation: number;
-  axlabel_yrotation: number;
-  showPercentIdentities: boolean;
-  showTitles: boolean;
-  title: string;
-  showscale: boolean;
-  axis_labels: boolean;
-  titleFont: typeof plotFontMonospace | typeof plotFontSansSerif;
-  margin: { top: number; bottom: number; left: number; right: number };
-} & Pick<ClustermapSettings, "axis_labels"> & {
-    clusterData?: {
-      id: string;
-      group: number;
-    }[];
-  };
+import { D3SvgHeatmap } from "./D3SvgHeatmap";
 
 export const Clustermap = ({
   data,
@@ -60,11 +38,10 @@ export const Clustermap = ({
         docState.clustermap.threshold_one,
         docState.clustermap.threshold_two,
       )
-      .then((clusterData) => {
-        setClusterData(clusterData);
-      });
+      .then(setClusterData);
   }, [docState.id, docState.clustermap]);
 
+  const { appState } = useAppState();
   const elementRef = React.useRef<HTMLDivElement | null>(null);
   const size = useSize(elementRef, leftSidebarCollapsed);
   const { clustermap: settings } = docState;
@@ -91,39 +68,72 @@ export const Clustermap = ({
     [data, clusterData, tickText],
   );
 
+  const forceSvgRender = useHeatmapRenderToggle();
+
+  const titleFont =
+    settings.titleFont === "Monospace" ? plotFontMonospace : plotFontSansSerif;
+
   return (
     <>
-      <div className="app-main" ref={elementRef} style={{ background: "#fff" }}>
-        {data && clusterData ? (
-          <D3CanvasHeatmap
-            data={clustermapData}
-            clusterData={clusterData}
-            settings={{ ...docState.heatmap, ...settings }}
-            tickText={tickText}
-            colorScale={colorScale}
-            cbarHeight={0}
-            cbarWidth={0}
-            minVal={0}
-            maxVal={100}
-            width={size.width}
-            height={size.height}
-            roundTo={2}
-            showscale={false}
-            axlabel_xrotation={settings.axlabel_xrotation}
-            axlabel_fontsize={settings.axlabel_fontsize}
-            axlabel_yrotation={settings.axlabel_yrotation}
-            titleFont={
-              settings.titleFont === "Monospace"
-                ? plotFontMonospace
-                : plotFontSansSerif
-            }
-            showPercentIdentities={settings.annotation}
-            showTitles={settings.showTitles}
-            title={settings.title}
-            axis_labels={settings.axis_labels}
-            margin={margin}
-            cellSpace={settings.cellspace}
-          />
+      <div className="app-main" ref={elementRef}>
+        {clusterData && forceSvgRender ? (
+          <div className="debug-toast">SVG</div>
+        ) : null}
+        {clusterData ? (
+          forceSvgRender ||
+          (appState.showExportModal && appState.saveFormat === "svg") ? (
+            <D3SvgHeatmap
+              data={clustermapData}
+              clusterData={clusterData}
+              settings={{ ...docState.heatmap, ...settings }}
+              tickText={tickText}
+              colorScale={colorScale}
+              minVal={0}
+              maxVal={100}
+              width={size.width}
+              height={size.height}
+              cellSpace={settings.cellspace}
+              showPercentIdentities={settings.annotation}
+              roundTo={2}
+              cbarHeight={0}
+              cbarWidth={0}
+              axlabel_xrotation={settings.axlabel_xrotation}
+              axlabel_fontsize={settings.axlabel_fontsize}
+              axlabel_yrotation={settings.axlabel_yrotation}
+              titleFont={titleFont}
+              showTitles={settings.showTitles}
+              title={settings.title}
+              axis_labels={settings.axis_labels}
+              showscale={false}
+              margin={margin}
+            />
+          ) : (
+            <D3CanvasHeatmap
+              data={clustermapData}
+              clusterData={clusterData}
+              settings={{ ...docState.heatmap, ...settings }}
+              tickText={tickText}
+              colorScale={colorScale}
+              cbarHeight={0}
+              cbarWidth={0}
+              minVal={0}
+              maxVal={100}
+              width={size.width}
+              height={size.height}
+              roundTo={2}
+              showscale={false}
+              axlabel_xrotation={settings.axlabel_xrotation}
+              axlabel_fontsize={settings.axlabel_fontsize}
+              axlabel_yrotation={settings.axlabel_yrotation}
+              titleFont={titleFont}
+              showPercentIdentities={settings.annotation}
+              showTitles={settings.showTitles}
+              title={settings.title}
+              axis_labels={settings.axis_labels}
+              margin={margin}
+              cellSpace={settings.cellspace}
+            />
+          )
         ) : null}
       </div>
       <ClustermapSidebar

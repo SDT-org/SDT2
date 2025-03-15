@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import React from "react";
+import { distinctColor } from "../colors";
 import { plotFontMonospace } from "../constants";
 import { getCellMetrics } from "../heatmapUtils";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
@@ -27,6 +28,7 @@ export const D3SvgHeatmap = ({
   showscale,
   axis_labels,
   margin,
+  clusterData,
 }: HeatmapRenderProps) => {
   const svgRef = useHeatmapRef() as React.MutableRefObject<SVGSVGElement>;
   const [_, setSvgTransform] = React.useState({});
@@ -64,7 +66,7 @@ export const D3SvgHeatmap = ({
 
     const groups = g
       .selectAll("g")
-      .data(data.filter((d) => Number(d.value)))
+      .data(data)
       .join("g")
       .attr(
         "transform",
@@ -88,7 +90,7 @@ export const D3SvgHeatmap = ({
         .attr("text-anchor", "middle")
         .attr("font-family", "Roboto Mono")
         .attr("font-size", `${cellMetrics.fontSize}px`)
-        .text((d) => (d.value === 100 ? "100" : d.value.toFixed(roundTo)))
+        .text((d) => d.displayValue)
         .attr("fill", (d) => d.foregroundColor);
     }
 
@@ -116,7 +118,6 @@ export const D3SvgHeatmap = ({
         .attr("font-family", titleFont.family)
         .attr("font-size", "20px")
         .attr("font-weight", "bold")
-        // .attr("text-align", "center")
         .attr("x", (width - margin.left - margin.right) / 2)
         .attr("y", margin.top - margin.bottom - 2)
         .text(title);
@@ -211,6 +212,52 @@ export const D3SvgHeatmap = ({
             .attr("font-family", "Roboto Mono"),
         );
     }
+
+    if (clusterData) {
+      const legendWidth = 80;
+      const cellSize = 10;
+      const lineGap = 20;
+      const labelGap = 5;
+      const columnGap = 20;
+      const positionX = width - legendWidth * 2 - columnGap - margin.right;
+
+      const uniqueClusters = [
+        ...new Set(clusterData.map((i) => i.group)),
+      ].slice(0, 50);
+
+      const legends = g
+        .append("g")
+        .attr("transform", () => `translate(-${margin.right}, 0)`)
+        .selectAll("g")
+        .data(uniqueClusters)
+        .join("g")
+        .attr("transform", (d) => {
+          const index = d - 1; // data from d3 is 1-indexed
+          const column = index % 2;
+          const row = Math.floor(index / 2);
+          const itemX = positionX + column * (legendWidth + columnGap);
+          const itemY = lineGap * row;
+          return `translate(${itemX}, ${itemY})`;
+        });
+
+      legends
+        .append("rect")
+        .attr("width", cellSize)
+        .attr("height", cellSize)
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("fill", (d) => distinctColor(d));
+
+      legends
+        .append("text")
+        .attr("x", cellSize + labelGap)
+        .attr("y", cellSize / 2)
+        .attr("dy", ".35em")
+        .attr("font-family", "Roboto Mono")
+        .attr("font-size", "10px")
+        .text((d) => `Cluster ${d}`)
+        .attr("fill", "black");
+    }
   }, [
     tickValues,
     scale,
@@ -234,6 +281,7 @@ export const D3SvgHeatmap = ({
     showscale,
     axis_labels,
     margin,
+    clusterData,
   ]);
 
   return (
