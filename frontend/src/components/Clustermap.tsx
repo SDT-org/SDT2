@@ -106,6 +106,7 @@ export const Clustermap = ({
               axis_labels={settings.axis_labels}
               showscale={false}
               margin={margin}
+              showLegend={settings.showLegend}
             />
           ) : (
             <D3CanvasHeatmap
@@ -132,6 +133,7 @@ export const Clustermap = ({
               axis_labels={settings.axis_labels}
               margin={margin}
               cellSpace={settings.cellspace}
+              showLegend={settings.showLegend}
             />
           )
         ) : null}

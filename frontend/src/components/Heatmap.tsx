@@ -44,6 +44,7 @@ export type HeatmapRenderProps = {
   titleFont: typeof plotFontMonospace | typeof plotFontSansSerif;
   margin: { top: number; bottom: number; left: number; right: number };
   clusterData?: { id: string; group: number }[];
+  showLegend?: boolean;
 } & Pick<HeatmapSettings, "axis_labels">;
 
 export const Heatmap = ({

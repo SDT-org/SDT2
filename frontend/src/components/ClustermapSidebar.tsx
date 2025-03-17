@@ -160,6 +160,7 @@ export const ClustermapSidebar = ({
               />
             </div>
           </div>
+
           <div className="group">
             <Switch
               isSelected={settings.showTitles}
@@ -207,6 +208,19 @@ export const ClustermapSidebar = ({
                 </TextField>
               </div>
             </div>
+          </div>
+
+          <div className="group">
+            <Switch
+              isSelected={settings.showLegend}
+              onChange={(value) => {
+                updateSettings({
+                  showLegend: value,
+                });
+              }}
+            >
+              Legend
+            </Switch>
           </div>
         </div>
       </div>

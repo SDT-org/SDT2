@@ -189,6 +189,7 @@ export const initialDocState: DocState = {
     axlabel_fontsize: 12,
     axlabel_yrotation: 0,
     cellspace: 1,
+    showLegend: true,
   },
 };
 

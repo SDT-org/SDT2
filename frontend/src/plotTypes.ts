@@ -121,6 +121,7 @@ export interface ClustermapSettings {
   axlabel_fontsize: number;
   axlabel_yrotation: number;
   cellspace: number;
+  showLegend: boolean;
 }
 
 export const ClustermapSettingsSchema = z.object({
@@ -145,4 +146,5 @@ export const ClustermapSettingsSchema = z.object({
   axlabel_fontsize: z.number(),
   axlabel_yrotation: z.number(),
   cellspace: z.number(),
+  showLegend: z.boolean(),
 });

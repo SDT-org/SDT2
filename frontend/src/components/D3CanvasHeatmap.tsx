@@ -30,6 +30,7 @@ export const D3CanvasHeatmap = ({
   showscale,
   margin,
   settings,
+  showLegend,
 }: HeatmapRenderProps) => {
   const canvasRef =
     useHeatmapRef() as React.MutableRefObject<HTMLCanvasElement>;
@@ -209,7 +210,7 @@ export const D3CanvasHeatmap = ({
       }
     }
 
-    if (clusterData) {
+    if (clusterData && showLegend) {
       const legendWidth = 80;
       const cellSize = 10;
       const lineGap = 20;
@@ -278,6 +279,7 @@ export const D3CanvasHeatmap = ({
     maxVal,
     settings?.colorScaleKey,
     clusterData,
+    showLegend,
   ]);
 
   React.useEffect(() => {
