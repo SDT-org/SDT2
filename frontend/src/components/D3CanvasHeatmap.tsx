@@ -374,7 +374,7 @@ export const D3CanvasHeatmap = ({
             <dt>
               {clusterData
                 ? tooltipData.value
-                  ? "Group:"
+                  ? "Cluster:"
                   : ""
                 : "Percent ID:"}
             </dt>
