@@ -39,194 +39,172 @@ export const ClustermapSidebar = ({
               Clusters
             </label>
             <div className="drawer">
-              <div className="field">
-                <Slider
-                  label="Threshold"
-                  id="threshold"
-                  onChange={(value) => updateSettings({ threshold: value })}
-                  minValue={0}
-                  maxValue={100}
-                  step={1}
-                  value={settings.threshold}
-                />
-              </div>
-              <div className="field">
-                <div className="col-2 onefr-atuo">
-                  <div className="col-2 auto-onefr align-items-center linkage-method-container">
-                    <Label htmlFor="method">Linkage Method</Label>
-                    <Select
-                      id="method"
-                      data-compact
-                      className="method-select"
-                      style={{ width: "120px" }}
-                      selectedKey={settings.method}
-                      onSelectionChange={(value: React.Key) =>
-                        updateSettings({
-                          ...settings,
-                          method: value as
-                            | "single"
-                            | "complete"
-                            | "average"
-                            | "weighted"
-                            | "centroid"
-                            | "median"
-                            | "ward",
-                        })
-                      }
-                      items={[
-                        "single",
-                        "complete",
-                        "average",
-                        "weighted",
-                        "centroid",
-                        "median",
-                        "ward",
-                      ].map((method) => ({
-                        id: method,
-                        name: method.charAt(0).toUpperCase() + method.slice(1),
-                      }))}
-                    >
-                      {(item) => (
-                        <SelectItem textValue={item.id}>{item.name}</SelectItem>
-                      )}
-                    </Select>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="group">
-              {/* <label className="setting-header" htmlFor="cellspace">
-                Cell Spacing
-              </label> */}
-              <div className="drawer">
-                <div className="field">
-                  <Slider
-                    label="Cell Spacing"
-                    labelClassName="sublabel"
-                    id="cellspace"
-                    onChange={(value) => updateSettings({ cellspace: value })}
-                    minValue={0}
-                    maxValue={20}
-                    value={settings.cellspace}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="group">
-              <Switch
-                isSelected={settings.annotation}
-                onChange={(value) =>
-                  maybeWarnPerformance(value, () =>
+              <div className="col-2 auto-onefr align-items-center">
+                <Label htmlFor="method">Linkage Method</Label>
+                <Select
+                  id="method"
+                  data-compact
+                  selectedKey={settings.method}
+                  onSelectionChange={(value: React.Key) =>
                     updateSettings({
-                      annotation: value,
-                    }),
-                  )
-                }
-              >
-                Percent Identities
-              </Switch>
-            </div>
-            <div className="group">
-              <Switch
-                isSelected={settings.axis_labels}
-                onChange={(value) =>
-                  maybeWarnPerformance(value, () =>
-                    updateSettings({
-                      axis_labels: value,
-                    }),
-                  )
-                }
-              >
-                Axis Labels
-              </Switch>
-              <div
-                className="drawer"
-                data-hidden={!settings.axis_labels}
-                aria-hidden={!settings.axis_labels}
-              >
-                <Slider
-                  label="Font Size"
-                  labelClassName="sublabel"
-                  onChange={(value) =>
-                    updateSettings({ axlabel_fontsize: value })
+                      ...settings,
+                      method: value as typeof settings.method,
+                    })
                   }
-                  value={settings.axlabel_fontsize}
-                  minValue={1}
-                  maxValue={20}
-                  step={1}
-                />
-                <Slider
-                  label="X Rotation"
-                  labelClassName="sublabel"
-                  onChange={(value) =>
-                    updateSettings({ axlabel_xrotation: value })
-                  }
-                  value={settings.axlabel_xrotation}
-                  minValue={-90}
-                  maxValue={90}
-                  step={10}
-                />
-                <Slider
-                  label="Y Rotation"
-                  labelClassName="sublabel"
-                  onChange={(value) =>
-                    updateSettings({ axlabel_yrotation: value })
-                  }
-                  value={settings.axlabel_yrotation}
-                  minValue={-90}
-                  maxValue={90}
-                  step={10}
-                />
+                  items={[
+                    "single",
+                    "complete",
+                    "average",
+                    "weighted",
+                    "centroid",
+                    "median",
+                    "ward",
+                  ].map((method) => ({
+                    id: method,
+                    name: method.charAt(0).toUpperCase() + method.slice(1),
+                  }))}
+                >
+                  {(item) => (
+                    <SelectItem textValue={item.id}>{item.name}</SelectItem>
+                  )}
+                </Select>
               </div>
+
+              <hr className="compact" />
+
+              <Slider
+                label="Threshold"
+                id="threshold"
+                onChange={(value) => updateSettings({ threshold: value })}
+                minValue={0}
+                maxValue={100}
+                step={1}
+                value={settings.threshold}
+              />
+
+              <Slider
+                label="Cell Spacing"
+                id="cellspace"
+                onChange={(value) => updateSettings({ cellspace: value })}
+                minValue={0}
+                maxValue={20}
+                value={settings.cellspace}
+              />
             </div>
-            <div className="group">
-              <Switch
-                isSelected={settings.showTitles}
-                onChange={(value) => {
+          </div>
+
+          <div className="group">
+            <Switch
+              isSelected={settings.annotation}
+              onChange={(value) =>
+                maybeWarnPerformance(value, () =>
                   updateSettings({
-                    showTitles: value,
-                  });
-                }}
-              >
-                Plot Titles
-              </Switch>
-              <div
-                className="drawer"
-                data-hidden={!settings.showTitles}
-                aria-hidden={!settings.showTitles}
-              >
-                <div className="col-2 auto-onefr align-items-center">
-                  <Label htmlFor="font">Font Type</Label>
-                  <Select
-                    id="font"
-                    data-compact
-                    selectedKey={settings.titleFont}
-                    onSelectionChange={(value: React.Key) =>
-                      updateSettings({
-                        titleFont: value as typeof settings.titleFont,
-                      })
-                    }
-                    items={["Sans Serif", "Monospace"].map((name) => ({
-                      id: name,
-                      name,
-                    }))}
-                  >
-                    {(item) => (
-                      <SelectItem textValue={item.name}>{item.name}</SelectItem>
-                    )}
-                  </Select>
-                </div>
-                <div className="field">
-                  <TextField
-                    onChange={(value) => updateSettings({ title: value })}
-                    value={settings.title}
-                  >
-                    <Label>Title</Label>
-                    <Input />
-                  </TextField>
-                </div>
+                    annotation: value,
+                  }),
+                )
+              }
+            >
+              Percent Identities
+            </Switch>
+          </div>
+          <div className="group">
+            <Switch
+              isSelected={settings.axis_labels}
+              onChange={(value) =>
+                maybeWarnPerformance(value, () =>
+                  updateSettings({
+                    axis_labels: value,
+                  }),
+                )
+              }
+            >
+              Axis Labels
+            </Switch>
+            <div
+              className="drawer"
+              data-hidden={!settings.axis_labels}
+              aria-hidden={!settings.axis_labels}
+            >
+              <Slider
+                label="Font Size"
+                labelClassName="sublabel"
+                onChange={(value) =>
+                  updateSettings({ axlabel_fontsize: value })
+                }
+                value={settings.axlabel_fontsize}
+                minValue={1}
+                maxValue={20}
+                step={1}
+              />
+              <Slider
+                label="X Rotation"
+                labelClassName="sublabel"
+                onChange={(value) =>
+                  updateSettings({ axlabel_xrotation: value })
+                }
+                value={settings.axlabel_xrotation}
+                minValue={-90}
+                maxValue={90}
+                step={10}
+              />
+              <Slider
+                label="Y Rotation"
+                labelClassName="sublabel"
+                onChange={(value) =>
+                  updateSettings({ axlabel_yrotation: value })
+                }
+                value={settings.axlabel_yrotation}
+                minValue={-90}
+                maxValue={90}
+                step={10}
+              />
+            </div>
+          </div>
+          <div className="group">
+            <Switch
+              isSelected={settings.showTitles}
+              onChange={(value) => {
+                updateSettings({
+                  showTitles: value,
+                });
+              }}
+            >
+              Plot Titles
+            </Switch>
+            <div
+              className="drawer"
+              data-hidden={!settings.showTitles}
+              aria-hidden={!settings.showTitles}
+            >
+              <div className="col-2 auto-onefr align-items-center">
+                <Label htmlFor="font">Font Type</Label>
+                <Select
+                  id="font"
+                  data-compact
+                  selectedKey={settings.titleFont}
+                  onSelectionChange={(value: React.Key) =>
+                    updateSettings({
+                      titleFont: value as typeof settings.titleFont,
+                    })
+                  }
+                  items={["Sans Serif", "Monospace"].map((name) => ({
+                    id: name,
+                    name,
+                  }))}
+                >
+                  {(item) => (
+                    <SelectItem textValue={item.name}>{item.name}</SelectItem>
+                  )}
+                </Select>
+              </div>
+              <div className="field">
+                <TextField
+                  onChange={(value) => updateSettings({ title: value })}
+                  value={settings.title}
+                >
+                  <Label>Title</Label>
+                  <Input />
+                </TextField>
               </div>
             </div>
           </div>
