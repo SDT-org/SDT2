@@ -7,3 +7,4 @@ pandas==2.2.3
 nuitka==2.6.2
 parasail
 platformdirs
+scikit-learn

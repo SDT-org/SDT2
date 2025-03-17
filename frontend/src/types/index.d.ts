@@ -49,6 +49,7 @@ declare global {
           export_path: string;
           output_cluster: boolean;
           cluster_threshold: number;
+          cluster_method: string;
           heatmap_image_data: string;
           clustermap_image_data: string;
           histogram_image_data: string;

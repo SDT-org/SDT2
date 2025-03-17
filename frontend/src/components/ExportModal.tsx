@@ -16,8 +16,6 @@ import { assertDefined } from "../helpers";
 import { useDocState } from "../hooks/useDocState";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import { Select, SelectItem } from "./Select";
-import { Slider } from "./Slider";
-import { Switch } from "./Switch";
 
 const getPlotlyElement = () =>
   assertDefined(
@@ -65,8 +63,6 @@ export const ExportModal = () => {
   const [exportState, setExportState] = React.useState<
     "idle" | "exporting" | "success"
   >("idle");
-  const [outputCluster, setOutputCluster] = React.useState(false);
-  const [threshold, setThreshold] = React.useState(79);
   const { docState, updateDocState } = useDocState(
     appState.activeDocumentId,
     appState,
@@ -179,13 +175,15 @@ export const ExportModal = () => {
 
   const doExport = React.useCallback(() => {
     setExportState("exporting");
+
     getImages().then((images) => {
       window.pywebview.api
         .export_data({
           doc_id: appState.activeDocumentId,
           export_path: appState.dataExportPath,
-          output_cluster: outputCluster,
-          cluster_threshold: threshold,
+          output_cluster: true,
+          cluster_threshold: docState.clustermap.threshold,
+          cluster_method: docState.clustermap.method,
           heatmap_image_data: images.heatmapImage,
           clustermap_image_data: images.clustermapImage,
           histogram_image_data: images.histogramImage,
@@ -196,7 +194,12 @@ export const ExportModal = () => {
           result ? setExportState("success") : setExportState("idle"),
         );
     });
-  }, [getImages, appState, outputCluster, threshold]);
+  }, [
+    getImages,
+    appState,
+    docState.clustermap.threshold,
+    docState.clustermap.method,
+  ]);
 
   React.useEffect(() => {
     if (exportState !== "success") {
@@ -318,34 +321,6 @@ export const ExportModal = () => {
                           </SelectItem>
                         )}
                       </Select>
-                    </div>
-                    <div className="group">
-                      <Switch
-                        data-split
-                        isSelected={outputCluster}
-                        onChange={() => {
-                          setExportState("idle");
-                          setOutputCluster(!outputCluster);
-                        }}
-                      >
-                        Cluster by Percent Identity
-                      </Switch>
-                      <div
-                        className="field col-2 subfield"
-                        data-hidden={!outputCluster}
-                        aria-hidden={!outputCluster}
-                      >
-                        <Slider
-                          label="Threshold"
-                          value={threshold}
-                          isDisabled={!outputCluster}
-                          onChange={setThreshold}
-                          minValue={0}
-                          maxValue={100}
-                          step={1}
-                          includeField
-                        />
-                      </div>
                     </div>
                     <div className="actions">
                       <Button

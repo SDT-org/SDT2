@@ -13,7 +13,7 @@ def process_groups( data, index,threshold, method):
     data[i_upper] = data.T[i_upper]
     # convert to distance matrix
     distance_mat = 100 - data
-    
+
     # create linkage matrix
     if method =="ward" or method == "centroid" or method == "complete":
         mds_coords = MDS(n_components=2, dissimilarity='precomputed', random_state=42).fit_transform(distance_mat)
@@ -22,7 +22,7 @@ def process_groups( data, index,threshold, method):
     else:
         condensed_dist = squareform(distance_mat)
         Z = linkage(condensed_dist, method=method, metric='precomputed')
-        
+
     #set cut threshold
     cutby = 100 - threshold
     #identify clusters from threshold cut
