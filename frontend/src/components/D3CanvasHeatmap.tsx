@@ -218,12 +218,18 @@ export const D3CanvasHeatmap = ({
       const columnGap = 20;
       const positionX = width - legendWidth * 2 - columnGap - margin.right;
 
-      const uniqueClusters = [
-        ...new Set(clusterData.map((i) => i.group)),
-      ].slice(0, 50);
+ 
+
+
+      const uniqueClusters = [...new Set(clusterData.map((i) => i.group))] 
+      //added sort to 
+        .sort((a, b) => {
+          return Number(a) - Number(b);
+        }).slice(0,50); // Arbitrarily set to 50
 
       uniqueClusters.forEach((cluster, index) => {
-        // Determine column (0 for left, 1 for right)
+        // Determine column (0  left, 1  right)
+        cluster
         const column = index % 2;
 
         // Calculate row position (every two items share the same row)
@@ -233,7 +239,7 @@ export const D3CanvasHeatmap = ({
         const itemX = positionX + column * (legendWidth + columnGap);
         const itemY = margin.top + lineGap * row;
 
-        // Draw colored square
+        // draw colored rect
         ctx.fillStyle = distinctColor(index + 1);
         ctx.fillRect(itemX, itemY, cellSize, cellSize);
 
