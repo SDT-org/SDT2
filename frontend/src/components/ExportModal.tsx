@@ -66,7 +66,7 @@ export const ExportModal = () => {
     "idle" | "exporting" | "success"
   >("idle");
   const [outputCluster, setOutputCluster] = React.useState(false);
-  const [thresholds, setThresholds] = React.useState({ one: 79, two: 0 });
+  const [threshold, setThreshold] = React.useState(79);
   const { docState, updateDocState } = useDocState(
     appState.activeDocumentId,
     appState,
@@ -185,8 +185,7 @@ export const ExportModal = () => {
           doc_id: appState.activeDocumentId,
           export_path: appState.dataExportPath,
           output_cluster: outputCluster,
-          cluster_threshold_one: thresholds.one,
-          cluster_threshold_two: thresholds.two,
+          cluster_threshold: threshold,
           heatmap_image_data: images.heatmapImage,
           clustermap_image_data: images.clustermapImage,
           histogram_image_data: images.histogramImage,
@@ -197,7 +196,7 @@ export const ExportModal = () => {
           result ? setExportState("success") : setExportState("idle"),
         );
     });
-  }, [getImages, appState, outputCluster, thresholds]);
+  }, [getImages, appState, outputCluster, threshold]);
 
   React.useEffect(() => {
     if (exportState !== "success") {
@@ -337,30 +336,10 @@ export const ExportModal = () => {
                         aria-hidden={!outputCluster}
                       >
                         <Slider
-                          label="Threshold 1"
-                          value={thresholds.one}
+                          label="Threshold"
+                          value={threshold}
                           isDisabled={!outputCluster}
-                          onChange={(newValue) =>
-                            setThresholds((prev) => ({
-                              ...prev,
-                              one: newValue,
-                            }))
-                          }
-                          minValue={0}
-                          maxValue={100}
-                          step={1}
-                          includeField
-                        />
-                        <Slider
-                          label="Threshold 2"
-                          value={thresholds.two}
-                          isDisabled={!outputCluster}
-                          onChange={(newValue) =>
-                            setThresholds((prev) => ({
-                              ...prev,
-                              two: newValue,
-                            }))
-                          }
+                          onChange={setThreshold}
                           minValue={0}
                           maxValue={100}
                           step={1}

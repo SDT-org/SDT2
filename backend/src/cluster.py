@@ -4,7 +4,6 @@ from scipy.cluster.hierarchy import linkage, fcluster
 import pandas as pd
 from collections import defaultdict
 from scipy.spatial.distance import squareform, pdist
-import matplotlib.pyplot as plt
 from sklearn.manifold import MDS
 
 def process_groups( data, index,threshold, method):

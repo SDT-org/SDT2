@@ -48,8 +48,7 @@ declare global {
           doc_id: string;
           export_path: string;
           output_cluster: boolean;
-          cluster_threshold_one: number;
-          cluster_threshold_two: number;
+          cluster_threshold: number;
           heatmap_image_data: string;
           clustermap_image_data: string;
           histogram_image_data: string;

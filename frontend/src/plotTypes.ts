@@ -124,7 +124,7 @@ export interface ClustermapSettings {
 }
 
 export const ClustermapSettingsSchema = z.object({
-  threshold_: z.number(),
+  threshold: z.number(),
   method: z.enum([
     "single",
     "complete",
