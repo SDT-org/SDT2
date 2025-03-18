@@ -6,6 +6,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "react-aria-components";
+import { TbRepeat } from "react-icons/tb";
 import type { DocState } from "../appState";
 import type { ColorScaleArray } from "../colorScales";
 import { formatTitle } from "../helpers";
@@ -96,25 +97,7 @@ export const HeatmapSidebar = ({
                         });
                       }}
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                      >
-                        <g
-                          style={{
-                            fill: "none",
-                            stroke: "currentcolor",
-                            strokeWidth: 2,
-                            strokeLinecap: "round",
-                            strokeLinejoin: "round",
-                            strokeMiterlimit: 10,
-                          }}
-                        >
-                          <path d="m15 1 5 5-5 5M9 23l-5-5 5-5" />
-                          <path d="M4 18h13a6 6 0 0 0 6-6v-1M20 6H7a6 6 0 0 0-6 6v1" />
-                        </g>
-                      </svg>
+                      <TbRepeat />
                     </ToggleButton>
                   </Tooltip>
                 </div>

@@ -5,6 +5,12 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "react-aria-components";
+import {
+  TbGrid4X4,
+  TbLetterA,
+  TbNumber10,
+  TbTableDashed,
+} from "react-icons/tb";
 import type { ColorString } from "../colors";
 import type { DistributionState } from "../distributionState";
 import { ColorPicker } from "./ColorPicker";
@@ -54,24 +60,7 @@ export const HistogramSidebar = ({
               >
                 <Tooltip tooltip="Toggle grid">
                   <ToggleButton id="showGrid" aria-label="Toggle grid">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <g
-                        style={{
-                          fill: "none",
-                          stroke: "currentcolor",
-                          strokeWidth: 2,
-                          strokeLinecap: "round",
-                          strokeLinejoin: "round",
-                          strokeMiterlimit: 10,
-                        }}
-                      >
-                        <path d="M9 3v18M15 3v18M3 15h18M21 9H3M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2z" />
-                      </g>
-                    </svg>
+                    <TbGrid4X4 size={18} />
                   </ToggleButton>
                 </Tooltip>
                 <Tooltip tooltip="Toggle axis lines">
@@ -79,26 +68,7 @@ export const HistogramSidebar = ({
                     id="showAxisLines"
                     aria-label="Toggle axis lines"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <g
-                        style={{
-                          fill: "none",
-                          stroke: "currentcolor",
-                          strokeWidth: 2,
-                          strokeLinecap: "round",
-                          strokeLinejoin: "round",
-                          strokeMiterlimit: 10,
-                        }}
-                      >
-                        <path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-14a2 2 0 0 1-2 -2v-14z" />
-                        <path d="M3 10h18" />
-                        <path d="M10 3v18" />
-                      </g>
-                    </svg>
+                    <TbTableDashed size={18} />
                   </ToggleButton>
                 </Tooltip>
                 <Tooltip tooltip="Toggle axis labels">
@@ -106,25 +76,7 @@ export const HistogramSidebar = ({
                     id="showAxisLabels"
                     aria-label="Toggle axis labels"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <g
-                        style={{
-                          fill: "none",
-                          stroke: "currentcolor",
-                          strokeWidth: 2,
-                          strokeLinecap: "round",
-                          strokeLinejoin: "round",
-                          strokeMiterlimit: 10,
-                        }}
-                      >
-                        <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4z" />
-                        <path d="M8 17v-6a4 4 0 0 1 8 0v6M8 13h8" />
-                      </g>
-                    </svg>
+                    <TbLetterA size={18} />
                   </ToggleButton>
                 </Tooltip>
                 <Tooltip tooltip="Toggle tick values">
@@ -132,25 +84,7 @@ export const HistogramSidebar = ({
                     id="showTickLabels"
                     aria-label="Toggle axis tick values"
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      aria-hidden="true"
-                    >
-                      <g
-                        style={{
-                          fill: "none",
-                          stroke: "currentcolor",
-                          strokeWidth: 2,
-                          strokeLinecap: "round",
-                          strokeLinejoin: "round",
-                          strokeMiterlimit: 10,
-                        }}
-                      >
-                        <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4zM9 7v10M6 9l3-2" />
-                        <path d="M15.5 17a2.5 2.5 0 0 1-2.5-2.5v-5a2.5 2.5 0 1 1 5 0v5a2.5 2.5 0 0 1-2.5 2.5z" />
-                      </g>
-                    </svg>
+                    <TbNumber10 size={18} />
                   </ToggleButton>
                 </Tooltip>
               </ToggleButtonGroup>

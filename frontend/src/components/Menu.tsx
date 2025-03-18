@@ -12,6 +12,7 @@ import {
   Separator,
   SubmenuTrigger,
 } from "react-aria-components";
+import { TbMenu2 } from "react-icons/tb";
 import { type AppState, findDoc, useAppState } from "../appState";
 import { isSDTFile } from "../helpers";
 import { useCloseDocument } from "../hooks/useCloseDocument";
@@ -27,7 +28,6 @@ interface MyMenuButtonProps<T>
 }
 
 const AppMenuButton = <T extends object>({
-  label,
   children,
   ...props
 }: MyMenuButtonProps<T>) => {
@@ -37,33 +37,7 @@ const AppMenuButton = <T extends object>({
         className="react-aria-Button main-menu-button"
         aria-label="Application Menu"
       >
-        <svg
-          height="16"
-          width="16"
-          aria-hidden="true"
-          enableBackground="new 0 0 24 24"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-          color="currentcolor"
-        >
-          <g
-            style={{
-              fill: "none",
-              stroke: "currentcolor",
-              strokeWidth: 2,
-              strokeLinecap: "round",
-              strokeLinejoin: "round",
-              strokeMiterlimit: "10",
-            }}
-          >
-            <path d="m3 5h18" />
-            <path d="m3 12h18" />
-            <path d="m3 19h18" />
-            <path d="m3 5h18" />
-            <path d="m3 12h18" />
-            <path d="m3 19h18" />
-          </g>
-        </svg>
+        <TbMenu2 size={18} />
       </Button>
       <Popover>
         <Menu {...props}>{children}</Menu>
@@ -153,7 +127,7 @@ export const MainMenu = createHideableComponent(() => {
   }, []);
 
   return (
-    <AppMenuButton label="☰">
+    <AppMenuButton>
       <AppMenuItem onAction={onNew}>New</AppMenuItem>
       <AppMenuItem onAction={onOpen}>Open...</AppMenuItem>
       <SubmenuTrigger>

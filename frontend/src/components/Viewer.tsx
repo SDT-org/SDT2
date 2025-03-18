@@ -137,10 +137,7 @@ export const Viewer = ({
                   aria-hidden={true}
                   color="currentcolor"
                 >
-                  <path
-                    d="M15 1.5c1 0 5 5 5 9s-4 9-5 9-5-5-5-9 4-9 5-9z"
-                    fill="black"
-                  />
+                  <path d="M15 1.5c1 0 5 5 5 9s-4 9-5 9-5-5-5-9 4-9 5-9z" />
                   <rect x="12" y="12" width="6" height="9" fill="black" />
                   <rect x="7" y="11.25" width="16" height="7.5" fill="black" />
                   <circle cx="15" cy="23.25" r="1.75" fill="black" />
