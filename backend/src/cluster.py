@@ -5,7 +5,6 @@ import pandas as pd
 from collections import defaultdict
 from scipy.spatial.distance import squareform, pdist
 from sklearn.manifold import MDS
-from Bio import  Phylo
 
 ## creata blank cache which is dict of dicts to store hash ids with a dict of matrices
 linkage_cache = {}
