@@ -1,10 +1,11 @@
 import os
 import numpy as np
-from scipy.cluster.hierarchy import linkage, fcluster
+from scipy.cluster.hierarchy import linkage, fcluster,dendrogram
 import pandas as pd
 from collections import defaultdict
 from scipy.spatial.distance import squareform, pdist
 from sklearn.manifold import MDS
+from Bio import  Phylo
 
 ## creata blank cache which is dict of dicts to store hash ids with a dict of matrices
 linkage_cache = {}
@@ -19,7 +20,6 @@ def calculate_linkages(data, index):
     # check if id in linkage dict, if not add key with blank val
     if id_hash not in linkage_cache:
         linkage_cache[id_hash] = {}
-    
     
     # default check to false...assume linkage avail
     run_linkage=False
@@ -79,13 +79,24 @@ def cut_tree(Z, threshold, index):
     #set cut threshold
     cutby = 100 - threshold
     #identify clusters from threshold cut
-    labels = fcluster(Z, t=cutby, criterion='distance')
+    clusters = fcluster(Z, t=cutby, criterion='distance')
     # store as dict
-    groups_dict = defaultdict(list)
-    for i, label in enumerate(labels):
-        groups_dict[label-1].append(index[i])
-    return groups_dict
+    cluster_dict = defaultdict(list)
+    for i, label in enumerate(clusters):
+        cluster_dict[label-1].append(index[i])
         
+    # Get the leaf order from dendrogram
+    dendro = dendrogram(Z, no_plot=True)
+    leaf_indices = dendro['leaves']
+    new_order = [index[i] for i in leaf_indices]
+    print(new_order)
+    return cluster_dict,new_order
+  
+
+
+    
+
+
 def export(matrix_path, threshold, method, save_csv = True):
    
    #set variables
@@ -116,7 +127,7 @@ def export(matrix_path, threshold, method, save_csv = True):
         Z = get_linkage(index, method)
     
     
-    output = cut_tree(Z, threshold, index)
+    output, new_order = cut_tree(Z, threshold, index)
     flattened_output = [(item, key + 1) for key, sublist in output.items() for item in sublist]
     df_result = pd.DataFrame(flattened_output)
     df_result.columns = ["ID", "Group - Threshold: " + str(threshold)]
