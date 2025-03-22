@@ -173,7 +173,7 @@ def handle_open_file(filepath: str, doc_id: str | None):
             )
 
             # Test that the file is gonna work in get_data
-            tick_text = df.index.tolist()
+            df.index.tolist()
             data = df.to_numpy()
             diag_mask = eye(data.shape[0], dtype=bool)
             data_no_diag = where(diag_mask, nan, data)
