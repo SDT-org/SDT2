@@ -53,7 +53,7 @@ def calculate_linkages(data, index):
         if method in linkage_cache[id_hash]:
              continue
         # create linkage matrix
-        if method =="ward" or method == "centroid" or method == "complete":
+        if method =="ward" or method == "centroid" or method == "median":
             Z = linkage(mds_distances, method=method, metric='euclidean')
         else:
             Z = linkage(condensed_dist, method=method, metric='precomputed')
