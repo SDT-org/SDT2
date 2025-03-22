@@ -75,7 +75,7 @@ def get_linkage(index, method):
         print(f"ID not found in cacche for {method} linkage for dataset {id_hash}")
         return None 
 
-def cut_tree(Z, threshold, index):
+def get_cluster_data(Z, threshold, index):
     #set cut threshold
     cutby = 100 - threshold
     #identify clusters from threshold cut
@@ -92,11 +92,6 @@ def cut_tree(Z, threshold, index):
     print(new_order)
     return cluster_dict,new_order
   
-
-
-    
-
-
 def export(matrix_path, threshold, method, save_csv = True):
    
    #set variables
