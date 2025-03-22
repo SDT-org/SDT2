@@ -5,7 +5,7 @@ import os
 import sys
 import re
 import random
-from datetime import datetime, timedelta
+from datetime import datetime
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from itertools import combinations_with_replacement as cwr
@@ -13,12 +13,12 @@ from functools import partial
 from pandas import DataFrame
 from numpy import tril, triu_indices, zeros, around, nan
 import parasail
-from Bio import SeqIO, Phylo
+from Bio import SeqIO
 from Bio.SeqUtils import gc_fraction
 from Bio.Phylo.TreeConstruction import (
-    DistanceTreeConstructor,
     DistanceMatrix,
 )
+from cluster import get_linkage_matrix, get_linkage_method_order
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
@@ -63,7 +63,7 @@ def get_similarity(seq1, seq2):
                 dist += 1
         else:
             gaps += 1
-            
+
     similarity = float((float(dist)) / (len(seq1) - gaps))
     # convert to percentile
     similarity_percentile = similarity * 100
@@ -152,24 +152,6 @@ def get_alignment_scores(
             increment_pair_progress()
 
     return dist_scores, order
-
-
-# Reorder the scores matrix based on the tree and save it to a new CSV
-def tree_clustering(settings, dm, filename):
-    constructor = DistanceTreeConstructor()
-    clustering_method = getattr(constructor, settings["cluster_method"])
-    tree_file = filename + "_tree.nwk"
-    tree = clustering_method(dm)
-    if not tree.rooted:
-        tree.root_at_midpoint()
-    if settings["cluster_method"] == "nj":  # NJ method does not inherently reorder, need ladderize, It sorts clades in-place according to the number of terminal nodes
-        tree.ladderize(reverse=True) 
-
-    Phylo.write(tree, tree_file, "newick")
-    tree = Phylo.read(tree_file, "newick")
-    new_order = [leaf.name for leaf in tree.get_terminals()]
-    return tree_file, new_order  # Return the tree file name instead of the tree object
-
 
 # Format distance scores to triangle matrix for NJ tree creation
 def create_distance_matrix(dist_scores, order):
@@ -290,16 +272,16 @@ def process_data(
 
     order = list(order.keys())
 
-    dm = create_distance_matrix(dist_scores, order)
     aln_scores = 100 - dist_scores
 
     out_dir = settings["out_dir"]
     cluster_method = settings["cluster_method"]
 
-    if cluster_method == "nj" or cluster_method == "upgma":
-        _, new_order = tree_clustering(settings, dm, os.path.join(out_dir, file_base))
+    if cluster_method is not None:
+        new_order = get_linkage_method_order(dist_scores, cluster_method, order)
+
         reorder_index = [
-            order.index(id_) for id_ in new_order
+            order.index(id) for id in new_order
         ]  # create numerical index of order and  of new order IDs
 
         aln_reordered = aln_scores[reorder_index, :][:, reorder_index]

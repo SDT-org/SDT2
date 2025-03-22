@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { colorScales } from "./colorScales";
+import { reorderMethods } from "./constants";
 
 export type ColorScaleKey = keyof typeof colorScales;
 
@@ -102,14 +103,7 @@ export type DistributionData = Omit<
 
 export interface ClustermapSettings {
   threshold: number;
-  method:
-    | "single"
-    | "complete"
-    | "average"
-    | "weighted"
-    | "centroid"
-    | "median"
-    | "ward";
+  method: keyof typeof reorderMethods;
   annotation: boolean;
   titleFont: "Sans Serif" | "Monospace";
   showTitles: boolean;
@@ -124,17 +118,13 @@ export interface ClustermapSettings {
   showLegend: boolean;
 }
 
+const reorderMethodKeys = Object.keys(
+  reorderMethods,
+) as (keyof typeof reorderMethods)[];
+
 export const ClustermapSettingsSchema = z.object({
   threshold: z.number(),
-  method: z.enum([
-    "single",
-    "complete",
-    "average",
-    "weighted",
-    "centroid",
-    "median",
-    "ward",
-  ]),
+  method: z.any().refine((v) => reorderMethodKeys.includes(v)), // TODO:fix this
   annotation: z.boolean(),
   showTitles: z.boolean(),
   titleFont: z.enum(["Sans Serif", "Monospace"]),

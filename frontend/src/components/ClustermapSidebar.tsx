@@ -1,6 +1,7 @@
 import React from "react";
 import { Input, Label, TextField } from "react-aria-components";
 import type { DocState } from "../appState";
+import { reorderMethods } from "../constants";
 import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";
 import { Switch } from "./Switch";
@@ -51,17 +52,9 @@ export const ClustermapSidebar = ({
                       method: value as typeof settings.method,
                     })
                   }
-                  items={[
-                    "single",
-                    "complete",
-                    "average",
-                    "weighted",
-                    "centroid",
-                    "median",
-                    "ward",
-                  ].map((method) => ({
-                    id: method,
-                    name: method.charAt(0).toUpperCase() + method.slice(1),
+                  items={Object.entries(reorderMethods).map(([key, value]) => ({
+                    id: key,
+                    name: value.name,
                   }))}
                 >
                   {(item) => (

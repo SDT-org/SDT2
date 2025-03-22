@@ -1,5 +1,6 @@
 import React, { type ErrorInfo } from "react";
 import { z } from "zod";
+import { reorderMethodKeys, type reorderMethods } from "./constants";
 import {
   type DistributionState,
   DistributionStateSchema,
@@ -12,7 +13,6 @@ import {
   type HeatmapSettings,
   HeatmapSettingsSchema,
 } from "./plotTypes";
-export const clusterMethods = ["Neighbor-Joining", "UPGMA"] as const;
 
 export const clusterMethodDescriptions = [
   "Unrooted phylogenetic tree for large datasets",
@@ -76,7 +76,7 @@ export type AppState = {
   debug: boolean;
   enableClustering: boolean;
   enableOutputAlignments: boolean;
-  cluster_method: (typeof clusterMethods)[number];
+  cluster_method: keyof typeof reorderMethods;
   compute_cores: number;
   showExportModal: boolean;
   saveFormat: SaveableImageFormat;
@@ -90,7 +90,7 @@ export type AppState = {
 export const clientStateSchema = z.object({
   enableClustering: z.boolean(),
   enableOutputAlignments: z.boolean(),
-  cluster_method: z.enum(clusterMethods),
+  cluster_method: z.any().refine((v) => reorderMethodKeys.includes(v)), // TODO:fix this
   compute_cores: z.number(),
   error: z.instanceof(Error).nullable(),
   errorInfo: z.null(),
@@ -201,7 +201,7 @@ export const initialAppState: AppState = {
   lastDataFilePath: "",
   enableClustering: true,
   enableOutputAlignments: false,
-  cluster_method: "Neighbor-Joining",
+  cluster_method: "average",
   saveFormat: "svg",
   showExportModal: false,
   compute_cores: 1,

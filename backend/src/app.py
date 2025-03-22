@@ -344,12 +344,10 @@ class Api:
         settings["input_file"] = doc.filename
         settings["out_dir"] = doc.tempdir_path
 
-        if args.get("cluster_method") == "Neighbor-Joining":
-            settings["cluster_method"] = "nj"
-        if args.get("cluster_method") == "UPGMA":
-            settings["cluster_method"] = "upgma"
         if args.get("cluster_method") == "None":
-            settings["cluster_method"] = "none"
+            settings["cluster_method"] = None
+        else:
+            settings["cluster_method"] = args.get("cluster_method")
 
         compute_cores = args.get("compute_cores")
         assert isinstance(compute_cores, int)

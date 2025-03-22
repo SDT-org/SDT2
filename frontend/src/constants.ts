@@ -9,3 +9,38 @@ export const plotFontSansSerif = {
 };
 
 export const plotFont = plotFontMonospace;
+
+export const reorderMethods = {
+  single: {
+    name: "Nearest Neighbor",
+    description: "Single Linkage method",
+  },
+  complete: {
+    name: "Farthest Neighbor",
+    description: "Complete Linkage method",
+  },
+  average: {
+    name: "UPGMA",
+    description: "Average Linkage method",
+  },
+  weighted: {
+    name: "WPGMA",
+    description: "Weighted Linkage method",
+  },
+  centroid: {
+    name: "UPGMC",
+    description: "Centroid Linkage method",
+  },
+  median: {
+    name: "WPGMC",
+    description: "Median Linkage method",
+  },
+  ward: {
+    name: "Minimum Variance",
+    description: "Ward's Linkage method",
+  },
+};
+
+export const reorderMethodKeys = Object.keys(
+  reorderMethods,
+) as (keyof typeof reorderMethods)[];
