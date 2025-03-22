@@ -42,8 +42,20 @@ declare global {
         generate_cluster_data: (
           doc_id: string,
           threshold: number,
-          method: str,
+          method: string,
         ) => Promise<{ id: string; group: number }[]>;
+
+        // Add the new method here
+        get_cluster_ordered_data: (
+          doc_id: string,
+          threshold: number,
+          method: string,
+        ) => Promise<{
+          matrix: HeatmapData;
+          tickText: string[];
+          clusterData: Array<{ id: string; group: number }>;
+        }>;
+
         export_data: (args: {
           doc_id: string;
           export_path: string;

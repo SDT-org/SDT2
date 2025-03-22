@@ -115,6 +115,22 @@ def get_cluster_data(Z, threshold, index):
 
     return cluster_dict
 
+def reorder_clusters(values, clusters):
+    # Create dictionary mapping unique clusters to the smallest value in each cluster
+    cluster_min_values = {}
+    for val, cluster in zip(values, clusters):
+        if cluster not in cluster_min_values or val < cluster_min_values[cluster]:
+            cluster_min_values[cluster] = val
+            
+    # Sort clusters by their minimum values
+    sorted_clusters = sorted(cluster_min_values.items(), key=lambda x: x[1])
+    
+    # Create mapping from old to new cluster numbers (starting from 1, not 0)
+    cluster_mapping = {old: new+1 for new, (old, _) in enumerate(sorted_clusters)}
+    
+    # Apply mapping to original clusters
+    return [cluster_mapping[c] for c in clusters]
+
 def export(matrix_path, threshold, method, save_csv = True):
 
    #set variables

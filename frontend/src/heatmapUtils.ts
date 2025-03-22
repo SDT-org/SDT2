@@ -84,8 +84,20 @@ export const formatClustermapData = (
   data: HeatmapData,
   tickText: string[],
   clusterData?: { id: string; group: number }[],
-) =>
-  data.flatMap((row, y) =>
+) => {
+  console.log("formatClustermapData input:", {
+    data: data?.length || 0,
+    tickText: tickText?.length || 0,
+    clusterData: clusterData?.length || 0,
+  });
+
+  // Check if data is array of arrays
+  if (!Array.isArray(data) || !data.length || !Array.isArray(data[0])) {
+    console.error("Invalid data format:", data);
+    return [];
+  }
+
+  const result = data.flatMap((row, y) =>
     row.filter(Number).map((value, x) => {
       const clusterX = clusterData?.find((i) => i.id === tickText[x])?.group;
       const clusterY = clusterData?.find((i) => i.id === tickText[y])?.group;
@@ -100,9 +112,11 @@ export const formatClustermapData = (
       const backgroundColor = clusterGroup
         ? distinctColor(clusterGroup)
         : "rgb(245, 245, 245)";
+
       const foregroundColor = tinycolor(backgroundColor).isLight()
         ? "#000"
         : "#fff";
+
       const roundedValue = (value as number).toFixed(2);
 
       return {
@@ -115,3 +129,7 @@ export const formatClustermapData = (
       };
     }),
   );
+
+  console.log("formatClustermapData output:", result.length);
+  return result;
+};

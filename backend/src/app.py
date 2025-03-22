@@ -22,6 +22,8 @@ from Bio import SeqIO
 import psutil
 import webview
 import json
+import pandas as pd
+import numpy as np
 from pandas import read_csv, DataFrame
 from numpy import eye, where, nan, nanmin, nanmax
 import mimetypes
@@ -544,7 +546,7 @@ class Api:
             full_stats=stats_df.values.tolist()
         )
         return json.dumps(data_to_dump)
-
+    
     def generate_cluster_data(self, doc_id: str, threshold: float, method: str):
         doc = get_document(doc_id)
         if doc is None:
@@ -556,7 +558,133 @@ class Api:
         if len(df.columns) > 2 and df.columns[2] is not None:
             df = df.rename(columns={str(df.columns[2]): 'subgroup'})
         return df.to_dict(orient="records")
+    
+    def get_reordered_matrix(self, doc_id: str, threshold: float, method: str):
+        doc = get_document(doc_id)
+        if doc is None:
+            raise Exception(f"Could not find document: {doc_id}")
+        matrix_path = get_matrix_path(doc)
 
+        # Read the original matrix
+        with open(matrix_path, "r") as temp_f:
+            col_count = [len(l.split(",")) for l in temp_f.readlines()]
+            column_names = [i for i in range(0, max(col_count))]
+
+        df_matrix = pd.read_csv(matrix_path, delimiter=",", index_col=0, header=None, names=column_names)
+        row_ids = df_matrix.index.tolist()
+
+        # Get cluster data
+        df_clusters = cluster.export(matrix_path, threshold, method, False)
+        df_clusters = df_clusters.rename(columns={str(df_clusters.columns[0]): 'id', str(df_clusters.columns[1]): 'group'})
+
+        # Filter to rows that exist
+        df_clusters = df_clusters[df_clusters['id'].isin(row_ids)]
+
+        # Get values and clusters
+        values = df_clusters['id'].tolist()
+        clusters = df_clusters['group'].tolist()
+
+        # Remap clusters
+        remapped_clusters = cluster.reorder_clusters(values, clusters)
+        df_clusters['group'] = remapped_clusters
+
+        # Sort by group
+        df_clusters = df_clusters.sort_values(by=['group', 'id'])
+        sorted_ids = df_clusters['id'].tolist()
+
+        if not sorted_ids:
+            print("No valid IDs found")
+            return {'matrix': [], 'tickText': []}
+
+        # Create a map from original position to new position
+        old_to_new = {id: i for i, id in enumerate(sorted_ids)}
+
+        # Create an empty matrix filled with NaN
+        n = len(sorted_ids)
+        new_matrix = np.full((n, n), np.nan)
+
+        # Fill in the values from the original matrix in their new positions
+        for i, row_id in enumerate(sorted_ids):
+            row_idx_old = row_ids.index(row_id)
+
+            for j, col_id in enumerate(sorted_ids):
+                if j > i:  # Skip upper triangle
+                    continue
+                
+                col_idx_old = row_ids.index(col_id)
+
+                # Get value from original matrix - get lower value for triangular
+                if row_idx_old >= col_idx_old:
+                    value = df_matrix.iloc[row_idx_old, col_idx_old]
+                else:
+                    value = df_matrix.iloc[col_idx_old, row_idx_old]
+
+                new_matrix[i, j] = value
+
+        # Convert to list and replace NaN values with None for JSON serialization
+        matrix_data = new_matrix.tolist()
+        for i in range(len(matrix_data)):
+            for j in range(len(matrix_data[i])):
+                if pd.isna(matrix_data[i][j]):
+                    matrix_data[i][j] = None
+
+        return {
+            'matrix': matrix_data,
+            'tickText': sorted_ids
+        }
+
+    def get_cluster_ordered_data(self, doc_id: str, threshold: float, method: str):
+        try:
+            reordered_data = self.get_reordered_matrix(doc_id, threshold, method)
+
+            doc = get_document(doc_id)
+            matrix_path = get_matrix_path(doc)
+
+            df = cluster.export(matrix_path, threshold, method, False)
+            df = df.rename(columns={str(df.columns[0]): 'id', str(df.columns[1]): 'group'})
+
+            # Debug what we're working with
+            print(f"Cluster data before filtering: {len(df)} rows")
+            print(f"Tick labels: {reordered_data['tickText'][:3]}...")
+            print(f"Cluster IDs: {df['id'].tolist()[:3]}...")
+
+            # Filter to only IDs in the reordered data
+            df = df[df['id'].isin(reordered_data['tickText'])]
+            print(f"Cluster data after filtering: {len(df)} rows")
+
+            # If no matching IDs, return empty cluster data
+            if df.empty:
+                print("No matching cluster data, returning without clusters")
+                return {
+                    'matrix': reordered_data['matrix'],
+                    'tickText': reordered_data['tickText'],
+                    'clusterData': []
+                }
+
+            # Get the list of values and clusters
+            values = df['id'].tolist()
+            clusters = df['group'].tolist()
+
+            # Remap clusters
+            remapped_clusters = cluster.reorder_clusters(values, clusters)
+            df['group'] = remapped_clusters
+
+            # Convert to records
+            cluster_data = df.to_dict(orient="records")
+            print(f"Final cluster data: {len(cluster_data)} records")
+            print(f"Sample cluster data: {cluster_data[:2]}")
+
+            return {
+                'matrix': reordered_data['matrix'],
+                'tickText': reordered_data['tickText'],
+                'clusterData': cluster_data
+            }
+        except Exception as e:
+            print(f"Error: {str(e)}")
+            import traceback
+            traceback.print_exc()
+            return {'matrix': [], 'tickText': [], 'clusterData': []}
+    
     def new_doc(self):
         id = make_doc_id()
         new_document(id)
@@ -587,7 +715,7 @@ class Api:
                 filetype="application/vnd.sdt"
             )
             add_recent_file(path)
-
+    
     def save_doc_settings(self, args: dict):
         doc = get_document(args["id"])
         if doc == None:

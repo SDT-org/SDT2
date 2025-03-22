@@ -10,6 +10,11 @@ import { ClustermapSidebar } from "./ClustermapSidebar";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3SvgHeatmap } from "./D3SvgHeatmap";
 
+type ClusterDataItem = {
+  id: string;
+  group: number;
+};
+
 export const Clustermap = ({
   data,
   docState,
@@ -23,29 +28,46 @@ export const Clustermap = ({
   tickText: string[];
   leftSidebarCollapsed: boolean;
 }) => {
-  const [clusterData, setClusterData] =
-    React.useState<
-      {
-        id: string;
-        group: number;
-      }[]
-    >();
+  const [clusterData, setClusterData] = React.useState<
+    Array<ClusterDataItem> | undefined
+  >(undefined);
+  const [orderedMatrix, setOrderedMatrix] = React.useState<HeatmapData>(data);
+  const [orderedTickText, setOrderedTickText] =
+    React.useState<string[]>(tickText);
 
   React.useEffect(() => {
+    // @ts-ignore
     window.pywebview.api
-      .generate_cluster_data(
+      .get_cluster_ordered_data(
         docState.id,
         docState.clustermap.threshold,
         docState.clustermap.method,
       )
-      .then(setClusterData);
-  }, [docState.id, docState.clustermap]);
+      // @ts-ignore
+      .then((response) => {
+        console.log("API response:", {
+          matrix: response.matrix
+            ? `${response.matrix.length}x${response.matrix[0]?.length || 0}`
+            : "empty",
+          tickText: response.tickText?.length || 0,
+          clusterData: response.clusterData?.length || 0,
+        });
+
+        setClusterData(response.clusterData);
+        setOrderedTickText(response.tickText);
+        setOrderedMatrix(response.matrix);
+      })
+      .catch((error: Error) => {
+        console.error("Error getting cluster ordered data:", error);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [docState.id, docState.clustermap.threshold, docState.clustermap.method]);
 
   const { appState } = useAppState();
   const elementRef = React.useRef<HTMLDivElement | null>(null);
   const size = useSize(elementRef, leftSidebarCollapsed);
   const { clustermap: settings } = docState;
-  const { margin } = useMetrics(settings, tickText);
+  const { margin } = useMetrics(settings, orderedTickText);
   const updateSettings = React.useCallback(
     (values: Partial<DocState["clustermap"]>) =>
       setDocState((prev) => ({
@@ -63,15 +85,32 @@ export const Clustermap = ({
     [1, "rgb(245,245,245)"],
   ];
 
-  const clustermapData = React.useMemo(
-    () => formatClustermapData(data, tickText, clusterData),
-    [data, clusterData, tickText],
-  );
+  const clustermapData = React.useMemo(() => {
+    console.log("Creating clustermapData with:", {
+      matrixDimensions: `${orderedMatrix.length}x${orderedMatrix[0]?.length || 0}`,
+      tickTextLength: orderedTickText.length,
+      clusterDataLength: clusterData?.length || 0,
+    });
+
+    const result = formatClustermapData(
+      orderedMatrix,
+      orderedTickText,
+      clusterData,
+    );
+    console.log(`Formatted data contains ${result.length} items`);
+    return result;
+  }, [orderedMatrix, clusterData, orderedTickText]);
 
   const forceSvgRender = useHeatmapRenderToggle();
 
   const titleFont =
     settings.titleFont === "Monospace" ? plotFontMonospace : plotFontSansSerif;
+
+  console.log("Rendering D3CanvasHeatmap with:", {
+    dataLength: clustermapData?.length || 0,
+    tickTextLength: orderedTickText?.length || 0,
+    clusterDataLength: clusterData?.length || 0,
+  });
 
   return (
     <>
@@ -86,7 +125,7 @@ export const Clustermap = ({
               data={clustermapData}
               clusterData={clusterData}
               settings={{ ...docState.heatmap, ...settings }}
-              tickText={tickText}
+              tickText={orderedTickText}
               colorScale={colorScale}
               minVal={0}
               maxVal={100}
@@ -113,7 +152,7 @@ export const Clustermap = ({
               data={clustermapData}
               clusterData={clusterData}
               settings={{ ...docState.heatmap, ...settings }}
-              tickText={tickText}
+              tickText={orderedTickText}
               colorScale={colorScale}
               cbarHeight={0}
               cbarWidth={0}
