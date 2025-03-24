@@ -82,12 +82,6 @@ def get_linkage_method_order(data, method, index):
 
 def get_linkage_matrix(data, method):
     print(data, method)
-    # # SET the upp triangle to zero
-    # i_upper = np.triu_indices(data.shape[0], 1)
-    # #transpost data to upper triangle
-    # data[i_upper] = data.T[i_upper]
-    # # convert to distance matrix
-    # distance_mat = 100 - data
 
      #Redduce dimensionality with MDS once and store for neccessary linkages
     mds_coords = MDS(n_components=2, dissimilarity='precomputed', random_state=42).fit_transform(data)  # 42 is the answer to everything

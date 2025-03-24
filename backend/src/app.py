@@ -632,7 +632,7 @@ class Api:
             'matrix': matrix_data,
             'tickText': sorted_ids
         }
-
+    
     def get_cluster_ordered_data(self, doc_id: str, threshold: float, method: str):
         try:
             reordered_data = self.get_reordered_matrix(doc_id, threshold, method)
@@ -643,14 +643,8 @@ class Api:
             df = cluster.export(matrix_path, threshold, method, False)
             df = df.rename(columns={str(df.columns[0]): 'id', str(df.columns[1]): 'group'})
 
-            # Debug what we're working with
-            print(f"Cluster data before filtering: {len(df)} rows")
-            print(f"Tick labels: {reordered_data['tickText'][:3]}...")
-            print(f"Cluster IDs: {df['id'].tolist()[:3]}...")
-
             # Filter to only IDs in the reordered data
             df = df[df['id'].isin(reordered_data['tickText'])]
-            print(f"Cluster data after filtering: {len(df)} rows")
 
             # If no matching IDs, return empty cluster data
             if df.empty:
@@ -671,8 +665,6 @@ class Api:
 
             # Convert to records
             cluster_data = df.to_dict(orient="records")
-            print(f"Final cluster data: {len(cluster_data)} records")
-            print(f"Sample cluster data: {cluster_data[:2]}")
 
             return {
                 'matrix': reordered_data['matrix'],

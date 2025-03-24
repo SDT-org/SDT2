@@ -198,7 +198,7 @@ const RunnerSettings = ({
                   updateAppState({ enableClustering: value });
                 }}
               >
-                Reorder sequences by:
+                Reorder sequences by cluster method:
               </Switch>
               <div
                 className="setting clustering-method"
