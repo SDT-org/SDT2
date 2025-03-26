@@ -75,9 +75,8 @@ def residue_check(seq):
 
 
 def process_pair(id_sequence_pair, settings):
-    ids = id_sequence_pair[0]
-    id1 = ids[0]
-    id2 = ids[1]
+    id1 = id_sequence_pair[0][0]
+    id2 = id_sequence_pair[0][1]
     seq1 = id_sequence_pair[1][0]
     seq2 = id_sequence_pair[1][1]
     if id1 == id2:
@@ -97,8 +96,8 @@ def process_pair(id_sequence_pair, settings):
             settings["aln_out"], str(id1 + "_" + id2) + "_aligned.fasta"
         )
         seq_records = [
-            SeqRecord(Seq(result.traceback.query), id=ids[0], description=""),
-            SeqRecord(Seq(result.traceback.ref), id=ids[1], description=""),
+            SeqRecord(Seq(result.traceback.query), id=id1, description=""),
+            SeqRecord(Seq(result.traceback.ref), id=id2, description=""),
         ]
         SeqIO.write(seq_records, fname, "fasta")
 

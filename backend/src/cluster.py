@@ -110,20 +110,14 @@ def get_cluster_data(Z, threshold, index):
     return cluster_dict
 
 def reorder_clusters(values, clusters):
-    # Create dictionary mapping unique clusters to the smallest value in each cluster
-    cluster_min_values = {}
-    for val, cluster in zip(values, clusters):
-        if cluster not in cluster_min_values or val < cluster_min_values[cluster]:
-            cluster_min_values[cluster] = val
-            
-    # Sort clusters by their minimum values
-    sorted_clusters = sorted(cluster_min_values.items(), key=lambda x: x[1])
-    
-    # Create mapping from old to new cluster numbers (starting from 1, not 0)
-    cluster_mapping = {old: new+1 for new, (old, _) in enumerate(sorted_clusters)}
-    
-    # Apply mapping to original clusters
-    return [cluster_mapping[c] for c in clusters]
+    ##https://stackoverflow.com/questions/26851553/sklearn-agglomerative-clustering-linkage-matrix
+    #lets make it NP
+    labels= np.array(clusters)
+    print(labels,"should be cluster ##'s")
+    #create newly reordered labels that make sends
+    new_order_labels = np.searchsorted(np.unique(labels), labels)
+    print(new_order_labels, "should be new order")
+    return (new_order_labels +1).tolist()    
 
 def export(matrix_path, threshold, method, save_csv = True):
 
