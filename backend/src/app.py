@@ -16,6 +16,7 @@ from export_data import do_export_data, prepare_export_data
 from save_document import pack_document, unpack_document
 from app_state import create_app_state
 from validations import validate_fasta
+from scipy.cluster.hierarchy import dendrogram
 import cluster
 import platform
 from Bio import SeqIO
@@ -551,88 +552,106 @@ class Api:
         doc = get_document(doc_id)
         if doc is None:
             raise Exception(f"Could not find document: {doc_id}")
+        
         matrix_path = get_matrix_path(doc)
-
+        
+        # This will use the cached linkage matrix if available
         df = cluster.export(matrix_path, threshold, method, False)
         df = df.rename(columns={str(df.columns[0]): 'id', str(df.columns[1]): 'group'})
+        
         if len(df.columns) > 2 and df.columns[2] is not None:
             df = df.rename(columns={str(df.columns[2]): 'subgroup'})
+        
         return df.to_dict(orient="records")
     
     def get_reordered_matrix(self, doc_id: str, threshold: float, method: str):
         doc = get_document(doc_id)
         if doc is None:
             raise Exception(f"Could not find document: {doc_id}")
+        
         matrix_path = get_matrix_path(doc)
-
+    
         # Read the original matrix
         with open(matrix_path, "r") as temp_f:
             col_count = [len(l.split(",")) for l in temp_f.readlines()]
             column_names = [i for i in range(0, max(col_count))]
-
+    
         df_matrix = pd.read_csv(matrix_path, delimiter=",", index_col=0, header=None, names=column_names)
+        
+        # Get row IDs from the original matrix
         row_ids = df_matrix.index.tolist()
-
-        # Get cluster data
+        
+        # Create a lookup dictionary for faster index retrieval
+        row_id_to_idx = {id: i for i, id in enumerate(row_ids)}
+        
+        # Convert to numpy array
+        data = df_matrix.to_numpy()
+        
+        # Make a full square matrix for clustering calculations
+        data_full = data.copy()
+        # Fill in the upper triangle to make a full matrix for clustering
+        i_upper = np.triu_indices(data_full.shape[0], 1)
+        data_full[i_upper] = data_full.T[i_upper]
+        
+        # Create a hash ID for cache lookup
+        id_hash = hash(tuple(row_ids))
+        
+        # Ensure the linkage matrices are calculated and cached
+        if id_hash not in cluster.linkage_cache or method not in cluster.linkage_cache.get(id_hash, {}).get('methods', {}):
+            cluster.calculate_linkages(data_full, row_ids)
+        
+        # Get the linkage matrix directly from cache
+        Z = cluster.linkage_cache[id_hash]['methods'][method]
+        
+        # Get cluster assignments
         df_clusters = cluster.export(matrix_path, threshold, method, False)
         df_clusters = df_clusters.rename(columns={str(df_clusters.columns[0]): 'id', str(df_clusters.columns[1]): 'group'})
-
+        
         # Filter to rows that exist
         df_clusters = df_clusters[df_clusters['id'].isin(row_ids)]
-
+        
         # Get values and clusters
         values = df_clusters['id'].tolist()
         clusters = df_clusters['group'].tolist()
-
+        
         # Remap clusters
         remapped_clusters = cluster.reorder_clusters(values, clusters)
         df_clusters['group'] = remapped_clusters
-
+        
         # Sort by group
         df_clusters = df_clusters.sort_values(by=['group', 'id'])
         sorted_ids = df_clusters['id'].tolist()
-
+        
         if not sorted_ids:
             print("No valid IDs found")
             return {'matrix': [], 'tickText': []}
-
-        # Create a map from original position to new position
-        old_to_new = {id: i for i, id in enumerate(sorted_ids)}
-
-        # Create an empty matrix filled with NaN
-        n = len(sorted_ids)
-        new_matrix = np.full((n, n), np.nan)
-
-        # Fill in the values from the original matrix in their new positions
-        for i, row_id in enumerate(sorted_ids):
-            row_idx_old = row_ids.index(row_id)
-
-            for j, col_id in enumerate(sorted_ids):
-                if j > i:  # Skip upper triangle
-                    continue
-                
-                col_idx_old = row_ids.index(col_id)
-
-                # Get value from original matrix - get lower value for triangular
-                if row_idx_old >= col_idx_old:
-                    value = df_matrix.iloc[row_idx_old, col_idx_old]
-                else:
-                    value = df_matrix.iloc[col_idx_old, row_idx_old]
-
-                new_matrix[i, j] = value
-
-        # Convert to list and replace NaN values with None for JSON serialization
-        matrix_data = new_matrix.tolist()
-        for i in range(len(matrix_data)):
-            for j in range(len(matrix_data[i])):
-                if pd.isna(matrix_data[i][j]):
-                    matrix_data[i][j] = None
-
+        
+        # Get the reordering indices using the dictionary lookup (much faster)
+        try:
+            idx = [row_id_to_idx[id] for id in sorted_ids]
+        except KeyError as e:
+            print(f"ID not found in matrix: {e}")
+            # Fall back to the slower method
+            idx = [row_ids.index(id) for id in sorted_ids if id in row_ids]
+        
+        # Reorder the matrix in one step using numpy
+        new_matrix = data_full[idx, :][:, idx]
+        
+        # Create a lower triangular matrix
+        lower_triangle = np.tril(new_matrix)
+        
+        # Set upper triangle to NaN
+        i_upper = np.triu_indices(lower_triangle.shape[0], 1)
+        lower_triangle[i_upper] = np.nan
+        
+        # Convert to list and replace NaN values with None in one step
+        matrix_data = np.where(np.isnan(lower_triangle), None, lower_triangle).tolist()
+        
         return {
             'matrix': matrix_data,
             'tickText': sorted_ids
         }
-    
+        
     def get_cluster_ordered_data(self, doc_id: str, threshold: float, method: str):
         try:
             reordered_data = self.get_reordered_matrix(doc_id, threshold, method)

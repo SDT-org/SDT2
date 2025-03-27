@@ -45,7 +45,6 @@ declare global {
           method: string,
         ) => Promise<{ id: string; group: number }[]>;
 
-        // Add the new method here
         get_cluster_ordered_data: (
           doc_id: string,
           threshold: number,
