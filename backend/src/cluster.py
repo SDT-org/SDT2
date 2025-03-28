@@ -129,7 +129,8 @@ def export(matrix_path, threshold, method, save_csv=True):
 
     # Parse data
     output_file = os.path.join(output_dir, file_name + "_cluster_" + method + ".csv")
-    
+    # https://stackoverflow.com/a/57824142
+    # SDT1 matrix CSVs do not have padding for columnsgit
     with open(matrix_path, "r") as temp_f:
         col_count = [len(l.split(",")) for l in temp_f.readlines()]
         column_names = [i for i in range(0, max(col_count))]
