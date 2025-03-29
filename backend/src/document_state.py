@@ -2,9 +2,12 @@ from collections import namedtuple
 import json
 import os
 
+VERSION = 1
+
 DocState = namedtuple(
     "DocState",
     [
+        "version",
         "id",
         "view",
         "dataView",
@@ -189,6 +192,7 @@ def create_document_state(
             distribution = doc_settings["distribution"]
 
     return DocState(
+        version=VERSION,
         id=id,
         view=view,
         dataView=dataView,
@@ -225,6 +229,7 @@ def save_doc_settings(doc_state: DocState):
     path = get_doc_setting_path(doc_state.tempdir_path)
     with open(path, "w") as f:
         settings = {
+            "version": VERSION,
             "dataView": doc_state.dataView,
             "heatmap": doc_state.heatmap,
             "clustermap": doc_state.clustermap,

@@ -15,10 +15,7 @@ from numpy import tril, triu_indices, zeros, around, nan
 import parasail
 from Bio import SeqIO
 from Bio.SeqUtils import gc_fraction
-from Bio.Phylo.TreeConstruction import (
-    DistanceMatrix,
-)
-from cluster import calculate_linkages, get_linkage_method_order
+from cluster import get_linkage_method_order
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
@@ -218,14 +215,6 @@ def output_summary(file_name, start_time, end_time, start_counter, end_counter):
 def fasta_alignments(seq_records, fname):
     SeqIO.write(seq_records, fname, "fasta")
 
-
-linkage_cache = {}
-def generate_trees(dist_scores, order):
-    Z = calculate_linkages(dist_scores, order)
-    
-    return Z
-    
-
 def process_data(
     settings,
     pool,
@@ -256,16 +245,16 @@ def process_data(
 
     set_stage("Analyzing")
     print("Stage: Analyzing")
-    
+
     dist_scores, order = get_alignment_scores(
         seq_dict, settings, pool, cancelled, increment_pair_progress, set_pair_count
     )
 
     if cancelled.value:
         return
-    print(dist_scores)
-    set_stage("Postprocessing")
-    print("Stage: Postprocessing")
+
+    set_stage("Clustering")
+    print("Stage: Clustering")
 
     order = list(order.keys())
 
@@ -275,14 +264,14 @@ def process_data(
     cluster_method = settings["cluster_method"]
 
     if cluster_method is not None:
-        
+
         new_order = get_linkage_method_order(dist_scores, cluster_method, order)
 
         reorder_index = [
             order.index(id) for id in new_order
         ]  # create numerical index of order and  of new order IDs
 
-        #nupmpy array indexing syntax rows/cols
+        # numpy array indexing syntax rows/cols
         aln_reordered = aln_scores[reorder_index, :][:, reorder_index]
         aln_lowt = tril(around(aln_reordered, 2))
         aln_lowt[triu_indices(aln_lowt.shape[0], k=1)] = nan
@@ -293,7 +282,9 @@ def process_data(
         aln_lowt[triu_indices(aln_lowt.shape[0], k=1)] = nan
         df = DataFrame(
         aln_lowt, index=order)
-    
+
+    set_stage("Postprocessing")
+    print("Stage: Postprocessing")
 
     save_cols_to_csv(df, os.path.join(out_dir, file_base))
     save_stats_to_csv(seq_stats, os.path.join(out_dir, file_base))

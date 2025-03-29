@@ -36,23 +36,13 @@ export const Clustermap = ({
     React.useState<string[]>(tickText);
 
   React.useEffect(() => {
-    // @ts-ignore
     window.pywebview.api
       .get_cluster_ordered_data(
         docState.id,
         docState.clustermap.threshold,
         docState.clustermap.method,
       )
-      // @ts-ignore
       .then((response) => {
-        console.log("API response:", {
-          matrix: response.matrix
-            ? `${response.matrix.length}x${response.matrix[0]?.length || 0}`
-            : "empty",
-          tickText: response.tickText?.length || 0,
-          clusterData: response.clusterData?.length || 0,
-        });
-
         setClusterData(response.clusterData);
         setOrderedTickText(response.tickText);
         setOrderedMatrix(response.matrix);
@@ -60,7 +50,6 @@ export const Clustermap = ({
       .catch((error: Error) => {
         console.error("Error getting cluster ordered data:", error);
       });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [docState.id, docState.clustermap.threshold, docState.clustermap.method]);
 
   const { appState } = useAppState();

@@ -31,6 +31,8 @@ export const ClustermapSidebar = ({
     [sequences_count],
   );
 
+  const [tempThreshold, setTempThreshold] = React.useState(settings.threshold);
+
   return (
     <div className="app-sidebar app-sidebar-right heatmap-sidebar">
       <div className="app-sidebar-toolbar">
@@ -68,11 +70,12 @@ export const ClustermapSidebar = ({
               <Slider
                 label="Threshold"
                 id="threshold"
-                onChange={(value) => updateSettings({ threshold: value })}
+                onChange={setTempThreshold}
+                onChangeEnd={(value) => updateSettings({ threshold: value })}
                 minValue={0}
                 maxValue={100}
                 step={1}
-                value={settings.threshold}
+                value={tempThreshold}
               />
 
               <Slider
