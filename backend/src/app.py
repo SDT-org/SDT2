@@ -32,6 +32,7 @@ from shutil import copy
 
 from config import app_version, dev_frontend_host
 from constants import matrix_filetypes, default_window_title
+from heatmap import dataframe_to_lower_triangle, numpy_to_lower_triangle
 
 is_compiled = "__compiled__" in globals()
 is_macos = platform.system() == "Darwin"
@@ -248,7 +249,7 @@ class Api:
         manual_window()
 
     def app_config(self):
-        return {"appVersion": app_version, "userPath": os.path.expanduser('~')}
+        return {"appVersion": app_version, "userPath": os.path.expanduser("~")}
 
     def app_settings(self):
         return load_app_settings()
@@ -353,9 +354,7 @@ class Api:
 
         compute_cores = args.get("compute_cores")
         assert isinstance(compute_cores, int)
-        settings["num_processes"] = max(
-            min(compute_cores, get_cpu_count()), 1
-        )
+        settings["num_processes"] = max(min(compute_cores, get_cpu_count()), 1)
 
         alignment_export_path = args.get("alignment_export_path")
         if args.get("export_alignments") == "True" and alignment_export_path:
@@ -513,8 +512,8 @@ class Api:
 
             ids = list(id_map.keys())
         else:
-           ids = []
-           identity_scores = []
+            ids = []
+            identity_scores = []
 
         df = read_csv(
             matrix_path, delimiter=",", index_col=0, header=None, names=column_names
@@ -536,6 +535,7 @@ class Api:
             self.load_data_and_stats(doc_id)
         )
         heat_data = DataFrame(data, index=tick_text)
+        heat_data = dataframe_to_lower_triangle(heat_data)
         parsedData = heat_data.values.tolist()
 
         data_to_dump = dict(
@@ -543,152 +543,57 @@ class Api:
             data=([tick_text] + parsedData),
             ids=ids,
             identity_scores=identity_scores,
-            full_stats=stats_df.values.tolist()
+            full_stats=stats_df.values.tolist(),
         )
         return json.dumps(data_to_dump)
 
-    def generate_cluster_data(self, doc_id: str, threshold: float, method: str):
+    def get_clustermap_data(self, doc_id: str, threshold: float, method: str):
         doc = get_document(doc_id)
         if doc is None:
             raise Exception(f"Could not find document: {doc_id}")
 
         matrix_path = get_matrix_path(doc)
 
-        # This will use the cached linkage matrix if available
-        df = cluster.export(matrix_path, threshold, method, False)
-        df = df.rename(columns={str(df.columns[0]): 'id', str(df.columns[1]): 'group'})
-
-        if len(df.columns) > 2 and df.columns[2] is not None:
-            df = df.rename(columns={str(df.columns[2]): 'subgroup'})
-
-        return df.to_dict(orient="records")
-
-    def get_reordered_matrix(self, doc_id: str, threshold: float, method: str):
-        doc = get_document(doc_id)
-        if doc is None:
-            raise Exception(f"Could not find document: {doc_id}")
-
-        matrix_path = get_matrix_path(doc)
-
-        # Read the original matrix
-        with open(matrix_path, "r") as temp_f:
-            col_count = [len(l.split(",")) for l in temp_f.readlines()]
-            column_names = [i for i in range(0, max(col_count))]
-
-        df_matrix = pd.read_csv(matrix_path, delimiter=",", index_col=0, header=None, names=column_names)
-
-        # Get row IDs from the original matrix
-        row_ids = df_matrix.index.tolist()
-
-        # Create a lookup dictionary for faster index retrieval
-        row_id_to_idx = {id: i for i, id in enumerate(row_ids)}
-
-        # Convert to numpy array
-        data = df_matrix.to_numpy()
-
-        # Make a full square matrix for clustering calculations
-        data_full = data.copy()
-        # Fill in the upper triangle to make a full matrix for clustering
-        i_upper = np.triu_indices(data_full.shape[0], 1)
-        data_full[i_upper] = data_full.T[i_upper]
-
-        # Create a hash ID for cache lookup
-        id_hash = hash(tuple(row_ids))
-
-        Z = cluster.get_linkage(data_full, method)
+        matrix_df = pd.read_csv(matrix_path, delimiter=",", index_col=0, header=None)
+        matrix_np = matrix_df.to_numpy()
+        row_ids = matrix_df.index.tolist()
 
         # Get cluster assignments
-        df_clusters = cluster.export(matrix_path, threshold, method, False)
-        df_clusters = df_clusters.rename(columns={str(df_clusters.columns[0]): 'id', str(df_clusters.columns[1]): 'group'})
+        seqid_clusters_df = cluster.get_clusters_dataframe(
+            matrix_np, method, threshold, row_ids
+        )
 
-        # Filter to rows that exist
-        df_clusters = df_clusters[df_clusters['id'].isin(row_ids)]
+        seqid_clusters_df = seqid_clusters_df.rename(
+            columns={
+                str(seqid_clusters_df.columns[0]): "id",
+                str(seqid_clusters_df.columns[1]): "cluster",
+            }
+        )
 
-        # Get values and clusters
-        values = df_clusters['id'].tolist()
-        clusters = df_clusters['group'].tolist()
-
-        # Remap clusters
-        remapped_clusters = cluster.reorder_clusters(values, clusters)
-        df_clusters['group'] = remapped_clusters
+        clusters = seqid_clusters_df["cluster"].tolist()
+        reorder_clusters = cluster.order_clusters_sequentially(clusters)
+        seqid_clusters_df["cluster"] = reorder_clusters
 
         # Sort by group
-        df_clusters = df_clusters.sort_values(by=['group', 'id'])
-        sorted_ids = df_clusters['id'].tolist()
+        seqid_clusters_df = seqid_clusters_df.sort_values(by=["cluster", "id"])
+        sorted_ids = seqid_clusters_df["id"].tolist()
 
-        if not sorted_ids:
-            print("No valid IDs found")
-            return {'matrix': [], 'tickText': []}
+        # Get the new index order and reorder the matrix in one step using numpy
+        new_order = [row_ids.index(id) for id in sorted_ids if id in row_ids]
+        reordered_matrix_np = matrix_np[new_order, :][:, new_order]
 
-        # Get the reordering indices using the dictionary lookup (much faster)
-        try:
-            idx = [row_id_to_idx[id] for id in sorted_ids]
-        except KeyError as e:
-            print(f"ID not found in matrix: {e}")
-            # Fall back to the slower method
-            idx = [row_ids.index(id) for id in sorted_ids if id in row_ids]
-
-        # Reorder the matrix in one step using numpy
-        new_matrix = data_full[idx, :][:, idx]
-
-        # Create a lower triangular matrix
-        lower_triangle = np.tril(new_matrix)
-
-        # Set upper triangle to NaN
-        i_upper = np.triu_indices(lower_triangle.shape[0], 1)
-        lower_triangle[i_upper] = np.nan
-
-        # Convert to list and replace NaN values with None in one step
-        matrix_data = np.where(np.isnan(lower_triangle), None, lower_triangle).tolist()
-
-        return {
-            'matrix': matrix_data,
-            'tickText': sorted_ids
+        reordered_data = {
+            "matrix": numpy_to_lower_triangle(reordered_matrix_np).tolist(),
+            "tickText": sorted_ids,
         }
 
-    def get_cluster_ordered_data(self, doc_id: str, threshold: float, method: str):
-        try:
-            reordered_data = self.get_reordered_matrix(doc_id, threshold, method)
+        cluster_data = seqid_clusters_df.to_dict(orient="records")
 
-            doc = get_document(doc_id)
-            matrix_path = get_matrix_path(doc)
-
-            df = cluster.export(matrix_path, threshold, method, False)
-            df = df.rename(columns={str(df.columns[0]): 'id', str(df.columns[1]): 'group'})
-
-            # Filter to only IDs in the reordered data
-            df = df[df['id'].isin(reordered_data['tickText'])]
-
-            # If no matching IDs, return empty cluster data
-            if df.empty:
-                print("No matching cluster data, returning without clusters")
-                return {
-                    'matrix': reordered_data['matrix'],
-                    'tickText': reordered_data['tickText'],
-                    'clusterData': []
-                }
-
-            # Get the list of values and clusters
-            values = df['id'].tolist()
-            clusters = df['group'].tolist()
-
-            # Remap clusters
-            remapped_clusters = cluster.reorder_clusters(values, clusters)
-            df['group'] = remapped_clusters
-
-            # Convert to records
-            cluster_data = df.to_dict(orient="records")
-
-            return {
-                'matrix': reordered_data['matrix'],
-                'tickText': reordered_data['tickText'],
-                'clusterData': cluster_data
-            }
-        except Exception as e:
-            print(f"Error: {str(e)}")
-            import traceback
-            traceback.print_exc()
-            return {'matrix': [], 'tickText': [], 'clusterData': []}
+        return {
+            "matrix": reordered_data["matrix"],
+            "tickText": reordered_data["tickText"],
+            "clusterData": cluster_data,
+        }
 
     def new_doc(self):
         id = make_doc_id()
@@ -714,10 +619,7 @@ class Api:
         if save_as == False:
             basename = os.path.basename(path)
             update_document(
-                doc_id,
-                filename=path,
-                basename=basename,
-                filetype="application/vnd.sdt"
+                doc_id, filename=path, basename=basename, filetype="application/vnd.sdt"
             )
             add_recent_file(path)
 
@@ -742,6 +644,7 @@ class Api:
 
     def set_window_title(self, title: str):
         assert_window().title = f"{title}{window_title_suffix}"
+
 
 def file_exists(path):
     return os.path.exists(os.path.join(os.path.dirname(__file__), path))
@@ -769,7 +672,7 @@ def push_backend_state(window: webview.Window):
 
 
 def on_closed():
-    #map(lambda doc: doc.cleanup(), get_state().documents)
+    # map(lambda doc: doc.cleanup(), get_state().documents)
     do_cancel_run()
     os._exit(0)
 

@@ -39,20 +39,14 @@ declare global {
           defaultDirectory?: string,
         ) => Promise<string>;
         select_path_dialog: (defaultDirectory?: string) => Promise<string>;
-        generate_cluster_data: (
-          doc_id: string,
-          threshold: number,
-          method: string,
-        ) => Promise<{ id: string; group: number }[]>;
-
-        get_cluster_ordered_data: (
+        get_clustermap_data: (
           doc_id: string,
           threshold: number,
           method: string,
         ) => Promise<{
           matrix: HeatmapData;
           tickText: string[];
-          clusterData: Array<{ id: string; group: number }>;
+          clusterData: ClusterDataItem[];
         }>;
 
         export_data: (args: {

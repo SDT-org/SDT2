@@ -138,3 +138,8 @@ export const ClustermapSettingsSchema = z.object({
   cellspace: z.number(),
   showLegend: z.boolean(),
 });
+
+export type ClusterDataItem = {
+  id: string;
+  cluster: number;
+};

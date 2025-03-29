@@ -5,15 +5,10 @@ import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import { formatClustermapData } from "../heatmapUtils";
 import { useMetrics, useSize } from "../hooks/heatmap";
 import { useHeatmapRenderToggle } from "../hooks/useHeatmapRenderToggle";
-import type { HeatmapData } from "../plotTypes";
+import type { ClusterDataItem, HeatmapData } from "../plotTypes";
 import { ClustermapSidebar } from "./ClustermapSidebar";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3SvgHeatmap } from "./D3SvgHeatmap";
-
-type ClusterDataItem = {
-  id: string;
-  group: number;
-};
 
 export const Clustermap = ({
   data,
@@ -37,7 +32,7 @@ export const Clustermap = ({
 
   React.useEffect(() => {
     window.pywebview.api
-      .get_cluster_ordered_data(
+      .get_clustermap_data(
         docState.id,
         docState.clustermap.threshold,
         docState.clustermap.method,
@@ -75,12 +70,6 @@ export const Clustermap = ({
   ];
 
   const clustermapData = React.useMemo(() => {
-    console.log("Creating clustermapData with:", {
-      matrixDimensions: `${orderedMatrix.length}x${orderedMatrix[0]?.length || 0}`,
-      tickTextLength: orderedTickText.length,
-      clusterDataLength: clusterData?.length || 0,
-    });
-
     const result = formatClustermapData(
       orderedMatrix,
       orderedTickText,

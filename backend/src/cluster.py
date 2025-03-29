@@ -1,8 +1,5 @@
-import enum
-from functools import lru_cache
 import os
 from tempfile import TemporaryDirectory
-from typing import Literal
 import numpy as np
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 import pandas as pd
@@ -12,21 +9,6 @@ from sklearn.manifold import MDS
 import time
 from joblib import Memory
 
-# Global cache for linkage matrices
-# Structure: {hash_id: {'methods': {method: Z_matrix}, 'timestamp': last_accessed_time}}
-# linkage_cache = {}
-
-# ClusterMethod = Literal[
-#     "single",
-#     "complete",
-#     "average",
-#     "weighted",
-#     "centroid",
-#     "median",
-#     "ward",
-# ]
-
-
 cache_dir = TemporaryDirectory()
 memory = Memory(cache_dir.name, verbose=1)
 print(cache_dir)
@@ -35,10 +17,6 @@ print(cache_dir)
 @memory.cache
 def calculate_linkage(data, method) -> np.ndarray:
     dist_data = data.copy()  # TODO: do we need to copy the data?
-
-    # Set the upper triangle to mirror lower triangle
-    i_upper = np.triu_indices(dist_data.shape[0], 1)
-    dist_data[i_upper] = dist_data.T[i_upper]
 
     # Check if it's a similarity matrix (values near 100) or distance matrix
     if np.max(dist_data) > 90:
@@ -61,88 +39,6 @@ def calculate_linkage(data, method) -> np.ndarray:
     return linkage(y, method=method, metric=metric)
 
 
-# def calculate_linkages(data, index):
-#     global linkage_cache
-
-#     methods = [
-#         "single",
-#         "complete",
-#         "average",
-#         "weighted",
-#         "centroid",
-#         "median",
-#         "ward",
-#     ]
-#     id_hash = hash(tuple(index))
-
-#     # Update access timestamp or initialize cache entry
-#     current_time = time.time()
-
-#     if id_hash not in linkage_cache:
-#         linkage_cache[id_hash] = {"methods": {}, "timestamp": current_time}
-#     else:
-#         linkage_cache[id_hash]["timestamp"] = current_time
-
-#     # Check if all methods are already in cache
-#     all_cached = True
-#     for method in methods:
-#         if method not in linkage_cache[id_hash]["methods"]:
-#             all_cached = False
-#             break
-
-#     # Early return if all methods are cached
-#     if all_cached:
-#         return
-
-#     # Prepare the distance matrix
-#     dist_data = data.copy()
-
-#     # Set the upper triangle to mirror lower triangle
-#     i_upper = np.triu_indices(dist_data.shape[0], 1)
-#     dist_data[i_upper] = dist_data.T[i_upper]
-
-#     # Check if it's a similarity matrix (values near 100) or distance matrix
-#     if np.max(dist_data) > 90:
-#         distance_mat = 100 - dist_data
-#     else:
-#         distance_mat = dist_data
-
-#     # MDS for methods that need Euclidean distance
-#     mds_coords = MDS(
-#         n_components=2, dissimilarity="precomputed", random_state=42
-#     ).fit_transform(distance_mat)
-#     mds_distances = pdist(mds_coords)
-
-#     # Convert to condensed distance matrix
-#     condensed_dist = squareform(distance_mat)
-
-#     # Calculate linkage for each method not in cache
-#     for method in methods:
-#         if method in linkage_cache[id_hash]["methods"]:
-#             continue
-
-#         if method in ["ward", "centroid", "median"]:
-#             Z = linkage(mds_distances, method=method, metric="euclidean")
-#         else:
-#             Z = linkage(condensed_dist, method=method, metric="precomputed")
-
-#         linkage_cache[id_hash]["methods"][method] = Z
-#         # linkage_cache[id_hash]["methods"][method] = calculate_linkage(data, method)
-
-
-# def get_linkage(index, method):
-#     global linkage_cache
-
-#     id_hash = hash(tuple(index))
-
-#     if id_hash in linkage_cache and method in linkage_cache[id_hash]["methods"]:
-#         # Update timestamp when accessed
-#         linkage_cache[id_hash]["timestamp"] = time.time()
-#         return linkage_cache[id_hash]["methods"][method]
-#     else:
-#         return None
-
-
 def get_linkage(data: np.ndarray, method: str) -> np.ndarray:
     start = time.perf_counter()
     result = calculate_linkage(data, method)
@@ -152,19 +48,6 @@ def get_linkage(data: np.ndarray, method: str) -> np.ndarray:
 
 
 def get_linkage_method_order(data, method, index):
-    # # Make sure all linkage methods are calculated and cached
-    # calculate_linkages(data, index)
-
-    # Get hash ID for the cache lookup
-    id = hash(tuple(index))
-
-    # # Get linkage matrix for the specified method
-    # if id_hash in linkage_cache and method in linkage_cache[id_hash]["methods"]:
-    #     Z = linkage_cache[id_hash]["methods"][method]
-    # else:
-    #     print(f"Warning: Linkage matrix for {method} not found in cache")
-    #     return index  # Return original order as fallback
-
     Z = get_linkage(data, method)
 
     # Create dendrogram to get leaf order
@@ -175,31 +58,13 @@ def get_linkage_method_order(data, method, index):
     return new_order
 
 
-# def purge_old_cache_entries(max_age_seconds=3600, max_entries=10):
-#     global linkage_cache
-
-#     current_time = time.time()
-
-#     # Remove entries older than max_age_seconds
-#     old_keys = [
-#         k
-#         for k, v in linkage_cache.items()
-#         if current_time - v["timestamp"] > max_age_seconds
-#     ]
-
-#     for k in old_keys:
-#         del linkage_cache[k]
-
-#     # If still too many entries, remove oldest ones
-#     if len(linkage_cache) > max_entries:
-#         sorted_keys = sorted(
-#             linkage_cache.keys(), key=lambda k: linkage_cache[k]["timestamp"]
-#         )
-#         for k in sorted_keys[: len(linkage_cache) - max_entries]:
-#             del linkage_cache[k]
+def get_clusters_dataframe(data, method, threshold, index):
+    Z = get_linkage(data, method)
+    cluster_data = get_cluster_data_dict(Z, threshold, index)
+    return cluster_data_to_dataframe(cluster_data, threshold)
 
 
-def export(matrix_path, threshold, method, save_csv=True):
+def export(matrix_path, threshold, method):
     # Set variables
     output_dir = os.path.dirname(matrix_path)
     file_name = os.path.basename(matrix_path)
@@ -220,41 +85,13 @@ def export(matrix_path, threshold, method, save_csv=True):
     data = df.to_numpy()
     data = np.round(data, 2)
 
-    # Check if the linkage is already in the cache
-    # id_hash = hash(tuple(index))
-
-    # If not in cache, calculate all linkages
-    # if id_hash not in linkage_cache or method not in linkage_cache.get(id_hash, {}).get(
-    #     "methods", {}
-    # ):
-    #     calculate_linkages(data, index)
-
-    # # Get the linkage matrix
-    # Z = linkage_cache[id_hash]["methods"][method]
-
-    Z = get_linkage(data, method)
-
-    # output = get_cluster_data(Z, threshold, index)
-    # flattened_output = [
-    #     (item, key + 1) for key, sublist in output.items() for item in sublist
-    # ]
-    # df_result = pd.DataFrame(flattened_output)
-    # df_result.columns = ["ID", "Group - Threshold: " + str(threshold)]
-
-    # Get cluster data
-    cluster_data = get_cluster_data(Z, threshold, index)
-    df_result = cluster_data_to_dataframe(cluster_data, threshold)
-
-    if save_csv:
-        df_result.to_csv(output_file, index=False)
-
-    # # Periodically clean up old cache entries
-    # purge_old_cache_entries()
+    df_result = get_clusters_dataframe(data, method, threshold, index)
+    df_result.to_csv(output_file, index=False)
 
     return df_result
 
 
-def get_cluster_data(Z, threshold, index):
+def get_cluster_data_dict(Z, threshold, index):
     # Set cut threshold
     cutby = 100 - threshold
     # Identify clusters from threshold cut
@@ -272,12 +109,12 @@ def cluster_data_to_dataframe(cluster_data: dict, threshold: int):
         (item, key + 1) for key, sublist in cluster_data.items() for item in sublist
     ]
     dataframe = pd.DataFrame(flattened_output)
-    dataframe.columns = ["ID", "Group - Threshold: " + str(threshold)]
+    dataframe.columns = ["ID", "Cluster - Threshold: " + str(threshold)]
 
     return dataframe
 
 
-def reorder_clusters(values, clusters):
+def order_clusters_sequentially(clusters):
     # Let's make it NP
     labels = np.array(clusters)
     # Create newly reordered labels that make sense

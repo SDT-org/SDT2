@@ -264,7 +264,6 @@ def process_data(
     cluster_method = settings["cluster_method"]
 
     if cluster_method is not None:
-
         new_order = get_linkage_method_order(dist_scores, cluster_method, order)
 
         reorder_index = [
@@ -272,16 +271,12 @@ def process_data(
         ]  # create numerical index of order and  of new order IDs
 
         # numpy array indexing syntax rows/cols
-        aln_reordered = aln_scores[reorder_index, :][:, reorder_index]
-        aln_lowt = tril(around(aln_reordered, 2))
-        aln_lowt[triu_indices(aln_lowt.shape[0], k=1)] = nan
-        df = DataFrame(
-        aln_lowt, index=new_order)
-    else:
-        aln_lowt = tril(around(aln_scores, 2))
-        aln_lowt[triu_indices(aln_lowt.shape[0], k=1)] = nan
-        df = DataFrame(
-        aln_lowt, index=order)
+        aln_scores = aln_scores[reorder_index, :][:, reorder_index]
+        order = new_order
+
+        df = DataFrame(aln_scores, index=new_order)
+
+    df = DataFrame(aln_scores, index=order)
 
     set_stage("Postprocessing")
     print("Stage: Postprocessing")

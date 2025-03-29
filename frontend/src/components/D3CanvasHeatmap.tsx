@@ -218,7 +218,7 @@ export const D3CanvasHeatmap = ({
       const columnGap = 20;
       const positionX = width - legendWidth * 2 - columnGap - margin.right;
 
-      const uniqueClusters = [...new Set(clusterData.map((i) => i.group))]
+      const uniqueClusters = [...new Set(clusterData.map((i) => i.cluster))]
         .sort((a, b) => a - b)
         .slice(0, 50); // Arbitrarily set to 50
 
@@ -328,9 +328,9 @@ export const D3CanvasHeatmap = ({
     const clusterGroup =
       clusterData &&
       cell &&
-      clusterData.find((i) => i.id === tickText[cell.x])?.group ===
-        clusterData.find((i) => i.id === tickText[cell.y])?.group
-        ? clusterData.find((i) => i.id === tickText[cell.x])?.group
+      clusterData.find((i) => i.id === tickText[cell.x])?.cluster ===
+        clusterData.find((i) => i.id === tickText[cell.y])?.cluster
+        ? clusterData.find((i) => i.id === tickText[cell.x])?.cluster
         : null;
 
     if (cell) {

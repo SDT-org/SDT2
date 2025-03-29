@@ -1,7 +1,11 @@
 import tinycolor from "tinycolor2";
 import type { ColorScaleArray } from "./colorScales";
 import { createD3ColorScale, distinctColor } from "./colors";
-import type { HeatmapData, HeatmapSettings } from "./plotTypes";
+import type {
+  ClusterDataItem,
+  HeatmapData,
+  HeatmapSettings,
+} from "./plotTypes";
 
 export const getPlotMetrics = (width: number, height: number) => {
   // WIP
@@ -83,12 +87,12 @@ export const formatHeatmapData = (
 export const formatClustermapData = (
   data: HeatmapData,
   tickText: string[],
-  clusterData?: { id: string; group: number }[],
+  clusterData?: ClusterDataItem[],
 ) => {
   const result = data.flatMap((row, y) =>
     row.filter(Number).map((value, x) => {
-      const clusterX = clusterData?.find((i) => i.id === tickText[x])?.group;
-      const clusterY = clusterData?.find((i) => i.id === tickText[y])?.group;
+      const clusterX = clusterData?.find((i) => i.id === tickText[x])?.cluster;
+      const clusterY = clusterData?.find((i) => i.id === tickText[y])?.cluster;
 
       const clusterMatch =
         clusterX !== undefined &&
