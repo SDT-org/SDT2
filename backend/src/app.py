@@ -32,7 +32,11 @@ from shutil import copy
 
 from config import app_version, dev_frontend_host
 from constants import matrix_filetypes, default_window_title
-from heatmap import dataframe_to_lower_triangle, numpy_to_lower_triangle
+from heatmap import (
+    dataframe_to_lower_triangle,
+    lower_triangle_to_full_matrix,
+    numpy_to_lower_triangle,
+)
 
 is_compiled = "__compiled__" in globals()
 is_macos = platform.system() == "Darwin"
@@ -59,24 +63,29 @@ cancelled = None
 start_time = None
 
 
+print(temp_dir)
+
+
 def get_matrix_path(state: DocState):
-    if state.filetype == "application/vnd.sdt":
-        path = next(
-            (
-                os.path.join(state.tempdir_path, file)
-                for file in os.listdir(state.tempdir_path)
-                if file.endswith("_mat.csv") or file.endswith("_mat.txt")
-            ),
-            None,
-        )
-        if not path:
-            raise Exception(f"Failed to located matrix file")
-        return path
-    elif state.filetype == "text/fasta":
-        file_base = os.path.splitext(state.basename)[0]
-        return os.path.join(state.tempdir_path, f"{file_base}_mat.csv")
-    else:
-        return state.filename
+    return os.path.join(state.tempdir_path, "matrix.csv")
+    # if state.filetype == "application/vnd.sdt":
+    #     path = os.path.join(state.tempdir_path, "matrix.csv")
+    #     # path = next(
+    #     #     (
+    #     #         os.path.join(state.tempdir_path, file)
+    #     #         for file in os.listdir(state.tempdir_path)
+    #     #         if file.endswith("_mat.csv") or file.endswith("_mat.txt")
+    #     #     ),
+    #     #     None,
+    #     # )
+    #     if not path:
+    #         raise Exception(f"Failed to located matrix file")
+    #     return path
+    # elif state.filetype == "text/fasta":
+    #     file_base = os.path.splitext(state.basename)[0]
+    #     return os.path.join(state.tempdir_path, f"{file_base}_mat.csv")
+    # else:
+    #     return state.filename
 
 
 def do_cancel_run():
@@ -176,7 +185,7 @@ def handle_open_file(filepath: str, doc_id: str | None):
             )
 
             # Test that the file is gonna work in get_data
-            tick_text = df.index.tolist()
+            df.index.tolist()
             data = df.to_numpy()
             diag_mask = eye(data.shape[0], dtype=bool)
             data_no_diag = where(diag_mask, nan, data)
@@ -189,6 +198,14 @@ def handle_open_file(filepath: str, doc_id: str | None):
                     unique_dir,
                     os.path.splitext(basename)[0].removesuffix("_mat"),
                 ),
+            )
+
+            full_matrix_dataframe = lower_triangle_to_full_matrix(df)
+            full_matrix_dataframe.to_csv(
+                os.path.join(unique_dir, "matrix.csv"),
+                mode="w",
+                header=False,
+                index=True,
             )
 
             new_document(
@@ -470,10 +487,12 @@ class Api:
         if doc == None:
             raise Exception(f"could not find document: {doc_id}")
 
-        if doc.filetype == "application/vnd.sdt" or doc.filetype == "text/fasta":
-            matrix_path = get_matrix_path(doc)
-        else:
-            matrix_path = doc.filename
+        # if doc.filetype == "application/vnd.sdt" or doc.filetype == "text/fasta":
+        #     matrix_path = get_matrix_path(doc)
+        # else:
+        #     matrix_path = doc.filename
+
+        matrix_path = get_matrix_path(doc)
 
         if doc.filetype == "application/vnd.sdt":
             file_base = os.path.splitext(os.path.basename(matrix_path))[0].removesuffix(

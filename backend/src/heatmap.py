@@ -15,3 +15,11 @@ def numpy_to_lower_triangle(matrix: numpy.ndarray) -> numpy.ndarray:
     result[i_upper] = None
     result = numpy.where(numpy.isnan(result), None, result)
     return result
+
+def lower_triangle_to_full_matrix(dataframe: DataFrame) -> DataFrame:
+    # dataframe = dataframe.fillna(0)
+    # dataframe = dataframe + dataframe.T
+    # lower_triangle + np.tril(lower_triangle, -1).T
+    np_arrary = dataframe.to_numpy()
+    dataframe = numpy.fill_diagonal(np_arrary, 0)
+    return DataFrame(dataframe)

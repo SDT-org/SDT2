@@ -16,6 +16,7 @@ import parasail
 from Bio import SeqIO
 from Bio.SeqUtils import gc_fraction
 from cluster import get_linkage_method_order
+from heatmap import dataframe_to_lower_triangle
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
@@ -153,8 +154,9 @@ def get_alignment_scores(
 
 # Save similarity scores as 2d matrix csv
 def save_matrix_to_csv(df, filename):
-    df.to_csv(filename + "_mat.csv", mode="w", header=False, index=True)
-
+    tri_matrix = dataframe_to_lower_triangle(df)
+    tri_matrix.to_csv(filename + "_mat.csv", mode="w", header=False, index=True)
+    df.to_csv("matrix.csv", mode="w", header=False, index=True)
 
 # Save similarity scores as 3 column csv
 def save_cols_to_csv(df, filename):
@@ -284,6 +286,7 @@ def process_data(
     save_cols_to_csv(df, os.path.join(out_dir, file_base))
     save_stats_to_csv(seq_stats, os.path.join(out_dir, file_base))
     save_matrix_to_csv(df, os.path.join(out_dir, file_base))
+
 
     set_stage("Finalizing")
     print("Stage: Finalizing")
