@@ -1,4 +1,4 @@
-import type React from "react";
+import React from "react";
 import { type DocState, useAppState } from "../appState";
 import { useDocState } from "../hooks/useDocState";
 import { Loader } from "./Loader";
@@ -33,6 +33,22 @@ export const Document = ({
     loader: <Loader {...commonViewProps} />,
     viewer: <Viewer {...commonViewProps} />,
   };
+
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (
+        event.shiftKey &&
+        (event.metaKey || event.altKey) &&
+        event.key === "0"
+      ) {
+        event.preventDefault();
+        window.pywebview.api.open_doc_folder(id);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [id]);
 
   return VIEWS[docState?.view || "viewer"];
 };

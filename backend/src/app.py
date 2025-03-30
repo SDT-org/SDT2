@@ -23,13 +23,13 @@ import psutil
 import webview
 import json
 import pandas as pd
-import numpy as np
 from pandas import read_csv, DataFrame
 from numpy import eye, where, nan, nanmin, nanmax
 import mimetypes
 from time import perf_counter
 from shutil import copy
 
+from debug import open_doc_folder
 from config import app_version, dev_frontend_host
 from constants import matrix_filetypes, default_window_title
 from heatmap import (
@@ -471,11 +471,6 @@ class Api:
         if doc == None:
             raise Exception(f"could not find document: {doc_id}")
 
-        # if doc.filetype == "application/vnd.sdt" or doc.filetype == "text/fasta":
-        #     matrix_path = get_matrix_path(doc)
-        # else:
-        #     matrix_path = doc.filename
-
         matrix_path = get_matrix_path(doc)
 
         if doc.filetype == "application/vnd.sdt":
@@ -492,6 +487,7 @@ class Api:
         stats_path = os.path.join(doc.tempdir_path, f"{file_base}_stats.csv")
         if os.path.exists(stats_path):
             stats_df = read_csv(stats_path, header=0)
+
         else:
             stats_df = DataFrame([])
 
@@ -647,6 +643,12 @@ class Api:
 
     def set_window_title(self, title: str):
         assert_window().title = f"{title}{window_title_suffix}"
+
+    def open_doc_folder(self, doc_id: str):
+        doc = get_document(doc_id)
+        if doc == None:
+            raise Exception(f"Expected to find document: {doc_id}")
+        return open_doc_folder(doc)
 
 
 def file_exists(path):

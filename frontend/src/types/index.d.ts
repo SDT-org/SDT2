@@ -48,7 +48,6 @@ declare global {
           tickText: string[];
           clusterData: ClusterDataItem[];
         }>;
-
         export_data: (args: {
           doc_id: string;
           export_path: string;
@@ -73,6 +72,7 @@ declare global {
         show_about: () => Promise<void>;
         show_manual: () => Promise<void>;
         close_app: () => Promise<void>;
+        open_doc_folder: (doc_id: string) => Promise<void>;
       };
     };
     syncAppState: (state: AppState) => void;

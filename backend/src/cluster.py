@@ -64,15 +64,17 @@ def get_clusters_dataframe(data, method, threshold, index):
     return cluster_data_to_dataframe(cluster_data, threshold)
 
 
-def export(matrix_path, threshold, method):
-    # Set variables
+def make_cluster_path(matrix_path, method):
     output_dir = os.path.dirname(matrix_path)
     file_name = os.path.basename(matrix_path)
     file_base, _ = os.path.splitext(file_name)
     file_name = file_base.replace("_mat", "")
+    file_base = os.path.splitext(os.path.basename(matrix_path))[0].removesuffix("_mat")
+    return os.path.join(output_dir, file_name + "_cluster_" + method + ".csv")
 
-    # Parse data
-    output_file = os.path.join(output_dir, file_name + "_cluster_" + method + ".csv")
+
+def export(matrix_path, threshold, method):
+    output_file = make_cluster_path(matrix_path, method)
 
     with open(matrix_path, "r") as temp_f:
         col_count = [len(l.split(",")) for l in temp_f.readlines()]
