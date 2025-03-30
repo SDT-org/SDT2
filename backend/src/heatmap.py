@@ -1,5 +1,5 @@
 from numpy import tril, triu_indices, around, nan
-import numpy
+import numpy as np
 from pandas.core.frame import DataFrame
 from pandas import DataFrame
 
@@ -9,17 +9,15 @@ def dataframe_to_lower_triangle(matrix: DataFrame) -> DataFrame:
 
     return DataFrame(dataframe)
 
-def numpy_to_lower_triangle(matrix: numpy.ndarray) -> numpy.ndarray:
+def numpy_to_lower_triangle(matrix: np.ndarray) -> np.ndarray:
     result = tril(around(matrix, 2))
-    i_upper = numpy.triu_indices(result.shape[0], 1)
+    i_upper = np.triu_indices(result.shape[0], 1)
     result[i_upper] = None
-    result = numpy.where(numpy.isnan(result), None, result)
+    result = np.where(np.isnan(result), None, result)
     return result
 
-def lower_triangle_to_full_matrix(dataframe: DataFrame) -> DataFrame:
-    # dataframe = dataframe.fillna(0)
-    # dataframe = dataframe + dataframe.T
-    # lower_triangle + np.tril(lower_triangle, -1).T
-    np_arrary = dataframe.to_numpy()
-    dataframe = numpy.fill_diagonal(np_arrary, 0)
+def lower_triangle_to_full_matrix(lower_triangle: DataFrame) -> DataFrame:
+    lower = np.tril(lower_triangle)
+    dataframe = lower + np.triu(lower.T, 1)
+
     return DataFrame(dataframe)

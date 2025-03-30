@@ -6,8 +6,6 @@ from document_state import DocState
 import cluster
 from constants import data_file_suffixes
 
-# TODO: Export needs to output a lower triangle for the matrix
-
 image_types = ["heatmap", "clustermap", "histogram", "violin"]
 
 def find_source_files(state: DocState, prefix, suffixes):
