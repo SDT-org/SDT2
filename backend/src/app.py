@@ -68,24 +68,6 @@ print(temp_dir)
 
 def get_matrix_path(state: DocState):
     return os.path.join(state.tempdir_path, "matrix.csv")
-    # if state.filetype == "application/vnd.sdt":
-    #     path = os.path.join(state.tempdir_path, "matrix.csv")
-    #     # path = next(
-    #     #     (
-    #     #         os.path.join(state.tempdir_path, file)
-    #     #         for file in os.listdir(state.tempdir_path)
-    #     #         if file.endswith("_mat.csv") or file.endswith("_mat.txt")
-    #     #     ),
-    #     #     None,
-    #     # )
-    #     if not path:
-    #         raise Exception(f"Failed to located matrix file")
-    #     return path
-    # elif state.filetype == "text/fasta":
-    #     file_base = os.path.splitext(state.basename)[0]
-    #     return os.path.join(state.tempdir_path, f"{file_base}_mat.csv")
-    # else:
-    #     return state.filename
 
 
 def do_cancel_run():
@@ -200,6 +182,8 @@ def handle_open_file(filepath: str, doc_id: str | None):
                 ),
             )
 
+            # We need a full matrix for doing things but we don't have
+            # it yet because this was a .txt/.csv lower triangle matrix
             full_matrix_dataframe = lower_triangle_to_full_matrix(df)
             full_matrix_dataframe.to_csv(
                 os.path.join(unique_dir, "matrix.csv"),

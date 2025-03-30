@@ -17,7 +17,8 @@ def numpy_to_lower_triangle(matrix: np.ndarray) -> np.ndarray:
     return result
 
 def lower_triangle_to_full_matrix(lower_triangle: DataFrame) -> DataFrame:
-    lower = np.tril(lower_triangle)
+    # We need to round to 2 decimals for SDT 1 matrix files saving 100s as 100.001
+    lower = np.round(np.tril(lower_triangle), 2)
     dataframe = lower + np.triu(lower.T, 1)
 
     return DataFrame(dataframe)
