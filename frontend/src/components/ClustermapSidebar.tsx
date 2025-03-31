@@ -1,5 +1,5 @@
 import React from "react";
-import { Input, Label, TextField } from "react-aria-components";
+import { Input, Label, TextField, Text } from "react-aria-components";
 import type { DocState } from "../appState";
 import { reorderMethods } from "../constants";
 import { Select, SelectItem } from "./Select";
@@ -57,10 +57,14 @@ export const ClustermapSidebar = ({
                   items={Object.entries(reorderMethods).map(([key, value]) => ({
                     id: key,
                     name: value.name,
+                    description: value.description,
                   }))}
                 >
                   {(item) => (
-                    <SelectItem textValue={item.id}>{item.name}</SelectItem>
+                    <SelectItem textValue={item.name}>
+                      <Text slot="label">{item.name}</Text>
+                      <Text slot="description">{item.description}</Text>
+                    </SelectItem>
                   )}
                 </Select>
               </div>
