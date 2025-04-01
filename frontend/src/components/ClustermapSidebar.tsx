@@ -1,5 +1,5 @@
 import React from "react";
-import { Input, Label, TextField, Text } from "react-aria-components";
+import { Input, Label, Text, TextField } from "react-aria-components";
 import type { DocState } from "../appState";
 import { reorderMethods } from "../constants";
 import { Select, SelectItem } from "./Select";
