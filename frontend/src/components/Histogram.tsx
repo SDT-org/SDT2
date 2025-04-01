@@ -89,28 +89,12 @@ export const Histogram = ({
               ...(settings.titleFont === "Monospace"
                 ? plotFontMonospace
                 : plotFontSansSerif),
-              // @ts-ignore
-              weight: "bold",
+              size: 14,
             },
             uirevision: "true",
             bargap: settings.barGap,
             xaxis: {
-              ...(settings.showAxisLabels
-                ? {
-                    title: {
-                      text: settings.xtitle,
-                      font: {
-                        ...(settings.titleFont === "Monospace"
-                          ? plotFontMonospace
-                          : plotFontSansSerif),
-                        //@ts-ignore
-                        weight: "bold",
-                      },
-                    },
-                    tickfont: { weight: "normal" },
-                    scaleratio: 1,
-                  }
-                : {}),
+              tickfont: { family: "sans-serif", size: 11 },
               side: "bottom",
               linecolor: settings.histlineColor,
               linewidth: settings.histOutlineWidth,
@@ -125,24 +109,7 @@ export const Histogram = ({
               autotick: true,
             },
             yaxis: {
-              ...(settings.showAxisLabels
-                ? {
-                    title: {
-                      text: settings.ytitle,
-                      font: {
-                        ...(settings.titleFont === "Monospace"
-                          ? plotFontMonospace
-                          : plotFontSansSerif),
-                        //@ts-ignore
-                        weight: "bold",
-                      },
-                      pad: {
-                        r: 15,
-                      },
-                    },
-                    tickfont: { weight: "normal" },
-                  }
-                : {}),
+              tickfont: { family: "sans-serif", size: 11 },
               side: "left",
               linecolor: settings.histlineColor,
               linewidth: settings.histOutlineWidth,

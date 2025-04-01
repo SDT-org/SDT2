@@ -322,7 +322,7 @@ export const HeatmapSidebar = ({
                 });
               }}
             >
-              Plot Titles
+              Plot Title
             </Switch>
             <div
               className="drawer"

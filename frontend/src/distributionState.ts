@@ -39,8 +39,6 @@ export type DistributionState = {
     dtickx: number;
     dticky: number;
     title: string;
-    xtitle: string;
-    ytitle: string;
     plotOrientation: "horizontal" | "vertical";
     titleFont: "Monospace" | "Sans Serif";
     barGap: number;
@@ -88,8 +86,6 @@ export type DistributionState = {
     whiskerWidth: number;
     plotOrientation: "horizontal" | "vertical";
     title: string;
-    xtitle: string;
-    ytitle: string;
     titleFont: "Monospace" | "Sans Serif";
   };
 };
@@ -120,8 +116,6 @@ export const DistributionStateSchema = z.object({
     dtickx: z.number(),
     dticky: z.number(),
     title: z.string(),
-    xtitle: z.string(),
-    ytitle: z.string(),
     plotOrientation: z.enum(["horizontal", "vertical"]),
     titleFont: z.enum(["Monospace", "Sans Serif"]),
     barGap: z.number(),
@@ -169,8 +163,6 @@ export const DistributionStateSchema = z.object({
     whiskerWidth: z.number(),
     plotOrientation: z.enum(["horizontal", "vertical"]),
     title: z.string(),
-    xtitle: z.string(),
-    ytitle: z.string(),
     titleFont: z.enum(["Monospace", "Sans Serif"]),
   }),
 });
@@ -202,8 +194,6 @@ export const initialDistributionState: DistributionState = {
     dticky: 1,
     showTitles: true,
     title: "Histogram",
-    xtitle: "Percent Identity",
-    ytitle: "Frequency",
     plotOrientation: "horizontal",
     titleFont: "Sans Serif",
     barGap: 0.1,
@@ -258,8 +248,6 @@ export const initialDistributionState: DistributionState = {
     showTitles: true,
     showTickLabels: true,
     title: "Violin Plot",
-    xtitle: "",
-    ytitle: "",
     titleFont: "Sans Serif",
   },
 };
