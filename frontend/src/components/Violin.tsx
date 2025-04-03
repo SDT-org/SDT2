@@ -177,7 +177,7 @@ export const Violin = ({
           size: settings.markerSize,
         },
         fillcolor: settings.boxfillColor,
-        boxgap: ( settings.boxWidth),
+        boxgap: settings.boxWidth,
         hoverinfo: "text",
         hovertemplate:
           dataSetKey === "scores"
