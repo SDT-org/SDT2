@@ -75,6 +75,16 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
                     axlabel_yfontsize: scaledAxisLabelFontSize,
                   }),
             },
+            clustermap: {
+              ...prev.clustermap,
+              ...state.clustermap,
+              ...(docState.filetype === "application/vnd.sdt"
+                ? null
+                : {
+                    axlabel_fontsize: scaledAxisLabelFontSize,
+                    axlabel_yfontsize: scaledAxisLabelFontSize,
+                  }),
+            },
           }),
           false,
         );

@@ -1,127 +1,124 @@
 import os
+from tempfile import TemporaryDirectory
 import numpy as np
+from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 import pandas as pd
 from collections import defaultdict
-import networkx as nx
+from scipy.spatial.distance import squareform, pdist
+from sklearn.manifold import MDS
+import time
+from joblib import Memory
 
-## switching from scipy to networkx. takes two threshold inputs now
-def process_groups(data, index, threshold_1, threshold_2=0):
-    # check for a threshold 2
-    if threshold_2 is None or threshold_2 == 0:
-        # set all values in the matrix that meet threshold 1 to 1 and all lower or NaN values to 0
-        adjacency_matrix = (~np.isnan(data) & (data >= threshold_1)).astype(int)
-        # Create a graph from the adjacency matrix
-        G1 = nx.from_numpy_array(adjacency_matrix, parallel_edges=False, create_using=None)
-        
-        # empty dict to store the groups
-        groups_dict = defaultdict(list)
-        
-        # look for connected components in graph G1
-        for i, component in enumerate(nx.connected_components(G1)):
-            for node_idx in component:
-                groups_dict[i].append(index[node_idx])
-        
-        return groups_dict
+cache_dir = TemporaryDirectory()
+memory = Memory(cache_dir.name, verbose=1)
+print(cache_dir)
+
+
+@memory.cache
+def calculate_linkage(data, method) -> np.ndarray:
+    dist_data = data.copy()  # TODO: do we need to copy the data?
+
+    # Check if it's a similarity matrix (values near 100) or distance matrix
+    if np.max(dist_data) > 90:
+        distance_mat = 100 - dist_data
     else:
-        # Create two adjacency matrices, one for each threshold ~ is the bitwise 'not' operator
-        adjacency_1 = (~np.isnan(data) & (data >= threshold_1)).astype(int)
-        adjacency_2 = (~np.isnan(data) & (data >= threshold_2)).astype(int)
-        
-        # convert adjacency matrices to networkx graphs
-        G1 = nx.from_numpy_array(adjacency_1)
-        G2 = nx.from_numpy_array(adjacency_2)
-        
-        # find primary clusters with threshold_1
-        groups_dict_1 = defaultdict(list)
-        for i, component in enumerate(nx.connected_components(G1)):
-            for node_idx in component:
-                groups_dict_1[i].append(index[node_idx])
-        
-        # find subclusters with threshold_2 
-        groups_dict_2 = defaultdict(list)
-        for i, component in enumerate(nx.connected_components(G2)):
-            for node_idx in component:
-                groups_dict_2[i].append(index[node_idx])
-        
-        # return both cluster sets
-        return groups_dict_1, groups_dict_2
+        distance_mat = dist_data
 
-def cluster_by_identity(clusters, nodes):
-    output = []
-    reverse_clusters = {}
-    
-    # create lookup table from sequence ID to primary cluster ID
-    for group, values in clusters.items():
-        for value in values:
-            reverse_clusters[value] = group
-    
-    # initialize counters for subgroups within each primary cluster
-    subgroup_counters = {group: 1 for group in clusters.keys()}
-    
-    # assign subgroups within each primary cluster
-    for _, node_list in nodes.items():
-        if node_list:
-            # get first node to determine which primary cluster this belongs to
-            first_value = node_list[0]
-            if first_value in reverse_clusters:
-                # get primary cluster ID (add 1 for human-readable indexing)
-                group_number = reverse_clusters[first_value] + 1
-                # get next available subgroup number for this primary cluster
-                subgroup_number = subgroup_counters[reverse_clusters[first_value]]
-                
-                # process all nodes in this subcluster
-                for value in node_list:
-                    # only include if node belongs to the same primary cluster
-                    if value in reverse_clusters:
-                        output.append((value, group_number, subgroup_number))
-                
-                # increment subgroup counter for this primary cluster
-                subgroup_counters[reverse_clusters[first_value]] += 1
-    
-    return output
+    # MDS for methods that need Euclidean distance
+    mds_coords = MDS(
+        n_components=2, dissimilarity="precomputed", random_state=42
+    ).fit_transform(distance_mat)
+
+    if method in ["ward", "centroid", "median"]:
+        y = pdist(mds_coords)
+        metric = "euclidean"
+    else:
+        y = squareform(distance_mat)
+        metric = "precomputed"
+
+    return linkage(y, method=method, metric=metric)
 
 
-def export(matrix_path, threshold_1=79, threshold_2=0, save_csv=True):
+def get_linkage(data: np.ndarray, method: str) -> np.ndarray:
+    start = time.perf_counter()
+    result = calculate_linkage(data, method)
+    end = time.perf_counter()
+    print(f"Calculate linkage took {end - start:0.4f} seconds")
+    return result
+
+
+def get_linkage_method_order(data, method, index):
+    Z = get_linkage(data, method)
+
+    # Create dendrogram to get leaf order
+    dendro = dendrogram(Z, no_plot=True)
+    leaf_indices = dendro["leaves"]
+    new_order = [index[i] for i in leaf_indices]
+
+    return new_order
+
+
+def get_clusters_dataframe(data, method, threshold, index):
+    Z = get_linkage(data, method)
+    cluster_data = get_cluster_data_dict(Z, threshold, index)
+    return cluster_data_to_dataframe(cluster_data, threshold)
+
+
+def make_cluster_path(matrix_path, method):
     output_dir = os.path.dirname(matrix_path)
     file_name = os.path.basename(matrix_path)
     file_base, _ = os.path.splitext(file_name)
     file_name = file_base.replace("_mat", "")
-    output_file = os.path.join(output_dir, file_name + "_cluster.csv")
-    
+    file_base = os.path.splitext(os.path.basename(matrix_path))[0].removesuffix("_mat")
+    return os.path.join(output_dir, file_name + "_cluster_" + method + ".csv")
+
+
+def export(matrix_path, threshold, method):
+    output_file = make_cluster_path(matrix_path, method)
+
     with open(matrix_path, "r") as temp_f:
         col_count = [len(l.split(",")) for l in temp_f.readlines()]
         column_names = [i for i in range(0, max(col_count))]
-    
+
     df = pd.read_csv(
         matrix_path, delimiter=",", index_col=0, header=None, names=column_names
     )
-    
     index = df.index.tolist()
     data = df.to_numpy()
     data = np.round(data, 2)
-    
-    if threshold_2 != 0 and threshold_1 >= threshold_2:
-        threshold_1, threshold_2 = threshold_2, threshold_1
-    
-    if threshold_2 is None or threshold_2 == 0:
-        output = process_groups(data, index, threshold_1)
-        flattened_output = [
-            (item, key + 1) for key, sublist in output.items() for item in sublist
-        ]
-        df_result = pd.DataFrame(flattened_output)
-        df_result.columns = ["SeqID", "Group - Threshold: " + str(threshold_1)]
-    else:
-        clusters, nodes = process_groups(data, index, threshold_1, threshold_2)
-        output = cluster_by_identity(clusters, nodes)
-        df_result = pd.DataFrame(output)
-        df_result.columns = [
-            "ID",
-            "Group - Threshold: " + str(threshold_1),
-            "Subgroup - Threshold: " + str(threshold_2),
-        ]
-    
-    if save_csv:
-        df_result.to_csv(output_file, index=False)
-    
+
+    df_result = get_clusters_dataframe(data, method, threshold, index)
+    df_result.to_csv(output_file, index=False)
+
     return df_result
 
+
+def get_cluster_data_dict(Z, threshold, index):
+    # Set cut threshold
+    cutby = 100 - threshold
+    # Identify clusters from threshold cut
+    clusters = fcluster(Z, t=cutby, criterion="distance")
+    # Store as dict
+    cluster_dict = defaultdict(list)
+    for i, label in enumerate(clusters):
+        cluster_dict[label - 1].append(index[i])
+
+    return cluster_dict
+
+
+def cluster_data_to_dataframe(cluster_data: dict, threshold: int):
+    flattened_output = [
+        (item, key + 1) for key, sublist in cluster_data.items() for item in sublist
+    ]
+    dataframe = pd.DataFrame(flattened_output)
+    dataframe.columns = ["ID", "Cluster - Threshold: " + str(threshold)]
+
+    return dataframe
+
+
+def order_clusters_sequentially(clusters):
+    # Let's make it NP
+    labels = np.array(clusters)
+    # Create newly reordered labels that make sense
+    new_order_labels = np.searchsorted(np.unique(labels), labels)
+    return (new_order_labels + 1).tolist()

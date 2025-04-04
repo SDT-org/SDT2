@@ -96,10 +96,10 @@ describe("formatClustermapData", () => {
     const tickText = ["A", "B", "C", "D"];
 
     const clusterData = [
-      { id: "A", group: 1 },
-      { id: "B", group: 2 },
-      { id: "C", group: 2 },
-      { id: "D", group: 3 },
+      { id: "A", cluster: 1 },
+      { id: "B", cluster: 2 },
+      { id: "C", cluster: 2 },
+      { id: "D", cluster: 3 },
     ];
 
     expect(formatClustermapData(data, tickText, clusterData)).toMatchSnapshot();

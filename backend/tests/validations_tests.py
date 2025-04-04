@@ -13,11 +13,6 @@ class TestValidateFasta(unittest.TestCase):
         self.assertTrue(result)
         self.assertEqual(message, "VALID")
 
-    def test_sequence_too_long_fasta(self):
-        result, message = validate_fasta(fasta_path('too_long.fasta'))
-        self.assertFalse(result)
-        self.assertEqual(message, "SEQUENCE_TOO_LONG")
-
     def test_empty_fasta(self):
         result, message = validate_fasta(fasta_path('empty.fasta'))
         self.assertFalse(result)

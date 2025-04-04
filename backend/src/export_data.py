@@ -43,11 +43,11 @@ def prepare_export_data(export_path: str, matrix_path: str, doc: DocState, args:
         suffixes = ["_mat"]
 
     if args["output_cluster"] == True:
-        suffixes.append("_cluster")
+        suffixes.append(f"_cluster_{args['cluster_method'].lower()}")
         cluster.export(
             matrix_path,
-            args["cluster_threshold_one"],
-            args["cluster_threshold_two"],
+            args["cluster_threshold"],
+            args["cluster_method"] # Note this is not the same as the cluster_method param in the runner api
         )
 
     image_format = str(args["image_format"]).lower()

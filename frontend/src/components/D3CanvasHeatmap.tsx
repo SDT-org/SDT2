@@ -30,6 +30,7 @@ export const D3CanvasHeatmap = ({
   showscale,
   margin,
   settings,
+  showLegend,
 }: HeatmapRenderProps) => {
   const canvasRef =
     useHeatmapRef() as React.MutableRefObject<HTMLCanvasElement>;
@@ -209,7 +210,7 @@ export const D3CanvasHeatmap = ({
       }
     }
 
-    if (clusterData) {
+    if (clusterData && showLegend) {
       const legendWidth = 80;
       const cellSize = 10;
       const lineGap = 20;
@@ -217,12 +218,12 @@ export const D3CanvasHeatmap = ({
       const columnGap = 20;
       const positionX = width - legendWidth * 2 - columnGap - margin.right;
 
-      const uniqueClusters = [
-        ...new Set(clusterData.map((i) => i.group)),
-      ].slice(0, 50);
+      const uniqueClusters = [...new Set(clusterData.map((i) => i.cluster))]
+        .sort((a, b) => a - b)
+        .slice(0, 50); // Arbitrarily set to 50
 
       uniqueClusters.forEach((cluster, index) => {
-        // Determine column (0 for left, 1 for right)
+        // Determine column (0  left, 1  right)
         const column = index % 2;
 
         // Calculate row position (every two items share the same row)
@@ -232,7 +233,7 @@ export const D3CanvasHeatmap = ({
         const itemX = positionX + column * (legendWidth + columnGap);
         const itemY = margin.top + lineGap * row;
 
-        // Draw colored square
+        // draw colored rect
         ctx.fillStyle = distinctColor(index + 1);
         ctx.fillRect(itemX, itemY, cellSize, cellSize);
 
@@ -278,6 +279,7 @@ export const D3CanvasHeatmap = ({
     maxVal,
     settings?.colorScaleKey,
     clusterData,
+    showLegend,
   ]);
 
   React.useEffect(() => {
@@ -326,9 +328,9 @@ export const D3CanvasHeatmap = ({
     const clusterGroup =
       clusterData &&
       cell &&
-      clusterData.find((i) => i.id === tickText[cell.x])?.group ===
-        clusterData.find((i) => i.id === tickText[cell.y])?.group
-        ? clusterData.find((i) => i.id === tickText[cell.x])?.group
+      clusterData.find((i) => i.id === tickText[cell.x])?.cluster ===
+        clusterData.find((i) => i.id === tickText[cell.y])?.cluster
+        ? clusterData.find((i) => i.id === tickText[cell.x])?.cluster
         : null;
 
     if (cell) {
@@ -374,7 +376,7 @@ export const D3CanvasHeatmap = ({
             <dt>
               {clusterData
                 ? tooltipData.value
-                  ? "Group:"
+                  ? "Cluster:"
                   : ""
                 : "Percent ID:"}
             </dt>

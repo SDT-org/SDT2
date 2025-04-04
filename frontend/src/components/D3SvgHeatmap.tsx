@@ -221,9 +221,9 @@ export const D3SvgHeatmap = ({
       const columnGap = 20;
       const positionX = width - legendWidth * 2 - columnGap - margin.right;
 
-      const uniqueClusters = [
-        ...new Set(clusterData.map((i) => i.group)),
-      ].slice(0, 50);
+      const uniqueClusters = [...new Set(clusterData.map((i) => i.cluster))]
+        .sort((a, b) => a - b)
+        .slice(0, 50);
 
       const legends = g
         .append("g")

@@ -5,7 +5,7 @@ import os
 import sys
 import re
 import random
-from datetime import datetime, timedelta
+from datetime import datetime
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from itertools import combinations_with_replacement as cwr
@@ -13,12 +13,10 @@ from functools import partial
 from pandas import DataFrame
 from numpy import tril, triu_indices, zeros, around, nan
 import parasail
-from Bio import SeqIO, Phylo
+from Bio import SeqIO
 from Bio.SeqUtils import gc_fraction
-from Bio.Phylo.TreeConstruction import (
-    DistanceTreeConstructor,
-    DistanceMatrix,
-)
+from cluster import get_linkage_method_order
+from heatmap import dataframe_to_lower_triangle
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
@@ -63,7 +61,7 @@ def get_similarity(seq1, seq2):
                 dist += 1
         else:
             gaps += 1
-            
+
     similarity = float((float(dist)) / (len(seq1) - gaps))
     # convert to percentile
     similarity_percentile = similarity * 100
@@ -75,9 +73,8 @@ def residue_check(seq):
 
 
 def process_pair(id_sequence_pair, settings):
-    ids = id_sequence_pair[0]
-    id1 = ids[0]
-    id2 = ids[1]
+    id1 = id_sequence_pair[0][0]
+    id2 = id_sequence_pair[0][1]
     seq1 = id_sequence_pair[1][0]
     seq2 = id_sequence_pair[1][1]
     if id1 == id2:
@@ -97,8 +94,8 @@ def process_pair(id_sequence_pair, settings):
             settings["aln_out"], str(id1 + "_" + id2) + "_aligned.fasta"
         )
         seq_records = [
-            SeqRecord(Seq(result.traceback.query), id=ids[0], description=""),
-            SeqRecord(Seq(result.traceback.ref), id=ids[1], description=""),
+            SeqRecord(Seq(result.traceback.query), id=id1, description=""),
+            SeqRecord(Seq(result.traceback.ref), id=id2, description=""),
         ]
         SeqIO.write(seq_records, fname, "fasta")
 
@@ -154,37 +151,16 @@ def get_alignment_scores(
     return dist_scores, order
 
 
-# Reorder the scores matrix based on the tree and save it to a new CSV
-def tree_clustering(settings, dm, filename):
-    constructor = DistanceTreeConstructor()
-    clustering_method = getattr(constructor, settings["cluster_method"])
-    tree_file = filename + "_tree.nwk"
-    tree = clustering_method(dm)
-    if not tree.rooted:
-        tree.root_at_midpoint()
-    if settings["cluster_method"] == "nj":  # NJ method does not inherently reorder, need ladderize, It sorts clades in-place according to the number of terminal nodes
-        tree.ladderize(reverse=True) 
-
-    Phylo.write(tree, tree_file, "newick")
-    tree = Phylo.read(tree_file, "newick")
-    new_order = [leaf.name for leaf in tree.get_terminals()]
-    return tree_file, new_order  # Return the tree file name instead of the tree object
-
-
-# Format distance scores to triangle matrix for NJ tree creation
-def create_distance_matrix(dist_scores, order):
-    lower_triangle = [
-        dist_scores[i, : i + 1].tolist() for i in range(len(order))
-    ]  ##this has to be list, cant use np
-    # Create the DistanceMatrix object
-    dm = DistanceMatrix(order, lower_triangle)
-    return dm
-
 
 # Save similarity scores as 2d matrix csv
-def save_matrix_to_csv(df, filename):
-    df.to_csv(filename + "_mat.csv", mode="w", header=False, index=True)
-
+def save_matrix_to_csv(df, outdir, filename):
+    index=df.index
+    print(index)
+    tri_matrix = dataframe_to_lower_triangle(df)
+    tri_matrix.index = index
+    print(tri_matrix)
+    tri_matrix.to_csv( os.path.join(outdir, filename + "_mat.csv"), mode="wt", header=False, index=True)
+    df.to_csv( os.path.join(outdir, "matrix.csv"), mode="w", header=False, index=True)
 
 # Save similarity scores as 3 column csv
 def save_cols_to_csv(df, filename):
@@ -245,8 +221,6 @@ def output_summary(file_name, start_time, end_time, start_counter, end_counter):
 def fasta_alignments(seq_records, fname):
     SeqIO.write(seq_records, fname, "fasta")
 
-
-
 def process_data(
     settings,
     pool,
@@ -285,38 +259,38 @@ def process_data(
     if cancelled.value:
         return
 
-    set_stage("Postprocessing")
-    print("Stage: Postprocessing")
+    set_stage("Clustering")
+    print("Stage: Clustering")
 
     order = list(order.keys())
 
-    dm = create_distance_matrix(dist_scores, order)
     aln_scores = 100 - dist_scores
 
     out_dir = settings["out_dir"]
     cluster_method = settings["cluster_method"]
 
-    if cluster_method == "nj" or cluster_method == "upgma":
-        _, new_order = tree_clustering(settings, dm, os.path.join(out_dir, file_base))
+    if cluster_method is not None:
+        new_order = get_linkage_method_order(dist_scores, cluster_method, order)
+
         reorder_index = [
-            order.index(id_) for id_ in new_order
+            order.index(id) for id in new_order
         ]  # create numerical index of order and  of new order IDs
 
-        aln_reordered = aln_scores[reorder_index, :][:, reorder_index]
-        aln_lowt = tril(around(aln_reordered, 2))
-        aln_lowt[triu_indices(aln_lowt.shape[0], k=1)] = nan
-        df = DataFrame(
-        aln_lowt, index=new_order)
-    else:
-        aln_lowt = tril(around(aln_scores, 2))
-        aln_lowt[triu_indices(aln_lowt.shape[0], k=1)] = nan
-        df = DataFrame(
-        aln_lowt, index=order)
+        # numpy array indexing syntax rows/cols
+        aln_scores = aln_scores[reorder_index, :][:, reorder_index]
+        order = new_order
 
+        df = DataFrame(aln_scores, index=new_order)
+
+    df = DataFrame(aln_scores, index=order)
+
+    set_stage("Postprocessing")
+    print("Stage: Postprocessing")
 
     save_cols_to_csv(df, os.path.join(out_dir, file_base))
     save_stats_to_csv(seq_stats, os.path.join(out_dir, file_base))
-    save_matrix_to_csv(df, os.path.join(out_dir, file_base))
+    save_matrix_to_csv(df, out_dir, file_base)
+
 
     set_stage("Finalizing")
     print("Stage: Finalizing")

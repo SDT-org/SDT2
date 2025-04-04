@@ -299,70 +299,113 @@
     </div>
   </div>
 
-  <h2>Visualization Options</h2>
-
   <h3>Heatmap</h3>
+  
+  <img src="/images/Heatmap.png" alt="Heatmap Example" class="plot-img" />
+  <p>
+    The heatmap visualization in SDT2 provides a color-coded representation of pairwise sequence identity.
+    It displays sequence relationships in a triangular matrix format where each cell represents the percent
+    identity between two sequences.
+  </p>
   <div class="control-panel">
     <div class="control-image">
-      <img src="/images/Heatmap.png" alt="Heatmap Visualization" />
-    </div>
-    <div class="control-options">
-      <p>
-        The heatmap visualization in SDT2 provides a color-coded representation of pairwise sequence identity.
-        It displays sequence relationships in a triangular matrix format where each cell represents the percent
-        identity between two sequences.
-      </p>
-    </div>
-  </div>
-
-  <div class="control-panel">
-    <div class="control-image">
-      <img src="/images/HeatmapBar.png" alt="Heatmap Colorscale Options" />
+      <img src="/images/HeatmapBar.png" alt="Heatmap Controls" />
     </div>
     <div class="control-options">
       <h4>Colorscale</h4>
       <ul>
-        <li><b>Colorscale Selection</b>: Choose from various predefined color schemes (Portland, Viridis, Plasma, etc.)</li>
-        <li><b>Reverse</b>: Toggle to invert the color scale direction</li>
+        <li><b>Colorscale Selection</b>: Choose from various predefined color schemes (Portland, Viridis, Plasma, etc.)
+        </li>
+        <li><b>Color Inversion</b>: Toggle to create a negative image effect, reversing dark and light values</li>
         <li><b>Cell Spacing</b>: Adjust the gap between cells in the heatmap matrix</li>
         <li><b>Discrete Cutoff Values</b> (Discrete Colorscale Only): Set thresholds to create distinct color regions</li>
       </ul>
-
+  
       <h4>Percent Identities</h4>
       <p>Toggle this option to show or hide percent pairwise identity values within each cell of the heatmap.</p>
       <ul>
         <li><b>Precision</b>: Select the number of decimal places to display for percent identities (0, 1, or 2)</li>
         <li><b>Font Size</b>: Adjust the text size for the percentage values</li>
       </ul>
+  
       <h4>Plot Titles</h4>
       <p>Toggle this option to show or hide plot titles on the heatmap.</p>
       <ul>
         <li><b>Font Type</b>: Choose between Sans Serif or Monospace</li>
         <li><b>Title and Subtitle</b>: Enter the desired text to appear above the heatmap</li>
       </ul>
-    
+  
       <h4>Axis Labels</h4>
       <p>Toggle this option to show or hide sequence identifiers along the axes of the heatmap.</p>
       <ul>
         <li><b>Font Size</b>: Adjust font size for X and Y axis labels</li>
         <li><b>Rotation</b>: Set rotation angle for X and Y labels</li>
       </ul>
-    
+  
       <h4>Scale Bar</h4>
       <p>Toggle to show or hide the color reference scale.</p>
       <ul>
         <li><b>Height</b>: Adjust the height of the scale bar</li>
         <li><b>Width</b>: Adjust the width of the scale bar</li>
-        <li><b>Min</b>: Adjust the minimum value represented in on the color scale</li>
-        <li><b>Max</b>: Adjust the maximum value represented in on the colorscale</li>
+        <li><b>Min</b>: Adjust the minimum value represented on the color scale</li>
+        <li><b>Max</b>: Adjust the maximum value represented on the color scale</li>
       </ul>
     </div>
   </div>
   <div class="warning">
     <p><b>Note:</b> Displaying percentage values in large datasets may significantly impact rendering performance.</p>
   </div>
- 
-
+  
+  <h3>Clustermap</h3>
+  
+  <img src="/images/Clustermap.png" alt="Clustermap Example" class="plot-img" />
+  <p>
+    The Clustermap plot provides a new way to visualize sequence data in SDT2, allowing you to set specific clustering
+    thresholds and algorithms to explore relationships within datasets. The current clustering algorithms supported by
+    SDT2 are linkage-based clustering methods from the well-known SciPy package.
+    During clustering, the precomputed pairwise distance matrix is condensed for the Single, Complete, and Average linkage
+    algorithms. For the Centroid and Median algorithms,
+    the dimensionality of the dataset is reduced to 2D Euclidean distances through multidimensional scaling
+    prior to clustering. The resulting dendrogram is used to reorder the heatmap, allowing for more intuitive viewing
+    options.
+  </p>
+  <div class="control-panel">
+    <div class="control-image">
+      <img src="/images/ClusterSidebar.png" alt="Clustermap Controls" />
+    </div>
+    <div class="control-options">
+      <h4>Clusters</h4>
+      <ul>
+        <li><b>Threshold</b>: Set the similarity threshold for clustering sequences. Higher values require greater
+          similarity for sequences to be grouped together.</li>
+        <li><b>Linkage Method</b>: Choose the algorithm for hierarchical clustering (Single, Complete, Average, Centroid,
+          or Median).</li>
+        <li><b>Cell Spacing</b>: Adjust the gap between cells in the clustermap matrix.</li>
+      </ul>
+  
+      <h4>Percent Identities</h4>
+      <p>Toggle this option to show or hide percent pairwise identity values within each cell of the clustermap.</p>
+  
+      <h4>Axis Labels</h4>
+      <p>Toggle this option to show or hide sequence identifiers along the axes of the clustermap.</p>
+      <ul>
+        <li><b>Font Size</b>: Adjust text size for sequence labels.</li>
+        <li><b>X Rotation</b>: Set rotation angle for X-axis labels to improve readability.</li>
+        <li><b>Y Rotation</b>: Set rotation angle for Y-axis labels to improve readability.</li>
+      </ul>
+  
+      <h4>Plot Titles</h4>
+      <p>Toggle this option to show or hide plot titles on the clustermap.</p>
+      <ul>
+        <li><b>Font Type</b>: Choose between Sans Serif or other typefaces for titles.</li>
+        <li><b>Title</b>: Enter the desired text to appear above the clustermap.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="warning">
+    <p><b>Note:</b> Processing large datasets with complex clustering algorithms may require additional computational
+      time.</p>
+  </div>
   <h3>Distribution Plots</h3>
   <p>
     SDT2 provides visualization tools for examining the distribution of your sequence data:

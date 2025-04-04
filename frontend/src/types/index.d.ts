@@ -39,17 +39,21 @@ declare global {
           defaultDirectory?: string,
         ) => Promise<string>;
         select_path_dialog: (defaultDirectory?: string) => Promise<string>;
-        generate_cluster_data: (
+        get_clustermap_data: (
           doc_id: string,
-          threshold_one: number,
-          threshold_two: number,
-        ) => Promise<{ id: string; group: number }[]>;
+          threshold: number,
+          method: string,
+        ) => Promise<{
+          matrix: HeatmapData;
+          tickText: string[];
+          clusterData: ClusterDataItem[];
+        }>;
         export_data: (args: {
           doc_id: string;
           export_path: string;
           output_cluster: boolean;
-          cluster_threshold_one: number;
-          cluster_threshold_two: number;
+          cluster_threshold: number;
+          cluster_method: string;
           heatmap_image_data: string;
           clustermap_image_data: string;
           histogram_image_data: string;
@@ -68,6 +72,7 @@ declare global {
         show_about: () => Promise<void>;
         show_manual: () => Promise<void>;
         close_app: () => Promise<void>;
+        open_doc_folder: (doc_id: string) => Promise<void>;
       };
     };
     syncAppState: (state: AppState) => void;

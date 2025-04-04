@@ -1,7 +1,7 @@
 import React from "react";
-import { Input, Label, TextField } from "react-aria-components";
+import { Input, Label, Text, TextField } from "react-aria-components";
 import type { DocState } from "../appState";
-import { NumberInput } from "./NumberInput";
+import { reorderMethods } from "../constants";
 import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";
 import { Switch } from "./Switch";
@@ -31,6 +31,8 @@ export const ClustermapSidebar = ({
     [sequences_count],
   );
 
+  const [tempThreshold, setTempThreshold] = React.useState(settings.threshold);
+
   return (
     <div className="app-sidebar app-sidebar-right heatmap-sidebar">
       <div className="app-sidebar-toolbar">
@@ -40,44 +42,57 @@ export const ClustermapSidebar = ({
               Clusters
             </label>
             <div className="drawer">
-              <div className="col-2">
-                <div className="field">
-                  <NumberInput
-                    label="Threshold 1"
-                    field="threshold_one"
-                    value={settings.threshold_one}
-                    updateValue={updateSettings}
-                    min={settings.threshold_two + 1}
-                    max={100}
-                    step={1}
-                  />
-                </div>
-                <div className="field">
-                  <NumberInput
-                    label="Threshold 2"
-                    field="threshold_two"
-                    value={settings.threshold_two}
-                    updateValue={updateSettings}
-                    min={0}
-                    max={settings.threshold_one - 1}
-                    step={1}
-                  />
-                </div>
+              <div className="col-2 auto-onefr align-items-center">
+                <Label htmlFor="method">Linkage Method</Label>
+                <Select
+                  id="method"
+                  data-compact
+                  selectedKey={settings.method}
+                  onSelectionChange={(value: React.Key) =>
+                    updateSettings({
+                      ...settings,
+                      method: value as typeof settings.method,
+                    })
+                  }
+                  items={Object.entries(reorderMethods).map(([key, value]) => ({
+                    id: key,
+                    name: value.name,
+                    description: value.description,
+                  }))}
+                >
+                  {(item) => (
+                    <SelectItem textValue={item.name}>
+                      <Text slot="label">{item.name}</Text>
+                      <Text slot="description">{item.description}</Text>
+                    </SelectItem>
+                  )}
+                </Select>
               </div>
+
               <hr className="compact" />
-              <div className="field">
-                <Slider
-                  label="Cell Spacing"
-                  labelClassName="sublabel"
-                  id="cellspace"
-                  onChange={(value) => updateSettings({ cellspace: value })}
-                  minValue={0}
-                  maxValue={20}
-                  value={settings.cellspace}
-                />
-              </div>
+
+              <Slider
+                label="Threshold"
+                id="threshold"
+                onChange={setTempThreshold}
+                onChangeEnd={(value) => updateSettings({ threshold: value })}
+                minValue={0}
+                maxValue={100}
+                step={1}
+                value={tempThreshold}
+              />
+
+              <Slider
+                label="Cell Spacing"
+                id="cellspace"
+                onChange={(value) => updateSettings({ cellspace: value })}
+                minValue={0}
+                maxValue={20}
+                value={settings.cellspace}
+              />
             </div>
           </div>
+
           <div className="group">
             <Switch
               isSelected={settings.annotation}
@@ -145,6 +160,7 @@ export const ClustermapSidebar = ({
               />
             </div>
           </div>
+
           <div className="group">
             <Switch
               isSelected={settings.showTitles}
@@ -167,7 +183,7 @@ export const ClustermapSidebar = ({
                   id="font"
                   data-compact
                   selectedKey={settings.titleFont}
-                  onSelectionChange={(value) =>
+                  onSelectionChange={(value: React.Key) =>
                     updateSettings({
                       titleFont: value as typeof settings.titleFont,
                     })
@@ -182,7 +198,6 @@ export const ClustermapSidebar = ({
                   )}
                 </Select>
               </div>
-
               <div className="field">
                 <TextField
                   onChange={(value) => updateSettings({ title: value })}
@@ -193,6 +208,19 @@ export const ClustermapSidebar = ({
                 </TextField>
               </div>
             </div>
+          </div>
+
+          <div className="group">
+            <Switch
+              isSelected={settings.showLegend}
+              onChange={(value) => {
+                updateSettings({
+                  showLegend: value,
+                });
+              }}
+            >
+              Legend
+            </Switch>
           </div>
         </div>
       </div>

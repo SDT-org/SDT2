@@ -5,7 +5,7 @@ import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import { formatClustermapData } from "../heatmapUtils";
 import { useMetrics, useSize } from "../hooks/heatmap";
 import { useHeatmapRenderToggle } from "../hooks/useHeatmapRenderToggle";
-import type { HeatmapData } from "../plotTypes";
+import type { ClusterDataItem, HeatmapData } from "../plotTypes";
 import { ClustermapSidebar } from "./ClustermapSidebar";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3SvgHeatmap } from "./D3SvgHeatmap";
@@ -23,29 +23,35 @@ export const Clustermap = ({
   tickText: string[];
   leftSidebarCollapsed: boolean;
 }) => {
-  const [clusterData, setClusterData] =
-    React.useState<
-      {
-        id: string;
-        group: number;
-      }[]
-    >();
+  const [clusterData, setClusterData] = React.useState<
+    Array<ClusterDataItem> | undefined
+  >(undefined);
+  const [orderedMatrix, setOrderedMatrix] = React.useState<HeatmapData>(data);
+  const [orderedTickText, setOrderedTickText] =
+    React.useState<string[]>(tickText);
 
   React.useEffect(() => {
     window.pywebview.api
-      .generate_cluster_data(
+      .get_clustermap_data(
         docState.id,
-        docState.clustermap.threshold_one,
-        docState.clustermap.threshold_two,
+        docState.clustermap.threshold,
+        docState.clustermap.method,
       )
-      .then(setClusterData);
-  }, [docState.id, docState.clustermap]);
+      .then((response) => {
+        setClusterData(response.clusterData);
+        setOrderedTickText(response.tickText);
+        setOrderedMatrix(response.matrix);
+      })
+      .catch((error: Error) => {
+        console.error("Error getting cluster ordered data:", error);
+      });
+  }, [docState.id, docState.clustermap.threshold, docState.clustermap.method]);
 
   const { appState } = useAppState();
   const elementRef = React.useRef<HTMLDivElement | null>(null);
   const size = useSize(elementRef, leftSidebarCollapsed);
   const { clustermap: settings } = docState;
-  const { margin } = useMetrics(settings, tickText);
+  const { margin } = useMetrics(settings, orderedTickText);
   const updateSettings = React.useCallback(
     (values: Partial<DocState["clustermap"]>) =>
       setDocState((prev) => ({
@@ -63,15 +69,26 @@ export const Clustermap = ({
     [1, "rgb(245,245,245)"],
   ];
 
-  const clustermapData = React.useMemo(
-    () => formatClustermapData(data, tickText, clusterData),
-    [data, clusterData, tickText],
-  );
+  const clustermapData = React.useMemo(() => {
+    const result = formatClustermapData(
+      orderedMatrix,
+      orderedTickText,
+      clusterData,
+    );
+    console.log(`Formatted data contains ${result.length} items`);
+    return result;
+  }, [orderedMatrix, clusterData, orderedTickText]);
 
   const forceSvgRender = useHeatmapRenderToggle();
 
   const titleFont =
     settings.titleFont === "Monospace" ? plotFontMonospace : plotFontSansSerif;
+
+  console.log("Rendering D3CanvasHeatmap with:", {
+    dataLength: clustermapData?.length || 0,
+    tickTextLength: orderedTickText?.length || 0,
+    clusterDataLength: clusterData?.length || 0,
+  });
 
   return (
     <>
@@ -86,7 +103,7 @@ export const Clustermap = ({
               data={clustermapData}
               clusterData={clusterData}
               settings={{ ...docState.heatmap, ...settings }}
-              tickText={tickText}
+              tickText={orderedTickText}
               colorScale={colorScale}
               minVal={0}
               maxVal={100}
@@ -106,13 +123,14 @@ export const Clustermap = ({
               axis_labels={settings.axis_labels}
               showscale={false}
               margin={margin}
+              showLegend={settings.showLegend}
             />
           ) : (
             <D3CanvasHeatmap
               data={clustermapData}
               clusterData={clusterData}
               settings={{ ...docState.heatmap, ...settings }}
-              tickText={tickText}
+              tickText={orderedTickText}
               colorScale={colorScale}
               cbarHeight={0}
               cbarWidth={0}
@@ -132,6 +150,7 @@ export const Clustermap = ({
               axis_labels={settings.axis_labels}
               margin={margin}
               cellSpace={settings.cellspace}
+              showLegend={settings.showLegend}
             />
           )
         ) : null}

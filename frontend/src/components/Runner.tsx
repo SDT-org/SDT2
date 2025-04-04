@@ -9,6 +9,7 @@ import {
   SliderThumb,
   SliderTrack,
   TabPanel,
+  Text,
 } from "react-aria-components";
 import { TbAlertTriangleFilled, TbFile } from "react-icons/tb";
 import useAppState, {
@@ -16,8 +17,8 @@ import useAppState, {
   type DocState,
   type SetDocState,
   type UpdateDocState,
-  clusterMethods,
 } from "../appState";
+import { reorderMethods } from "../constants";
 import { formatBytes, splitFilePath } from "../helpers";
 import useOpenFileDialog from "../hooks/useOpenFileDialog";
 import { useStartRun } from "../hooks/useStartRun";
@@ -181,7 +182,7 @@ const RunnerSettings = ({
                   updateAppState({ enableClustering: value });
                 }}
               >
-                Cluster sequences
+                Reorder sequences by cluster method:
               </Switch>
               <div
                 className="setting clustering-method"
@@ -192,24 +193,26 @@ const RunnerSettings = ({
                   selectedKey={appState.cluster_method}
                   onSelectionChange={(value) => {
                     updateAppState({
-                      cluster_method: value as (typeof clusterMethods)[number],
+                      cluster_method: value as typeof appState.cluster_method,
                     });
                   }}
-                  items={clusterMethods.map((name) => ({
-                    id: name,
-                    name,
+                  items={Object.entries(reorderMethods).map(([key, value]) => ({
+                    id: key,
+                    name: value.name,
+                    description: value.description,
                   }))}
                 >
                   {(item) => (
                     <SelectItem textValue={item.name}>
-                      {item.name} method
+                      <Text slot="label">{item.name}</Text>
+                      <Text slot="description">{item.description}</Text>
                     </SelectItem>
                   )}
                 </Select>
               </div>
             </div>
 
-            <div className="field output inline-toggle">
+            {/* <div className="field output inline-toggle">
               <Switch
                 isSelected={appState.enableOutputAlignments}
                 onChange={(value) => {
@@ -247,7 +250,7 @@ const RunnerSettings = ({
                   </Button>
                 </div>
               ) : null}
-            </div>
+            </div> */}
 
             <div className="field performance">
               <label className="header" htmlFor="compute-cores">

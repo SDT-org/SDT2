@@ -2,7 +2,7 @@ from collections import namedtuple
 from document_state import DocState, create_document_state, load_doc_settings
 
 AppState = namedtuple(
-    "AppState",
+    "default_app_state",
     [
         "debug",
         "active_run_document_id",
@@ -10,7 +10,12 @@ AppState = namedtuple(
         "documents"
     ],
 )
-
+AppState.__annotations__ = {
+    "debug": bool,
+    "active_run_document_id": str | None,
+    "platform": str | None,
+    "documents": list[DocState]
+}
 
 def create_app_state(
     debug=False,

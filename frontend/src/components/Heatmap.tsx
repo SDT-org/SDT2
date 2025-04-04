@@ -12,7 +12,12 @@ import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import { type formatClustermapData, formatHeatmapData } from "../heatmapUtils";
 import { useMetrics, useSize } from "../hooks/heatmap";
 import { useHeatmapRenderToggle } from "../hooks/useHeatmapRenderToggle";
-import type { HeatmapData, HeatmapSettings, MetaData } from "../plotTypes";
+import type {
+  ClusterDataItem,
+  HeatmapData,
+  HeatmapSettings,
+  MetaData,
+} from "../plotTypes";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3SvgHeatmap } from "./D3SvgHeatmap";
 import { HeatmapSidebar } from "./HeatmapSidebar";
@@ -43,7 +48,8 @@ export type HeatmapRenderProps = {
   axis_labels: boolean;
   titleFont: typeof plotFontMonospace | typeof plotFontSansSerif;
   margin: { top: number; bottom: number; left: number; right: number };
-  clusterData?: { id: string; group: number }[];
+  clusterData?: ClusterDataItem[];
+  showLegend?: boolean;
 } & Pick<HeatmapSettings, "axis_labels">;
 
 export const Heatmap = ({

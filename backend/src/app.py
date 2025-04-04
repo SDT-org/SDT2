@@ -22,14 +22,21 @@ from Bio import SeqIO
 import psutil
 import webview
 import json
+import pandas as pd
 from pandas import read_csv, DataFrame
 from numpy import eye, where, nan, nanmin, nanmax
 import mimetypes
 from time import perf_counter
 from shutil import copy
 
+from debug import open_doc_folder
 from config import app_version, dev_frontend_host
 from constants import matrix_filetypes, default_window_title
+from heatmap import (
+    dataframe_to_lower_triangle,
+    lower_triangle_to_full_matrix,
+    numpy_to_lower_triangle,
+)
 
 is_compiled = "__compiled__" in globals()
 is_macos = platform.system() == "Darwin"
@@ -56,24 +63,11 @@ cancelled = None
 start_time = None
 
 
+print(temp_dir)
+
+
 def get_matrix_path(state: DocState):
-    if state.filetype == "application/vnd.sdt":
-        path = next(
-            (
-                os.path.join(state.tempdir_path, file)
-                for file in os.listdir(state.tempdir_path)
-                if file.endswith("_mat.csv") or file.endswith("_mat.txt")
-            ),
-            None,
-        )
-        if not path:
-            raise Exception(f"Failed to located matrix file")
-        return path
-    elif state.filetype == "text/fasta":
-        file_base = os.path.splitext(state.basename)[0]
-        return os.path.join(state.tempdir_path, f"{file_base}_mat.csv")
-    else:
-        return state.filename
+    return os.path.join(state.tempdir_path, "matrix.csv")
 
 
 def do_cancel_run():
@@ -188,6 +182,16 @@ def handle_open_file(filepath: str, doc_id: str | None):
                 ),
             )
 
+            # We need a full matrix for doing things but we don't have
+            # it yet because this was a .txt/.csv lower triangle matrix
+            full_matrix_dataframe = lower_triangle_to_full_matrix(df)
+            full_matrix_dataframe.to_csv(
+                os.path.join(unique_dir, "matrix.csv"),
+                mode="w",
+                header=False,
+                index=True,
+            )
+
             new_document(
                 doc_id,
                 view="viewer",
@@ -246,7 +250,7 @@ class Api:
         manual_window()
 
     def app_config(self):
-        return {"appVersion": app_version, "userPath": os.path.expanduser('~')}
+        return {"appVersion": app_version, "userPath": os.path.expanduser("~")}
 
     def app_settings(self):
         return load_app_settings()
@@ -344,18 +348,14 @@ class Api:
         settings["input_file"] = doc.filename
         settings["out_dir"] = doc.tempdir_path
 
-        if args.get("cluster_method") == "Neighbor-Joining":
-            settings["cluster_method"] = "nj"
-        if args.get("cluster_method") == "UPGMA":
-            settings["cluster_method"] = "upgma"
         if args.get("cluster_method") == "None":
-            settings["cluster_method"] = "none"
+            settings["cluster_method"] = None
+        else:
+            settings["cluster_method"] = args.get("cluster_method")
 
         compute_cores = args.get("compute_cores")
         assert isinstance(compute_cores, int)
-        settings["num_processes"] = max(
-            min(compute_cores, get_cpu_count()), 1
-        )
+        settings["num_processes"] = max(min(compute_cores, get_cpu_count()), 1)
 
         alignment_export_path = args.get("alignment_export_path")
         if args.get("export_alignments") == "True" and alignment_export_path:
@@ -471,10 +471,7 @@ class Api:
         if doc == None:
             raise Exception(f"could not find document: {doc_id}")
 
-        if doc.filetype == "application/vnd.sdt" or doc.filetype == "text/fasta":
-            matrix_path = get_matrix_path(doc)
-        else:
-            matrix_path = doc.filename
+        matrix_path = get_matrix_path(doc)
 
         if doc.filetype == "application/vnd.sdt":
             file_base = os.path.splitext(os.path.basename(matrix_path))[0].removesuffix(
@@ -490,6 +487,7 @@ class Api:
         stats_path = os.path.join(doc.tempdir_path, f"{file_base}_stats.csv")
         if os.path.exists(stats_path):
             stats_df = read_csv(stats_path, header=0)
+
         else:
             stats_df = DataFrame([])
 
@@ -513,8 +511,8 @@ class Api:
 
             ids = list(id_map.keys())
         else:
-           ids = []
-           identity_scores = []
+            ids = []
+            identity_scores = []
 
         df = read_csv(
             matrix_path, delimiter=",", index_col=0, header=None, names=column_names
@@ -536,6 +534,7 @@ class Api:
             self.load_data_and_stats(doc_id)
         )
         heat_data = DataFrame(data, index=tick_text)
+        heat_data = dataframe_to_lower_triangle(heat_data)
         parsedData = heat_data.values.tolist()
 
         data_to_dump = dict(
@@ -543,21 +542,57 @@ class Api:
             data=([tick_text] + parsedData),
             ids=ids,
             identity_scores=identity_scores,
-            full_stats=stats_df.values.tolist()
+            full_stats=stats_df.values.tolist(),
         )
         return json.dumps(data_to_dump)
 
-    def generate_cluster_data(self, doc_id: str, threshold_one: int, threshold_two: int = 0):
+    def get_clustermap_data(self, doc_id: str, threshold: float, method: str):
         doc = get_document(doc_id)
         if doc is None:
             raise Exception(f"Could not find document: {doc_id}")
+
         matrix_path = get_matrix_path(doc)
 
-        df = cluster.export(matrix_path, threshold_one, threshold_two, False)
-        df = df.rename(columns={str(df.columns[0]): 'id', str(df.columns[1]): 'group'})
-        if len(df.columns) > 2 and df.columns[2] is not None:
-            df = df.rename(columns={str(df.columns[2]): 'subgroup'})
-        return df.to_dict(orient="records")
+        matrix_df = pd.read_csv(matrix_path, delimiter=",", index_col=0, header=None)
+        matrix_np = matrix_df.to_numpy()
+        row_ids = matrix_df.index.tolist()
+
+        # Get cluster assignments
+        seqid_clusters_df = cluster.get_clusters_dataframe(
+            matrix_np, method, threshold, row_ids
+        )
+
+        seqid_clusters_df = seqid_clusters_df.rename(
+            columns={
+                str(seqid_clusters_df.columns[0]): "id",
+                str(seqid_clusters_df.columns[1]): "cluster",
+            }
+        )
+
+        clusters = seqid_clusters_df["cluster"].tolist()
+        reorder_clusters = cluster.order_clusters_sequentially(clusters)
+        seqid_clusters_df["cluster"] = reorder_clusters
+
+        # Sort by group
+        seqid_clusters_df = seqid_clusters_df.sort_values(by=["cluster", "id"])
+        sorted_ids = seqid_clusters_df["id"].tolist()
+
+        # Get the new index order and reorder the matrix in one step using numpy
+        new_order = [row_ids.index(id) for id in sorted_ids if id in row_ids]
+        reordered_matrix_np = matrix_np[new_order, :][:, new_order]
+
+        reordered_data = {
+            "matrix": numpy_to_lower_triangle(reordered_matrix_np).tolist(),
+            "tickText": sorted_ids,
+        }
+
+        cluster_data = seqid_clusters_df.to_dict(orient="records")
+
+        return {
+            "matrix": reordered_data["matrix"],
+            "tickText": reordered_data["tickText"],
+            "clusterData": cluster_data,
+        }
 
     def new_doc(self):
         id = make_doc_id()
@@ -583,10 +618,7 @@ class Api:
         if save_as == False:
             basename = os.path.basename(path)
             update_document(
-                doc_id,
-                filename=path,
-                basename=basename,
-                filetype="application/vnd.sdt"
+                doc_id, filename=path, basename=basename, filetype="application/vnd.sdt"
             )
             add_recent_file(path)
 
@@ -611,6 +643,13 @@ class Api:
 
     def set_window_title(self, title: str):
         assert_window().title = f"{title}{window_title_suffix}"
+
+    def open_doc_folder(self, doc_id: str):
+        doc = get_document(doc_id)
+        if doc == None:
+            raise Exception(f"Expected to find document: {doc_id}")
+        return open_doc_folder(doc)
+
 
 def file_exists(path):
     return os.path.exists(os.path.join(os.path.dirname(__file__), path))
@@ -638,7 +677,7 @@ def push_backend_state(window: webview.Window):
 
 
 def on_closed():
-    #map(lambda doc: doc.cleanup(), get_state().documents)
+    # map(lambda doc: doc.cleanup(), get_state().documents)
     do_cancel_run()
     os._exit(0)
 

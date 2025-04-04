@@ -86,9 +86,9 @@ export const HeatmapSidebar = ({
                       </SelectItem>
                     )}
                   </Select>
-                  <Tooltip tooltip="Reverse colorscale" delay={600}>
+                  <Tooltip tooltip="Invert colorscale" delay={600}>
                     <ToggleButton
-                      aria-label="Toggle reverse colorscale"
+                      aria-label="Toggle invert colorscale"
                       id="reverse"
                       isSelected={settings.reverse}
                       onChange={(value) => {
