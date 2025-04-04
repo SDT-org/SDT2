@@ -8,7 +8,7 @@ from scipy.spatial.distance import squareform, pdist
 from sklearn.manifold import MDS
 import time
 from joblib import Memory
-
+from numba import jit
 cache_dir = TemporaryDirectory()
 memory = Memory(cache_dir.name, verbose=1)
 print(cache_dir)

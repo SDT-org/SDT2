@@ -577,8 +577,13 @@ class Api:
         seqid_clusters_df = seqid_clusters_df.sort_values(by=["cluster", "id"])
         sorted_ids = seqid_clusters_df["id"].tolist()
 
-        # Get the new index order and reorder the matrix in one step using numpy
-        new_order = [row_ids.index(id) for id in sorted_ids if id in row_ids]
+        #@ switching from list comp to dict lookup for hashin speed
+        #Create index map
+        id_to_original_index = {id_val: i for i, id_val in enumerate(row_ids)}
+        # Get the new order using the map 
+        new_order = [id_to_original_index[id_val] for id_val in sorted_ids]
+
+        # Reorder the matrix using NumPy fancy indexing 
         reordered_matrix_np = matrix_np[new_order, :][:, new_order]
 
         reordered_data = {
@@ -664,7 +669,10 @@ def get_html_path(filename="index.html"):
         return f"{dev_frontend_host}/{filename}"
 
 
-def push_backend_state(window: webview.Window):
+def push_backend_state(window: webview.Window | None):
+    # Ensure window exists before use (handles potential None type)
+    if window is None:
+        return
     state = get_state()
     dict_state = lambda t: {
         f: [d._asdict() for d in getattr(t, f)] if f == "documents" else getattr(t, f)
