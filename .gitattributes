@@ -1,32 +1,28 @@
-#automatically normalize line endings
+# normalize line endings on check-in, checkout with platform-specific endings
 * text=auto
 
-# bash needs lf
-*.sh text eol=lf
-
-#  TypeScript/JavaScript LF
-*.ts text eol=lf
-*.tsx text eol=lf
-*.js text eol=lf
-*.jsx text eol=lf
+*.sh   text eol=lf
+*.ts   text eol=lf
+*.tsx  text eol=lf
+*.js   text eol=lf
+*.jsx  text eol=lf
 *.json text eol=lf
-
-#  CSS/HTML use LF
-*.css text eol=lf
+*.css  text eol=lf
 *.scss text eol=lf
 *.html text eol=lf
 
-#  batch scriptss use CRLF line endings
+# windows-specific
 *.bat text eol=crlf
 *.cmd text eol=crlf
+*.ps1 text eol=crlf
 
-# list binaries
-*.png binary
-*.jpg binary
-*.jpeg binary
-*.gif binary
-*.ico binary
-*.ttf binary
-*.eot binary
-*.woff binary
+# leave binaries alone
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.ttf   binary
+*.eot   binary
+*.woff  binary
 *.woff2 binary
