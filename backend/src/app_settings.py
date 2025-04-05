@@ -27,6 +27,12 @@ def add_recent_file(filepath: str):
         settings["recent_files"] = settings["recent_files"][:8]
         save_app_settings(settings)
 
+def remove_recent_file(filepath: str):
+    settings = load_app_settings()
+    if filepath in settings["recent_files"]:
+        settings["recent_files"].remove(filepath)
+        save_app_settings(settings)
+
 def save_app_settings(settings: dict):
     with open(get_app_settings_path(), "w") as f:
         json.dump(settings, f, indent=2)

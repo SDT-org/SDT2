@@ -44,11 +44,13 @@ const RunnerSettings = ({
   const { appState, setAppState } = useAppState();
   const startRun = useStartRun(docState, appState);
   const [startingRun, setStartingRun] = React.useState(false);
+  const initialized = React.useRef(false);
   const openFileDialog = useOpenFileDialog(appState, setAppState);
   const fileName =
     docState.filename?.length && docState.filename
       ? docState.filename.split("/").pop()
       : undefined;
+  const isFastaType = docState.filetype === "text/fasta";
 
   const updateAppState = React.useCallback(
     (value: Partial<AppState>) =>
@@ -60,8 +62,6 @@ const RunnerSettings = ({
       }),
     [setAppState],
   );
-
-  const isFastaType = docState.filetype === "text/fasta";
 
   React.useEffect(() => {
     const handleEnter = (event: KeyboardEvent) => {
@@ -82,7 +82,6 @@ const RunnerSettings = ({
     };
   }, [docState.filename, docState.validation_error_id, startRun]);
 
-  const initialized = React.useRef(false);
   React.useEffect(() => {
     if (!docState.compute_stats || initialized.current) {
       return;
@@ -119,11 +118,25 @@ const RunnerSettings = ({
   }, [docState.filename, setDocState]);
 
   const [recentFiles, setRecentFiles] = React.useState<string[]>([]);
-  React.useEffect(() => {
+  const fetchRecentFiles = React.useCallback(() => {
     window.pywebview.api.app_settings().then((data) => {
       setRecentFiles(data.recent_files);
     });
   }, []);
+
+  React.useEffect(() => {
+    fetchRecentFiles();
+  }, [fetchRecentFiles]);
+
+  const handleOpenRecentFile = React.useCallback(
+    async (file: string) => {
+      const [success] = await openFile(file, docState.id);
+      if (!success) {
+        fetchRecentFiles();
+      }
+    },
+    [docState.id, fetchRecentFiles],
+  );
 
   const estimatedMemory =
     (docState.compute_stats?.required_memory || 1) *
@@ -211,47 +224,6 @@ const RunnerSettings = ({
                 </Select>
               </div>
             </div>
-
-            {/* <div className="field output inline-toggle">
-              <Switch
-                isSelected={appState.enableOutputAlignments}
-                onChange={(value) => {
-                  updateAppState({ enableOutputAlignments: value });
-                }}
-              >
-                Save alignments
-              </Switch>
-
-              {appState.enableOutputAlignments ? (
-                <div className="setting">
-                  {appState.alignmentExportPath ? (
-                    <div aria-live="polite" className="folder">
-                      <span>
-                        {appState.alignmentExportPath.replace("/", "")}
-                      </span>
-                    </div>
-                  ) : null}
-                  <Button
-                    onPress={() => {
-                      window.pywebview.api
-                        .select_path_dialog(appState.alignmentExportPath)
-                        .then((result) => {
-                          if (!result) {
-                            return;
-                          }
-                          setAppState((prev) => ({
-                            ...prev,
-                            alignmentExportPath: result,
-                          }));
-                        });
-                    }}
-                  >
-                    Set folder&#8230;
-                  </Button>
-                </div>
-              ) : null}
-            </div> */}
-
             <div className="field performance">
               <label className="header" htmlFor="compute-cores">
                 Performance
@@ -418,7 +390,7 @@ const RunnerSettings = ({
                     <Button
                       className={"react-aria-Button flat compact"}
                       key={file}
-                      onPress={() => openFile(file, docState.id)}
+                      onPress={() => handleOpenRecentFile(file)}
                     >
                       <TbFile size={16} />
                       <div className="file-info">
