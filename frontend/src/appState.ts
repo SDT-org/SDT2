@@ -85,6 +85,7 @@ export type AppState = {
   lastDataFilePath: string;
   error?: Error | null;
   errorInfo?: ErrorInfo | PromiseRejectionEvent["reason"] | null;
+  recentFiles: string[];
 };
 
 export const clientStateSchema = z.object({
@@ -211,6 +212,7 @@ export const initialAppState: AppState = {
     memory: 1,
     platform: "unknown",
   },
+  recentFiles: [],
 };
 
 export const clientStateKey = "app-client-state";

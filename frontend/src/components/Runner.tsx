@@ -21,9 +21,9 @@ import useAppState, {
 import { reorderMethods } from "../constants";
 import { formatBytes, splitFilePath } from "../helpers";
 import useOpenFileDialog from "../hooks/useOpenFileDialog";
+import { useRecentFiles } from "../hooks/useRecentFiles";
 import { useStartRun } from "../hooks/useStartRun";
 import messages from "../messages";
-import { openFile } from "../services/files";
 import { Select, SelectItem } from "./Select";
 import { Switch } from "./Switch";
 
@@ -46,6 +46,7 @@ const RunnerSettings = ({
   const [startingRun, setStartingRun] = React.useState(false);
   const initialized = React.useRef(false);
   const openFileDialog = useOpenFileDialog(appState, setAppState);
+  const openRecentFile = useRecentFiles(setAppState);
   const fileName =
     docState.filename?.length && docState.filename
       ? docState.filename.split("/").pop()
@@ -116,27 +117,6 @@ const RunnerSettings = ({
 
     return () => clearInterval(id);
   }, [docState.filename, setDocState]);
-
-  const [recentFiles, setRecentFiles] = React.useState<string[]>([]);
-  const fetchRecentFiles = React.useCallback(() => {
-    window.pywebview.api.app_settings().then((data) => {
-      setRecentFiles(data.recent_files);
-    });
-  }, []);
-
-  React.useEffect(() => {
-    fetchRecentFiles();
-  }, [fetchRecentFiles]);
-
-  const handleOpenRecentFile = React.useCallback(
-    async (file: string) => {
-      const [success] = await openFile(file, docState.id);
-      if (!success) {
-        fetchRecentFiles();
-      }
-    },
-    [docState.id, fetchRecentFiles],
-  );
 
   const estimatedMemory =
     (docState.compute_stats?.required_memory || 1) *
@@ -382,15 +362,15 @@ const RunnerSettings = ({
                 Select FASTA or SDT Matrix file&#8230;
               </Button>
             </div>
-            {recentFiles.some(Boolean) ? (
+            {appState.recentFiles.some(Boolean) ? (
               <div className="recent-files">
                 <h2>Recent Files</h2>
                 <div className="grid">
-                  {recentFiles.map((file) => (
+                  {appState.recentFiles.map((file) => (
                     <Button
                       className={"react-aria-Button flat compact"}
                       key={file}
-                      onPress={() => handleOpenRecentFile(file)}
+                      onPress={() => openRecentFile(file, docState)}
                     >
                       <TbFile size={16} />
                       <div className="file-info">

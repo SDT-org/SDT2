@@ -18,6 +18,7 @@ import { isSDTFile } from "../helpers";
 import { useCloseDocument } from "../hooks/useCloseDocument";
 import useNewDocument from "../hooks/useNewDocument";
 import useOpenFileDialog from "../hooks/useOpenFileDialog";
+import { useRecentFiles } from "../hooks/useRecentFiles";
 import { useSaveActiveDocument } from "../hooks/useSaveActiveDocument";
 
 // AppMenuButton and AppMenuItem were derived from https://react-spectrum.adobe.com/react-aria/Menu.html#reusable-wrappers
@@ -93,6 +94,7 @@ export const MainMenu = createHideableComponent(() => {
   const closeDocument = useCloseDocument(appState, setAppState);
   const saveDocument = useSaveActiveDocument(appState, setAppState);
 
+  const openRecentFile = useRecentFiles(setAppState);
   const sdtFile = activeDocState && isSDTFile(activeDocState.filetype);
 
   const openFileDialog = useOpenFileDialog(appState, setAppState);
@@ -118,40 +120,27 @@ export const MainMenu = createHideableComponent(() => {
     }
   };
 
-  const [recentFiles, setRecentFiles] = React.useState<string[]>([]);
-
-  React.useEffect(() => {
-    window.pywebview.api.app_settings().then((data) => {
-      setRecentFiles(data.recent_files);
-    });
-  }, []);
-
   return (
     <AppMenuButton>
       <AppMenuItem onAction={onNew}>New</AppMenuItem>
       <AppMenuItem onAction={onOpen}>Open...</AppMenuItem>
-      <SubmenuTrigger>
-        <AppMenuItem>Open Recent</AppMenuItem>
-        <Popover>
-          <Menu>
-            {recentFiles.map((filePath) => (
-              <AppMenuItem
-                key={filePath}
-                onAction={() =>
-                  window.pywebview.api.open_file(filePath).then((data) => {
-                    setAppState((prev) => ({
-                      ...prev,
-                      activeDocumentId: data[0],
-                    }));
-                  })
-                }
-              >
-                {filePath.split(/(\/|\\)/).pop()}
-              </AppMenuItem>
-            ))}
-          </Menu>
-        </Popover>
-      </SubmenuTrigger>
+      {activeDocState ? (
+        <SubmenuTrigger>
+          <AppMenuItem>Open Recent</AppMenuItem>
+          <Popover>
+            <Menu>
+              {appState.recentFiles.map((filePath) => (
+                <AppMenuItem
+                  key={filePath}
+                  onAction={() => openRecentFile(filePath, activeDocState)}
+                >
+                  {filePath.split(/(\/|\\)/).pop()}
+                </AppMenuItem>
+              ))}
+            </Menu>
+          </Popover>
+        </SubmenuTrigger>
+      ) : null}
       <Separator />
       {activeDocState?.view === "viewer" ? (
         <>
