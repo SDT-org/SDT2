@@ -1,6 +1,6 @@
 import React, { type ErrorInfo } from "react";
 import { z } from "zod";
-import { reorderMethodKeys, type reorderMethods } from "./constants";
+import type { reorderMethods } from "./constants";
 import {
   type DistributionState,
   DistributionStateSchema,
@@ -25,7 +25,6 @@ export const saveableImageFormats = {
   jpeg: "JPEG",
 };
 export type SaveableImageFormat = keyof typeof saveableImageFormats;
-const saveableImageFormatKeys = ["svg", "png", "jpeg"] as const;
 
 export type DocState = {
   id: string;
@@ -87,20 +86,6 @@ export type AppState = {
   errorInfo?: ErrorInfo | PromiseRejectionEvent["reason"] | null;
   recentFiles: string[];
 };
-
-export const clientStateSchema = z.object({
-  enableClustering: z.boolean(),
-  enableOutputAlignments: z.boolean(),
-  cluster_method: z.any().refine((v) => reorderMethodKeys.includes(v)), // TODO:fix this
-  compute_cores: z.number(),
-  error: z.instanceof(Error).nullable(),
-  errorInfo: z.null(),
-  saveFormat: z.enum(saveableImageFormatKeys),
-  showExportModal: z.boolean(),
-  alignmentExportPath: z.string(),
-  dataExportPath: z.string(),
-  lastDataFilePath: z.string(),
-});
 
 export const docStateSchema = z.object({
   id: z.string(),
@@ -214,8 +199,6 @@ export const initialAppState: AppState = {
   },
   recentFiles: [],
 };
-
-export const clientStateKey = "app-client-state";
 
 export type SetAppState = React.Dispatch<React.SetStateAction<AppState>>;
 export type SetDocState = (
