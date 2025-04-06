@@ -10,8 +10,6 @@ import time
 from joblib import Memory
 cache_dir = TemporaryDirectory()
 memory = Memory(cache_dir.name, verbose=1)
-print(cache_dir)
-
 
 @memory.cache
 def calculate_linkage(data, method) -> np.ndarray:

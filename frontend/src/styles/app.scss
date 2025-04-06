@@ -274,6 +274,7 @@ body {
 
   .react-aria-Button.new-document {
     width: 3rem;
+    padding: 0;
     position: fixed;
     top: .8rem;
     left: 0;
@@ -351,7 +352,6 @@ body {
     }
 
     > svg {
-      width: 1rem;
       position: absolute;
       left: 0.8rem;
       color: #777;

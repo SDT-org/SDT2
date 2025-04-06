@@ -154,8 +154,10 @@ def get_alignment_scores(
 
 # Save similarity scores as 2d matrix csv
 def save_matrix_to_csv(df, outdir, filename):
+    index=df.index
     tri_matrix = dataframe_to_lower_triangle(df)
-    tri_matrix.to_csv( os.path.join(outdir, filename + "_mat.csv"), mode="w", header=False, index=True)
+    tri_matrix.index = index
+    tri_matrix.to_csv( os.path.join(outdir, filename + "_mat.csv"), mode="wt", header=False, index=True)
     df.to_csv( os.path.join(outdir, "matrix.csv"), mode="w", header=False, index=True)
 
 # Save similarity scores as 3 column csv

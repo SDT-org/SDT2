@@ -11,6 +11,7 @@
         "react": "^18.2.0",
         "react-aria-components": "^1.5.0",
         "react-dom": "^18.2.0",
+        "react-icons": "^5.5.0",
         "react-plotly.js": "^2.6.0",
         "tinycolor2": "^1.6.0",
         "zod": "^3.23.8",
@@ -1019,6 +1020,8 @@
     "react-aria-components": ["react-aria-components@1.5.0", "", { "dependencies": { "@internationalized/date": "^3.6.0", "@internationalized/string": "^3.2.5", "@react-aria/collections": "3.0.0-alpha.6", "@react-aria/color": "^3.0.2", "@react-aria/disclosure": "^3.0.0", "@react-aria/dnd": "^3.8.0", "@react-aria/focus": "^3.19.0", "@react-aria/interactions": "^3.22.5", "@react-aria/live-announcer": "^3.4.1", "@react-aria/menu": "^3.16.0", "@react-aria/toolbar": "3.0.0-beta.11", "@react-aria/tree": "3.0.0-beta.2", "@react-aria/utils": "^3.26.0", "@react-aria/virtualizer": "^4.1.0", "@react-stately/color": "^3.8.1", "@react-stately/disclosure": "^3.0.0", "@react-stately/layout": "^4.1.0", "@react-stately/menu": "^3.9.0", "@react-stately/selection": "^3.18.0", "@react-stately/table": "^3.13.0", "@react-stately/utils": "^3.10.5", "@react-stately/virtualizer": "^4.2.0", "@react-types/color": "^3.0.1", "@react-types/form": "^3.7.8", "@react-types/grid": "^3.2.10", "@react-types/shared": "^3.26.0", "@react-types/table": "^3.10.3", "@swc/helpers": "^0.5.0", "client-only": "^0.0.1", "react-aria": "^3.36.0", "react-stately": "^3.34.0", "use-sync-external-store": "^1.2.0" }, "peerDependencies": { "react": "^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1", "react-dom": "^16.8.0 || ^17.0.0-rc.1 || ^18.0.0 || ^19.0.0-rc.1" } }, "sha512-wzf0g6cvWrqAJd4FkisAfFnslx6AJREgOd/NEmVE/RGuDxGTzss4awcwbo98rIVmqbTTFApiygy0SyWGrRZfDA=="],
 
     "react-dom": ["react-dom@18.2.0", "", { "dependencies": { "loose-envify": "^1.1.0", "scheduler": "^0.23.0" }, "peerDependencies": { "react": "^18.2.0" } }, "sha512-6IMTriUmvsjHUjNtEDudZfuDQUoWXVxKHhlEGSk81n4YFS+r/Kl99wXiwlVXtPBtJenozv2P+hxDsw9eA7Xo6g=="],
+
+    "react-icons": ["react-icons@5.5.0", "", { "peerDependencies": { "react": "*" } }, "sha512-MEFcXdkP3dLo8uumGI5xN3lDFNsRtrjbOEKDLD7yv76v4wpnEq2Lt2qeHaQOr34I/wPN3s3+N08WkQ+CW37Xiw=="],
 
     "react-is": ["react-is@16.13.1", "", {}, "sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ=="],
 

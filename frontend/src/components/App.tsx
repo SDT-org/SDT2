@@ -1,6 +1,13 @@
 import React from "react";
 import { Button, type Key, Tab, TabList, Tabs } from "react-aria-components";
 import {
+  TbFile,
+  TbFolderShare,
+  TbLayoutSidebarLeftCollapse,
+  TbLayoutSidebarLeftExpand,
+  TbPlus,
+} from "react-icons/tb";
+import {
   type AppState,
   AppStateContext,
   findDoc,
@@ -16,7 +23,6 @@ import { Document } from "./Document";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { ExportModal } from "./ExportModal";
 import { HeatmapRefProvider } from "./HeatmapRefProvider";
-import Icons from "./Icons";
 import { MainMenu } from "./Menu";
 import { Select, SelectItem } from "./Select";
 
@@ -184,15 +190,11 @@ export const App = () => {
                           ? "Expand sidebar"
                           : "Collapse sidebar"}
                       </span>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        height="16"
-                        fill="currentColor"
-                        viewBox="0 0 512 512"
-                        aria-hidden="true"
-                      >
-                        <path d="M 448 64 Q 462 64 471 73 L 471 73 L 471 73 Q 480 82 480 96 L 480 416 L 480 416 Q 480 430 471 439 Q 462 448 448 448 L 224 448 L 224 448 L 224 64 L 224 64 L 448 64 L 448 64 Z M 64 64 L 192 64 L 64 64 L 192 64 L 192 448 L 192 448 L 64 448 L 64 448 Q 50 448 41 439 Q 32 430 32 416 L 32 96 L 32 96 Q 32 82 41 73 Q 50 64 64 64 L 64 64 Z M 64 32 Q 37 33 19 51 L 19 51 L 19 51 Q 1 69 0 96 L 0 416 L 0 416 Q 1 443 19 461 Q 37 479 64 480 L 448 480 L 448 480 Q 475 479 493 461 Q 511 443 512 416 L 512 96 L 512 96 Q 511 69 493 51 Q 475 33 448 32 L 64 32 L 64 32 Z M 80 96 Q 65 97 64 112 Q 65 127 80 128 L 144 128 L 144 128 Q 159 127 160 112 Q 159 97 144 96 L 80 96 L 80 96 Z M 64 176 Q 65 191 80 192 L 144 192 L 144 192 Q 159 191 160 176 Q 159 161 144 160 L 80 160 L 80 160 Q 65 161 64 176 L 64 176 Z M 80 224 Q 65 225 64 240 Q 65 255 80 256 L 144 256 L 144 256 Q 159 255 160 240 Q 159 225 144 224 L 80 224 L 80 224 Z" />
-                      </svg>
+                      {leftSidebarCollapsed ? (
+                        <TbLayoutSidebarLeftExpand size={18} />
+                      ) : (
+                        <TbLayoutSidebarLeftCollapse size={18} />
+                      )}
                     </Button>
                   ) : null}
                 </div>
@@ -254,11 +256,12 @@ export const App = () => {
                                 </Button>
                               </>
                             )}
-                            <Icons.Document />
+                            <TbFile size={16} />
                           </Tab>
                         ))}
                       </TabList>
                       <Button
+                        aria-label="New Document"
                         className={"react-aria-Button new-document"}
                         onPress={newDocument}
                         style={{
@@ -267,17 +270,7 @@ export const App = () => {
                           opacity: hideNewTab ? "0" : "1",
                         }}
                       >
-                        <svg
-                          height="16"
-                          xmlns="http://www.w3.org/2000/svg"
-                          aria-hidden="true"
-                          viewBox="0 0 448 512"
-                        >
-                          <path
-                            d="M256 80c0-17.7-14.3-32-32-32s-32 14.3-32 32v144H48c-17.7 0-32 14.3-32 32s14.3 32 32 32h144v144c0 17.7 14.3 32 32 32s32-14.3 32-32V288h144c17.7 0 32-14.3 32-32s-14.3-32-32-32H256V80z"
-                            fill="currentColor"
-                          />
-                        </svg>
+                        <TbPlus size={16} />
                       </Button>
                     </Tabs>
                   ) : (
@@ -309,25 +302,7 @@ export const App = () => {
                       }))
                     }
                   >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      aria-hidden="true"
-                      viewBox="0 0 24 24"
-                      height="12"
-                    >
-                      <g
-                        style={{
-                          fill: "none",
-                          stroke: "currentcolor",
-                          strokeWidth: 2,
-                          strokeLinecap: "round",
-                          strokeLinejoin: "round",
-                          strokeMiterlimit: 10,
-                        }}
-                      >
-                        <path d="M15 3h6v6M21 3 11 13M19 18v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h1" />
-                      </g>
-                    </svg>
+                    <TbFolderShare size={17} />
                     <span>Export</span>
                   </Button>
                 </div>

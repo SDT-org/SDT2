@@ -11,7 +11,7 @@ from platformdirs import user_documents_dir
 from utils import get_child_process_info, make_doc_id
 from process_data import process_data, save_cols_to_csv
 from document_state import DocState, save_doc_settings
-from app_settings import add_recent_file, load_app_settings
+from app_settings import add_recent_file, load_app_settings, remove_recent_file, save_app_settings
 from export_data import do_export_data, prepare_export_data
 from save_document import pack_document, unpack_document
 from app_state import create_app_state
@@ -61,9 +61,6 @@ window = None
 pool = None
 cancelled = None
 start_time = None
-
-
-print(temp_dir)
 
 
 def get_matrix_path(state: DocState):
@@ -120,6 +117,10 @@ def get_compute_stats(filename):
 
 
 def handle_open_file(filepath: str, doc_id: str | None):
+    if not os.path.exists(filepath):
+        remove_recent_file(filepath)
+        raise Exception(f"File not found: {filepath}")
+
     basename = os.path.basename(filepath)
     filetype, _ = mimetypes.guess_type(basename)
 
@@ -135,6 +136,11 @@ def handle_open_file(filepath: str, doc_id: str | None):
 
     if filetype == "application/vnd.sdt":
         unpack_document(filepath, unique_dir)
+
+        if not os.path.exists(os.path.join(unique_dir, "matrix.csv")):
+            remove_recent_file(filepath)
+            raise Exception(f"File is not a valid SDT file: {filepath}")
+
         new_document(
             doc_id,
             view="viewer",
@@ -253,7 +259,12 @@ class Api:
         return {"appVersion": app_version, "userPath": os.path.expanduser("~")}
 
     def app_settings(self):
-        return load_app_settings()
+        settings = load_app_settings()
+        settings["recent_files"] = [
+            f for f in settings["recent_files"] if os.path.exists(f)
+        ]
+        save_app_settings(settings)
+        return settings
 
     def processes_info(self):
         return json.dumps(get_child_process_info())
