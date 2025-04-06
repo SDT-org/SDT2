@@ -36,7 +36,7 @@ export function createD3ColorScale(
     .interpolate(d3.interpolateRgb)
     .clamp(true);
 }
-
+//https://stackoverflow.com/questions/10014271/generate-random-color-distinguishable-to-humans
 export const distinctColor = (index: number) => {
   if (!index) {
     return "hsl(0, 0%, 96%)"; // Light grey for index 0
