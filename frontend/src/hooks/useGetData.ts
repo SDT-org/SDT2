@@ -85,6 +85,19 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
                     axlabel_yfontsize: scaledAxisLabelFontSize,
                   }),
             },
+            ...(docState.sequences_count > 99
+              ? {
+                  distribution: {
+                    ...prev.distribution,
+                    ...state.distribution,
+                    violin: {
+                      ...prev.distribution.violin,
+                      ...state.distribution.violin,
+                      showPoints: false,
+                    },
+                  },
+                }
+              : null),
           }),
           false,
         );
