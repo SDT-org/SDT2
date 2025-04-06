@@ -69,15 +69,10 @@ export const Clustermap = ({
     [1, "rgb(245,245,245)"],
   ];
 
-  const clustermapData = React.useMemo(() => {
-    const result = formatClustermapData(
-      orderedMatrix,
-      orderedTickText,
-      clusterData,
-    );
-    console.log(`Formatted data contains ${result.length} items`);
-    return result;
-  }, [orderedMatrix, clusterData, orderedTickText]);
+  const clustermapData = React.useMemo(
+    () => formatClustermapData(orderedMatrix, orderedTickText, clusterData),
+    [orderedMatrix, orderedTickText, clusterData],
+  );
 
   const forceSvgRender = useHeatmapRenderToggle();
 
