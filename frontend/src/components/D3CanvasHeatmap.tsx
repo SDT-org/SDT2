@@ -31,6 +31,7 @@ export const D3CanvasHeatmap = ({
   margin,
   settings,
   showLegend,
+  onRenderComplete,
 }: HeatmapRenderProps) => {
   const canvasRef =
     useHeatmapRef() as React.MutableRefObject<HTMLCanvasElement>;
@@ -54,6 +55,7 @@ export const D3CanvasHeatmap = ({
   const tickValues = React.useMemo(() => scale.ticks(5), [scale]);
 
   const drawCanvas = React.useCallback(() => {
+    const start = performance.now();
     const canvas = canvasRef.current;
     if (!canvas) {
       console.warn("Failed to find canvas");
@@ -226,29 +228,29 @@ export const D3CanvasHeatmap = ({
         // Determine column (0  left, 1  right)
         const column = index % 2;
 
-        // Calculate row position (every two items share the same row)
         const row = Math.floor(index / 2);
+        const textX = positionX + column * (legendWidth + columnGap);
+        const textY = margin.top + lineGap * row;
 
-        // Calculate position based on column and row
-        const itemX = positionX + column * (legendWidth + columnGap);
-        const itemY = margin.top + lineGap * row;
-
-        // draw colored rect
         ctx.fillStyle = distinctColor(index + 1);
-        ctx.fillRect(itemX, itemY, cellSize, cellSize);
+        ctx.fillRect(textX, textY, cellSize, cellSize);
 
-        // Draw text
         ctx.fillStyle = "black";
         ctx.textAlign = "left";
         ctx.textBaseline = "middle";
         ctx.font = `10px 'Roboto Mono'`;
         ctx.fillText(
           `Cluster ${cluster.toString()}`,
-          itemX + cellSize + labelGap,
-          itemY + cellSize / 2,
+          textX + cellSize + labelGap,
+          textY + cellSize / 2,
         );
       });
     }
+
+    const end = performance.now();
+    console.log(`Canvas render time: ${end - start} ms`);
+
+    onRenderComplete?.();
   }, [
     transform,
     data,
@@ -280,6 +282,7 @@ export const D3CanvasHeatmap = ({
     settings?.colorScaleKey,
     clusterData,
     showLegend,
+    onRenderComplete,
   ]);
 
   React.useEffect(() => {

@@ -38,11 +38,7 @@ def calculate_linkage(data, method) -> np.ndarray:
 
 
 def get_linkage(data: np.ndarray, method: str) -> np.ndarray:
-    start = time.perf_counter()
-    result = calculate_linkage(data, method)
-    end = time.perf_counter()
-    print(f"Calculate linkage took {end - start:0.4f} seconds")
-    return result
+    return calculate_linkage(data, method)
 
 
 def get_linkage_method_order(data, method, index):

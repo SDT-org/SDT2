@@ -220,6 +220,7 @@ body {
   border-radius: 0.6rem;
   box-shadow: 0 0 0.2rem 0 var(--drop-shadow-color);
   margin: 0.2rem 0.2rem 0;
+  position: relative;
 
   img {
     margin: 0 auto;
@@ -781,14 +782,27 @@ small {
   border: 5px solid #f3f3f3;
   border-top: 5px solid #3498db;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 4rem;
+  height: 4rem;
   animation: spin 2s linear infinite;
 }
 
 .app-loader.delay {
-  animation: reveal 0.25s linear var(--app-loader-delay) forwards;
   opacity: 0;
+  animation: 300ms linear forwards reveal, spin 2s linear infinite;
+}
+
+.app-loader[data-hidden] {
+  height: 4rem;
+}
+
+.app-loader.app-main-loader {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 99;
+  margin-top: -2rem;
+  margin-left: -2rem;
 }
 
 @keyframes reveal {

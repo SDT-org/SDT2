@@ -31,6 +31,8 @@ export const Clustermap = ({
     React.useState<string[]>(tickText);
 
   React.useEffect(() => {
+    const start = performance.now();
+    loaderRef.current?.setAttribute("data-hidden", "false");
     window.pywebview.api
       .get_clustermap_data(
         docState.id,
@@ -41,9 +43,8 @@ export const Clustermap = ({
         setClusterData(response.clusterData);
         setOrderedTickText(response.tickText);
         setOrderedMatrix(response.matrix);
-      })
-      .catch((error: Error) => {
-        console.error("Error getting cluster ordered data:", error);
+        const end = performance.now();
+        console.log(`Clustermap fetch time: ${end - start}ms`);
       });
   }, [docState.id, docState.clustermap.threshold, docState.clustermap.method]);
 
@@ -79,15 +80,20 @@ export const Clustermap = ({
   const titleFont =
     settings.titleFont === "Monospace" ? plotFontMonospace : plotFontSansSerif;
 
-  console.log("Rendering D3CanvasHeatmap with:", {
-    dataLength: clustermapData?.length || 0,
-    tickTextLength: orderedTickText?.length || 0,
-    clusterDataLength: clusterData?.length || 0,
-  });
+  const loaderRef = React.useRef<HTMLDivElement | null>(null);
+  const onRenderComplete = React.useCallback(() => {
+    loaderRef.current?.setAttribute("data-hidden", "true");
+  }, []);
 
   return (
     <>
       <div className="app-main" ref={elementRef}>
+        <div
+          className="app-loader app-main-loader delay"
+          aria-hidden="true"
+          data-hidden="false"
+          ref={loaderRef}
+        />
         {clusterData && forceSvgRender ? (
           <div className="debug-toast">SVG</div>
         ) : null}
@@ -146,6 +152,7 @@ export const Clustermap = ({
               margin={margin}
               cellSpace={settings.cellspace}
               showLegend={settings.showLegend}
+              onRenderComplete={onRenderComplete}
             />
           )
         ) : null}

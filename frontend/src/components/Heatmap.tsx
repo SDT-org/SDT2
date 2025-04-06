@@ -50,6 +50,7 @@ export type HeatmapRenderProps = {
   margin: { top: number; bottom: number; left: number; right: number };
   clusterData?: ClusterDataItem[];
   showLegend?: boolean;
+  onRenderComplete?: () => void;
 } & Pick<HeatmapSettings, "axis_labels">;
 
 export const Heatmap = ({
@@ -129,11 +130,22 @@ export const Heatmap = ({
 
   const forceSvgRender = useHeatmapRenderToggle();
 
+  const loaderRef = React.useRef<HTMLDivElement | null>(null);
+  const onRenderComplete = React.useCallback(() => {
+    loaderRef.current?.setAttribute("data-hidden", "true");
+  }, []);
+
   return (
     <>
       {data ? (
         <>
           <div className="app-main" ref={elementRef}>
+            <div
+              className="app-loader app-main-loader delay"
+              aria-hidden="true"
+              data-hidden="false"
+              ref={loaderRef}
+            />
             {forceSvgRender ? <div className="debug-toast">SVG</div> : null}
             {forceSvgRender ||
             (appState.showExportModal && appState.saveFormat === "svg") ? (
@@ -185,6 +197,7 @@ export const Heatmap = ({
                 title={settings.title}
                 axis_labels={settings.axis_labels}
                 margin={margin}
+                onRenderComplete={onRenderComplete}
               />
             )}
           </div>
