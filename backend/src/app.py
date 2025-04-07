@@ -4,7 +4,7 @@ import sys
 current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(current_file_path, "../../"))
 sys.path.append(os.path.join(current_file_path, "."))
-
+from  doc_paths import DocPaths
 from multiprocessing import Lock, Manager, Pool, cpu_count as get_cpu_count
 from tempfile import TemporaryDirectory
 from platformdirs import user_documents_dir
@@ -28,14 +28,15 @@ from numpy import eye, where, nan, nanmin, nanmax
 import mimetypes
 from time import perf_counter
 from shutil import copy
+from doc_paths import fetch_docpaths
 
 from debug import open_doc_folder
 from config import app_version, dev_frontend_host
 from constants import matrix_filetypes, default_window_title
 from heatmap import (
-    dataframe_to_lower_triangle,
-    lower_triangle_to_full_matrix,
-    numpy_to_lower_triangle,
+    dataframe_to_matrix_lower,
+    matrix_lower_to_full_matrix,
+    numpy_to_matrix_lower,
 )
 
 is_compiled = "__compiled__" in globals()
@@ -63,8 +64,11 @@ cancelled = None
 start_time = None
 
 
-def get_matrix_path(state: DocState):
-    return os.path.join(state.tempdir_path, "matrix.csv")
+
+
+def get_matrix_path(state):
+    doc_paths = fetch_docpaths(state.tempdir_path)
+    return doc_paths.full_matrix
 
 
 def do_cancel_run():
@@ -190,7 +194,7 @@ def handle_open_file(filepath: str, doc_id: str | None):
 
             # We need a full matrix for doing things but we don't have
             # it yet because this was a .txt/.csv lower triangle matrix
-            full_matrix_dataframe = lower_triangle_to_full_matrix(df)
+            full_matrix_dataframe = matrix_lower_to_full_matrix(df)
             full_matrix_dataframe.to_csv(
                 os.path.join(unique_dir, "matrix.csv"),
                 mode="w",
@@ -545,7 +549,7 @@ class Api:
             self.load_data_and_stats(doc_id)
         )
         heat_data = DataFrame(data, index=tick_text)
-        heat_data = dataframe_to_lower_triangle(heat_data)
+        heat_data = dataframe_to_matrix_lower(heat_data)
         parsedData = heat_data.values.tolist()
 
         data_to_dump = dict(
@@ -598,7 +602,7 @@ class Api:
         reordered_matrix_np = matrix_np[new_order, :][:, new_order]
 
         reordered_data = {
-            "matrix": numpy_to_lower_triangle(reordered_matrix_np).tolist(),
+            "matrix": numpy_to_matrix_lower(reordered_matrix_np).tolist(),
             "tickText": sorted_ids,
         }
 

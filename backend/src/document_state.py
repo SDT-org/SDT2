@@ -1,7 +1,7 @@
 from collections import namedtuple
 import json
 import os
-
+from doc_paths import fetch_docpaths
 VERSION = 1
 
 DocState = namedtuple(
@@ -216,7 +216,8 @@ def create_document_state(
     )
 
 def get_doc_setting_path(tempdir_path: str):
-    return os.path.join(tempdir_path, "document.json")
+    doc_paths = fetch_docpaths(tempdir_path)
+    return doc_paths.full_matrix
 
 def load_doc_settings(dir_path: str):
     path = get_doc_setting_path(dir_path)

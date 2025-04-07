@@ -16,7 +16,8 @@ import parasail
 from Bio import SeqIO
 from Bio.SeqUtils import gc_fraction
 from cluster import get_linkage_method_order
-from heatmap import dataframe_to_lower_triangle
+from heatmap import dataframe_to_matrix_lower
+from doc_paths import fetch_docpaths
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
@@ -153,15 +154,16 @@ def get_alignment_scores(
 
 
 # Save similarity scores as 2d matrix csv
-def save_matrix_to_csv(df, outdir, filename):
+def save_matrix_to_csv(df, full_path, header=False):
     index=df.index
-    tri_matrix = dataframe_to_lower_triangle(df)
-    tri_matrix.index = index
-    tri_matrix.to_csv( os.path.join(outdir, filename + "_mat.csv"), mode="wt", header=False, index=True)
-    df.to_csv( os.path.join(outdir, "matrix.csv"), mode="w", header=False, index=True)
+    matrix_lower = dataframe_to_matrix_lower(df)
+    matrix_lower.index = index
+    matrix_lower.to_csv(full_path, mode="wt", header=header, index=True)
+    df.to_csv(full_path, mode="w", header=False, index=True)
 
 # Save similarity scores as 3 column csv
-def save_cols_to_csv(df, filename):
+## this can be rewriten using pandas melt
+def save_cols_to_csv(df, full_path):
     order = df.index
     df.columns = df.index
     columnar_output = []
@@ -174,7 +176,7 @@ def save_cols_to_csv(df, filename):
         columnar_output,
         columns=["First Sequence", "Second Sequence", "Identity Score"],
     )
-    columnar_df.to_csv(filename + "_cols.csv", mode="w", header=True, index=False)
+    columnar_df.to_csv(full_path, mode="w", header=True, index=False)
 
 
 def save_stats_to_csv(seq_stats, filename):
@@ -266,7 +268,7 @@ def process_data(
 
     out_dir = settings["out_dir"]
     cluster_method = settings["cluster_method"]
-
+    paths = fetch_docpaths(out_dir)
     if cluster_method is not None:
         new_order = get_linkage_method_order(dist_scores, cluster_method, order)
 
@@ -285,9 +287,9 @@ def process_data(
     set_stage("Postprocessing")
     print("Stage: Postprocessing")
 
-    save_cols_to_csv(df, os.path.join(out_dir, file_base))
-    save_stats_to_csv(seq_stats, os.path.join(out_dir, file_base))
-    save_matrix_to_csv(df, out_dir, file_base)
+    save_cols_to_csv(df, paths.columns)
+    save_stats_to_csv(seq_stats, paths.stats)
+    save_matrix_to_csv(df, paths.matrix_lower)
 
 
     set_stage("Finalizing")

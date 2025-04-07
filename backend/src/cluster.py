@@ -63,12 +63,13 @@ def get_clusters_dataframe(data, method, threshold, index):
 
 def make_cluster_path(matrix_path, method):
     output_dir = os.path.dirname(matrix_path)
-    file_name = os.path.basename(matrix_path)
-    file_base, _ = os.path.splitext(file_name)
-    file_name = file_base.replace("_mat", "")
-    file_base = os.path.splitext(os.path.basename(matrix_path))[0].removesuffix("_mat")
-    return os.path.join(output_dir, file_name + "_cluster_" + method + ".csv")
+    file_base = os.path.splitext(os.path.basename(matrix_path))[0]
+    
 
+    if file_base.endswith("_matrix_lower"):
+        file_base = file_base[:-13]
+        
+    return os.path.join(output_dir, f"{file_base}_cluster_{method}.csv")
 
 def export(matrix_path, threshold, method):
     output_file = make_cluster_path(matrix_path, method)
