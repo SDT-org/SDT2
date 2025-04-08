@@ -1,52 +1,37 @@
+import multiprocessing
 import os
 import sys
-
-current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
-sys.path.append(os.path.join(current_file_path, "../../"))
-sys.path.append(os.path.join(current_file_path, "."))
-from  doc_paths import DocPaths
-from multiprocessing import Lock, Manager, Pool, cpu_count as get_cpu_count
-from tempfile import TemporaryDirectory
-from platformdirs import user_documents_dir
-from utils import get_child_process_info, make_doc_id
-from process_data import process_data, save_cols_to_csv
-from document_state import DocState, save_doc_settings
-from app_settings import add_recent_file, load_app_settings, remove_recent_file, save_app_settings
-from export_data import do_export_data, prepare_export_data
-from save_document import pack_document, unpack_document
-from app_state import create_app_state
-from validations import validate_fasta
-import cluster
 import platform
 from Bio import SeqIO
 import psutil
 import webview
+import tempfile
+import shutil
 import json
 import pandas as pd
-from pandas import read_csv, DataFrame
-from numpy import eye, where, nan, nanmin, nanmax
+import numpy as np
+import base64
+import urllib.parse
+import shutil
 import mimetypes
+import cluster
 from time import perf_counter
-from shutil import copy
-from doc_paths import fetch_docpaths
+from app_state import create_app_state
+from validations import validate_fasta
+from process_data import process_data
+from multiprocessing import Lock, Manager, Pool, cpu_count
+from  doc_paths import fetch_docpaths
 
-from debug import open_doc_folder
-from config import app_version, dev_frontend_host
-from constants import matrix_filetypes, default_window_title
-from heatmap import (
-    dataframe_to_matrix_lower,
-    matrix_lower_to_full_matrix,
-    numpy_to_matrix_lower,
-)
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+from config import app_version
 
-is_compiled = "__compiled__" in globals()
-is_macos = platform.system() == "Darwin"
-temp_dir = TemporaryDirectory()
-
-window_title_suffix = "" if is_macos else " - SDT2"
+is_nuitka = "__compiled__" in globals()
+temp_dir = tempfile.TemporaryDirectory()
+paths = fetch_docpaths(temp_dir)
+default_window_title = "Sequence Demarcation Tool 2 Beta"
 
 try:
-    cpu_count = get_cpu_count()
+    cpu_count = cpu_count()
 except:
     cpu_count = 1
 
@@ -55,8 +40,7 @@ mimetypes.add_type("text/fasta", ".fas")
 mimetypes.add_type("text/fasta", ".faa")
 mimetypes.add_type("text/fasta", ".fnt")
 mimetypes.add_type("text/fasta", ".fa")
-mimetypes.add_type("application/vnd.sdt", ".sdt")
-
+matrix_filetypes = ("text/csv", "application/vnd.ms-excel", "text/plain")
 
 window = None
 pool = None
@@ -64,11 +48,28 @@ cancelled = None
 start_time = None
 
 
+def get_matrix_path():
+    state = get_state()
+
+    if state.filetype == "text/fasta":
+        return paths.full_matrix
+    else:
+        return state.filename[0]
 
 
-def get_matrix_path(state):
-    doc_paths = fetch_docpaths(state.tempdir_path)
-    return doc_paths.full_matrix
+def find_source_files(prefix, suffixes):
+    state = get_state()
+    with os.scandir(state.tempdir_path) as entries:
+        for entry in entries:
+            if (
+                entry.is_file()
+                and entry.name.startswith(prefix)
+                and any(
+                    os.path.splitext(entry.name)[0].endswith(suffix)
+                    for suffix in suffixes
+                )
+            ):
+                yield entry
 
 
 def do_cancel_run():
@@ -85,12 +86,28 @@ def do_cancel_run():
         pool.terminate()
         pool.join()
 
-    set_state(active_run_document_id=None)
+    set_state(
+        view="runner", progress=0, pair_progress=0, pair_count=0, estimated_time=None
+    )
 
 
 def assert_window():
     assert window is not None
     return window
+
+
+def save_image_from_api(data, format, destination):
+
+    encoded = data.split(",")[1]
+
+    if format == "svg":
+        data = urllib.parse.unquote(encoded)
+        with open(destination, "w") as file:
+            file.write(data)
+    else:
+        data = base64.b64decode(encoded)
+        with open(destination, "wb") as file:
+            file.write(data)
 
 
 def get_compute_stats(filename):
@@ -105,148 +122,15 @@ def get_compute_stats(filename):
     ) + 100000000  # Each process has a minimum of about 100MB
     available_memory = psutil.virtual_memory().available
     total_cores = state.platform["cores"]
-    min_cores = available_memory // required_memory
-
-    if required_memory > available_memory:
-        min_cores = 0
 
     return {
         "recommended_cores": min(
             max(round(total_cores * 0.75), 1),
-            min_cores,
+            available_memory // required_memory,
         ),
         "required_memory": required_memory,
         "available_memory": available_memory,
     }
-
-
-def handle_open_file(filepath: str, doc_id: str | None):
-    if not os.path.exists(filepath):
-        remove_recent_file(filepath)
-        raise Exception(f"File not found: {filepath}")
-
-    basename = os.path.basename(filepath)
-    filetype, _ = mimetypes.guess_type(basename)
-
-    if doc_id == None:
-        for doc in get_state().documents:
-            if doc.filename == filepath:
-                return [doc.id, doc.filename]
-
-        doc_id = make_doc_id()
-
-    unique_dir = os.path.join(temp_dir.name, doc_id)
-    os.makedirs(unique_dir, exist_ok=True)
-
-    if filetype == "application/vnd.sdt":
-        unpack_document(filepath, unique_dir)
-
-        if not os.path.exists(os.path.join(unique_dir, "matrix.csv")):
-            remove_recent_file(filepath)
-            raise Exception(f"File is not a valid SDT file: {filepath}")
-
-        new_document(
-            doc_id,
-            view="viewer",
-            filename=filepath,
-            filemtime=os.path.getmtime(filepath),
-            tempdir_path=unique_dir,
-            basename=basename,
-            pair_progress=0,
-            pair_count=0,
-            filetype=filetype,
-        )
-        add_recent_file(filepath)
-        return [doc_id, filepath]
-
-    if filetype in matrix_filetypes:
-        copy(filepath, unique_dir)
-
-        # Maybe can remove this if we can find a way to make pandas
-        # infer the max column length based on the latest column length
-        with open(filepath, "r") as temp_f:
-            col_count = [len(l.split(",")) for l in temp_f.readlines()]
-            column_names = [i for i in range(0, max(col_count))]
-
-            df = read_csv(
-                filepath,
-                delimiter=",",
-                index_col=0,
-                header=None,
-                names=column_names,
-            )
-
-            # Test that the file is gonna work in get_data
-            df.index.tolist()
-            data = df.to_numpy()
-            diag_mask = eye(data.shape[0], dtype=bool)
-            data_no_diag = where(diag_mask, nan, data)
-            int(nanmin(data_no_diag))
-            int(nanmax(data_no_diag))
-
-            save_cols_to_csv(
-                df,
-                os.path.join(
-                    unique_dir,
-                    os.path.splitext(basename)[0].removesuffix("_mat"),
-                ),
-            )
-
-            # We need a full matrix for doing things but we don't have
-            # it yet because this was a .txt/.csv lower triangle matrix
-            full_matrix_dataframe = matrix_lower_to_full_matrix(df)
-            full_matrix_dataframe.to_csv(
-                os.path.join(unique_dir, "matrix.csv"),
-                mode="w",
-                header=False,
-                index=True,
-            )
-
-            new_document(
-                doc_id,
-                view="viewer",
-                filename=filepath,
-                filemtime=os.path.getmtime(filepath),
-                tempdir_path=unique_dir,
-                basename=basename,
-                pair_progress=0,
-                pair_count=0,
-                filetype=filetype,
-            )
-
-            add_recent_file(filepath)
-
-            return [doc_id, filepath]
-
-    else:
-        valid, message = validate_fasta(filepath, filetype)
-
-        if valid:
-            compute_stats = get_compute_stats(filepath)
-            new_document(
-                doc_id,
-                view="runner",
-                filename=filepath,
-                filetype=filetype,
-                filemtime=os.path.getmtime(filepath),
-                tempdir_path=unique_dir,
-                basename=basename,
-                validation_error_id=None,
-                pair_progress=0,
-                pair_count=0,
-                stage="",
-                progress=0,
-                compute_stats=compute_stats,
-            )
-
-            if len(get_state().documents) == 1:
-                remove_empty_documents()
-
-            add_recent_file(filepath)
-
-            return [doc_id, str(filepath)]
-        else:
-            raise Exception(message)
 
 
 class Api:
@@ -260,83 +144,117 @@ class Api:
         manual_window()
 
     def app_config(self):
-        return {"appVersion": app_version, "userPath": os.path.expanduser("~")}
-
-    def app_settings(self):
-        settings = load_app_settings()
-        settings["recent_files"] = [
-            f for f in settings["recent_files"] if os.path.exists(f)
-        ]
-        save_app_settings(settings)
-        return settings
+        return json.dumps({"appVersion": app_version})
 
     def processes_info(self):
-        return json.dumps(get_child_process_info())
+        process = psutil.Process()
+        info = []
 
-    def get_available_memory(self):
-        return psutil.virtual_memory().available
+        for child in process.children(recursive=True):
+            try:
+                cpu_percent = child.cpu_percent(interval=0.1)
+                memory = child.memory_info().rss
+                info.append((child.pid, cpu_percent, memory, child.nice()))
+            except:
+                pass
+        return json.dumps(info)
 
-    def open_file(self, filepath: str, doc_id: str | None = None):
-        return handle_open_file(filepath=filepath, doc_id=doc_id)
+    def save_image(self, args: dict):
+        state = get_state()
+        file_name = f"{state.basename}.{args['format']}"
 
-    def open_file_dialog(self, doc_id: str | None = None, filepath: str | None = None):
-        if filepath is None:
-            filepath = ""
+        save_path = webview.windows[0].create_file_dialog(
+            dialog_type=webview.SAVE_DIALOG,
+            directory=state.filename[0],
+            save_filename=file_name,
+        )
+
+        if not save_path:
+            return
+
+        save_image_from_api(
+            data=args["data"],
+            format=args["format"],
+            destination=save_path,
+        )
+
+    def open_file_dialog(self):
         result = webview.windows[0].create_file_dialog(
             webview.OPEN_DIALOG,
             allow_multiple=False,
-            directory=os.path.dirname(filepath),
             file_types=(
-                "Compatible file (*.fasta;*.fas;*.faa;*.fnt;*.fa;*.sdt;*.csv;*.txt)",
-                "SDT file (*.sdt)",
+                "Compatible file (*.fasta;*.fas;*.faa;*.fnt;*.fa;*.csv;*.txt)",
                 "FASTA file (*.fasta;*.fas;*.faa;*.fnt;*.fa)",
                 "SDT2 Matrix file (*.csv)",
                 "SDT1 Matrix file (*.txt)",
             ),
         )
+        print(result)
         if not result:
-            return ""
+            raise Exception("filename result was None")
+        basename = os.path.basename(result[0])
+        filetype, _ = mimetypes.guess_type(basename)
 
-        if isinstance(result, str):
-            result = result
+        if filetype in matrix_filetypes:
+            set_state(
+                view="viewer",
+                filename=result,
+                tempdir_path=os.path.dirname(result[0]),
+                basename=basename,
+                pair_progress=0,
+                pair_count=0,
+                filetype=filetype,
+            )
+            assert_window().title = f"SDT2 - {get_state().basename}"
         else:
-            result = result[0]
+            assert_window().title = default_window_title
+            valid, message = validate_fasta(result[0], filetype)
 
-        return handle_open_file(result, doc_id)
+            if valid:
+                compute_stats = get_compute_stats(result[0])
+                set_state(
+                    view="runner",
+                    filename=result,
+                    filetype=filetype,
+                    basename=basename,
+                    validation_error_id=None,
+                    pair_progress=0,
+                    pair_count=0,
+                    stage="",
+                    progress=0,
+                    tempdir_path=temp_dir.name,
+                    compute_stats=compute_stats,
+                )
+            else:
+                set_state(
+                    view="runner",
+                    validation_error_id=message,
+                    filename="",
+                    basename="",
+                    filetype="",
+                    compute_stats=None,
+                )
 
-    def save_file_dialog(self, filename: str, directory: str | None = None):
-        if directory == None:
-            directory = user_documents_dir()
-
-        result = webview.windows[0].create_file_dialog(
-            webview.SAVE_DIALOG, directory=directory, save_filename=filename
-        )
-
-        output_path = None
-
+    def select_alignment_output_path(self):
+        result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG)
+        print(result)
         if result:
             if isinstance(result, str):
-                output_path = result
+                set_state(alignment_output_path=result)
             else:
-                output_path = result[0]
+                set_state(alignment_output_path=result[0])
+        else:
+            raise Exception("path result was None")
 
-        return output_path
-
-    def select_path_dialog(self, directory: str | None = None):
-        if directory == None:
-            directory = ""
-
-        result = webview.windows[0].create_file_dialog(
-            webview.FOLDER_DIALOG, directory=directory
-        )
-        output_path = None
-
+    def select_export_path(self):
+        result = webview.windows[0].create_file_dialog(webview.FOLDER_DIALOG)
         if result:
             if isinstance(result, str):
-                output_path = result
+                set_state(export_path=result)
             else:
-                output_path = result[0]
-        return output_path
+                set_state(export_path=result[0])
+        else:
+            raise Exception("path result was None")
 
     def get_state(self):
         return get_state()._asdict()
@@ -345,43 +263,38 @@ class Api:
         reset_state()
         assert_window().title = default_window_title
 
-    def start_run(self, args: dict):
+    def run_process_data(self, args: dict):
         global pool, cancelled, start_time
-
-        if get_state().active_run_document_id:
-            raise Exception("Multiple runs are not supported")
-
-        doc_id = args["doc_id"]
-        doc = get_document(doc_id)
-        if doc == None:
-            raise Exception(f"could not find document: {args['doc_id']}")
+        set_state(view="loader")
 
         if get_state().debug:
             print("\nAPI args:", args)
 
         settings = dict()
-        settings["input_file"] = doc.filename
-        settings["out_dir"] = doc.tempdir_path
+        settings["input_file"] = get_state().filename[0]
+        settings["out_dir"] = temp_dir.name
 
+        if args.get("cluster_method") == "Neighbor-Joining":
+            settings["cluster_method"] = "nj"
+        if args.get("cluster_method") == "UPGMA":
+            settings["cluster_method"] = "upgma"
         if args.get("cluster_method") == "None":
-            settings["cluster_method"] = None
-        else:
-            settings["cluster_method"] = args.get("cluster_method")
+            settings["cluster_method"] = "none"
 
         compute_cores = args.get("compute_cores")
         assert isinstance(compute_cores, int)
-        settings["num_processes"] = max(min(compute_cores, get_cpu_count()), 1)
+        settings["num_processes"] = max(
+            min(compute_cores, multiprocessing.cpu_count()), 1
+        )
 
-        alignment_export_path = args.get("alignment_export_path")
-        if args.get("export_alignments") == "True" and alignment_export_path:
-            print("Saving alignments...", args.get("export_alignments"))
-            settings["aln_out"] = str(alignment_export_path)
+        alignment_output_path = get_state().alignment_output_path
+
+        if alignment_output_path:
+            settings["aln_out"] = str(alignment_output_path)
 
         if get_state().debug:
             print("\nRun settings:", settings)
             print(f"Number of processes: {settings['num_processes']}")
-
-        set_state(active_run_document_id=doc_id)
 
         with Pool(
             settings["num_processes"],
@@ -395,24 +308,19 @@ class Api:
                 def increment_pair_progress(counter, lock, start_time):
                     with lock:
                         counter.value += 1
-                    doc = get_document(doc_id)
-                    pair_count = doc.pair_count if doc else 0
+                    pair_count = get_state().pair_count
                     if pair_count and pair_count > 0:
-                        progress = round((counter.value / pair_count) * 100)
+                        progress = (counter.value / pair_count) * 100
                         elapsed = perf_counter() - start_time
                         estimated_total = elapsed * (pair_count / counter.value)
                         estimated = round(estimated_total - elapsed)
-
-                        update_document(
-                            doc_id,
-                            skip_callbacks=True,
+                        set_state(
                             progress=progress,
                             pair_progress=counter.value,
                             estimated_time=estimated,
                         )
 
-                update_document(doc_id, view="loader")
-
+                assert_window().title = f"SDT2 - Analyzing {get_state().basename}"
                 process_data(
                     settings=settings,
                     pool=pool,
@@ -420,32 +328,38 @@ class Api:
                     increment_pair_progress=lambda: increment_pair_progress(
                         counter, lock, start_time
                     ),
-                    set_stage=lambda stage: update_document(doc_id, stage=stage),
-                    set_pair_count=lambda pair_count: update_document(
-                        doc_id, pair_count=pair_count
-                    ),
+                    set_stage=lambda stage: set_state(stage=stage),
+                    set_pair_count=lambda pair_count: set_state(pair_count=pair_count),
                 )
 
                 if cancelled.value == False:
-                    update_document(doc_id, view="viewer")
-                    set_state(active_run_document_id=None)
+                    set_state(view="viewer")
+                    assert_window().title = f"SDT2 - {get_state().basename}"
 
-    def cancel_run(self, doc_id: str, run_settings: str):
+    def cancel_run(self):
         do_cancel_run()
 
-        if run_settings == "preserve":
-            update_document(
-                doc_id,
-                view="runner",
-                progress=0,
-                pair_progress=0,
-                pair_count=0,
-                estimated_time=None,
-                stage="",
-                sequences_count=0,
-            )
-        elif run_settings == "clear":
-            reset_state()
+    def load_data(self):
+        matrix_path = get_matrix_path()
+
+        # https://stackoverflow.com/a/57824142
+        # SDT1 matrix CSVs do not have padding for columns
+        with open(matrix_path, "r") as temp_f:
+            col_count = [len(l.split(",")) for l in temp_f.readlines()]
+            column_names = [i for i in range(0, max(col_count))]
+
+        df = pd.read_csv(
+            matrix_path, delimiter=",", index_col=0, header=None, names=column_names
+        )
+        tickText = df.index.tolist()
+        count = len(tickText)
+        set_state(sequences_count=count)
+        data = df.to_numpy()
+        diag_mask = np.eye(data.shape[0], dtype=bool)
+        data_no_diag = np.where(diag_mask, np.nan, data)
+        min_val = int(np.nanmin(data_no_diag))
+        max_val = int(np.nanmax(data_no_diag))
+        return data, tickText, min_val, max_val
 
     def confirm_overwrite(self, destination_files):
         files_to_overwrite = [f for f in destination_files if os.path.exists(f)]
@@ -462,293 +376,199 @@ class Api:
         return assert_window().create_confirmation_dialog("Warning", message)
 
     def export_data(self, args: dict):
-        doc = get_document(args["doc_id"])
-        if doc == None:
-            raise Exception(f"could not find document: {args['doc_id']}")
+        state = get_state()
+        matrix_path = get_matrix_path()
 
-        matrix_path = get_matrix_path(doc)
-        export_path = args["export_path"]
-        destination_files, image_destinations, image_format, prefix, suffixes = (
-            prepare_export_data(export_path, matrix_path, doc, args)
+        if state.filetype == "text/fasta":
+            prefix = os.path.splitext(state.basename)[0]
+            suffixes = ["_cols", "_mat", "_summary", "_tree"]
+        else:
+            prefix = os.path.splitext(state.basename)[0].removesuffix("_mat")
+            suffixes = ["_mat"]
+
+        if args["output_cluster"] == True:
+            suffixes.append("_cluster")
+            cluster.export(
+                matrix_path,
+                args["cluster_threshold_one"],
+                args["cluster_threshold_two"],
+            )
+
+        image_format = str(args["image_format"]).lower()
+        saveable_formats = ["jpeg", "svg", "png"]
+
+        if image_format not in saveable_formats:
+            raise Exception(f"Expected image_format to be one of {saveable_formats}")
+
+        heatmap_image_filename = (
+            os.path.basename(os.path.splitext(state.basename)[0]).removesuffix("_fasta")
+            + "_heatmap."
+            + image_format
+        )
+        distribution_image_filename = (
+            os.path.basename(os.path.splitext(state.basename)[0]).removesuffix("_fasta")
+            + "_distribution."
+            + image_format
+        )
+        heatmap_image_destination = os.path.join(
+            state.export_path, heatmap_image_filename
+        )
+        distribution_image_destination = os.path.join(
+            state.export_path, distribution_image_filename
+        )
+
+        destination_files = [
+            os.path.join(state.export_path, entry.name)
+            for entry in find_source_files(prefix, suffixes)
+        ]
+        destination_files.extend(
+            [heatmap_image_destination, distribution_image_destination]
         )
 
         if not self.confirm_overwrite(destination_files):
             return False
 
-        do_export_data(
-            export_path, image_destinations, image_format, doc, prefix, suffixes, args
+        for entry in find_source_files(prefix, suffixes):
+            destination_path = os.path.join(state.export_path, entry.name)
+            temp_destination_path = destination_path + ".tmp"
+            shutil.copy2(entry.path, temp_destination_path)
+            os.replace(temp_destination_path, destination_path)
+
+        save_image_from_api(
+            data=args["heatmap_image_data"],
+            format=image_format,
+            destination=heatmap_image_destination,
+        )
+        save_image_from_api(
+            data=args["distribution_image_data"],
+            format=image_format,
+            destination=distribution_image_destination,
         )
 
         return True
 
-    def load_data_and_stats(self, doc_id: str):
-        doc = get_document(doc_id)
-        if doc == None:
-            raise Exception(f"could not find document: {doc_id}")
-
-        matrix_path = get_matrix_path(doc)
-
-        if doc.filetype == "application/vnd.sdt":
-            file_base = os.path.splitext(os.path.basename(matrix_path))[0].removesuffix(
-                "_mat"
-            )
-        else:
-            file_base = os.path.splitext(doc.basename)[0]
-
-        with open(matrix_path, "r") as temp_f:
-            col_count = [len(l.split(",")) for l in temp_f.readlines()]
-            column_names = [i for i in range(0, max(col_count))]
-
-        stats_path = os.path.join(doc.tempdir_path, f"{file_base}_stats.csv")
-        if os.path.exists(stats_path):
-            stats_df = read_csv(stats_path, header=0)
-
-        else:
-            stats_df = DataFrame([])
-
-        cols_dir = doc.tempdir_path
-        cols_file_base = file_base.removesuffix("_mat")
-        cols_path = os.path.join(cols_dir, f"{cols_file_base}_cols.csv")
-
-        if os.path.exists(cols_path):
-            cols_data = read_csv(cols_path, skiprows=1).values.tolist()
-
-            id_map = {}
-            identity_scores = []
-
-            for row in cols_data:
-                a, b = row[:2]
-                if a not in id_map:
-                    id_map[a] = len(id_map)
-                if b not in id_map:
-                    id_map[b] = len(id_map)
-                identity_scores.append([id_map[a], id_map[b]] + list(row[2:]))
-
-            ids = list(id_map.keys())
-        else:
-            ids = []
-            identity_scores = []
-
-        df = read_csv(
-            matrix_path, delimiter=",", index_col=0, header=None, names=column_names
-        )
-        tick_text = df.index.tolist()
-        update_document(doc_id, sequences_count=len(tick_text))
-        data = df.to_numpy()
-
-        diag_mask = eye(data.shape[0], dtype=bool)
-        data_no_diag = where(diag_mask, nan, data)
-        min_val = int(nanmin(data_no_diag))
-        max_val = int(nanmax(data_no_diag))
-
-        # TODO might be able to make one tick text object for both to use?
-        return data, tick_text, min_val, max_val, ids, identity_scores, stats_df
-
-    def get_data(self, doc_id: str):
-        data, tick_text, min_val, max_val, ids, identity_scores, stats_df = (
-            self.load_data_and_stats(doc_id)
-        )
-        heat_data = DataFrame(data, index=tick_text)
-        heat_data = dataframe_to_matrix_lower(heat_data)
+    def get_heatmap_data(self):
+        data, tickText, min_val, max_val = self.load_data()
+        heat_data = pd.DataFrame(data, index=tickText)
         parsedData = heat_data.values.tolist()
-
-        data_to_dump = dict(
-            metadata=dict(minVal=min_val, maxVal=max_val),
-            data=([tick_text] + parsedData),
-            ids=ids,
-            identity_scores=identity_scores,
-            full_stats=stats_df.values.tolist(),
-        )
-        return json.dumps(data_to_dump)
-
-    def get_clustermap_data(self, doc_id: str, threshold: float, method: str):
-        doc = get_document(doc_id)
-        if doc is None:
-            raise Exception(f"Could not find document: {doc_id}")
-
-        matrix_path = get_matrix_path(doc)
-
-        matrix_df = pd.read_csv(matrix_path, delimiter=",", index_col=0, header=None)
-        matrix_np = matrix_df.to_numpy()
-        row_ids = matrix_df.index.tolist()
-
-        # Get cluster assignments
-        seqid_clusters_df = cluster.get_clusters_dataframe(
-            matrix_np, method, threshold, row_ids
-        )
-
-        seqid_clusters_df = seqid_clusters_df.rename(
-            columns={
-                str(seqid_clusters_df.columns[0]): "id",
-                str(seqid_clusters_df.columns[1]): "cluster",
-            }
-        )
-
-        clusters = seqid_clusters_df["cluster"].tolist()
-        reorder_clusters = cluster.order_clusters_sequentially(clusters)
-        seqid_clusters_df["cluster"] = reorder_clusters
-
-        # Sort by group
-        seqid_clusters_df = seqid_clusters_df.sort_values(by=["cluster", "id"])
-        sorted_ids = seqid_clusters_df["id"].tolist()
-
-        #@ switching from list comp to dict lookup for hashin speed
-        #Create index map
-        id_to_original_index = {id_val: i for i, id_val in enumerate(row_ids)}
-        # Get the new order using the map 
-        new_order = [id_to_original_index[id_val] for id_val in sorted_ids]
-
-        # Reorder the matrix using NumPy fancy indexing 
-        reordered_matrix_np = matrix_np[new_order, :][:, new_order]
-
-        reordered_data = {
-            "matrix": numpy_to_matrix_lower(reordered_matrix_np).tolist(),
-            "tickText": sorted_ids,
-        }
-
-        cluster_data = seqid_clusters_df.to_dict(orient="records")
-
-        return {
-            "matrix": reordered_data["matrix"],
-            "tickText": reordered_data["tickText"],
-            "clusterData": cluster_data,
-        }
-
-    def new_doc(self):
-        id = make_doc_id()
-        new_document(id)
-        return id
-
-    def get_doc(self, doc_id: str):
-        doc = get_document(doc_id)
-        return doc._asdict() if doc else None
-
-    def save_doc(self, doc_id: str, path: str, save_as: bool = False):
-        doc = get_document(doc_id)
-        if doc == None:
-            raise Exception(f"Expected to find document: {doc_id}")
-
-        files = [
-            os.path.join(doc.tempdir_path, file)
-            for file in os.listdir(doc.tempdir_path)
-        ]
-
-        pack_document(path, files)
-
-        if save_as == False:
-            basename = os.path.basename(path)
-            update_document(
-                doc_id, filename=path, basename=basename, filetype="application/vnd.sdt"
+        return json.dumps(
+            dict(
+                metadata=dict(minVal=min_val, maxVal=max_val),
+                data=([tickText] + parsedData),
             )
-            add_recent_file(path)
-
-    def save_doc_settings(self, args: dict):
-        doc = get_document(args["id"])
-        if doc == None:
-            raise Exception(f"Expected to find document: {args['id']}")
-        update_document(
-            args["id"],
-            dataView=args["dataView"],
-            heatmap=args["heatmap"],
-            clustermap=args["clustermap"],
-            distribution=args["distribution"],
         )
-        doc = get_document(args["id"])
-        if doc == None:
-            raise Exception(f"Expected to find document: {args['id']}")
-        save_doc_settings(doc)
 
-    def close_doc(self, doc_id: str):
-        remove_document(doc_id)
+    def get_line_histo_data(self):
+        # caluclating hist data manually to allow for line and scatter
+        data, _, min_val, max_val = self.load_data()
+        # Create a mask for the diagonal elements
+        diag_mask = np.eye(data.shape[0], dtype=bool)
 
-    def set_window_title(self, title: str):
-        assert_window().title = f"{title}{window_title_suffix}"
+        # Exclude the diagonal elements
+        data_no_diag = np.where(diag_mask, np.nan, data)
 
-    def open_doc_folder(self, doc_id: str):
-        doc = get_document(doc_id)
-        if doc == None:
-            raise Exception(f"Expected to find document: {doc_id}")
-        return open_doc_folder(doc)
+        # Flatten the data and remove NaN values
+        clean_vals = data_no_diag[~np.isnan(data_no_diag)].flatten()
+        clean_vals = np.rint(clean_vals)
+        # get unique values count number of occurances
+        uniquev, countsv = np.unique(clean_vals, return_counts=True)
+        props = np.around(countsv / countsv.sum(), 2)
+        # subtract 1 from minimum value for chart clarity
+        min_val = min_val - 1
+        max_val = max_val + 2
+
+        # create list of range values with 102 as max to ensure the 100 values fully display
+        range_values = np.arange(min_val, max_val, 1)
+
+        # create empty dict of with numerical keys populated from range_values
+        proportion_dict = {int(val): float(0) for val in range_values}
+        # populate the values of the dictionary  with proportions stores in props as the correstpond to uniquev
+        proportion_dict.update(
+            {int(val): float(prop) for val, prop in zip(uniquev, props)}
+        )
+
+        data_to_dump = {
+            "x": list(proportion_dict.keys()),
+            "y": list(proportion_dict.values()),
+        }
+
+        return json.dumps(data_to_dump)
 
 
 def file_exists(path):
     return os.path.exists(os.path.join(os.path.dirname(__file__), path))
 
 
-def get_html_path(filename="index.html"):
-    if is_compiled:
-        if file_exists(f"./gui/{filename}"):
-            return f"./gui/{filename}"
-        raise Exception(f"{filename} not found")
-    else:
-        return f"{dev_frontend_host}/{filename}"
+def get_entrypoint(filename="index.html"):
+    if file_exists(f"./gui/{filename}"):
+        return f"./gui/{filename}"
+    elif file_exists(f"../../gui/{filename}"):
+        return f"../../gui/{filename}"
+
+    raise Exception(f"{filename} not found")
 
 
-def push_backend_state(window: webview.Window | None):
-    # Ensure window exists before use (handles potential None type)
-    if window is None:
-        return
-    state = get_state()
-    dict_state = lambda t: {
-        f: [d._asdict() for d in getattr(t, f)] if f == "documents" else getattr(t, f)
-        for f in t._fields
-    }
-    js_app_state = json.dumps(dict(state=dict_state(state)))
-    window.evaluate_js(
-        f"document.dispatchEvent(new CustomEvent('sync-state', {{ detail: {js_app_state} }}))"
-    )
+def update_client_state(window: webview.Window):
+    window.evaluate_js("syncAppState()")
 
 
 def on_closed():
-    # map(lambda doc: doc.cleanup(), get_state().documents)
+    temp_dir.cleanup()
     do_cancel_run()
     os._exit(0)
 
 
 def about_window():
-    webview.create_window("About", get_html_path("about.html"), js_api=api)
+    webview.create_window("About", get_entrypoint("about.html"), js_api=api)
 
 
 def manual_window():
-    webview.create_window("SDT2 Manual", get_html_path("manual.html"))
+    webview.create_window("SDT2 Manual", get_entrypoint("manual.html"))
 
 
+entry = get_entrypoint()
 if __name__ == "__main__":
     api = Api()
 
     window = webview.create_window(
         default_window_title,
-        url=get_html_path(),
+        entry,
         js_api=api,
         # TODO: store last window size and position
         width=1200,
         height=900,
         min_size=(640, 480),
-        confirm_close=False,
-        # frameless=True,
-        # easy_drag=False,
+        confirm_close=True,
         # maximized=True
     )
 
     window.events.closed += on_closed
 
-    (
-        get_state,
-        set_state,
-        reset_state,
-        new_document,
-        get_document,
-        update_document,
-        remove_document,
-        remove_empty_documents,
-    ) = create_app_state(
+    get_state, set_state, reset_state = create_app_state(
         debug=os.getenv("DEBUG", "false").lower() == "true",
+        tempdir_path=temp_dir.name,
         platform=dict(
             platform=platform.platform(),
-            cores=get_cpu_count(),
+            cores=multiprocessing.cpu_count(),
             memory=psutil.virtual_memory().total,
         ),
-        on_update=lambda _: push_backend_state(window),
+        on_update=lambda _: update_client_state(window),
     )
 
-    webview.start(debug=get_state().debug, private_mode=False)
+    # menu_items = [
+    #     webview_menu.Menu(
+    #         "File",
+    #         [
+    #             webview_menu.MenuAction("Select file...", api.open_file_dialog),
+    #         ],
+    #     ),
+    #     webview_menu.Menu(
+    #         "Help",
+    #         [
+    #             webview_menu.MenuAction("About SDT2", about_window),
+    #             webview_menu.MenuAction("Manual", manual_window),
+    #         ],
+    #     ),
+    # ]
+
+    webview.start(debug=get_state().debug)

@@ -184,7 +184,8 @@ def save_stats_to_csv(seq_stats, filename):
     for key, value in seq_stats.items():
         stats_list.append([key, value[0], value[1]])
     stats_df = DataFrame(stats_list, columns=["Sequence", "GC %", "Sequence Length"])
-    stats_df.to_csv(filename + "_stats.csv", mode="w", header=True, index=False)
+    # Use the filename directly as it already contains the full path
+    stats_df.to_csv(filename, mode="w", header=True, index=False)
 
 def friendly_total_time(total_time):
     m, s = divmod(total_time, 60)
@@ -289,7 +290,7 @@ def process_data(
 
     save_cols_to_csv(df, paths.columns)
     save_stats_to_csv(seq_stats, paths.stats)
-    save_matrix_to_csv(df, paths.matrix_lower)
+    save_matrix_to_csv(df, paths.full_matrix)
 
 
     set_stage("Finalizing")
@@ -305,6 +306,6 @@ def process_data(
         end_counter
     )
 
-    with open(os.path.join(out_dir, f"{file_base}_summary.txt"), "w") as file:
+    with open(paths.summary, "w") as file:
         file.write(save_output_summary)
     print(f"Elapsed time: {friendly_total_time(end_counter - start_counter)}")
