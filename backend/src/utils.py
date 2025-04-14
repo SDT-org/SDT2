@@ -1,6 +1,10 @@
 import psutil
 from uuid import uuid4
 from hashlib import sha256
+import shutil
+import subprocess
+import platform
+
 
 def get_child_process_info():
     process = psutil.Process()
@@ -16,5 +20,28 @@ def get_child_process_info():
 
     return info
 
+
 def make_doc_id() -> str:
     return str(uuid4())
+
+
+def open_folder(path: str):
+    system = platform.system().lower()
+
+    if system == "darwin":
+        cmd = ["open", path]
+    elif system == "windows":
+        cmd = ["explorer", path]
+        shell = True
+    elif system == "linux":
+        for file_manager in ["xdg-open", "gnome-open", "kde-open", "gio"]:
+            if shutil.which(file_manager):
+                cmd = [file_manager, path]
+                break
+        else:
+            raise OSError("Could not find a file manager to open the folder")
+    else:
+        raise OSError(f"Unsupported platform: {system}")
+
+    shell = system == "windows"
+    subprocess.Popen(cmd, close_fds=True, shell=shell)

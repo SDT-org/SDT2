@@ -1,4 +1,3 @@
-import os
 from tempfile import TemporaryDirectory
 import numpy as np
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
@@ -8,6 +7,7 @@ from scipy.spatial.distance import squareform, pdist
 from sklearn.manifold import MDS
 import time
 from joblib import Memory
+
 cache_dir = TemporaryDirectory()
 memory = Memory(cache_dir.name, verbose=1)
 
@@ -37,11 +37,7 @@ def calculate_linkage(data, method) -> np.ndarray:
 
 
 def get_linkage(data: np.ndarray, method: str) -> np.ndarray:
-    start = time.perf_counter()
-    result = calculate_linkage(data, method)
-    end = time.perf_counter()
-    print(f"Calculate linkage took {end - start:0.4f} seconds")
-    return result
+    return calculate_linkage(data, method)
 
 
 def get_linkage_method_order(data, method, index):
@@ -61,19 +57,7 @@ def get_clusters_dataframe(data, method, threshold, index):
     return cluster_data_to_dataframe(cluster_data, threshold)
 
 
-def make_cluster_path(matrix_path, method):
-    output_dir = os.path.dirname(matrix_path)
-    file_base = os.path.splitext(os.path.basename(matrix_path))[0]
-    
-
-    if file_base.endswith("_matrix_lower"):
-        file_base = file_base[:-13]
-        
-    return os.path.join(output_dir, f"{file_base}_cluster_{method}.csv")
-
-def export(matrix_path, threshold, method):
-    output_file = make_cluster_path(matrix_path, method)
-
+def export(matrix_path, cluster_path, threshold, method):
     with open(matrix_path, "r") as temp_f:
         col_count = [len(l.split(",")) for l in temp_f.readlines()]
         column_names = [i for i in range(0, max(col_count))]
@@ -86,7 +70,7 @@ def export(matrix_path, threshold, method):
     data = np.round(data, 2)
 
     df_result = get_clusters_dataframe(data, method, threshold, index)
-    df_result.to_csv(output_file, index=False)
+    df_result.to_csv(cluster_path, index=False)
 
     return df_result
 

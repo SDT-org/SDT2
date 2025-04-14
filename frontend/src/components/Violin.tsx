@@ -5,6 +5,7 @@ import createPlotlyComponent from "react-plotly.js/factory";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import type { DataSets, DistributionState } from "../distributionState";
 import { arrayMinMax } from "../helpers";
+import { useExportPlotly } from "../hooks/useExportPlotly";
 import {
   useRelayoutHideSubtitle,
   useRelayoutUpdateTitles,
@@ -81,7 +82,9 @@ export const Violin = ({
   const [minDataValue, maxDataValue] = arrayMinMax(dataSet);
   const updateTitles = useRelayoutUpdateTitles(updateSettings);
   useRelayoutHideSubtitle(!settings.showTitles);
-  console.log(settings.boxWidth);
+
+  const exportPlotly = useExportPlotly("distribution_violin");
+
   const hoverData = {
     scores: {
       index: 0,
@@ -270,6 +273,7 @@ export const Violin = ({
             margin: { l: 50, r: 50, t: 50, b: 50 },
           }}
           onRelayout={updateTitles}
+          onInitialized={exportPlotly}
           config={{
             responsive: true,
             displayModeBar: false,

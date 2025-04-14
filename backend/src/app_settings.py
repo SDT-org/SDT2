@@ -1,7 +1,6 @@
 import json
 import os
 from platformdirs import user_data_dir
-from doc_paths import fetch_docpaths
 current_version = 1
 
 default_settings = {

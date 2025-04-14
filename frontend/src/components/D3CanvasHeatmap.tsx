@@ -3,6 +3,7 @@ import React from "react";
 import { distinctColor } from "../colors";
 import { plotFontMonospace } from "../constants";
 import { getCellMetrics } from "../heatmapUtils";
+import { useExportCanvas } from "../hooks/useExportCanvas";
 import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapRenderProps } from "./Heatmap";
 
@@ -34,6 +35,11 @@ export const D3CanvasHeatmap = ({
 }: HeatmapRenderProps) => {
   const canvasRef =
     useHeatmapRef() as React.MutableRefObject<HTMLCanvasElement>;
+  const exportCanvas = useExportCanvas(
+    clusterData ? "clustermap" : "heatmap",
+    canvasRef,
+  );
+
   const [transform, setTransform] = React.useState(d3.zoomIdentity);
   const [tooltipData, setTooltipData] = React.useState<{
     x: number;
@@ -249,7 +255,12 @@ export const D3CanvasHeatmap = ({
         );
       });
     }
+
+    setTimeout(() => {
+      exportCanvas();
+    }, 0);
   }, [
+    exportCanvas,
     transform,
     data,
     scale,
@@ -349,6 +360,7 @@ export const D3CanvasHeatmap = ({
   return (
     <div style={{ position: "relative" }}>
       <canvas
+        id="heatmap-canvas"
         ref={canvasRef}
         style={{ background: "#fff" }}
         width={width}

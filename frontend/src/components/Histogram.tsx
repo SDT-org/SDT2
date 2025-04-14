@@ -4,6 +4,7 @@ import React from "react";
 import createPlotlyComponent from "react-plotly.js/factory";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import type { DataSets, DistributionState } from "../distributionState";
+import { useExportPlotly } from "../hooks/useExportPlotly";
 import {
   useRelayoutHideSubtitle,
   useRelayoutUpdateTitles,
@@ -40,6 +41,8 @@ export const Histogram = ({
 
   const updateTitles = useRelayoutUpdateTitles(updateSettings);
   useRelayoutHideSubtitle(!settings.showTitles);
+  const exportPlotly = useExportPlotly("distribution_histogram");
+
   const histogramTrace = React.useMemo(() => {
     const orientation = settings.plotOrientation;
     return {
@@ -129,6 +132,7 @@ export const Histogram = ({
             margin: { l: 50, r: 50, t: 50, b: 50 },
           }}
           onRelayout={updateTitles}
+          onInitialized={exportPlotly}
           config={{
             responsive: true,
             displayModeBar: false,

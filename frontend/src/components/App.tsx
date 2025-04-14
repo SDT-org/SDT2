@@ -1,3 +1,4 @@
+// import Plotly from "plotly.js-cartesian-dist-min";
 import React from "react";
 import { Button, type Key, Tab, TabList, Tabs } from "react-aria-components";
 import {
@@ -22,6 +23,7 @@ import { useSyncState } from "../hooks/useSyncState";
 import { Document } from "./Document";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { ExportModal } from "./ExportModal";
+import { Exporter } from "./Exporter";
 import { HeatmapRefProvider } from "./HeatmapRefProvider";
 import { MainMenu } from "./Menu";
 import { Select, SelectItem } from "./Select";
@@ -177,154 +179,171 @@ export const App = () => {
           {initialized &&
           appState.documents.length > 0 &&
           appState.activeDocumentId ? (
-            <div className="app-layout">
-              <div className="app-header">
-                <div className="app-header-left">
-                  <MainMenu />
-                  {activeDocument && activeDocument.view === "viewer" ? (
-                    <Button
-                      onPress={() => setLeftSidebarCollapsed((prev) => !prev)}
-                    >
-                      <span data-sr-only>
-                        {leftSidebarCollapsed
-                          ? "Expand sidebar"
-                          : "Collapse sidebar"}
-                      </span>
-                      {leftSidebarCollapsed ? (
-                        <TbLayoutSidebarLeftExpand size={18} />
-                      ) : (
-                        <TbLayoutSidebarLeftCollapse size={18} />
-                      )}
-                    </Button>
+            <Exporter
+              appState={appState}
+              setAppState={setAppState}
+              docState={activeDocument}
+              tabs={[
+                "heatmap",
+                "clustermap",
+                "distribution_histogram",
+                "distribution_violin",
+              ]}
+            >
+              <div className="app-layout">
+                <div className="app-header">
+                  <div className="app-header-left">
+                    <MainMenu />
+                    {activeDocument && activeDocument.view === "viewer" ? (
+                      <Button
+                        onPress={() => setLeftSidebarCollapsed((prev) => !prev)}
+                      >
+                        <span data-sr-only>
+                          {leftSidebarCollapsed
+                            ? "Expand sidebar"
+                            : "Collapse sidebar"}
+                        </span>
+                        {leftSidebarCollapsed ? (
+                          <TbLayoutSidebarLeftExpand size={18} />
+                        ) : (
+                          <TbLayoutSidebarLeftCollapse size={18} />
+                        )}
+                      </Button>
+                    ) : null}
+                  </div>
+                  <div className="app-header-middle">
+                    {tabView === "tabs" ? (
+                      <Tabs
+                        selectedKey={appState.activeDocumentId}
+                        onSelectionChange={setActiveDocumentId}
+                        className="document-tabs"
+                      >
+                        <TabList className="document-tablist" ref={tabListRef}>
+                          {appState.documents.map((doc, index) => (
+                            <Tab
+                              id={doc.id}
+                              key={doc.id}
+                              className="react-aria-Tab document-tab"
+                              ref={
+                                appState.documents.length - 1 === index
+                                  ? lastTabRef
+                                  : null
+                              }
+                            >
+                              <span
+                                className="tab-title"
+                                data-modified={doc.modified}
+                              >
+                                {doc.basename || "Untitled"}
+                                <i>{doc.modified ? "Edited" : null}</i>
+                              </span>
+                              {doc.stage === "Analyzing" ? (
+                                <span className="tab-progress text-tabular-nums">
+                                  {" "}
+                                  {doc.progress}%
+                                </span>
+                              ) : doc.stage === "Postprocessing" ? (
+                                <div className="app-loader" />
+                              ) : (
+                                <>
+                                  <Button
+                                    className={"close-button"}
+                                    aria-label={`Close ${doc.basename}`}
+                                    onPress={() => closeDocument(doc.id)}
+                                  >
+                                    <svg
+                                      aria-hidden={true}
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      viewBox="0 0 24 24"
+                                      width="9"
+                                      height="9"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="4"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    >
+                                      <line x1="4" y1="4" x2="20" y2="20" />
+                                      <line x1="20" y1="4" x2="4" y2="20" />
+                                    </svg>
+                                  </Button>
+                                </>
+                              )}
+                              <TbFile size={16} />
+                            </Tab>
+                          ))}
+                        </TabList>
+                        <Button
+                          aria-label="New Document"
+                          className={"react-aria-Button new-document"}
+                          onPress={newDocument}
+                          style={{
+                            left: newTabPositionRect?.right || 0,
+                            top: newTabPositionRect?.top,
+                            opacity: hideNewTab ? "0" : "1",
+                          }}
+                        >
+                          <TbPlus size={16} />
+                        </Button>
+                      </Tabs>
+                    ) : (
+                      <Select
+                        wide
+                        selectedKey={appState.activeDocumentId}
+                        onSelectionChange={(value) =>
+                          setActiveDocumentId(value)
+                        }
+                        items={appState.documents.map((doc) => ({
+                          id: doc.id,
+                          name: doc.basename,
+                        }))}
+                      >
+                        {({ id, name }) => (
+                          <SelectItem id={id} textValue={name}>
+                            {name || "Untitled"}
+                          </SelectItem>
+                        )}
+                      </Select>
+                    )}
+                  </div>
+                  {activeDocument?.view === "viewer" ? (
+                    <div className="app-header-right">
+                      <Button
+                        className={"react-aria-Button with-svg"}
+                        onPress={() =>
+                          setAppState((prev) => ({
+                            ...prev,
+                            showExportModal: true,
+                          }))
+                        }
+                      >
+                        <TbFolderShare size={17} />
+                        <span>Export</span>
+                      </Button>
+                    </div>
                   ) : null}
                 </div>
-                <div className="app-header-middle">
-                  {tabView === "tabs" ? (
-                    <Tabs
-                      selectedKey={appState.activeDocumentId}
-                      onSelectionChange={setActiveDocumentId}
-                      className="document-tabs"
-                    >
-                      <TabList className="document-tablist" ref={tabListRef}>
-                        {appState.documents.map((doc, index) => (
-                          <Tab
-                            id={doc.id}
-                            key={doc.id}
-                            className="react-aria-Tab document-tab"
-                            ref={
-                              appState.documents.length - 1 === index
-                                ? lastTabRef
-                                : null
-                            }
-                          >
-                            <span
-                              className="tab-title"
-                              data-modified={doc.modified}
-                            >
-                              {doc.basename || "Untitled"}
-                              <i>{doc.modified ? "Edited" : null}</i>
-                            </span>
-                            {doc.stage === "Analyzing" ? (
-                              <span className="tab-progress text-tabular-nums">
-                                {" "}
-                                {doc.progress}%
-                              </span>
-                            ) : doc.stage === "Postprocessing" ? (
-                              <div className="app-loader" />
-                            ) : (
-                              <>
-                                <Button
-                                  className={"close-button"}
-                                  aria-label={`Close ${doc.basename}`}
-                                  onPress={() => closeDocument(doc.id)}
-                                >
-                                  <svg
-                                    aria-hidden={true}
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    width="9"
-                                    height="9"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="4"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <line x1="4" y1="4" x2="20" y2="20" />
-                                    <line x1="20" y1="4" x2="4" y2="20" />
-                                  </svg>
-                                </Button>
-                              </>
-                            )}
-                            <TbFile size={16} />
-                          </Tab>
-                        ))}
-                      </TabList>
-                      <Button
-                        aria-label="New Document"
-                        className={"react-aria-Button new-document"}
-                        onPress={newDocument}
-                        style={{
-                          left: newTabPositionRect?.right || 0,
-                          top: newTabPositionRect?.top,
-                          opacity: hideNewTab ? "0" : "1",
-                        }}
-                      >
-                        <TbPlus size={16} />
-                      </Button>
-                    </Tabs>
-                  ) : (
-                    <Select
-                      wide
-                      selectedKey={appState.activeDocumentId}
-                      onSelectionChange={(value) => setActiveDocumentId(value)}
-                      items={appState.documents.map((doc) => ({
-                        id: doc.id,
-                        name: doc.basename,
-                      }))}
-                    >
-                      {({ id, name }) => (
-                        <SelectItem id={id} textValue={name}>
-                          {name || "Untitled"}
-                        </SelectItem>
-                      )}
-                    </Select>
-                  )}
-                </div>
-
-                <div className="app-header-right">
-                  <Button
-                    className={"react-aria-Button with-svg"}
-                    onPress={() =>
-                      setAppState((prev) => ({
-                        ...prev,
-                        showExportModal: true,
-                      }))
-                    }
-                  >
-                    <TbFolderShare size={17} />
-                    <span>Export</span>
-                  </Button>
-                </div>
+                <Tabs
+                  selectedKey={appState.activeDocumentId}
+                  onSelectionChange={setActiveDocumentId}
+                  className={"app-body"}
+                >
+                  {appState.documents
+                    .filter((doc) => doc.parsed)
+                    .map((doc) => (
+                      <Document
+                        id={doc.id}
+                        key={doc.id}
+                        tabView={tabView}
+                        leftSidebarCollapsed={leftSidebarCollapsed}
+                      />
+                    ))}
+                </Tabs>
+                {activeDocument ? (
+                  <ExportModal appState={appState} setAppState={setAppState} />
+                ) : null}
               </div>
-              <Tabs
-                selectedKey={appState.activeDocumentId}
-                onSelectionChange={setActiveDocumentId}
-                className={"app-body"}
-              >
-                {appState.documents
-                  .filter((doc) => doc.parsed)
-                  .map((doc) => (
-                    <Document
-                      id={doc.id}
-                      key={doc.id}
-                      tabView={tabView}
-                      leftSidebarCollapsed={leftSidebarCollapsed}
-                    />
-                  ))}
-              </Tabs>
-              {activeDocument ? <ExportModal /> : null}
-            </div>
+            </Exporter>
           ) : (
             <div className="app-overlay app-loader" />
           )}

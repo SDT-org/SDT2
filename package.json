@@ -7,12 +7,12 @@
   "scripts": {
     "format": "bunx biome format --write frontend",
     "check": "bunx biome check --write frontend && bun run tsc --noEmit",
-    "build": "bun run clean && bun run frontend:build && uv run -p venv-pywebview python build.py",
+    "build": "bun run clean && bun run frontend:build && ./venv-pywebview/bin/python build.py",
     "build:noclean": "bun run frontend:build && uv run -p venv-pywebview python build.py",
     "clean": "node -e \"['build', 'gui'].forEach(d => { try { require('fs').rmSync(d, { recursive: true, force: true }); } catch (e) { if (e.code !== 'ENOTEMPTY') throw e; } });\"",
     "backend": "run-script-os",
-    "backend:default": "uv run -p venv-pywebview python -m jurigged -v backend/src/app.py",
-    "backend:windows": "uv run -p venv-pywebview python backend/src/app.py",
+    "backend:default": "./venv-pywebview/bin/python -m jurigged backend/src/app.py",
+    "backend:windows": "./venv-pywebview/bin/python backend/src/app.py",
     "frontend:dev": "vite dev --config ./vite.config.js",
     "frontend:build": "vite build --mode production --config ./vite.config.js --minify --emptyOutDir",
     "init": "bun i && run-script-os",
@@ -24,7 +24,9 @@
     "start": "bun run check && concurrently --raw --kill-others --success first --names \"frontend,backend\" \"bun run frontend:dev\" \"bun run backend\"",
     "start:debug": "DEBUG=true bun run start",
     "start:tools": "concurrently --raw --kill-others \"bunx react-devtools\" \"REACT_DEV_TOOLS=true bun run start:debug\"",
-    "test:backend": "./venv-pywebview/bin/python -m unittest backend/tests/*.py"
+    "test:backend": "./venv-pywebview/bin/python -m unittest backend/tests/*.py",
+    "test:frontend": "bun test",
+    "test": "bun run test:frontend && bun run test:backend"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.1",

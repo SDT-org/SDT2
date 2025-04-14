@@ -88,7 +88,7 @@ exports[`formatHeatmapData should return formatted data 1`] = `
 exports[`formatClustermapData should return formatted data 1`] = `
 [
   {
-    "backgroundColor": "hsl(137.5, 85%, 50%)",
+    "backgroundColor": "hsl(137.5, 75%, 65%)",
     "displayValue": "100",
     "foregroundColor": "#000",
     "value": 100,
@@ -97,14 +97,14 @@ exports[`formatClustermapData should return formatted data 1`] = `
   },
   {
     "backgroundColor": "rgb(245, 245, 245)",
-    "displayValue": "72.6",
+    "displayValue": "72.60",
     "foregroundColor": "#000",
     "value": 72.6,
     "x": 0,
     "y": 1,
   },
   {
-    "backgroundColor": "hsl(275, 85%, 50%)",
+    "backgroundColor": "hsl(275.0, 90%, 35%)",
     "displayValue": "100",
     "foregroundColor": "#fff",
     "value": 100,
@@ -120,7 +120,7 @@ exports[`formatClustermapData should return formatted data 1`] = `
     "y": 2,
   },
   {
-    "backgroundColor": "hsl(275, 85%, 50%)",
+    "backgroundColor": "hsl(275.0, 90%, 35%)",
     "displayValue": "97.61",
     "foregroundColor": "#fff",
     "value": 97.61,
@@ -128,7 +128,7 @@ exports[`formatClustermapData should return formatted data 1`] = `
     "y": 2,
   },
   {
-    "backgroundColor": "hsl(275, 85%, 50%)",
+    "backgroundColor": "hsl(275.0, 90%, 35%)",
     "displayValue": "100",
     "foregroundColor": "#fff",
     "value": 100,
@@ -137,7 +137,7 @@ exports[`formatClustermapData should return formatted data 1`] = `
   },
   {
     "backgroundColor": "rgb(245, 245, 245)",
-    "displayValue": "8.2",
+    "displayValue": "8.20",
     "foregroundColor": "#000",
     "value": 8.2,
     "x": 0,
@@ -160,7 +160,7 @@ exports[`formatClustermapData should return formatted data 1`] = `
     "y": 3,
   },
   {
-    "backgroundColor": "hsl(52.5, 85%, 50%)",
+    "backgroundColor": "hsl(52.5, 60%, 75%)",
     "displayValue": "100",
     "foregroundColor": "#000",
     "value": 100,

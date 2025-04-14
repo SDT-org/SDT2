@@ -1,5 +1,5 @@
 from collections import namedtuple
-from document_state import DocState, create_document_state, load_doc_settings
+from document_state import DocState, create_doc_state, load_document_settings
 
 AppState = namedtuple(
     "default_app_state",
@@ -55,13 +55,13 @@ def create_app_state(
     def new_document(id: str, **kwargs):
         doc = get_document(id)
         if doc:
-            doc_settings = load_doc_settings(kwargs["tempdir_path"])
+            doc_settings = load_document_settings(kwargs["tempdir_path"])
             if doc_settings:
                 return update_document(id, **kwargs, **doc_settings)
             else:
                 return update_document(id, **kwargs)
 
-        doc_state = create_document_state(id=id, **kwargs)
+        doc_state = create_doc_state(id=id, **kwargs)
         set_state(documents=state.documents + [doc_state])
 
     def get_document(id: str) -> DocState | None:

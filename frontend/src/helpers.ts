@@ -1,3 +1,5 @@
+import type { RasterFormat, SaveableImageFormat } from "./appState";
+
 export const assertDefined = <T>(value: T) => {
   if (value === undefined) {
     throw new Error(`Expected ${value} to be defined`);
@@ -49,3 +51,7 @@ export const splitFilePath = (filePath: string) => {
   const dir = parts.join("");
   return { dir, name };
 };
+
+export const isRasterFormat = (
+  format: SaveableImageFormat,
+): format is RasterFormat => ["png", "jpeg"].includes(format);

@@ -129,38 +129,43 @@ export const Heatmap = ({
 
   const forceSvgRender = useHeatmapRenderToggle();
 
+  const renderSvg =
+    forceSvgRender ||
+    (appState.exportStatus === "exporting" && appState.saveFormat === "svg");
+
   return (
     <>
       {data ? (
         <>
           <div className="app-main" ref={elementRef}>
-            {forceSvgRender ? <div className="debug-toast">SVG</div> : null}
-            {forceSvgRender ||
-            (appState.showExportModal && appState.saveFormat === "svg") ? (
-              <D3SvgHeatmap
-                data={heatmapData}
-                settings={settings}
-                tickText={tickText}
-                colorScale={colorScale}
-                minVal={settings.vmin}
-                maxVal={settings.vmax}
-                width={size.width}
-                height={size.height}
-                cellSpace={settings.cellspace}
-                showPercentIdentities={settings.annotation}
-                roundTo={settings.annotation_rounding}
-                cbarHeight={cbar_shrink ?? settings.cbar_shrink}
-                cbarWidth={cbar_aspect ?? settings.cbar_aspect}
-                axlabel_xrotation={settings.axlabel_xrotation}
-                axlabel_fontsize={settings.axlabel_fontsize}
-                axlabel_yrotation={settings.axlabel_yrotation}
-                titleFont={titleFont}
-                showTitles={settings.showTitles}
-                title={settings.title}
-                axis_labels={settings.axis_labels}
-                showscale={settings.showscale}
-                margin={margin}
-              />
+            {renderSvg ? (
+              <>
+                <div className="debug-toast">SVG</div>
+                <D3SvgHeatmap
+                  data={heatmapData}
+                  settings={settings}
+                  tickText={tickText}
+                  colorScale={colorScale}
+                  minVal={settings.vmin}
+                  maxVal={settings.vmax}
+                  width={size.width}
+                  height={size.height}
+                  cellSpace={settings.cellspace}
+                  showPercentIdentities={settings.annotation}
+                  roundTo={settings.annotation_rounding}
+                  cbarHeight={cbar_shrink ?? settings.cbar_shrink}
+                  cbarWidth={cbar_aspect ?? settings.cbar_aspect}
+                  axlabel_xrotation={settings.axlabel_xrotation}
+                  axlabel_fontsize={settings.axlabel_fontsize}
+                  axlabel_yrotation={settings.axlabel_yrotation}
+                  titleFont={titleFont}
+                  showTitles={settings.showTitles}
+                  title={settings.title}
+                  axis_labels={settings.axis_labels}
+                  showscale={settings.showscale}
+                  margin={margin}
+                />
+              </>
             ) : (
               <D3CanvasHeatmap
                 data={heatmapData}

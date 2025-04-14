@@ -11,13 +11,13 @@ from Bio.Seq import Seq
 from itertools import combinations_with_replacement as cwr
 from functools import partial
 from pandas import DataFrame
-from numpy import tril, triu_indices, zeros, around, nan
+from numpy import zeros
 import parasail
 from Bio import SeqIO
 from Bio.SeqUtils import gc_fraction
 from cluster import get_linkage_method_order
-from heatmap import dataframe_to_matrix_lower
-from doc_paths import fetch_docpaths
+from heatmap import dataframe_to_triangle
+from document_paths import build_document_paths
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
@@ -152,14 +152,13 @@ def get_alignment_scores(
     return dist_scores, order
 
 
-
 # Save similarity scores as 2d matrix csv
-def save_matrix_to_csv(df, full_path, header=False):
-    index=df.index
-    matrix_lower = dataframe_to_matrix_lower(df)
-    matrix_lower.index = index
-    matrix_lower.to_csv(full_path, mode="wt", header=header, index=True)
-    df.to_csv(full_path, mode="w", header=False, index=True)
+def save_matrix_to_csv(df, matrix_path, triangle_path):
+    index = df.index
+    triangle = dataframe_to_triangle(df)
+    triangle.index = index
+    triangle.to_csv(triangle_path, mode="wt", header=False, index=True)
+    df.to_csv(matrix_path, mode="w", header=False, index=True)
 
 # Save similarity scores as 3 column csv
 ## this can be rewriten using pandas melt
@@ -234,7 +233,6 @@ def process_data(
     start_counter = time.perf_counter()
     input_file = settings["input_file"]
     file_name = os.path.basename(input_file)
-    file_base = os.path.splitext(file_name)[0]
 
     set_stage("Preparing")
     print("Stage: Preparing")
@@ -269,7 +267,7 @@ def process_data(
 
     out_dir = settings["out_dir"]
     cluster_method = settings["cluster_method"]
-    paths = fetch_docpaths(out_dir)
+    doc_paths = build_document_paths(out_dir)
     if cluster_method is not None:
         new_order = get_linkage_method_order(dist_scores, cluster_method, order)
 
@@ -288,9 +286,9 @@ def process_data(
     set_stage("Postprocessing")
     print("Stage: Postprocessing")
 
-    save_cols_to_csv(df, paths.columns)
-    save_stats_to_csv(seq_stats, paths.stats)
-    save_matrix_to_csv(df, paths.full_matrix)
+    save_cols_to_csv(df, doc_paths.columns)
+    save_stats_to_csv(seq_stats, doc_paths.stats)
+    save_matrix_to_csv(df, doc_paths.matrix, doc_paths.triangle)
 
 
     set_stage("Finalizing")
@@ -306,6 +304,6 @@ def process_data(
         end_counter
     )
 
-    with open(paths.summary, "w") as file:
+    with open(doc_paths.summary, "w") as file:
         file.write(save_output_summary)
     print(f"Elapsed time: {friendly_total_time(end_counter - start_counter)}")
