@@ -11,14 +11,6 @@
   // backdrop-filter: blur(0.2rem);
   z-index: 10;
   transition: all 200ms;
-
-  &.export-modal-overlay {
-    &.exporting {
-      background: rgba(var(--app-modal-overlay-color), 1);
-    }
-    &.success {
-    }
-  }
 }
 
 .react-aria-Modal {

@@ -4,7 +4,6 @@ import { distinctColor } from "../colors";
 import { plotFontMonospace } from "../constants";
 import { getCellMetrics } from "../heatmapUtils";
 import { useExportCanvas } from "../hooks/useExportCanvas";
-import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapRenderProps } from "./Heatmap";
 
 export const D3CanvasHeatmap = ({
@@ -33,8 +32,7 @@ export const D3CanvasHeatmap = ({
   settings,
   showLegend,
 }: HeatmapRenderProps) => {
-  const canvasRef =
-    useHeatmapRef() as React.MutableRefObject<HTMLCanvasElement>;
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const exportCanvas = useExportCanvas(
     clusterData ? "clustermap" : "heatmap",
     canvasRef,
@@ -59,7 +57,15 @@ export const D3CanvasHeatmap = ({
 
   const tickValues = React.useMemo(() => scale.ticks(5), [scale]);
 
+  const drawing = React.useRef(false);
+
   const drawCanvas = React.useCallback(() => {
+    if (drawing.current) {
+      console.warn("Drawing already in progress");
+      return;
+    }
+    drawing.current = true;
+
     const canvas = canvasRef.current;
     if (!canvas) {
       console.warn("Failed to find canvas");
@@ -256,9 +262,15 @@ export const D3CanvasHeatmap = ({
       });
     }
 
-    setTimeout(() => {
+    drawing.current = false;
+
+    const id = setTimeout(() => {
       exportCanvas();
     }, 0);
+
+    return () => {
+      clearTimeout(id);
+    };
   }, [
     exportCanvas,
     transform,
@@ -279,7 +291,6 @@ export const D3CanvasHeatmap = ({
     cbarWidth,
     cbarHeight,
     colorScale,
-    canvasRef,
     width,
     height,
     axis_labels,
@@ -317,7 +328,7 @@ export const D3CanvasHeatmap = ({
     return () => {
       d3.select(canvas).on("zoom", null);
     };
-  }, [canvasRef, width, height, margin]);
+  }, [width, height, margin]);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;

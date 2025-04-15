@@ -468,12 +468,15 @@ class Api:
             raise Exception(f"could not find document: {doc_id}")
 
         element = assert_window().dom.get_element(selector)
+
         if element == None:
             raise Exception(f"could not find element: {selector}")
         inner_html = element.node["innerHTML"]
         data = f"<svg xmlns='http://www.w3.org/2000/svg'>{inner_html}</svg>"
 
         save_image_from_api(doc=doc, data=data, key=key, format="svg")
+
+        return True
 
     def save_svg_data(self, doc_id: str, data: str, key: ImageKey, format: ImageFormat):
         doc = get_document(doc_id)
@@ -488,6 +491,8 @@ class Api:
             format=format,
         )
 
+        return True
+
     def save_raster_image(
         self, doc_id: str, data: str, key: ImageKey, format: ImageFormat
     ):
@@ -501,6 +506,8 @@ class Api:
             key=key,
             format=format,
         )
+
+        return True
 
     def export(self, args: dict):
         doc = get_document(args["doc_id"])

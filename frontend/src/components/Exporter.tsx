@@ -1,6 +1,7 @@
 import React from "react";
 import type { AppState, DocState, SetAppState } from "../appState";
 import { useDocState } from "../hooks/useDocState";
+import { SuccessModal } from "./SuccessMessage";
 
 type RenderStatus = {
   markTabAsRendered: (tabId: string) => void;
@@ -40,12 +41,11 @@ export const Exporter = ({
   if (!docState) {
     return null;
   }
-
   const { updateDocState } = useDocState(docState.id, appState, setAppState);
-
   const initialTab = React.useRef<DocState["dataView"]>(docState.dataView);
   const currentTab = React.useRef<string | null>(null);
   const currentResolver = React.useRef<(() => void) | null>(null);
+  const exportStep = React.useRef("Preparing");
 
   const swapDataView = React.useCallback(
     (view: DocState["dataView"]) => {
@@ -73,7 +73,10 @@ export const Exporter = ({
   }, []);
 
   const runExport = React.useCallback(async () => {
+    if (currentTab.current) return;
     if (!tabs) return;
+
+    setExportStatus("exporting");
 
     try {
       // each tab exports its own images
@@ -86,6 +89,11 @@ export const Exporter = ({
           currentResolver.current = resolve;
         });
       }
+
+      currentTab.current = null;
+      currentResolver.current = null;
+      exportStep.current = "Finalizing";
+      swapDataView(initialTab.current);
 
       const result = await window.pywebview.api.export({
         doc_id: docState.id,
@@ -103,8 +111,7 @@ export const Exporter = ({
       } else {
         setExportStatus("idle");
       }
-      currentTab.current = null;
-      swapDataView(initialTab.current);
+      exportStep.current = "Preparing";
     } catch (error) {
       setExportStatus("idle");
       currentTab.current = null;
@@ -125,11 +132,14 @@ export const Exporter = ({
   ]);
 
   React.useEffect(() => {
-    if (appState.exportStatus === "exporting" && !currentTab.current) {
-      initialTab.current = docState.dataView;
+    if (
+      appState.exportStatus === "preparing" &&
+      !currentTab.current &&
+      currentResolver.current === null
+    ) {
       runExport();
     }
-  }, [appState.exportStatus, runExport, docState.dataView]);
+  }, [runExport, appState.exportStatus]);
 
   React.useEffect(() => {
     if (appState.exportStatus !== "success") {
@@ -138,21 +148,33 @@ export const Exporter = ({
 
     const handler = () => {
       setExportStatus("idle");
-      setAppState((prev) => ({
-        ...prev,
-        showExportModal: false,
-      }));
     };
 
-    const id = setTimeout(handler, 2000);
+    const id = setTimeout(handler, 3000);
 
     return () => {
       clearTimeout(id);
     };
-  }, [appState, setAppState, setExportStatus]);
+  }, [appState, setExportStatus]);
 
   return (
     <RenderStatusContext.Provider value={{ markTabAsRendered, currentTab }}>
+      {appState.exportStatus !== "idle" ? (
+        appState.exportStatus === "success" ? (
+          <SuccessModal onClose={() => setExportStatus("idle")} />
+        ) : (
+          <div className="app-backdrop">
+            <div className="app-overlay app-loader">
+              <div className="app-loader-status">
+                {currentTab.current
+                  ? `Exporting ${currentTab.current?.replaceAll("_", " ")}`
+                  : exportStep.current}
+                ...
+              </div>
+            </div>
+          </div>
+        )
+      ) : null}
       {children}
     </RenderStatusContext.Provider>
   );

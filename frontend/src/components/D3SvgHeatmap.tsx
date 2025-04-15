@@ -4,7 +4,6 @@ import { distinctColor } from "../colors";
 import { plotFontMonospace } from "../constants";
 import { getCellMetrics } from "../heatmapUtils";
 import { useExportSvg } from "../hooks/useExportSvg";
-import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import type { HeatmapRenderProps } from "./Heatmap";
 
 export const D3SvgHeatmap = ({
@@ -31,7 +30,7 @@ export const D3SvgHeatmap = ({
   margin,
   clusterData,
 }: HeatmapRenderProps) => {
-  const svgRef = useHeatmapRef() as React.MutableRefObject<SVGSVGElement>;
+  const svgRef = React.useRef<SVGSVGElement>(null);
   const exportSvg = useExportSvg(
     clusterData ? "clustermap" : "heatmap",
     svgRef,
@@ -50,8 +49,25 @@ export const D3SvgHeatmap = ({
   const ticks = 5;
   const tickValues = React.useMemo(() => scale.ticks(ticks), [scale]);
 
+  const rendering = React.useRef(false);
+  const onRenderComplete = React.useCallback(() => {
+    rendering.current = false;
+    const id = setTimeout(() => {
+      exportSvg();
+    }, 0);
+    return () => {
+      clearTimeout(id);
+    };
+  }, [exportSvg]);
+
   const renderHeatmap = React.useCallback(
-    (ref: React.MutableRefObject<SVGSVGElement>) => {
+    (ref: React.RefObject<SVGSVGElement>) => {
+      if (rendering.current) {
+        console.warn("Rendering already in progress");
+        return;
+      }
+      rendering.current = true;
+
       const start = performance.now();
       const node = ref.current as Element;
       const d3Svg = d3.select(node);
@@ -69,7 +85,6 @@ export const D3SvgHeatmap = ({
 
       const axisGap = 5;
 
-      const startCells = performance.now();
       g.selectAll("rect.cell")
         .data(data)
         .join("rect")
@@ -95,9 +110,6 @@ export const D3SvgHeatmap = ({
           .text((d) => d.displayValue)
           .attr("fill", (d) => d.foregroundColor);
       }
-      console.log(
-        `Cell rendering took ${performance.now() - startCells} milliseconds`,
-      );
 
       d3Svg.call(
         d3
@@ -269,8 +281,11 @@ export const D3SvgHeatmap = ({
       const end = performance.now();
       const duration = end - start;
       console.log(`Heatmap rendering took ${duration.toFixed(2)} milliseconds`);
+
+      onRenderComplete();
     },
     [
+      onRenderComplete,
       tickValues,
       scale,
       gradientStops,
@@ -299,15 +314,14 @@ export const D3SvgHeatmap = ({
   React.useEffect(() => {
     if (!(svgRef.current && height && width)) return;
     renderHeatmap(svgRef);
-    exportSvg();
-  }, [exportSvg, svgRef, renderHeatmap, height, width]);
+  }, [renderHeatmap, height, width]);
 
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
       id={"heatmap-svg"}
-      style={{ overflow: "visible", background: "#fff", display: "none" }}
+      style={{ overflow: "visible", background: "#fff" }}
       ref={svgRef}
       width={"100%"}
       height={"100%"}

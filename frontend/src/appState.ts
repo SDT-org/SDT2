@@ -89,7 +89,7 @@ export type AppState = {
   error?: Error | null;
   errorInfo?: ErrorInfo | PromiseRejectionEvent["reason"] | null;
   recentFiles: string[];
-  exportStatus: "idle" | "exporting" | "success";
+  exportStatus: "idle" | "preparing" | "exporting" | "success";
 };
 
 export const docStateSchema = z.object({

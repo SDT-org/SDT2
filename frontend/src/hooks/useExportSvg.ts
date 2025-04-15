@@ -5,7 +5,7 @@ import { useDocState } from "./useDocState";
 
 export const useExportSvg = (
   key: Extract<SaveableImageKey, "clustermap" | "heatmap">,
-  ref: React.MutableRefObject<SVGSVGElement>,
+  ref: React.RefObject<SVGSVGElement>,
 ) => {
   const running = React.useRef(false);
   const { appState, setAppState } = useAppState();
@@ -20,7 +20,7 @@ export const useExportSvg = (
     if (
       currentTab.current !== key ||
       appState.exportStatus !== "exporting" ||
-      !ref.current.id
+      !ref.current?.id
     ) {
       return;
     }

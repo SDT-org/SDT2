@@ -31,19 +31,6 @@ export const useExportPlotly = (
 
   const { markTabAsRendered, currentTab } = useRenderStatus();
 
-  React.useEffect(() => {
-    if (currentTab.current !== key) {
-      return;
-    }
-    const listener = () => {
-      markTabAsRendered(key);
-    };
-    document.addEventListener("plotly-export-complete", listener);
-    return () => {
-      document.removeEventListener("plotly-export-complete", listener);
-    };
-  }, [key, markTabAsRendered, currentTab]);
-
   const exportPlotly = React.useCallback(() => {
     if (
       !(currentTab.current === key && appState.exportStatus === "exporting")

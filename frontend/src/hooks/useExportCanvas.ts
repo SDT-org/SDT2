@@ -6,7 +6,7 @@ import { useDocState } from "./useDocState";
 
 export const useExportCanvas = (
   key: Extract<SaveableImageKey, "clustermap" | "heatmap">,
-  ref: React.MutableRefObject<HTMLCanvasElement>,
+  ref: React.RefObject<HTMLCanvasElement>,
 ) => {
   const running = React.useRef(false);
   const { appState, setAppState } = useAppState();
