@@ -5,6 +5,7 @@ import createPlotlyComponent from "react-plotly.js/factory";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import type { DataSets, DistributionState } from "../distributionState";
 import { arrayMinMax } from "../helpers";
+import { useExportPlotly } from "../hooks/useExportPlotly";
 import {
   useRelayoutHideSubtitle,
   useRelayoutUpdateTitles,
@@ -21,9 +22,10 @@ const getAxisConfig = (
 ) => {
   if (isLength) {
     return {
-      tickmode: "linear",
+      tickmode: "linear" as const,
       tickfont: {
-        ...plotFontMonospace,
+        family: plotFontMonospace.family,
+        size: 11,
       },
       dtick: 10,
       range: [minDataValue - 20, maxDataValue + 20],
@@ -31,9 +33,10 @@ const getAxisConfig = (
   }
 
   return {
-    tickmode: "array",
+    tickmode: "array" as const,
     tickfont: {
-      ...plotFontMonospace,
+      family: plotFontMonospace.family,
+      size: 11,
     },
     range: [minDataValue - 20, maxDataValue + 20],
     ticktext: Array.from(
@@ -79,6 +82,8 @@ export const Violin = ({
   const [minDataValue, maxDataValue] = arrayMinMax(dataSet);
   const updateTitles = useRelayoutUpdateTitles(updateSettings);
   useRelayoutHideSubtitle(!settings.showTitles);
+
+  const exportPlotly = useExportPlotly("distribution_violin");
 
   const hoverData = {
     scores: {
@@ -175,7 +180,7 @@ export const Violin = ({
           size: settings.markerSize,
         },
         fillcolor: settings.boxfillColor,
-        boxgap: 1 - settings.boxWidth,
+        width: settings.boxWidth,
         hoverinfo: "text",
         hovertemplate:
           dataSetKey === "scores"
@@ -213,11 +218,9 @@ export const Violin = ({
               ...(settings.titleFont === "Monospace"
                 ? plotFontMonospace
                 : plotFontSansSerif),
-              //@ts-ignore
-              weight: "bold",
+              size: 14,
             },
             uirevision: settings.plotOrientation,
-            boxgap: 1 - settings.boxWidth,
             xaxis: {
               ...(settings.plotOrientation === "vertical"
                 ? {
@@ -240,21 +243,6 @@ export const Violin = ({
                       dataSetKey === "length",
                     ),
                   }),
-              ...(settings.showTitles
-                ? {
-                    title: {
-                      text: settings.xtitle,
-                      font: {
-                        ...(settings.titleFont === "Monospace"
-                          ? plotFontMonospace
-                          : plotFontSansSerif),
-                        //@ts-ignore
-                        weight: "bold",
-                      },
-                    },
-                    scaleratio: 1,
-                  }
-                : {}),
             },
             yaxis: {
               ...(settings.plotOrientation === "vertical"
@@ -278,23 +266,6 @@ export const Violin = ({
                     showline: settings.showAxisLines,
                     showticklabels: settings.showTickLabels,
                   }),
-              ...(settings.showTitles
-                ? {
-                    title: {
-                      text: settings.ytitle,
-                      font: {
-                        ...(settings.titleFont === "Monospace"
-                          ? plotFontMonospace
-                          : plotFontSansSerif),
-                        //@ts-ignore
-                        weight: "bold",
-                      },
-                      pad: {
-                        r: 15,
-                      },
-                    },
-                  }
-                : {}),
             },
             dragmode: "pan",
             barmode: "overlay",
@@ -302,6 +273,7 @@ export const Violin = ({
             margin: { l: 50, r: 50, t: 50, b: 50 },
           }}
           onRelayout={updateTitles}
+          onInitialized={exportPlotly}
           config={{
             responsive: true,
             displayModeBar: false,

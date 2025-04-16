@@ -1,4 +1,3 @@
-import Plotly from "plotly.js-cartesian-dist-min";
 import React from "react";
 import {
   Button,
@@ -7,225 +6,76 @@ import {
   Modal,
   ModalOverlay,
 } from "react-aria-components";
-import useAppState, {
-  type DocState,
+import {
+  type AppState,
   type SaveableImageFormat,
+  type SetAppState,
   saveableImageFormats,
 } from "../appState";
-import { assertDefined } from "../helpers";
 import { useDocState } from "../hooks/useDocState";
-import { useHeatmapRef } from "../hooks/useHeatmapRef";
 import { Select, SelectItem } from "./Select";
+import { Switch } from "./Switch";
 
-const getPlotlyElement = () =>
-  assertDefined(
-    (
-      document.getElementsByClassName(
-        "js-plotly-plot",
-      ) as HTMLCollectionOf<HTMLElement>
-    )[0],
-  );
-
-const SuccessMessage = () => (
-  <div className="app-message">
-    <svg
-      className="app-success"
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-    >
-      <g
-        style={{
-          fill: "none",
-          stroke: "currentcolor",
-          strokeWidth: 2,
-          strokeLinecap: "round",
-          strokeLinejoin: "round",
-          strokeMiterlimit: 10,
-        }}
-      >
-        <path d="m8.5 13 3 2 4-6" />
-        <path d="M18 22H6a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4z" />
-      </g>
-    </svg>
-    <Heading slot="title">Export complete</Heading>
-  </div>
-);
-
-export const ExportModal = () => {
-  const { appState, setAppState } = useAppState();
+export const ExportModal = ({
+  appState,
+  setAppState,
+}: {
+  appState: AppState;
+  setAppState: SetAppState;
+}) => {
   if (
     !appState.activeDocumentId ||
     !appState.documents.find((doc) => doc.id === appState.activeDocumentId)
   ) {
     return null;
   }
-  const [exportState, setExportState] = React.useState<
-    "idle" | "exporting" | "success"
-  >("idle");
-  const { docState, updateDocState } = useDocState(
+  const { docState, setDocState } = useDocState(
     appState.activeDocumentId,
     appState,
     setAppState,
   );
 
-  const swapDataView = React.useCallback(
-    (view: DocState["dataView"]) => {
-      updateDocState({ dataView: view });
-    },
-    [updateDocState],
+  const setExportState = React.useCallback(
+    (status: AppState["exportStatus"]) =>
+      setAppState((prev) => ({ ...prev, exportStatus: status })),
+    [setAppState],
   );
 
-  const heatmapRef = useHeatmapRef();
+  const groupCss = "group col-2 onefr-auto";
+  const defaultExportPrefix = docState.basename
+    .split(".")
+    .slice(0, -1)
+    .join("");
 
-  const getImages = React.useCallback(async () => {
-    const config = {
-      format: appState.saveFormat,
-      width: 1000,
-      height: 800,
-    };
-    const previousDataView = docState.dataView;
-    const renderTimeout = 400;
-    let heatmapImage = "";
-
-    swapDataView("heatmap");
-    await new Promise((r) => setTimeout(r, renderTimeout));
-
-    if (config.format === "svg") {
-      if (!heatmapRef.current) {
-        throw new Error("Expected heatmapRef to have a current value");
-      }
-      const encoded64Svg = encodeURIComponent(heatmapRef.current.outerHTML);
-      heatmapImage = `data:image/svg+xml;base64,${encoded64Svg}`;
-    } else {
-      heatmapImage = await new Promise((resolve) => {
-        if (!heatmapRef.current) {
-          throw new Error("Expected heatmapRef to have a current value");
-        }
-
-        (heatmapRef.current as HTMLCanvasElement).toBlob(async (blob) => {
-          if (blob) {
-            const arrayBuffer = await blob.arrayBuffer();
-            const binary = Array.from(new Uint8Array(arrayBuffer))
-              .map((byte) => String.fromCharCode(byte))
-              .join("");
-            resolve(`data:image/${config.format};base64,${btoa(binary)}`);
-          } else {
-            resolve("");
-          }
-        }, `image/${config.format}`);
-      });
-    }
-
-    await new Promise((r) => setTimeout(r, renderTimeout));
-
-    swapDataView("clustermap");
-    await new Promise((r) => setTimeout(r, renderTimeout));
-    let clustermapImage = "";
-
-    // Clustermap reuses the heatmap component
-    if (config.format === "svg") {
-      if (!heatmapRef.current) {
-        throw new Error("Expected heatmapRef to have a current value");
-      }
-      const encoded64Svg = encodeURIComponent(heatmapRef.current.outerHTML);
-      clustermapImage = `data:image/svg+xml;base64,${encoded64Svg}`;
-    } else {
-      clustermapImage = await new Promise((resolve) => {
-        if (!heatmapRef.current) {
-          throw new Error("Expected heatmapRef to have a current value");
-        }
-
-        (heatmapRef.current as HTMLCanvasElement).toBlob(async (blob) => {
-          if (blob) {
-            const arrayBuffer = await blob.arrayBuffer();
-            const binary = Array.from(new Uint8Array(arrayBuffer))
-              .map((byte) => String.fromCharCode(byte))
-              .join("");
-            resolve(`data:image/${config.format};base64,${btoa(binary)}`);
-          } else {
-            resolve("");
-          }
-        }, `image/${config.format}`);
-      });
-    }
-
-    // Plotly exports
-
-    swapDataView("distribution_histogram");
-
-    await new Promise((r) => setTimeout(r, renderTimeout));
-
-    let element = getPlotlyElement();
-
-    element = getPlotlyElement();
-    await Plotly.toImage(element, config);
-    const histogramImage = await Plotly.toImage(element, config);
-
-    swapDataView("distribution_violin");
-
-    await new Promise((r) => setTimeout(r, renderTimeout));
-    element = getPlotlyElement();
-    await Plotly.toImage(element, config);
-    const violinImage = await Plotly.toImage(element, config);
-
-    swapDataView(previousDataView);
-    return { heatmapImage, clustermapImage, histogramImage, violinImage };
-  }, [heatmapRef, appState, docState.dataView, swapDataView]);
-
-  const doExport = React.useCallback(() => {
-    setExportState("exporting");
-
-    getImages().then((images) => {
-      window.pywebview.api
-        .export_data({
-          doc_id: appState.activeDocumentId,
-          export_path: appState.dataExportPath,
-          output_cluster: true,
-          cluster_threshold: docState.clustermap.threshold,
-          cluster_method: docState.clustermap.method,
-          heatmap_image_data: images.heatmapImage,
-          clustermap_image_data: images.clustermapImage,
-          histogram_image_data: images.histogramImage,
-          violin_image_data: images.violinImage,
-          image_format: appState.saveFormat,
-        })
-        .then((result) =>
-          result ? setExportState("success") : setExportState("idle"),
-        );
-    });
-  }, [
-    getImages,
-    appState,
-    docState.clustermap.threshold,
-    docState.clustermap.method,
-  ]);
+  const [prefix, setPrefix] = React.useState<string>(
+    docState.exportPrefix || defaultExportPrefix,
+  );
+  const [showFolder, setShowFolder] = React.useState(appState.openExportFolder);
+  const [saveFormat, setSaveFormat] = React.useState<SaveableImageFormat>(
+    appState.saveFormat,
+  );
 
   React.useEffect(() => {
-    if (exportState !== "success") {
-      return;
-    }
+    setPrefix(docState.exportPrefix || defaultExportPrefix);
+  }, [docState.exportPrefix, defaultExportPrefix]);
 
-    const handler = () => {
-      setExportState("idle");
-      setAppState((prev) => ({
-        ...prev,
-        showExportModal: false,
-      }));
-    };
-
-    const id = setTimeout(handler, 2000);
-
-    return () => {
-      clearTimeout(id);
-    };
-  }, [exportState, setAppState]);
-
-  const groupCss = "group col-2 onefr-auto";
+  const startExport = React.useCallback(() => {
+    setDocState((previous) => ({
+      ...previous,
+      exportPrefix: prefix,
+    }));
+    setAppState((previous) => ({
+      ...previous,
+      exportStatus: "preparing",
+      saveFormat,
+      showExportModal: false,
+      openExportFolder: showFolder,
+    }));
+  }, [setAppState, setDocState, prefix, showFolder, saveFormat]);
 
   return (
     <ModalOverlay
-      className={`react-aria-ModalOverlay export-modal-overlay ${exportState}`}
+      className={`react-aria-ModalOverlay modal-overlay ${appState.exportStatus}`}
       isOpen={appState.showExportModal}
       onOpenChange={() =>
         setAppState((previous) => {
@@ -246,105 +96,123 @@ export const ExportModal = () => {
             };
           })
         }
-        isDismissable={exportState !== "exporting"}
-        className={`react-aria-Modal export-modal ${exportState}`}
+        isDismissable={appState.exportStatus !== "exporting"}
+        className={`react-aria-Modal export-modal ${appState.exportStatus}`}
       >
-        {exportState === "exporting" ? (
-          <div className="app-overlay app-loader" />
-        ) : (
-          <Dialog>
-            {({ close }) =>
-              exportState === "success" ? (
-                <SuccessMessage />
-              ) : (
-                <>
-                  <Heading slot="title">Export images and data</Heading>
-                  <form className="form export-form">
-                    <div className={appState.dataExportPath ? "" : groupCss}>
-                      <label htmlFor="export-path" className="header">
-                        Output Folder
-                      </label>
+        <Dialog>
+          {({ close }) => (
+            <>
+              <Heading slot="title">Export images and data</Heading>
+              <form className="form export-form">
+                <div className={appState.dataExportPath ? "" : groupCss}>
+                  <label htmlFor="export-path" className="header">
+                    Output folder
+                  </label>
 
-                      <div
-                        className={`${appState.dataExportPath ? groupCss : ""}`}
-                      >
-                        {appState.dataExportPath ? (
-                          <div className="filename">
-                            {appState.dataExportPath}
-                          </div>
-                        ) : null}
-                        <Button
-                          type="button"
-                          onPress={() => {
-                            setExportState("idle");
-                            window.pywebview.api
-                              .select_path_dialog(appState.dataExportPath)
-                              .then((result) => {
-                                if (!result) {
-                                  return;
-                                }
-                                setAppState((prev) => ({
-                                  ...prev,
-                                  dataExportPath: result,
-                                }));
-                              });
-                          }}
-                        >
-                          {appState.dataExportPath ? "Set" : "Set folder"}
-                          ...
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="group col-2 onefr-auto force-flat">
-                      <label htmlFor="save-format" className="header">
-                        Image Format
-                      </label>
-                      <Select
-                        data-flat
-                        selectedKey={appState.saveFormat}
-                        onSelectionChange={(value) =>
-                          setAppState((previous) => ({
-                            ...previous,
-                            saveFormat: value as SaveableImageFormat,
-                          }))
-                        }
-                        items={Object.entries(saveableImageFormats).map(
-                          ([id, name]) => ({
-                            id,
-                            name,
-                          }),
-                        )}
-                      >
-                        {(item) => (
-                          <SelectItem textValue={item.name}>
-                            {item.name}
-                          </SelectItem>
-                        )}
-                      </Select>
-                    </div>
-                    <div className="actions">
-                      <Button
-                        onPress={() => {
-                          setExportState("idle");
-                          close();
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        data-primary
-                        isDisabled={!appState.dataExportPath}
-                        onPress={doExport}
-                      >
-                        Export
-                      </Button>
-                    </div>
-                  </form>
-                </>
-              )
-            }
-          </Dialog>
-        )}
+                  <div className={`${appState.dataExportPath ? groupCss : ""}`}>
+                    {appState.dataExportPath ? (
+                      <div className="filename">{appState.dataExportPath}</div>
+                    ) : null}
+                    <Button
+                      type="button"
+                      onPress={() => {
+                        setExportState("idle");
+                        window.pywebview.api
+                          .select_path_dialog(appState.dataExportPath)
+                          .then((result) => {
+                            if (!result) {
+                              return;
+                            }
+                            setAppState((prev) => ({
+                              ...prev,
+                              dataExportPath: result,
+                            }));
+                          });
+                      }}
+                    >
+                      {appState.dataExportPath ? "Set" : "Set folder"}
+                      ...
+                    </Button>
+                  </div>
+                </div>
+                <div className="group col-2 onefr-auto">
+                  <label htmlFor="prefix" className="header">
+                    File prefix
+                  </label>
+                  <input
+                    type="text"
+                    id="prefix"
+                    value={prefix}
+                    onChange={(e) => {
+                      setPrefix(e.target.value);
+                    }}
+                    placeholder={defaultExportPrefix}
+                  />
+                </div>
+                <div className="group col-2 onefr-auto force-flat">
+                  <label htmlFor="save-format" className="header">
+                    Image format
+                  </label>
+                  <Select
+                    data-flat
+                    selectedKey={saveFormat}
+                    onSelectionChange={(value) =>
+                      setSaveFormat(value as SaveableImageFormat)
+                    }
+                    items={Object.entries(saveableImageFormats).map(
+                      ([id, name]) => ({
+                        id,
+                        name,
+                      }),
+                    )}
+                  >
+                    {(item) => (
+                      <SelectItem textValue={item.name}>{item.name}</SelectItem>
+                    )}
+                  </Select>
+                </div>
+                <div className="group col-2 onefr-auto">
+                  <label htmlFor="open-export-folder" className="header">
+                    Open folder after export
+                  </label>
+                  <Switch
+                    id="open-export-folder"
+                    isSelected={showFolder}
+                    onChange={setShowFolder}
+                  />
+                </div>
+                <div className="actions">
+                  <Button
+                    onPress={() => {
+                      setAppState((previous) => ({
+                        ...previous,
+                        openExportModal: showFolder,
+                      }));
+                      setDocState((previous) => ({
+                        ...previous,
+                        exportPrefix: prefix,
+                      }));
+                      setExportState("idle");
+                      close();
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    data-primary
+                    isDisabled={
+                      !appState.dataExportPath ||
+                      appState.exportStatus === "exporting"
+                    }
+                    onPress={startExport}
+                  >
+                    Export
+                  </Button>
+                </div>
+              </form>
+            </>
+          )}
+        </Dialog>
       </Modal>
     </ModalOverlay>
   );

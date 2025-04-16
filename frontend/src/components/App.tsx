@@ -1,3 +1,4 @@
+// import Plotly from "plotly.js-cartesian-dist-min";
 import React from "react";
 import { Button, type Key, Tab, TabList, Tabs } from "react-aria-components";
 import {
@@ -22,7 +23,7 @@ import { useSyncState } from "../hooks/useSyncState";
 import { Document } from "./Document";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { ExportModal } from "./ExportModal";
-import { HeatmapRefProvider } from "./HeatmapRefProvider";
+import { Exporter } from "./Exporter";
 import { MainMenu } from "./Menu";
 import { Select, SelectItem } from "./Select";
 
@@ -36,14 +37,31 @@ export const App = () => {
     if (initialized) {
       return;
     }
-    window.pywebview.api.app_config().then((data) => {
-      setAppState((prev) => ({ ...prev, config: data }));
-      setInitialized(true);
-    });
+
+    Promise.all([
+      window.pywebview.api.app_config(),
+      window.pywebview.api.app_settings(),
+    ]).then(
+      ([
+        config,
+        {
+          user_settings: { export_path, open_folder_after_export },
+        },
+      ]) => {
+        setAppState((prev) => ({
+          ...prev,
+          config,
+          dataExportPath: export_path,
+          openExportFolder:
+            open_folder_after_export || initialAppState.openExportFolder,
+        }));
+        setInitialized(true);
+      },
+    );
   });
   const tabListRef = React.useRef<HTMLDivElement>(null);
   const lastTabRef = React.useRef<HTMLDivElement>(null);
-
+  console.log(appState);
   React.useEffect(() => {
     if (!initialized) {
       return;
@@ -173,10 +191,20 @@ export const App = () => {
   return (
     <ErrorBoundary appState={appState} setAppState={setAppState}>
       <AppStateContext.Provider value={{ appState, setAppState }}>
-        <HeatmapRefProvider>
-          {initialized &&
-          appState.documents.length > 0 &&
-          appState.activeDocumentId ? (
+        {initialized &&
+        appState.documents.length > 0 &&
+        appState.activeDocumentId ? (
+          <Exporter
+            appState={appState}
+            setAppState={setAppState}
+            docState={activeDocument}
+            tabs={[
+              "heatmap",
+              "clustermap",
+              "distribution_histogram",
+              "distribution_violin",
+            ]}
+          >
             <div className="app-layout">
               <div className="app-header">
                 <div className="app-header-left">
@@ -291,21 +319,22 @@ export const App = () => {
                     </Select>
                   )}
                 </div>
-
-                <div className="app-header-right">
-                  <Button
-                    className={"react-aria-Button with-svg"}
-                    onPress={() =>
-                      setAppState((prev) => ({
-                        ...prev,
-                        showExportModal: true,
-                      }))
-                    }
-                  >
-                    <TbFolderShare size={17} />
-                    <span>Export</span>
-                  </Button>
-                </div>
+                {activeDocument?.view === "viewer" ? (
+                  <div className="app-header-right">
+                    <Button
+                      className={"react-aria-Button with-svg"}
+                      onPress={() =>
+                        setAppState((prev) => ({
+                          ...prev,
+                          showExportModal: true,
+                        }))
+                      }
+                    >
+                      <TbFolderShare size={17} />
+                      <span>Export</span>
+                    </Button>
+                  </div>
+                ) : null}
               </div>
               <Tabs
                 selectedKey={appState.activeDocumentId}
@@ -323,12 +352,14 @@ export const App = () => {
                     />
                   ))}
               </Tabs>
-              {activeDocument ? <ExportModal /> : null}
+              {activeDocument ? (
+                <ExportModal appState={appState} setAppState={setAppState} />
+              ) : null}
             </div>
-          ) : (
-            <div className="app-overlay app-loader" />
-          )}
-        </HeatmapRefProvider>
+          </Exporter>
+        ) : (
+          <div className="app-overlay app-loader" />
+        )}
       </AppStateContext.Provider>
     </ErrorBoundary>
   );

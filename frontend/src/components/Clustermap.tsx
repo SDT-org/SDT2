@@ -76,6 +76,9 @@ export const Clustermap = ({
   );
 
   const forceSvgRender = useHeatmapRenderToggle();
+  const renderSvg =
+    forceSvgRender ||
+    (appState.exportStatus === "exporting" && appState.saveFormat === "svg");
 
   const titleFont =
     settings.titleFont === "Monospace" ? plotFontMonospace : plotFontSansSerif;
@@ -89,7 +92,7 @@ export const Clustermap = ({
     <>
       <div className="app-main" ref={elementRef}>
         <div
-          className="app-loader app-main-loader delay"
+          className="app-overlay app-loader app-main-loader delay"
           aria-hidden="true"
           data-hidden="false"
           ref={loaderRef}
@@ -98,34 +101,36 @@ export const Clustermap = ({
           <div className="debug-toast">SVG</div>
         ) : null}
         {clusterData ? (
-          forceSvgRender ||
-          (appState.showExportModal && appState.saveFormat === "svg") ? (
-            <D3SvgHeatmap
-              data={clustermapData}
-              clusterData={clusterData}
-              settings={{ ...docState.heatmap, ...settings }}
-              tickText={orderedTickText}
-              colorScale={colorScale}
-              minVal={0}
-              maxVal={100}
-              width={size.width}
-              height={size.height}
-              cellSpace={settings.cellspace}
-              showPercentIdentities={settings.annotation}
-              roundTo={2}
-              cbarHeight={0}
-              cbarWidth={0}
-              axlabel_xrotation={settings.axlabel_xrotation}
-              axlabel_fontsize={settings.axlabel_fontsize}
-              axlabel_yrotation={settings.axlabel_yrotation}
-              titleFont={titleFont}
-              showTitles={settings.showTitles}
-              title={settings.title}
-              axis_labels={settings.axis_labels}
-              showscale={false}
-              margin={margin}
-              showLegend={settings.showLegend}
-            />
+          renderSvg ? (
+            <>
+              <div className="debug-toast">SVG</div>
+              <D3SvgHeatmap
+                data={clustermapData}
+                clusterData={clusterData}
+                settings={{ ...docState.heatmap, ...settings }}
+                tickText={orderedTickText}
+                colorScale={colorScale}
+                minVal={0}
+                maxVal={100}
+                width={size.width}
+                height={size.height}
+                cellSpace={settings.cellspace}
+                showPercentIdentities={settings.annotation}
+                roundTo={2}
+                cbarHeight={0}
+                cbarWidth={0}
+                axlabel_xrotation={settings.axlabel_xrotation}
+                axlabel_fontsize={settings.axlabel_fontsize}
+                axlabel_yrotation={settings.axlabel_yrotation}
+                titleFont={titleFont}
+                showTitles={settings.showTitles}
+                title={settings.title}
+                axis_labels={settings.axis_labels}
+                showscale={false}
+                margin={margin}
+                showLegend={settings.showLegend}
+              />
+            </>
           ) : (
             <D3CanvasHeatmap
               data={clustermapData}

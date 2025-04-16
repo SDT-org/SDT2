@@ -18,11 +18,8 @@ bio_data_src_path = os.path.join(
 )
 bio_data_dest_path = os.path.join(*bio_data_path)
 
-python_executable = (
-    os.path.join(venv_path, "Scripts", "python")
-    if os.name == "nt"
-    else os.path.join(venv_path, "bin", "python")
-)
+# Find and use current Python interpreter (should be uv)
+python_executable = sys.executable
 
 
 def get_parasail_library_name():
@@ -37,10 +34,9 @@ def get_parasail_library_name():
 
 
 def get_parasail_library_path(library_name):
-    venv_path = os.environ.get("VIRTUAL_ENV")
-    if not venv_path:
-        raise RuntimeError("VIRTUAL_ENV not set. Activate your virtual environment.")
-
+    if not os.path.exists(venv_path):
+        raise RuntimeError(f"Virtual environment path {venv_path} does not exist.")
+    
     for root, _, files in os.walk(venv_path):
         if library_name in files:
             return os.path.join(root, library_name)

@@ -1,5 +1,7 @@
 import os
 import sys
+import time
+import urllib.parse
 
 current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(current_file_path, "../../"))
@@ -8,11 +10,22 @@ sys.path.append(os.path.join(current_file_path, "."))
 from multiprocessing import Lock, Manager, Pool, cpu_count as get_cpu_count
 from tempfile import TemporaryDirectory
 from platformdirs import user_documents_dir
-from utils import get_child_process_info, make_doc_id
+from utils import get_child_process_info, make_doc_id, open_folder
 from process_data import process_data, save_cols_to_csv
-from document_state import DocState, save_doc_settings
-from app_settings import add_recent_file, load_app_settings, remove_recent_file, save_app_settings
-from export_data import do_export_data, prepare_export_data
+from document_state import save_document_settings
+from app_settings import (
+    add_recent_file,
+    load_app_settings,
+    remove_recent_file,
+    save_app_settings,
+    update_app_settings,
+)
+from export import (
+    ImageFormat,
+    build_source_target_pairs,
+    do_export,
+    save_image_from_api,
+)
 from save_document import pack_document, unpack_document
 from app_state import create_app_state
 from validations import validate_fasta
@@ -33,10 +46,11 @@ from debug import open_doc_folder
 from config import app_version, dev_frontend_host
 from constants import matrix_filetypes, default_window_title
 from heatmap import (
-    dataframe_to_lower_triangle,
-    lower_triangle_to_full_matrix,
-    numpy_to_lower_triangle,
+    dataframe_to_triangle,
+    triangle_to_matrix,
+    numpy_to_triangle,
 )
+from document_paths import ImageKey, build_document_paths
 
 is_compiled = "__compiled__" in globals()
 is_macos = platform.system() == "Darwin"
@@ -61,10 +75,6 @@ window = None
 pool = None
 cancelled = None
 start_time = None
-
-
-def get_matrix_path(state: DocState):
-    return os.path.join(state.tempdir_path, "matrix.csv")
 
 
 def do_cancel_run():
@@ -134,10 +144,12 @@ def handle_open_file(filepath: str, doc_id: str | None):
     unique_dir = os.path.join(temp_dir.name, doc_id)
     os.makedirs(unique_dir, exist_ok=True)
 
+    doc_paths = build_document_paths(unique_dir)
+
     if filetype == "application/vnd.sdt":
         unpack_document(filepath, unique_dir)
 
-        if not os.path.exists(os.path.join(unique_dir, "matrix.csv")):
+        if not os.path.exists(doc_paths.matrix):
             remove_recent_file(filepath)
             raise Exception(f"File is not a valid SDT file: {filepath}")
 
@@ -180,19 +192,13 @@ def handle_open_file(filepath: str, doc_id: str | None):
             int(nanmin(data_no_diag))
             int(nanmax(data_no_diag))
 
-            save_cols_to_csv(
-                df,
-                os.path.join(
-                    unique_dir,
-                    os.path.splitext(basename)[0].removesuffix("_mat"),
-                ),
-            )
+            save_cols_to_csv(df, doc_paths.triangle)
 
             # We need a full matrix for doing things but we don't have
             # it yet because this was a .txt/.csv lower triangle matrix
-            full_matrix_dataframe = lower_triangle_to_full_matrix(df)
-            full_matrix_dataframe.to_csv(
-                os.path.join(unique_dir, "matrix.csv"),
+            matrix_dataframe = triangle_to_matrix(df)
+            matrix_dataframe.to_csv(
+                doc_paths.matrix,
                 mode="w",
                 header=False,
                 index=True,
@@ -263,6 +269,10 @@ class Api:
         settings["recent_files"] = [
             f for f in settings["recent_files"] if os.path.exists(f)
         ]
+        export_path = settings["user_settings"].get("export_path", "")
+        settings["user_settings"]["export_path"] = (
+            user_documents_dir() if not os.path.exists(export_path) else export_path
+        )
         save_app_settings(settings)
         return settings
 
@@ -443,8 +453,8 @@ class Api:
         elif run_settings == "clear":
             reset_state()
 
-    def confirm_overwrite(self, destination_files):
-        files_to_overwrite = [f for f in destination_files if os.path.exists(f)]
+    def confirm_overwrite(self, target_files):
+        files_to_overwrite = [f for f in target_files if os.path.exists(f)]
 
         if not files_to_overwrite:
             return True
@@ -457,23 +467,97 @@ class Api:
 
         return assert_window().create_confirmation_dialog("Warning", message)
 
-    def export_data(self, args: dict):
+    def save_svg_element(self, doc_id: str, selector: str, key: ImageKey):
+        doc = get_document(doc_id)
+        if doc == None:
+            raise Exception(f"could not find document: {doc_id}")
+
+        element = assert_window().dom.get_element(selector)
+
+        if element == None:
+            raise Exception(f"could not find element: {selector}")
+        inner_html = element.node["innerHTML"]
+        data = f"<svg xmlns='http://www.w3.org/2000/svg'>{inner_html}</svg>"
+
+        save_image_from_api(doc=doc, data=data, key=key, format="svg")
+
+        return True
+
+    def save_svg_data(self, doc_id: str, data: str, key: ImageKey, format: ImageFormat):
+        doc = get_document(doc_id)
+        if doc == None:
+            raise Exception(f"could not find document: {doc_id}")
+
+        data = urllib.parse.unquote(data.split(",")[1])
+        save_image_from_api(
+            doc=doc,
+            data=data,
+            key=key,
+            format=format,
+        )
+
+        return True
+
+    def save_raster_image(
+        self, doc_id: str, data: str, key: ImageKey, format: ImageFormat
+    ):
+        doc = get_document(doc_id)
+        if doc == None:
+            raise Exception(f"could not find document: {doc_id}")
+
+        save_image_from_api(
+            doc=doc,
+            data=data,
+            key=key,
+            format=format,
+        )
+
+        return True
+
+    def export(self, args: dict):
         doc = get_document(args["doc_id"])
         if doc == None:
             raise Exception(f"could not find document: {args['doc_id']}")
 
-        matrix_path = get_matrix_path(doc)
-        export_path = args["export_path"]
-        destination_files, image_destinations, image_format, prefix, suffixes = (
-            prepare_export_data(export_path, matrix_path, doc, args)
+        update_app_settings(
+            {
+                "user_settings": {
+                    "export_path": args["export_path"],
+                    "open_folder_after_export": args["open_folder"],
+                }
+            }
         )
 
-        if not self.confirm_overwrite(destination_files):
+        doc_paths = build_document_paths(doc.tempdir_path)
+
+        if args["output_cluster"] == True:
+            cluster.export(
+                doc_paths.matrix,
+                doc_paths.cluster,
+                args["cluster_threshold"],
+                # Note this is not the same as the cluster_method param in the runner api
+                args["cluster_method"],
+            )
+
+        prefix_default = os.path.splitext(doc.basename)[0]
+        args["prefix"] = args.get("prefix", prefix_default) or prefix_default
+        source_target_pairs = build_source_target_pairs(
+            doc.tempdir_path, args["export_path"], args["prefix"], args["image_format"]
+        )
+
+        source_paths, target_paths = zip(*source_target_pairs)
+
+        for file in source_paths:
+            if not os.path.exists(file):
+                raise FileNotFoundError(f"File not found: {file}")
+
+        if not self.confirm_overwrite(target_paths):
             return False
 
-        do_export_data(
-            export_path, image_destinations, image_format, doc, prefix, suffixes, args
-        )
+        do_export(source_target_pairs)
+
+        if args["open_folder"]:
+            open_folder(args["export_path"])
 
         return True
 
@@ -482,32 +566,20 @@ class Api:
         if doc == None:
             raise Exception(f"could not find document: {doc_id}")
 
-        matrix_path = get_matrix_path(doc)
+        doc_paths = build_document_paths(doc.tempdir_path)
 
-        if doc.filetype == "application/vnd.sdt":
-            file_base = os.path.splitext(os.path.basename(matrix_path))[0].removesuffix(
-                "_mat"
-            )
-        else:
-            file_base = os.path.splitext(doc.basename)[0]
-
-        with open(matrix_path, "r") as temp_f:
+        with open(doc_paths.matrix, "r") as temp_f:
             col_count = [len(l.split(",")) for l in temp_f.readlines()]
             column_names = [i for i in range(0, max(col_count))]
 
-        stats_path = os.path.join(doc.tempdir_path, f"{file_base}_stats.csv")
-        if os.path.exists(stats_path):
-            stats_df = read_csv(stats_path, header=0)
+        if os.path.exists(doc_paths.stats):
+            stats_df = read_csv(doc_paths.stats, header=0)
 
         else:
             stats_df = DataFrame([])
 
-        cols_dir = doc.tempdir_path
-        cols_file_base = file_base.removesuffix("_mat")
-        cols_path = os.path.join(cols_dir, f"{cols_file_base}_cols.csv")
-
-        if os.path.exists(cols_path):
-            cols_data = read_csv(cols_path, skiprows=1).values.tolist()
+        if os.path.exists(doc_paths.columns):
+            cols_data = read_csv(doc_paths.columns, skiprows=1).values.tolist()
 
             id_map = {}
             identity_scores = []
@@ -526,7 +598,11 @@ class Api:
             identity_scores = []
 
         df = read_csv(
-            matrix_path, delimiter=",", index_col=0, header=None, names=column_names
+            doc_paths.matrix,
+            delimiter=",",
+            index_col=0,
+            header=None,
+            names=column_names,
         )
         tick_text = df.index.tolist()
         update_document(doc_id, sequences_count=len(tick_text))
@@ -545,7 +621,7 @@ class Api:
             self.load_data_and_stats(doc_id)
         )
         heat_data = DataFrame(data, index=tick_text)
-        heat_data = dataframe_to_lower_triangle(heat_data)
+        heat_data = dataframe_to_triangle(heat_data)
         parsedData = heat_data.values.tolist()
 
         data_to_dump = dict(
@@ -562,9 +638,11 @@ class Api:
         if doc is None:
             raise Exception(f"Could not find document: {doc_id}")
 
-        matrix_path = get_matrix_path(doc)
+        doc_paths = build_document_paths(doc.tempdir_path)
 
-        matrix_df = pd.read_csv(matrix_path, delimiter=",", index_col=0, header=None)
+        matrix_df = pd.read_csv(
+            doc_paths.matrix, delimiter=",", index_col=0, header=None
+        )
         matrix_np = matrix_df.to_numpy()
         row_ids = matrix_df.index.tolist()
 
@@ -593,7 +671,7 @@ class Api:
         reordered_matrix_np = matrix_np[new_order, :][:, new_order]
 
         reordered_data = {
-            "matrix": numpy_to_lower_triangle(reordered_matrix_np).tolist(),
+            "matrix": numpy_to_triangle(reordered_matrix_np).tolist(),
             "tickText": sorted_ids,
         }
 
@@ -647,7 +725,7 @@ class Api:
         doc = get_document(args["id"])
         if doc == None:
             raise Exception(f"Expected to find document: {args['id']}")
-        save_doc_settings(doc)
+        save_document_settings(doc)
 
     def close_doc(self, doc_id: str):
         remove_document(doc_id)

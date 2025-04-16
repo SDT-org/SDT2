@@ -4,6 +4,7 @@ import React from "react";
 import createPlotlyComponent from "react-plotly.js/factory";
 import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import type { DataSets, DistributionState } from "../distributionState";
+import { useExportPlotly } from "../hooks/useExportPlotly";
 import {
   useRelayoutHideSubtitle,
   useRelayoutUpdateTitles,
@@ -40,6 +41,8 @@ export const Histogram = ({
 
   const updateTitles = useRelayoutUpdateTitles(updateSettings);
   useRelayoutHideSubtitle(!settings.showTitles);
+  const exportPlotly = useExportPlotly("distribution_histogram");
+
   const histogramTrace = React.useMemo(() => {
     const orientation = settings.plotOrientation;
     return {
@@ -89,28 +92,12 @@ export const Histogram = ({
               ...(settings.titleFont === "Monospace"
                 ? plotFontMonospace
                 : plotFontSansSerif),
-              // @ts-ignore
-              weight: "bold",
+              size: 14,
             },
             uirevision: "true",
             bargap: settings.barGap,
             xaxis: {
-              ...(settings.showAxisLabels
-                ? {
-                    title: {
-                      text: settings.xtitle,
-                      font: {
-                        ...(settings.titleFont === "Monospace"
-                          ? plotFontMonospace
-                          : plotFontSansSerif),
-                        //@ts-ignore
-                        weight: "bold",
-                      },
-                    },
-                    tickfont: { weight: "normal" },
-                    scaleratio: 1,
-                  }
-                : {}),
+              tickfont: { family: "sans-serif", size: 11 },
               side: "bottom",
               linecolor: settings.histlineColor,
               linewidth: settings.histOutlineWidth,
@@ -125,24 +112,7 @@ export const Histogram = ({
               autotick: true,
             },
             yaxis: {
-              ...(settings.showAxisLabels
-                ? {
-                    title: {
-                      text: settings.ytitle,
-                      font: {
-                        ...(settings.titleFont === "Monospace"
-                          ? plotFontMonospace
-                          : plotFontSansSerif),
-                        //@ts-ignore
-                        weight: "bold",
-                      },
-                      pad: {
-                        r: 15,
-                      },
-                    },
-                    tickfont: { weight: "normal" },
-                  }
-                : {}),
+              tickfont: { family: "sans-serif", size: 11 },
               side: "left",
               linecolor: settings.histlineColor,
               linewidth: settings.histOutlineWidth,
@@ -162,6 +132,7 @@ export const Histogram = ({
             margin: { l: 50, r: 50, t: 50, b: 50 },
           }}
           onRelayout={updateTitles}
+          onInitialized={exportPlotly}
           config={{
             responsive: true,
             displayModeBar: false,

@@ -170,7 +170,7 @@ export const ClustermapSidebar = ({
                 });
               }}
             >
-              Plot Titles
+              Plot Title
             </Switch>
             <div
               className="drawer"

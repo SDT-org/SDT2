@@ -778,13 +778,32 @@ small {
   gap: 1.6rem;
 }
 
+.app-backdrop {
+  position: absolute;
+  height: 100vh;
+  width: 100vw;
+  background: rgba(var(--app-modal-overlay-color), 1);
+  z-index: 20;
+}
+
 .app-loader {
+  content: "";
   border: 5px solid #f3f3f3;
   border-top: 5px solid #3498db;
   border-radius: 50%;
   width: 4rem;
   height: 4rem;
   animation: spin 2s linear infinite;
+}
+
+.app-loader-status {
+  position: absolute;
+  width: 22.4rem;
+  margin-top: 5rem;
+  text-align: center;
+  -webkit-font-smoothing: subpixel-antialiased;
+  -webkit-transform: translateZ(0) scale(1.0, 1.0);
+  color: #3498db;
 }
 
 .app-loader.delay {
@@ -800,7 +819,7 @@ small {
   position: absolute;
   left: 50%;
   top: 50%;
-  z-index: 99;
+  z-index: 19;
   margin-top: -2rem;
   margin-left: -2rem;
 }
@@ -815,6 +834,14 @@ small {
   to {
     opacity: 0;
   }
+}
+
+.app-overlay-cancel {
+  position: absolute;
+  display: block;
+  width: 12.8rem;
+  left: calc(50% - 6.4rem);
+  bottom: 10%;
 }
 
 .app-message {

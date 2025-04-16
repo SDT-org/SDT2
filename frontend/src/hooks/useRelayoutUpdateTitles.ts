@@ -10,8 +10,6 @@ type ExtendedPlotRelayoutEvent = Plotly.PlotRelayoutEvent & {
 type UpdateSettingsPayload = Partial<{
   title: string;
   subtitle: string;
-  ytitle: string;
-  xtitle: string;
 }>;
 
 export const useRelayoutUpdateTitles = (
@@ -24,8 +22,6 @@ export const useRelayoutUpdateTitles = (
       if (event["title.text"]) updates.title = event["title.text"];
       if (event["title.subtitle.text"])
         updates.subtitle = event["title.subtitle.text"];
-      if (event["yaxis.title.text"]) updates.ytitle = event["yaxis.title.text"];
-      if (event["xaxis.title.text"]) updates.xtitle = event["xaxis.title.text"];
 
       if (Object.keys(updates).length > 0) {
         updateSettings(updates);

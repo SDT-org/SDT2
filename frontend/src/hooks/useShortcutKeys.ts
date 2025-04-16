@@ -26,6 +26,10 @@ export const useShortcutKeys = (
 
   React.useEffect(() => {
     const handleKeydown = (event: KeyboardEvent) => {
+      if (appState.exportStatus === "exporting") {
+        event.preventDefault();
+        return;
+      }
       if (
         (event.ctrlKey || event.metaKey) &&
         Object.keys(keyMap).includes(event.key)
@@ -40,5 +44,5 @@ export const useShortcutKeys = (
     document.addEventListener("keydown", handleKeydown);
 
     return () => document.removeEventListener("keydown", handleKeydown);
-  }, [keyMap]);
+  }, [keyMap, appState.exportStatus]);
 };

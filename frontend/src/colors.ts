@@ -36,13 +36,37 @@ export function createD3ColorScale(
     .interpolate(d3.interpolateRgb)
     .clamp(true);
 }
-
+//https://stackoverflow.com/questions/10014271/generate-random-color-distinguishable-to-humans
 export const distinctColor = (index: number) => {
   if (!index) {
-    return "hsl(245, 245, 245)";
+    return "hsl(0, 0%, 96%)"; // Light grey for index 0
   }
-  const hue = (index * 137.5) % 360;
-  return `hsl(${hue}, 85%, 50%)`;
+
+  const hue = (index * 137.5) % 360; // Golden angle approximation for hue
+
+  // Define saturation and alpha patterns
+  const patterns = [
+    { saturation: 90, alpha: 50 }, // Vibrant, Medium
+    { saturation: 75, alpha: 65 }, // Less Vibrant, Lighter
+    { saturation: 90, alpha: 35 }, // Dark and full
+    { saturation: 60, alpha: 75 }, // Less Vibrant, Lighter
+    { saturation: 75, alpha: 40 }, // Dark
+    { saturation: 85, alpha: 50 }, // Default
+  ];
+
+  // cycle with modulo
+  const cycle = ((index % patterns.length) + patterns.length) % patterns.length;
+
+  // Default values
+  let saturation = 85;
+  let alpha = 50;
+
+  if (patterns[cycle]) {
+    saturation = patterns[cycle].saturation;
+    alpha = patterns[cycle].alpha;
+  }
+
+  return `hsl(${hue.toFixed(1)}, ${saturation}%, ${alpha}%)`;
 };
 
 type ColorName =

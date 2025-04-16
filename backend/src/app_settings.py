@@ -1,12 +1,14 @@
 import json
 import os
 from platformdirs import user_data_dir
-
 current_version = 1
 
 default_settings = {
     "recent_files": [],
-    "user_settings": {}
+    "user_settings": {
+        "export_path": "",
+        "open_folder_after_export": False
+    }
 }
 
 def get_app_settings_path():
@@ -21,6 +23,11 @@ def load_app_settings():
             return json.load(f)
     else:
         return default_settings
+
+def update_app_settings(new_settings: dict):
+    settings = load_app_settings()
+    settings.update(new_settings)
+    save_app_settings(settings)
 
 def add_recent_file(filepath: str):
     settings = load_app_settings()

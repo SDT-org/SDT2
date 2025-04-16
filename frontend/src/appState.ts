@@ -25,6 +25,8 @@ export const saveableImageFormats = {
   jpeg: "JPEG",
 };
 export type SaveableImageFormat = keyof typeof saveableImageFormats;
+export type SaveableImageKey = DocState["dataView"];
+export type RasterFormat = Extract<SaveableImageFormat, "png" | "jpeg">;
 
 export type DocState = {
   id: string;
@@ -56,6 +58,7 @@ export type DocState = {
   distribution: DistributionState;
   heatmap: HeatmapSettings;
   clustermap: ClustermapSettings;
+  exportPrefix: string;
 };
 
 export type AppState = {
@@ -85,6 +88,8 @@ export type AppState = {
   error?: Error | null;
   errorInfo?: ErrorInfo | PromiseRejectionEvent["reason"] | null;
   recentFiles: string[];
+  exportStatus: "idle" | "preparing" | "exporting" | "success";
+  openExportFolder: boolean;
 };
 
 export const docStateSchema = z.object({
@@ -120,6 +125,11 @@ export const docStateSchema = z.object({
   clustermap: ClustermapSettingsSchema,
 });
 
+const clientDocState = {
+  exportPrefix: "",
+  openExportFolder: false,
+};
+
 export const initialDocState: DocState = {
   id: "",
   view: "runner",
@@ -129,7 +139,6 @@ export const initialDocState: DocState = {
   basename: "",
   modified: false,
   parsed: false,
-  // TODO: wrap in runState
   progress: 0,
   sequences_count: 0,
   stage: "Preprocessing",
@@ -177,6 +186,7 @@ export const initialDocState: DocState = {
     cellspace: 1,
     showLegend: true,
   },
+  ...clientDocState,
 };
 
 export const initialAppState: AppState = {
@@ -198,6 +208,8 @@ export const initialAppState: AppState = {
     platform: "unknown",
   },
   recentFiles: [],
+  exportStatus: "idle",
+  openExportFolder: false,
 };
 
 export type SetAppState = React.Dispatch<React.SetStateAction<AppState>>;

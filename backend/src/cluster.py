@@ -1,4 +1,3 @@
-import os
 from tempfile import TemporaryDirectory
 import numpy as np
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
@@ -58,18 +57,7 @@ def get_clusters_dataframe(data, method, threshold, index):
     return cluster_data_to_dataframe(cluster_data, threshold)
 
 
-def make_cluster_path(matrix_path, method):
-    output_dir = os.path.dirname(matrix_path)
-    file_name = os.path.basename(matrix_path)
-    file_base, _ = os.path.splitext(file_name)
-    file_name = file_base.replace("_mat", "")
-    file_base = os.path.splitext(os.path.basename(matrix_path))[0].removesuffix("_mat")
-    return os.path.join(output_dir, file_name + "_cluster_" + method + ".csv")
-
-
-def export(matrix_path, threshold, method):
-    output_file = make_cluster_path(matrix_path, method)
-
+def export(matrix_path, cluster_path, threshold, method):
     with open(matrix_path, "r") as temp_f:
         col_count = [len(l.split(",")) for l in temp_f.readlines()]
         column_names = [i for i in range(0, max(col_count))]
@@ -82,7 +70,7 @@ def export(matrix_path, threshold, method):
     data = np.round(data, 2)
 
     df_result = get_clusters_dataframe(data, method, threshold, index)
-    df_result.to_csv(output_file, index=False)
+    df_result.to_csv(cluster_path, index=False)
 
     return df_result
 

@@ -1,7 +1,7 @@
 from collections import namedtuple
 import json
 import os
-
+from document_paths import build_document_paths
 VERSION = 1
 
 DocState = namedtuple(
@@ -109,29 +109,7 @@ default_distribution_state = dict(
     plotOrientation="vertical",
     barGap = 0.1,
   ),
-  raincloud=dict(
-    **visualization_defaults,
-    bandwidth=8,
-    jitter=0.5,
-    markerColor="hsl(9, 100%, 64%)",
-    markerSize=7,
-    plotOrientation="horizontal",
-    pointPos=-1.5,
-    points="all",
-    showAxisLines=True,
-    showPoints=True,
-    showZeroLine=False,
-    fillColor="hsl(195, 53%, 79%)",
-    editable=False,
-    side="positive",
-    showMeanline=True,
-    makeEditable=True,
-    dticks=5,
-    subtitle="Raincloud Plot",
-    title="Raincloud Plot",
-    xtitle="Percent Identity",
-    ytitle="Genome",
-  ),
+
   violin=dict(
     **visualization_defaults,
     bandwidth=5,
@@ -142,7 +120,7 @@ default_distribution_state = dict(
     fillColor="hsl(195, 53%, 79%)",
     jitter=0.5,
     markerColor="hsl(9, 100%, 64%)",
-    markerSize=7,
+    markerSize=3,
     plotOrientation="vertical",
     pointOrientation="Violin",
     pointPos=0,
@@ -162,7 +140,7 @@ default_distribution_state = dict(
   ),
 )
 
-def create_document_state(
+def create_doc_state(
     id,
     view="runner",
     dataView="heatmap",
@@ -185,11 +163,11 @@ def create_document_state(
     distribution=default_distribution_state
 ):
     if filetype == "application/vnd.sdt" and tempdir_path:
-        doc_settings = load_doc_settings(tempdir_path)
-        if doc_settings:
-            dataView = doc_settings["dataView"]
-            heatmap = doc_settings["heatmap"]
-            distribution = doc_settings["distribution"]
+        settings = load_document_settings(tempdir_path)
+        if settings:
+            dataView = settings["dataView"]
+            heatmap = settings["heatmap"]
+            distribution = settings["distribution"]
 
     return DocState(
         version=VERSION,
@@ -215,18 +193,15 @@ def create_document_state(
         distribution=distribution
     )
 
-def get_doc_setting_path(tempdir_path: str):
-    return os.path.join(tempdir_path, "document.json")
-
-def load_doc_settings(dir_path: str):
-    path = get_doc_setting_path(dir_path)
-    if os.path.exists(path):
-        with open(path) as f:
+def load_document_settings(dir_path: str):
+    doc_settings_path = build_document_paths(dir_path).settings
+    if os.path.exists(doc_settings_path):
+        with open(doc_settings_path) as f:
             return json.load(f)
     return None
 
-def save_doc_settings(doc_state: DocState):
-    path = get_doc_setting_path(doc_state.tempdir_path)
+def save_document_settings(doc_state: DocState):
+    path = build_document_paths(doc_state.tempdir_path).settings
     with open(path, "w") as f:
         settings = {
             "version": VERSION,

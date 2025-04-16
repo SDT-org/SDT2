@@ -1,28 +1,15 @@
 import os
 import zipfile
-from constants import data_file_suffixes
 
-internal_files = ["document.json", "matrix.csv"]
-
-def pack_document(output_file, files):
-    if not output_file.endswith(".sdt"):
-        output_file += ".sdt"
-    with zipfile.ZipFile(output_file, "w") as zf:
+def pack_document(target_file, files):
+    if not target_file.endswith(".sdt"):
+        target_file += ".sdt"
+    with zipfile.ZipFile(target_file, "w") as zf:
         for file in files:
-            basename = os.path.basename(file)
-
-            if (
-                any(
-                    os.path.splitext(basename)[0].endswith(suffix)
-                    for suffix in data_file_suffixes
-                )
-                or basename in internal_files
-            ):
-                zf.write(
-                    os.path.join(os.path.dirname(output_file), file),
-                    os.path.basename(file),
-                )
-
+            zf.write(
+                os.path.join(os.path.dirname(target_file), file),
+                os.path.basename(file),
+            )
 
 def unpack_document(input_file, output_directory):
     if not input_file.endswith(".sdt"):

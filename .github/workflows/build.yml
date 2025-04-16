@@ -22,8 +22,11 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Install uv
+        run: pip install uv
+
       - name: Install virtualenv
-        run: pip install virtualenv
+        run: uv pip install virtualenv
 
       - uses: oven-sh/setup-bun@v2
 
@@ -37,18 +40,17 @@ jobs:
       - name: macOS - Build
         if: matrix.os == 'macos-latest'
         run: |
-          source venv-pywebview/bin/activate
-          bun run build
+          uv run -p venv-pywebview bun run build
+
       - name: Linux - Build
         if: matrix.os == 'ubuntu-latest'
         run: |
-          source venv-pywebview/bin/activate
-          bun run build
+          uv run -p venv-pywebview bun run build
+
       - name: Windows - Build
         if: matrix.os == 'windows-latest'
         run: |
-          venv-pywebview\\Scripts\\activate
-          bun run build
+          uv run -p venv-pywebview bun run build
 
       - name: Windows - Sign artifact
         if: matrix.os == 'windows-latest'
@@ -85,8 +87,8 @@ jobs:
           endpoint: ${{ secrets.AZURE_ENDPOINT }}
           trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-          files-folder: '.'
-          files-folder-filter: 'SDT2_Installer.exe'
+          files-folder: "."
+          files-folder-filter: "SDT2_Installer.exe"
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256

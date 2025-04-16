@@ -1,6 +1,7 @@
 import type {
   DocState,
   SaveableImageFormat,
+  SaveableImageKey,
   SyncProgressEvent,
   SyncStateEvent,
 } from "../appState";
@@ -14,7 +15,10 @@ declare global {
     pywebview: {
       api: {
         app_config: () => Promise<AppState["config"]>;
-        app_settings: () => Promise<{ recent_files: string[] }>;
+        app_settings: () => Promise<{
+          recent_files: string[];
+          export_path: string;
+        }>;
         get_state: () => Promise<AppState>;
         reset_state: () => Promise<void>;
         new_doc: () => Promise<string>;
@@ -48,18 +52,33 @@ declare global {
           tickText: string[];
           clusterData: ClusterDataItem[];
         }>;
-        export_data: (args: {
+        export: (args: {
           doc_id: string;
           export_path: string;
           output_cluster: boolean;
           cluster_threshold: number;
           cluster_method: string;
-          heatmap_image_data: string;
-          clustermap_image_data: string;
-          histogram_image_data: string;
-          violin_image_data: string;
           image_format: SaveableImageFormat;
+          open_folder: boolean;
+          prefix: string;
         }) => Promise<boolean>;
+        save_svg_element: (
+          doc_id: string,
+          selector: string,
+          key: SaveableImageKey,
+        ) => Promise<void>;
+        save_svg_data: (
+          doc_id: string,
+          data: string,
+          key: SaveableImageKey,
+          format: SaveableImageFormat,
+        ) => Promise<void>;
+        save_raster_image: (
+          doc_id: string,
+          data: string,
+          key: SaveableImageKey,
+          format: SaveableImageFormat,
+        ) => Promise<void>;
         start_run: (args: RunProcessDataArgs) => Promise<void>;
         set_window_title: (title: string) => Promise<void>;
         processes_info: () => Promise<string>;
