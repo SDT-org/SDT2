@@ -290,7 +290,6 @@ def process_data(
     save_stats_to_csv(seq_stats, doc_paths.stats)
     save_matrix_to_csv(df, doc_paths.matrix, doc_paths.triangle)
 
-
     set_stage("Finalizing")
     print("Stage: Finalizing")
 

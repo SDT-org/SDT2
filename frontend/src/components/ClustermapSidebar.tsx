@@ -42,33 +42,38 @@ export const ClustermapSidebar = ({
               Clusters
             </label>
             <div className="drawer">
-              <div className="col-2 auto-onefr align-items-center">
-                <Label htmlFor="method">Linkage Method</Label>
-                <Select
-                  id="method"
-                  data-compact
-                  selectedKey={settings.method}
-                  onSelectionChange={(value: React.Key) =>
-                    updateSettings({
-                      ...settings,
-                      method: value as typeof settings.method,
-                    })
-                  }
-                  items={Object.entries(reorderMethods).map(([key, value]) => ({
-                    id: key,
-                    name: value.name,
-                    description: value.description,
-                  }))}
-                >
-                  {(item) => (
-                    <SelectItem textValue={item.name}>
-                      <Text slot="label">{item.name}</Text>
-                      <Text slot="description">{item.description}</Text>
-                    </SelectItem>
-                  )}
-                </Select>
+              <div className="field">
+                <div className="row">
+                  <Label htmlFor="method">Linkage Method</Label>
+                  <div className="subfield">
+                    <Select
+                      id="method"
+                      wide
+                      selectedKey={settings.method}
+                      onSelectionChange={(value: React.Key) =>
+                        updateSettings({
+                          ...settings,
+                          method: value as typeof settings.method,
+                        })
+                      }
+                      items={Object.entries(reorderMethods).map(
+                        ([key, value]) => ({
+                          id: key,
+                          name: value.name,
+                          description: value.description,
+                        }),
+                      )}
+                    >
+                      {(item) => (
+                        <SelectItem textValue={item.name}>
+                          <Text slot="label">{item.name}</Text>
+                          <Text slot="description">{item.description}</Text>
+                        </SelectItem>
+                      )}
+                    </Select>
+                  </div>
+                </div>
               </div>
-
               <hr className="compact" />
 
               <Slider

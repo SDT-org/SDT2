@@ -1,11 +1,11 @@
 from tempfile import TemporaryDirectory
+import time
 import numpy as np
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 import pandas as pd
 from collections import defaultdict
 from scipy.spatial.distance import squareform, pdist
 from sklearn.manifold import MDS
-import time
 from joblib import Memory
 
 cache_dir = TemporaryDirectory()
@@ -13,7 +13,7 @@ memory = Memory(cache_dir.name, verbose=1)
 
 @memory.cache
 def calculate_linkage(data, method) -> np.ndarray:
-    dist_data = data.copy()  # TODO: do we need to copy the data?
+    dist_data = data.copy()
 
     # Check if it's a similarity matrix (values near 100) or distance matrix
     if np.max(dist_data) > 90:
@@ -21,20 +21,30 @@ def calculate_linkage(data, method) -> np.ndarray:
     else:
         distance_mat = dist_data
 
-    # MDS for methods that need Euclidean distance
-    mds_coords = MDS(
-        n_components=2, dissimilarity="precomputed", random_state=42
-    ).fit_transform(distance_mat)
-
     if method in ["ward", "centroid", "median"]:
+        start = time.perf_counter()
+        # MDS for methods that need Euclidean distance
+        mds_coords = get_mds_coords(distance_mat)
+        if mds_coords is None:
+            raise ValueError("MDS failed to compute coordinates.")
+        end = time.perf_counter()
+        print(f"mds coords {end - start:.2f} seconds")
         y = pdist(mds_coords)
         metric = "euclidean"
     else:
+        start = time.perf_counter()
         y = squareform(distance_mat)
         metric = "precomputed"
+        end = time.perf_counter()
+        print(f"Linkage methods took {end - start:.2f} seconds")
 
     return linkage(y, method=method, metric=metric)
 
+@memory.cache
+def get_mds_coords(distance_mat):
+    return MDS(
+        n_components=2, dissimilarity="precomputed", random_state=42
+    ).fit_transform(distance_mat)
 
 def get_linkage(data: np.ndarray, method: str) -> np.ndarray:
     return calculate_linkage(data, method)
