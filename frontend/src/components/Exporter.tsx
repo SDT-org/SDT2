@@ -84,7 +84,6 @@ export const Exporter = ({
   }, [setExportStatus, updateDocState]);
 
   const runExport = React.useCallback(async () => {
-    console.debug("Running export", currentTab.current, tabs);
     if (currentTab.current || !tabs) return;
 
     setExportStatus("exporting");
@@ -92,21 +91,14 @@ export const Exporter = ({
     try {
       // each tab exports its own images
       for (const tab of tabs) {
-        console.debug(
-          `Beginning ${tab}`,
-          currentTab.current,
-          tab !== docState.dataView,
-        );
         exportStep.current = `Exporting ${tab}`;
         currentTab.current = tab;
 
-        console.log(`Switching to ${tab}`);
         swapDataView(tab);
 
         await new Promise<void>((resolve) => {
           currentResolver.current = resolve;
         });
-        console.debug(`Completed ${tab}`);
       }
 
       currentTab.current = null;
@@ -148,7 +140,6 @@ export const Exporter = ({
     swapDataView,
     setExportStatus,
     docState.exportPrefix,
-    docState.dataView,
   ]);
 
   React.useEffect(() => {

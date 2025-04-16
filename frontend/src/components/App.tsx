@@ -61,7 +61,7 @@ export const App = () => {
   });
   const tabListRef = React.useRef<HTMLDivElement>(null);
   const lastTabRef = React.useRef<HTMLDivElement>(null);
-  console.log(appState);
+
   React.useEffect(() => {
     if (!initialized) {
       return;
