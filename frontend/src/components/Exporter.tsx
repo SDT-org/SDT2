@@ -77,6 +77,7 @@ export const Exporter = ({
     if (currentTab.current) {
       currentTab.current = null;
       currentResolver.current = null;
+      exportStep.current = "Preparing";
       setExportStatus("idle");
       updateDocState({ dataView: initialTab.current });
     }
