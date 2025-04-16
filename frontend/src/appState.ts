@@ -59,7 +59,6 @@ export type DocState = {
   heatmap: HeatmapSettings;
   clustermap: ClustermapSettings;
   exportPrefix: string;
-  openExportFolder: boolean;
 };
 
 export type AppState = {
@@ -90,6 +89,7 @@ export type AppState = {
   errorInfo?: ErrorInfo | PromiseRejectionEvent["reason"] | null;
   recentFiles: string[];
   exportStatus: "idle" | "preparing" | "exporting" | "success";
+  openExportFolder: boolean;
 };
 
 export const docStateSchema = z.object({
@@ -209,6 +209,7 @@ export const initialAppState: AppState = {
   },
   recentFiles: [],
   exportStatus: "idle",
+  openExportFolder: false,
 };
 
 export type SetAppState = React.Dispatch<React.SetStateAction<AppState>>;

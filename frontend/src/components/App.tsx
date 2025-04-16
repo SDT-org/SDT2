@@ -37,14 +37,31 @@ export const App = () => {
     if (initialized) {
       return;
     }
-    window.pywebview.api.app_config().then((data) => {
-      setAppState((prev) => ({ ...prev, config: data }));
-      setInitialized(true);
-    });
+
+    Promise.all([
+      window.pywebview.api.app_config(),
+      window.pywebview.api.app_settings(),
+    ]).then(
+      ([
+        config,
+        {
+          user_settings: { export_path, open_folder_after_export },
+        },
+      ]) => {
+        setAppState((prev) => ({
+          ...prev,
+          config,
+          dataExportPath: export_path,
+          openExportFolder:
+            open_folder_after_export || initialAppState.openExportFolder,
+        }));
+        setInitialized(true);
+      },
+    );
   });
   const tabListRef = React.useRef<HTMLDivElement>(null);
   const lastTabRef = React.useRef<HTMLDivElement>(null);
-
+  console.log(appState);
   React.useEffect(() => {
     if (!initialized) {
       return;

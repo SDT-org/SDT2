@@ -56,6 +56,7 @@ export const D3SvgHeatmap = ({
       exportSvg();
     }, 0);
     return () => {
+      rendering.current = false;
       clearTimeout(id);
     };
   }, [exportSvg]);

@@ -1,4 +1,5 @@
 import React from "react";
+import { Button } from "react-aria-components";
 import type { AppState, DocState, SetAppState } from "../appState";
 import { useDocState } from "../hooks/useDocState";
 import { SuccessModal } from "./SuccessMessage";
@@ -72,22 +73,39 @@ export const Exporter = ({
     }
   }, []);
 
+  const cancelExport = React.useCallback(() => {
+    if (currentTab.current) {
+      currentTab.current = null;
+      currentResolver.current = null;
+      setExportStatus("idle");
+      updateDocState({ dataView: initialTab.current });
+    }
+  }, [setExportStatus, updateDocState]);
+
   const runExport = React.useCallback(async () => {
-    if (currentTab.current) return;
-    if (!tabs) return;
+    console.debug("Running export", currentTab.current, tabs);
+    if (currentTab.current || !tabs) return;
 
     setExportStatus("exporting");
 
     try {
       // each tab exports its own images
       for (const tab of tabs) {
+        console.debug(
+          `Beginning ${tab}`,
+          currentTab.current,
+          tab !== docState.dataView,
+        );
+        exportStep.current = `Exporting ${tab}`;
         currentTab.current = tab;
-        if (tab !== docState.dataView) {
-          swapDataView(tab);
-        }
+
+        console.log(`Switching to ${tab}`);
+        swapDataView(tab);
+
         await new Promise<void>((resolve) => {
           currentResolver.current = resolve;
         });
+        console.debug(`Completed ${tab}`);
       }
 
       currentTab.current = null;
@@ -103,7 +121,7 @@ export const Exporter = ({
         cluster_method: docState.clustermap.method,
         image_format: appState.saveFormat,
         prefix: docState.exportPrefix,
-        open_folder: docState.openExportFolder,
+        open_folder: appState.openExportFolder,
       });
 
       if (result) {
@@ -114,6 +132,7 @@ export const Exporter = ({
       exportStep.current = "Preparing";
     } catch (error) {
       setExportStatus("idle");
+      exportStep.current = "Preparing";
       currentTab.current = null;
       throw error;
     }
@@ -121,13 +140,13 @@ export const Exporter = ({
     tabs,
     appState.dataExportPath,
     appState.saveFormat,
+    appState.openExportFolder,
     docState.id,
     docState.clustermap.threshold,
     docState.clustermap.method,
     swapDataView,
     setExportStatus,
     docState.exportPrefix,
-    docState.openExportFolder,
     docState.dataView,
   ]);
 
@@ -172,6 +191,12 @@ export const Exporter = ({
                 ...
               </div>
             </div>
+            <Button
+              className="react-aria-Button app-overlay-cancel"
+              onPress={cancelExport}
+            >
+              Cancel
+            </Button>
           </div>
         )
       ) : null}

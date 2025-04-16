@@ -50,7 +50,7 @@ export const ExportModal = ({
   const [prefix, setPrefix] = React.useState<string>(
     docState.exportPrefix || defaultExportPrefix,
   );
-  const [showFolder, setShowFolder] = React.useState(false);
+  const [showFolder, setShowFolder] = React.useState(appState.openExportFolder);
   const [saveFormat, setSaveFormat] = React.useState<SaveableImageFormat>(
     appState.saveFormat,
   );
@@ -63,13 +63,13 @@ export const ExportModal = ({
     setDocState((previous) => ({
       ...previous,
       exportPrefix: prefix,
-      openExportFolder: showFolder,
     }));
     setAppState((previous) => ({
       ...previous,
       exportStatus: "preparing",
       saveFormat,
       showExportModal: false,
+      openExportFolder: showFolder,
     }));
   }, [setAppState, setDocState, prefix, showFolder, saveFormat]);
 
@@ -184,10 +184,13 @@ export const ExportModal = ({
                 <div className="actions">
                   <Button
                     onPress={() => {
+                      setAppState((previous) => ({
+                        ...previous,
+                        openExportModal: showFolder,
+                      }));
                       setDocState((previous) => ({
                         ...previous,
                         exportPrefix: prefix,
-                        openExportFolder: showFolder,
                       }));
                       setExportState("idle");
                       close();

@@ -18,6 +18,7 @@ from app_settings import (
     load_app_settings,
     remove_recent_file,
     save_app_settings,
+    update_app_settings,
 )
 from export import (
     ImageFormat,
@@ -268,6 +269,10 @@ class Api:
         settings["recent_files"] = [
             f for f in settings["recent_files"] if os.path.exists(f)
         ]
+        export_path = settings["user_settings"].get("export_path", "")
+        settings["user_settings"]["export_path"] = (
+            user_documents_dir() if not os.path.exists(export_path) else export_path
+        )
         save_app_settings(settings)
         return settings
 
@@ -513,6 +518,15 @@ class Api:
         doc = get_document(args["doc_id"])
         if doc == None:
             raise Exception(f"could not find document: {args['doc_id']}")
+
+        update_app_settings(
+            {
+                "user_settings": {
+                    "export_path": args["export_path"],
+                    "open_folder_after_export": args["open_folder"],
+                }
+            }
+        )
 
         doc_paths = build_document_paths(doc.tempdir_path)
 

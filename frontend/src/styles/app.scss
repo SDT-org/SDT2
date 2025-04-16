@@ -824,6 +824,14 @@ small {
   }
 }
 
+.app-overlay-cancel {
+  position: absolute;
+  display: block;
+  width: 12.8rem;
+  left: calc(50% - 6.4rem);
+  bottom: 10%;
+}
+
 .app-message {
   width: 20rem;
   height: 12rem;
