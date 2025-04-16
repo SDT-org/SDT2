@@ -89,10 +89,19 @@ export const formatClustermapData = (
   tickText: string[],
   clusterData?: ClusterDataItem[],
 ) => {
+  const clusterMap = new Map();
+  if (clusterData) {
+    for (const item of clusterData) {
+      clusterMap.set(item.id, item.cluster);
+    }
+  }
+
+  const colorCache = new Map();
+
   const result = data.flatMap((row, y) =>
     row.filter(Number).map((value, x) => {
-      const clusterX = clusterData?.find((i) => i.id === tickText[x])?.cluster;
-      const clusterY = clusterData?.find((i) => i.id === tickText[y])?.cluster;
+      const clusterX = clusterMap.get(tickText[x]);
+      const clusterY = clusterMap.get(tickText[y]);
 
       const clusterMatch =
         clusterX !== undefined &&
@@ -101,13 +110,23 @@ export const formatClustermapData = (
 
       const clusterGroup = clusterMatch ? clusterX : null;
 
-      const backgroundColor = clusterGroup
-        ? distinctColor(clusterGroup)
-        : "rgb(245, 245, 245)";
+      let backgroundColor = "rgb(245, 245, 245)";
+      if (clusterGroup) {
+        if (!colorCache.has(clusterGroup)) {
+          colorCache.set(clusterGroup, distinctColor(clusterGroup));
+        }
+        backgroundColor = colorCache.get(clusterGroup);
+      }
 
-      const foregroundColor = tinycolor(backgroundColor).isLight()
-        ? "#000"
-        : "#fff";
+      let foregroundColor = "rgb(0, 0, 0)";
+      if (!colorCache.has(`${backgroundColor}-fg`)) {
+        foregroundColor = tinycolor(backgroundColor).isLight()
+          ? "#000"
+          : "#fff";
+        colorCache.set(`${backgroundColor}-fg`, foregroundColor);
+      } else {
+        foregroundColor = colorCache.get(`${backgroundColor}-fg`);
+      }
 
       const roundedValue = (value as number).toFixed(2);
 

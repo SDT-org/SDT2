@@ -235,6 +235,13 @@ export const D3CanvasHeatmap = ({
         .sort((a, b) => a - b)
         .slice(0, 50); // Arbitrarily set to 50
 
+      const clusterColors = uniqueClusters.map((cluster) =>
+        distinctColor(cluster + 1),
+      );
+      ctx.font = `10px 'Roboto Mono'`;
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+
       uniqueClusters.forEach((cluster, index) => {
         // Determine column (0  left, 1  right)
         const column = index % 2;
@@ -243,13 +250,10 @@ export const D3CanvasHeatmap = ({
         const textX = positionX + column * (legendWidth + columnGap);
         const textY = margin.top + lineGap * row;
 
-        ctx.fillStyle = distinctColor(index + 1);
+        ctx.fillStyle = clusterColors[index] as string;
         ctx.fillRect(textX, textY, cellSize, cellSize);
 
         ctx.fillStyle = "black";
-        ctx.textAlign = "left";
-        ctx.textBaseline = "middle";
-        ctx.font = `10px 'Roboto Mono'`;
         ctx.fillText(
           `Cluster ${cluster.toString()}`,
           textX + cellSize + labelGap,
