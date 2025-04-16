@@ -359,8 +359,6 @@ class Api:
 
         doc_id = args["doc_id"]
         doc = get_document(doc_id)
-        if doc == None:
-            raise Exception(f"could not find document: {args['doc_id']}")
 
         if get_state().debug:
             print("\nAPI args:", args)
@@ -401,7 +399,7 @@ class Api:
                 def increment_pair_progress(counter, lock, start_time):
                     with lock:
                         counter.value += 1
-                    doc = get_document(doc_id)
+                    doc = find_document(doc_id)
                     pair_count = doc.pair_count if doc else 0
                     if pair_count and pair_count > 0:
                         progress = round((counter.value / pair_count) * 100)
@@ -469,8 +467,6 @@ class Api:
 
     def save_svg_element(self, doc_id: str, selector: str, key: ImageKey):
         doc = get_document(doc_id)
-        if doc == None:
-            raise Exception(f"could not find document: {doc_id}")
 
         element = assert_window().dom.get_element(selector)
 
@@ -485,8 +481,6 @@ class Api:
 
     def save_svg_data(self, doc_id: str, data: str, key: ImageKey, format: ImageFormat):
         doc = get_document(doc_id)
-        if doc == None:
-            raise Exception(f"could not find document: {doc_id}")
 
         data = urllib.parse.unquote(data.split(",")[1])
         save_image_from_api(
@@ -502,8 +496,6 @@ class Api:
         self, doc_id: str, data: str, key: ImageKey, format: ImageFormat
     ):
         doc = get_document(doc_id)
-        if doc == None:
-            raise Exception(f"could not find document: {doc_id}")
 
         save_image_from_api(
             doc=doc,
@@ -516,8 +508,6 @@ class Api:
 
     def export(self, args: dict):
         doc = get_document(args["doc_id"])
-        if doc == None:
-            raise Exception(f"could not find document: {args['doc_id']}")
 
         update_app_settings(
             {
@@ -563,8 +553,6 @@ class Api:
 
     def load_data_and_stats(self, doc_id: str):
         doc = get_document(doc_id)
-        if doc == None:
-            raise Exception(f"could not find document: {doc_id}")
 
         doc_paths = build_document_paths(doc.tempdir_path)
 
@@ -635,8 +623,6 @@ class Api:
 
     def get_clustermap_data(self, doc_id: str, threshold: float, method: str):
         doc = get_document(doc_id)
-        if doc is None:
-            raise Exception(f"Could not find document: {doc_id}")
 
         doc_paths = build_document_paths(doc.tempdir_path)
 
@@ -694,8 +680,6 @@ class Api:
 
     def save_doc(self, doc_id: str, path: str, save_as: bool = False):
         doc = get_document(doc_id)
-        if doc == None:
-            raise Exception(f"Expected to find document: {doc_id}")
 
         files = [
             os.path.join(doc.tempdir_path, file)
@@ -713,8 +697,7 @@ class Api:
 
     def save_doc_settings(self, args: dict):
         doc = get_document(args["id"])
-        if doc == None:
-            raise Exception(f"Expected to find document: {args['id']}")
+
         update_document(
             args["id"],
             dataView=args["dataView"],
@@ -723,8 +706,6 @@ class Api:
             distribution=args["distribution"],
         )
         doc = get_document(args["id"])
-        if doc == None:
-            raise Exception(f"Expected to find document: {args['id']}")
         save_document_settings(doc)
 
     def close_doc(self, doc_id: str):
@@ -735,8 +716,6 @@ class Api:
 
     def open_doc_folder(self, doc_id: str):
         doc = get_document(doc_id)
-        if doc == None:
-            raise Exception(f"Expected to find document: {doc_id}")
         return open_doc_folder(doc)
 
 
@@ -804,6 +783,7 @@ if __name__ == "__main__":
         reset_state,
         new_document,
         get_document,
+        find_document,
         update_document,
         remove_document,
         remove_empty_documents,

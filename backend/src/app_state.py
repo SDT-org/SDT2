@@ -53,7 +53,7 @@ def create_app_state(
             on_update(state)
 
     def new_document(id: str, **kwargs):
-        doc = get_document(id)
+        doc = find_document(id)
         if doc:
             doc_settings = load_document_settings(kwargs["tempdir_path"])
             if doc_settings:
@@ -64,14 +64,14 @@ def create_app_state(
         doc_state = create_doc_state(id=id, **kwargs)
         set_state(documents=state.documents + [doc_state])
 
-    def get_document(id: str) -> DocState | None:
-        return next((doc for doc in state.documents if doc.id == id), None)
-
-    def expect_document(id: str) -> DocState:
-        result = get_document(id)
+    def get_document(id: str) -> DocState:
+        result = find_document(id)
         if result is None:
-            raise Exception("Document not found")
+            raise Exception(f"Document ID not found: {id}")
         return result
+
+    def find_document(id: str) -> DocState | None:
+        return next((doc for doc in state.documents if doc.id == id), None)
 
     def update_document(id: str, skip_callbacks: bool = False, **updates):
         updated_documents = [
@@ -88,4 +88,4 @@ def create_app_state(
         updated_documents = [doc for doc in state.documents if doc.filename != ""]
         set_state(documents=updated_documents)
 
-    return get_state, set_state, reset_state, new_document, get_document, update_document, remove_document, remove_empty_documents
+    return get_state, set_state, reset_state, new_document, get_document, find_document, update_document, remove_document, remove_empty_documents

@@ -8,14 +8,14 @@ from app_state import create_app_state
 
 class TestAppState(unittest.TestCase):
     def test_state_updates(self):
-        get_state, set_state, _, _, _, _, _, _ = create_app_state()
+        get_state, set_state, _, _, _, _, _,_, _ = create_app_state()
 
         self.assertEqual(get_state().debug, False)
         set_state(debug=True)
         self.assertEqual(get_state().debug, True)
 
     def test_document_updates(self):
-        get_state, _, _, new_document, _, update_document, _, _ = create_app_state()
+        get_state, _, _, new_document, _, _, update_document, _, _ = create_app_state()
 
         new_document("test")
 
