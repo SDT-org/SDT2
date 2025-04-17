@@ -103,7 +103,7 @@ export const ExportModal = ({
           {({ close }) => (
             <>
               <Heading slot="title">Export images and data</Heading>
-              <form className="form export-form">
+              <div className="form export-form">
                 <div className={appState.dataExportPath ? "" : groupCss}>
                   <label htmlFor="export-path" className="header">
                     Output folder
@@ -209,7 +209,7 @@ export const ExportModal = ({
                     Export
                   </Button>
                 </div>
-              </form>
+              </div>
             </>
           )}
         </Dialog>

@@ -194,7 +194,6 @@ def handle_open_file(filepath: str, doc_id: str | None):
 
             save_cols_to_csv(df, doc_paths.columns)
 
-
             # We need a full matrix for doing things but we don't have
             # it yet because this was a .txt/.csv lower triangle matrix
             matrix_dataframe = triangle_to_matrix(df)
@@ -532,8 +531,15 @@ class Api:
 
         prefix_default = os.path.splitext(doc.basename)[0]
         args["prefix"] = args.get("prefix", prefix_default) or prefix_default
+        filetype, _ = mimetypes.guess_type(doc.basename)
+        matrix_only = filetype in matrix_filetypes
+
         source_target_pairs = build_source_target_pairs(
-            doc.tempdir_path, args["export_path"], args["prefix"], args["image_format"]
+            doc.tempdir_path,
+            args["export_path"],
+            args["prefix"],
+            args["image_format"],
+            matrix_only,
         )
 
         source_paths, target_paths = zip(*source_target_pairs)

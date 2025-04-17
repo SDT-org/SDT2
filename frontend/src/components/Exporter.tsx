@@ -83,6 +83,16 @@ export const Exporter = ({
     }
   }, [setExportStatus, updateDocState]);
 
+  const setFinalStage = React.useCallback(
+    (stage: AppState["exportStatus"]) => {
+      setExportStatus(stage);
+      exportStep.current = "Preparing";
+      currentTab.current = null;
+      currentResolver.current = null;
+    },
+    [setExportStatus],
+  );
+
   const runExport = React.useCallback(async () => {
     if (currentTab.current || !tabs) return;
 
@@ -118,16 +128,16 @@ export const Exporter = ({
       });
 
       if (result) {
-        setExportStatus("success");
+        setFinalStage("success");
       } else {
-        setExportStatus("idle");
+        setFinalStage("idle");
       }
-      exportStep.current = "Preparing";
     } catch (error) {
-      setExportStatus("idle");
-      exportStep.current = "Preparing";
-      currentTab.current = null;
-      throw error;
+      setFinalStage("idle");
+      setAppState((prev) => ({
+        ...prev,
+        error: error as Error,
+      }));
     }
   }, [
     tabs,
@@ -140,6 +150,8 @@ export const Exporter = ({
     swapDataView,
     setExportStatus,
     docState.exportPrefix,
+    setFinalStage,
+    setAppState,
   ]);
 
   React.useEffect(() => {

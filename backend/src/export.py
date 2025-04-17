@@ -21,6 +21,10 @@ EXPORTABLE_DATA_KEYS: List[DataKey] = [
     "cluster",
 ]
 
+MATRIX_ONLY_EXPORTABLE_DATA_KEYS: List[DataKey] = [
+    "matrix",
+    "columns",
+]
 
 def save_image_from_api(doc: DocState, data: str, key: ImageKey, format: ImageFormat):
     target = (
@@ -37,15 +41,18 @@ def save_image_from_api(doc: DocState, data: str, key: ImageKey, format: ImageFo
 
 
 def build_source_target_pairs(
-    doc_path: str, export_path: str, prefix: str, image_format: ImageFormat
+        doc_path: str, export_path: str, prefix: str, image_format: ImageFormat, matrix_only = False
 ) -> List[List[str]]:
     paths_dict = build_document_paths(doc_path)._asdict()
+    exportable_data_keys = (
+        MATRIX_ONLY_EXPORTABLE_DATA_KEYS if matrix_only else EXPORTABLE_DATA_KEYS
+    )
     data_file_paths = [
         [
             paths_dict[key],
             os.path.join(export_path, f"{prefix}_{DATA_FILES[key]}"),
         ]
-        for key in EXPORTABLE_DATA_KEYS
+        for key in exportable_data_keys
     ]
     image_paths = [
         [
