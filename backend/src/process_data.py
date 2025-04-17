@@ -162,7 +162,7 @@ def save_matrix_to_csv(df, matrix_path, triangle_path):
 
 # Save similarity scores as 3 column csv
 ## this can be rewriten using pandas melt
-def save_cols_to_csv(df, full_path):
+def save_cols_to_csv(df, path):
     order = df.index
     df.columns = df.index
     columnar_output = []
@@ -175,8 +175,7 @@ def save_cols_to_csv(df, full_path):
         columnar_output,
         columns=["First Sequence", "Second Sequence", "Identity Score"],
     )
-    columnar_df.to_csv(full_path, mode="w", header=True, index=False)
-
+    columnar_df.to_csv(path, mode="w", header=True, index=False)
 
 def save_stats_to_csv(seq_stats, filename):
     stats_list = []

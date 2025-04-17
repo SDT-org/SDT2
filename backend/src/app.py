@@ -192,7 +192,8 @@ def handle_open_file(filepath: str, doc_id: str | None):
             int(nanmin(data_no_diag))
             int(nanmax(data_no_diag))
 
-            save_cols_to_csv(df, doc_paths.triangle)
+            save_cols_to_csv(df, doc_paths.columns)
+
 
             # We need a full matrix for doing things but we don't have
             # it yet because this was a .txt/.csv lower triangle matrix
