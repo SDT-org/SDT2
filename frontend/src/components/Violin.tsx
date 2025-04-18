@@ -288,6 +288,7 @@ export const Violin = ({
         settings={settings}
         updateSettings={updateSettings}
         sidebarComponent={sidebarComponent}
+        dataSetLength={dataSet.length}
       />
     </>
   );
