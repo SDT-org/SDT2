@@ -165,6 +165,18 @@ export const ClustermapSidebar = ({
               />
             </div>
           </div>
+          <div className="group">
+            <Switch
+              isSelected={settings.showLegend}
+              onChange={(value) => {
+                updateSettings({
+                  showLegend: value,
+                });
+              }}
+            >
+              Legend
+            </Switch>
+          </div>
 
           <div className="group">
             <Switch
@@ -175,7 +187,7 @@ export const ClustermapSidebar = ({
                 });
               }}
             >
-              Plot Title
+              Title
             </Switch>
             <div
               className="drawer"
@@ -208,24 +220,10 @@ export const ClustermapSidebar = ({
                   onChange={(value) => updateSettings({ title: value })}
                   value={settings.title}
                 >
-                  <Label>Title</Label>
                   <Input />
                 </TextField>
               </div>
             </div>
-          </div>
-
-          <div className="group">
-            <Switch
-              isSelected={settings.showLegend}
-              onChange={(value) => {
-                updateSettings({
-                  showLegend: value,
-                });
-              }}
-            >
-              Legend
-            </Switch>
           </div>
         </div>
       </div>

@@ -95,7 +95,7 @@
       background-color: #0066cc;
       margin: 30px 0;
     }
-    
+
     /* Control panels layout for consistent display of images with explanations */
     .control-panel {
       display: flex;
@@ -125,7 +125,7 @@
       .control-panel {
         flex-direction: column;
       }
-      
+
       .control-image {
         max-width: 100%;
       }
@@ -160,25 +160,26 @@
     When first launched SDT2, the loading interface provides two primary options for loading data:
   </p>
   <div class="control-panel">
-      <img src="/images/LoadMain.png" alt="SDT2 Main Loading Screen" width="347" height="378"/>
+    <img src="/images/LoadMain.png" alt="SDT2 Main Loading Screen" width="347" height="378" />
     <div class="control-options">
 
-          <h3>I. File Selection</h3>
-          <p>Click "Select FASTA or SDT Matrix file..." to choose from:</p>
-          <ul>
-            <li>FASTA files (`.fasta`, `.fas`, `.faa`, `.fnt`, `.fa`)</li>
-            <li>SDT Matrix files (`.csv`, `.txt`)</li>
-            <li>Previously saved SDT files (`.sdt`)</li>
-          </ul>
-        </li>
-       <h3>II. Recent Files</h3>A section displaying recently used files for quick access
+      <h3>I. File Selection</h3>
+      <p>Click "Select FASTA or SDT Matrix file..." to choose from:</p>
+      <ul>
+        <li>FASTA files (`.fasta`, `.fas`, `.faa`, `.fnt`, `.fa`)</li>
+        <li>SDT Matrix files (`.csv`, `.txt`)</li>
+        <li>Previously saved SDT files (`.sdt`)</li>
+      </ul>
+      </li>
+      <h3>II. Recent Files</h3>A section displaying recently used files for quick access
       </ul>
     </div>
   </div>
   <div class="warning">
     <p>For FASTA files, the <b>Runner Interface</b> screen is loaded to prepare for sequence alignment and analysis.</p>
     <p>For SDT/SDT2 matrices, the<b>Viewer</b> screen is loaded, and the pre-run data is displayed as a heatmap.</p>
-    <p> Relocated files will still show in the Recent Files directory if you have moved them since the last they were used</p>
+    <p> Relocated files will still show in the Recent Files directory if you have moved them since the last they were
+      used</p>
   </div>
 
   <h3>Application Run Interface</h3>
@@ -187,7 +188,8 @@
   </p>
 
 
-  <img src="/images/AppRun.png" alt="Application Run Interface" style="max-width: 100%; height: auto; margin-bottom: 20px;" />
+  <img src="/images/AppRun.png" alt="Application Run Interface"
+    style="max-width: 100%; height: auto; margin-bottom: 20px;" />
 
 
   <div class="control-panel">
@@ -211,7 +213,8 @@
     <div class="control-options">
       <h4>Reorder by</h4>
       <p>
-        SDT2 offers sequence order rearrangement based on a phylogenetic tree to better organize the evolutionary relationships of the sequences:
+        SDT2 offers sequence order rearrangement based on a phylogenetic tree to better organize the evolutionary
+        relationships of the sequences:
       </p>
       <ul>
         <li><b>Toggle switch</b> to enable/disable phylogenetic reordering</li>
@@ -245,7 +248,7 @@
       </ul>
     </div>
   </div>
-  
+
   <h4>Performance</h4>
   <p>The core selection feature in SDT2 significantly increases both compute speed and memory usage during analysis. The
     application leverages Python's Multiprocessing capabilities to dramatically increase processing speed through
@@ -300,7 +303,7 @@
   </div>
 
   <h3>Heatmap</h3>
-  
+
   <img src="/images/Heatmap.png" alt="Heatmap Example" class="plot-img" />
   <p>
     The heatmap visualization in SDT2 provides a color-coded representation of pairwise sequence identity.
@@ -318,30 +321,31 @@
         </li>
         <li><b>Color Inversion</b>: Toggle to create a negative image effect, reversing dark and light values</li>
         <li><b>Cell Spacing</b>: Adjust the gap between cells in the heatmap matrix</li>
-        <li><b>Discrete Cutoff Values</b> (Discrete Colorscale Only): Set thresholds to create distinct color regions</li>
+        <li><b>Discrete Cutoff Values</b> (Discrete Colorscale Only): Set thresholds to create distinct color regions
+        </li>
       </ul>
-  
+
       <h4>Percent Identities</h4>
       <p>Toggle this option to show or hide percent pairwise identity values within each cell of the heatmap.</p>
       <ul>
         <li><b>Precision</b>: Select the number of decimal places to display for percent identities (0, 1, or 2)</li>
         <li><b>Font Size</b>: Adjust the text size for the percentage values</li>
       </ul>
-  
+
       <h4>Plot Titles</h4>
       <p>Toggle this option to show or hide plot titles on the heatmap.</p>
       <ul>
         <li><b>Font Type</b>: Choose between Sans Serif or Monospace</li>
         <li><b>Title and Subtitle</b>: Enter the desired text to appear above the heatmap</li>
       </ul>
-  
+
       <h4>Axis Labels</h4>
       <p>Toggle this option to show or hide sequence identifiers along the axes of the heatmap.</p>
       <ul>
         <li><b>Font Size</b>: Adjust font size for X and Y axis labels</li>
         <li><b>Rotation</b>: Set rotation angle for X and Y labels</li>
       </ul>
-  
+
       <h4>Scale Bar</h4>
       <p>Toggle to show or hide the color reference scale.</p>
       <ul>
@@ -355,19 +359,19 @@
   <div class="warning">
     <p><b>Note:</b> Displaying percentage values in large datasets may significantly impact rendering performance.</p>
   </div>
-  
+
   <h3>Clustermap</h3>
-  
+
   <img src="/images/Clustermap.png" alt="Clustermap Example" class="plot-img" />
   <p>
     The Clustermap plot provides a new way to visualize sequence data in SDT2, allowing you to set specific clustering
-    thresholds and algorithms to explore relationships within datasets. The current clustering algorithms supported by
-    SDT2 are linkage-based clustering methods from the well-known SciPy package.
-    During clustering, the precomputed pairwise distance matrix is condensed for the Single, Complete, and Average linkage
-    algorithms. For the Centroid and Median algorithms,
-    the dimensionality of the dataset is reduced to 2D Euclidean distances through multidimensional scaling
-    prior to clustering. The resulting dendrogram is used to reorder the heatmap, allowing for more intuitive viewing
-    options.
+    thresholds and clustering methods to explore relationships within datasets. SDT 2 provides severa agglomerative,
+    linkage-based clustering methods through the SciPy package library.
+    To create a heirirchacle, a precomputed pairwise distance matrix is used to perfeorm Single, Complete, and Average
+    linkage methods. For the Centroid and Median and Wards linkage methods,the dimensionality of the dataset must first be reduced to 
+    2D Euclidean distances through multidimensional scaling (MDS)through the sci-kit lean packageprior to clustering. 
+    dendrogram is visulized using the D3  to reorder the heatmap, 
+
   </p>
   <div class="control-panel">
     <div class="control-image">
@@ -378,14 +382,15 @@
       <ul>
         <li><b>Threshold</b>: Set the similarity threshold for clustering sequences. Higher values require greater
           similarity for sequences to be grouped together.</li>
-        <li><b>Linkage Method</b>: Choose the algorithm for hierarchical clustering (Single, Complete, Average, Centroid,
+        <li><b>Linkage Method</b>: Choose the algorithm for hierarchical clustering (Single, Complete, Average,
+          Centroid,
           or Median).</li>
         <li><b>Cell Spacing</b>: Adjust the gap between cells in the clustermap matrix.</li>
       </ul>
-  
+
       <h4>Percent Identities</h4>
       <p>Toggle this option to show or hide percent pairwise identity values within each cell of the clustermap.</p>
-  
+
       <h4>Axis Labels</h4>
       <p>Toggle this option to show or hide sequence identifiers along the axes of the clustermap.</p>
       <ul>
@@ -393,7 +398,7 @@
         <li><b>X Rotation</b>: Set rotation angle for X-axis labels to improve readability.</li>
         <li><b>Y Rotation</b>: Set rotation angle for Y-axis labels to improve readability.</li>
       </ul>
-  
+
       <h4>Plot Titles</h4>
       <p>Toggle this option to show or hide plot titles on the clustermap.</p>
       <ul>
@@ -406,6 +411,67 @@
     <p><b>Note:</b> Processing large datasets with complex clustering algorithms may require additional computational
       time.</p>
   </div>
+  <div class="custom-table-container responsive">
+    <table class="custom-table bordered">
+      <thead>
+        <tr>
+          <th class="sortable sort-asc">Clustering Method</th>
+          <th>Linkage Type</th>
+          <th>Calculation</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background-color: #f0f8ff;">
+          <td>Nearest Neighbor</td>
+          <td>Single</td>
+          <td class="align-center">d(u, v) = min(dist(t[i], t[j]))
+            for all points i in cluster u and j in cluster v.</td>
+          <td>The shortest distance between any two points in different clusters</td>
+        </tr>
+        <tr style="background-color: #e6f2ff;">
+          <td>Farthest Neighbor</td>
+          <td>Complete</td>
+          <td class="align-center">d(u, v) = max(dist(t[i], t[j]))
+            for all points i in cluster u and j in cluster v</td>
+          <td>The maximum distance between any two points in different clusters</td>
+        </tr>
+        <tr style="background-color: #f0f8ff;">
+          <td>UPGMA</td>
+          <td>Average</td>
+          <td class="align-center">d(u, v) = ∑(d(t[i], t[j])) / (|u| * |v|)</td>
+          <td>Average distance between all pairs of points in different clusters</td>
+        </tr>
+        <tr style="background-color: #e6f2ff;">
+          <td>WPGMA</td>
+          <td>Weighted</td>
+          <td class="align-center">d(u, v) = (dist(s, v) + dist(t, v))/2</td>
+          <td>Average of distances from cluster v to the two clusters that formed u</td>
+        </tr>
+        <tr style="background-color: #f0f8ff;">
+          <td>UPGMC</td>
+          <td>Centroid</td>
+          <td class="align-center">dist(s, t) = ||cs - ct||₂</td>
+          <td>Distance between cluster centroids</td>
+        </tr>
+        <tr style="background-color: #e6f2ff;">
+          <td>WPGMC</td>
+          <td>Median</td>
+          <td class="align-center">Uses centroid method with new centroid as average of merged centroids</td>
+          <td>Distance between median points of clusters</td>
+        </tr>
+        <tr style="background-color: #f0f8ff;">
+          <td>Minimum Variance</td>
+          <td>Ward's</td>
+          <td class="align-center">d(u, v) = √(((|v|+|s|)/T)d(v,s)² + ((|v|+|t|)/T)d(v,t)² - (|v|/T)d(s,t)²)</td>
+          <td>Minimizes variance increase when merging clusters</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+
   <h3>Distribution Plots</h3>
   <p>
     SDT2 provides visualization tools for examining the distribution of your sequence data:
@@ -488,7 +554,7 @@
         <li><b>Size</b>: Controls the diameter of each data point in pixels</li>
         <li><b>Position</b>:Determines the horizontal position offset of points from the central violin/box
           <ul>
-            
+
             <li>Negative values: Points appear to the left of the violin/box </li>
             <li>Positive values: Points appear to the right of the violin/box</li>
             <li>Zero: Points are centered on the violin/box</li>
@@ -514,7 +580,8 @@
     </div>
     <div class="control-options">
       <p>
-        The Export dialog provides options to save your visualizations and data for use in publications, presentations, or
+        The Export dialog provides options to save your visualizations and data for use in publications, presentations,
+        or
         further analysis:
       </p>
       <h4>Export Dialog Options</h4>
@@ -528,11 +595,12 @@
           </ul>
         </li>
         <li><b>Cancel/Export</b>: Close dialog or save files with current settings</li>
-        <p></p><li><b>Cluster by Percent Identity</b>: Toggle whether to cluster sequences in exported data</li>
+        <p></p>
+        <li><b>Cluster by Percent Identity</b>: Toggle whether to cluster sequences in exported data</li>
       </ul>
     </div>
   </div>
-  
+
   <h2>Best Practices</h2>
   <ul>
     <li>Check recommended cores and memory before starting analysis</li>
@@ -578,7 +646,7 @@
   <ul>
     <li>Multicore processor recommended</li>
     <li>Sufficient RAM based on sequence file size</li>
-    <li>Graphics card supporting  hardware acceleration</li>
+    <li>Graphics card supporting hardware acceleration</li>
     <li>Tested compatible with Windows 10 and 11, macOS, and Linux</li>
   </ul>
 

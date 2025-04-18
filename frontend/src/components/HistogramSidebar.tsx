@@ -164,7 +164,7 @@ export const HistogramSidebar = ({
                 });
               }}
             >
-              Plot Title
+               Title
             </Switch>
             <div
               className="drawer"
@@ -196,7 +196,6 @@ export const HistogramSidebar = ({
                 onChange={(value) => updateSettings({ title: value })}
                 value={settings.title}
               >
-                <Label>Title</Label>
                 <Input />
               </TextField>
             </div>

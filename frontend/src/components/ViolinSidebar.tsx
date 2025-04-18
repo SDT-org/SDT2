@@ -341,7 +341,7 @@ export const ViolinSidebar = ({
             });
           }}
         >
-          Plot Title
+           Title
         </Switch>
         <div
           className="drawer"
@@ -374,7 +374,6 @@ export const ViolinSidebar = ({
               onChange={(value) => updateSettings({ title: value })}
               value={settings.title}
             >
-              <Label>Title</Label>
               <Input />
             </TextField>
           </div>
