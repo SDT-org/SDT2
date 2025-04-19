@@ -96,14 +96,13 @@ export const D3SvgHeatmap = ({
         .attr("y", (d) => d.y * cellSize + cellMetrics.cellOffset)
         .attr("fill", (d) => d.backgroundColor);
 
-      // If you need text labels, add them separately
       if (showPercentIdentities) {
         g.selectAll("text.cell-text")
           .data(data)
           .join("text")
           .attr("class", "cell-text")
           .attr("x", (d) => d.x * cellSize + cellSize / 2)
-          .attr("y", (d) => d.y * cellSize)
+          .attr("y", (d) => d.y * cellSize + cellSize / 2)
           .attr("dy", ".35em")
           .attr("text-anchor", "middle")
           .attr("font-family", "Roboto Mono")
