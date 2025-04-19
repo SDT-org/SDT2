@@ -19,7 +19,7 @@
     "init:windows": "virtualenv -p python venv-pywebview && .\\venv-pywebview\\Scripts\\pip install Cython && .\\venv-pywebview\\Scripts\\pip install -r requirements.txt",
     "init:linux": "virtualenv -p python3 venv-pywebview && bun run init:qt5",
     "init:default": "virtualenv -p python3.11 venv-pywebview && ./venv-pywebview/bin/pip install Cython && ./venv-pywebview/bin/pip install -r requirements.txt",
-    "init:qt5": "./venv-pywebview/bin/pip install pyqt5 pyqtwebengine -r requirements.txt",
+    "init:qt5": "sudo apt install python3-pyqt5 python3-pyqt5.qtwebengine python3-pyqt5.qtwebchannel libqt5webkit5-dev && ./venv-pywebview/bin/pip install -r requirements.txt",
     "init:gtk": "sudo apt install libgirepository2.0-dev gcc libcairo2-dev pkg-config python3-dev gir1.2-gtk-3.0 && ./venv-pywebview/bin/pip install pycairo pygobject -r requirements.txt",
     "start": "bun run check && concurrently --raw --kill-others --success first --names \"frontend,backend\" \"bun run frontend:dev\" \"bun run backend\"",
     "start:debug": "DEBUG=true bun run start",
