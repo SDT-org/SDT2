@@ -18,8 +18,11 @@ bio_data_src_path = os.path.join(
 )
 bio_data_dest_path = os.path.join(*bio_data_path)
 
-# Find and use current Python interpreter (should be uv)
-python_executable = sys.executable
+python_executable = (
+    os.path.join(venv_path, "Scripts", "python")
+    if os.name == "nt"
+    else os.path.join(venv_path, "bin", "python")
+)
 
 
 def get_parasail_library_name():
@@ -34,9 +37,10 @@ def get_parasail_library_name():
 
 
 def get_parasail_library_path(library_name):
-    if not os.path.exists(venv_path):
+    venv_path = os.environ.get("VIRTUAL_ENV")
+    if not venv_path:
         raise RuntimeError(f"Virtual environment path {venv_path} does not exist.")
-    
+
     for root, _, files in os.walk(venv_path):
         if library_name in files:
             return os.path.join(root, library_name)
@@ -82,18 +86,6 @@ def make_platform_build_command(settings):
             )
         case "Darwin":
             command.extend(
-                [
-                    "--mode=app",
-                    f"--macos-app-icon={os.path.join(assets_path, 'app.icns')}",
-                ]
-            )
-        case _:
-            command.extend(
-                [
-                    "--standalone",
-                    "--onefile"
-                ]
-            )
 
     command.append(path)
 
