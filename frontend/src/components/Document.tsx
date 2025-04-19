@@ -35,11 +35,14 @@ export const Document = ({
   };
 
   React.useEffect(() => {
+    if (id !== appState.activeDocumentId) {
+      return;
+    }
     const handleKeyDown = (event: KeyboardEvent) => {
       if (
         event.shiftKey &&
         (event.metaKey || event.altKey) &&
-        event.key === "0"
+        event.key === "i"
       ) {
         event.preventDefault();
         window.pywebview.api.open_doc_folder(id);
@@ -48,7 +51,7 @@ export const Document = ({
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [id]);
+  }, [id, appState.activeDocumentId]);
 
   return VIEWS[docState?.view || "viewer"];
 };
