@@ -351,7 +351,7 @@ const RunnerSettings = ({
                       !appState.alignmentExportPath.length),
                 )}
               >
-                Start Analysis
+                {startingRun ? "Starting..." : "Start Analysis"}
               </Button>
             </div>
           </>
