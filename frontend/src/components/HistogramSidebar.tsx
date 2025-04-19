@@ -164,7 +164,7 @@ export const HistogramSidebar = ({
                 });
               }}
             >
-               Title
+              Title
             </Switch>
             <div
               className="drawer"

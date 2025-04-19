@@ -305,7 +305,7 @@ export const HeatmapSidebar = ({
                 });
               }}
             >
-               Title
+              Title
             </Switch>
             <div
               className="drawer"
