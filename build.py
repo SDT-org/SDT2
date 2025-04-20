@@ -4,7 +4,7 @@ import subprocess
 import platform
 import argparse
 
-venv_path = os.path.join(".", "venv-pywebview")
+venv_path = os.path.join(".", "venv")
 build_path = os.path.join(".", "build")
 os.makedirs(build_path, exist_ok=True)
 assets_path = "./assets"

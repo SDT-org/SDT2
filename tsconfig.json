@@ -25,5 +25,5 @@
     "forceConsistentCasingInFileNames": true
   },
   "include": ["frontend/**/*"],
-  "exclude": ["node_modules", "venv-pywebview"]
+  "exclude": ["node_modules", "venv"]
 }
