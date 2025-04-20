@@ -1,32 +1,16 @@
+
 name: Build SDT2
 on:
   push:
     tags:
       - "*"
-  workflow_dispatch:
-    inputs:
-      platform:
-        description: 'Platform to build (leave empty for all)'
-        required: false
-        type: choice
-        options:
-          - ''
-          - windows-latest
-          - macos-13
-          - macos-latest
-          - ubuntu-22.04
 
 jobs:
   build:
     strategy:
       matrix:
         os: [windows-latest, macos-13, macos-latest, ubuntu-22.04]
-      fail-fast: false
     runs-on: ${{ matrix.os }}
-    if: >
-      github.event_name != 'workflow_dispatch' ||
-      github.event.inputs.platform == '' ||
-      github.event.inputs.platform == '${{ matrix.os }}'
 
     steps:
       - uses: actions/checkout@v4
