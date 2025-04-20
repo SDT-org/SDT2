@@ -30,10 +30,8 @@ import { Select, SelectItem } from "./Select";
 export const App = () => {
   const [appState, setAppState] = React.useState<AppState>(initialAppState);
   const [initialized, setInitialized] = React.useState(false);
-  useSyncState(setAppState);
-  useShortcutKeys(appState, setAppState);
-  useAppBlur();
-  useWaitForPywebview(() => {
+
+  const handleReady = React.useCallback(() => {
     if (initialized) {
       return;
     }
@@ -58,7 +56,12 @@ export const App = () => {
         setInitialized(true);
       },
     );
-  });
+  }, [initialized]);
+
+  useSyncState(setAppState);
+  useShortcutKeys(appState, setAppState);
+  useAppBlur();
+  useWaitForPywebview(handleReady);
   const tabListRef = React.useRef<HTMLDivElement>(null);
   const lastTabRef = React.useRef<HTMLDivElement>(null);
 

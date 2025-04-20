@@ -1,5 +1,6 @@
 import json
 import os
+import time
 from platformdirs import user_data_dir
 current_version = 1
 
@@ -15,12 +16,21 @@ def get_app_settings_path():
     data_dir = user_data_dir(appname="SDT2", ensure_exists=True)
     return os.path.join(data_dir, "settings.json")
 
-
 def load_app_settings():
     path = get_app_settings_path()
-    if os.path.exists(path):
-        with open(path) as f:
-            return json.load(f)
+    for attempt in range(3):
+        if os.path.exists(path):
+            try:
+                with open(path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    if content.strip():
+                        return json.loads(content)
+            except (json.JSONDecodeError, IOError) as e:
+                if attempt == 2:
+                    print(f"Failed to load settings after retries: {e}")
+
+        if attempt < 2:
+            time.sleep(0.05)
     else:
         return default_settings
 
