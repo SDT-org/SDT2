@@ -2,7 +2,7 @@
   "lockfileVersion": 0,
   "workspaces": {
     "": {
-      "name": "pywebview-react-boilerplate",
+      "name": "SDT2",
       "dependencies": {
         "@vitejs/plugin-react": "^4.3.1",
         "colorjs.io": "^0.5.2",
