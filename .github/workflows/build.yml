@@ -34,13 +34,13 @@ jobs:
       - name: Windows - Build
         if: runner.os == 'Windows'
         run: |
-          venv-pywebview\\Scripts\\activate && bun run build
+          venv\\Scripts\\activate && bun run build
 
       - name: Linux/macOS - Build
         if: runner.os != 'Windows'
         shell: bash
         run: |
-          source venv-pywebview/bin/activate
+          source venv/bin/activate
           bun run build
 
       - name: Windows - Sign artifact
