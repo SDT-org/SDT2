@@ -94,7 +94,7 @@ export const MainMenu = createHideableComponent(() => {
   const closeDocument = useCloseDocument(appState, setAppState);
   const saveDocument = useSaveActiveDocument(appState, setAppState);
 
-  const openRecentFile = useRecentFiles(setAppState);
+  const openRecentFile = useRecentFiles(appState, setAppState);
   const sdtFile = activeDocState && isSDTFile(activeDocState.filetype);
 
   const openFileDialog = useOpenFileDialog(appState, setAppState);

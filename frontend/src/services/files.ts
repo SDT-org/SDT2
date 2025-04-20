@@ -14,7 +14,7 @@ const handleOpenFileFailure = (e: unknown): [boolean, [string, string]] => {
   return [false, ["", ""]];
 };
 
-export const openFile = async (path: string, docId: string) => {
+export const openFile = async (path: string, docId?: string) => {
   try {
     const data = await window.pywebview.api.open_file(path, docId);
     return [!!data, data];

@@ -46,7 +46,7 @@ const RunnerSettings = ({
   const [startingRun, setStartingRun] = React.useState(false);
   const initialized = React.useRef(false);
   const openFileDialog = useOpenFileDialog(appState, setAppState);
-  const openRecentFile = useRecentFiles(setAppState);
+  const openRecentFile = useRecentFiles(appState, setAppState);
   const fileName =
     docState.filename?.length && docState.filename
       ? docState.filename.split("/").pop()
