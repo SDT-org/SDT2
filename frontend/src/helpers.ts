@@ -1,9 +1,10 @@
+import type { RasterFormat, SaveableImageFormat } from "./appState";
+
 export const assertDefined = <T>(value: T) => {
   if (value === undefined) {
     throw new Error(`Expected ${value} to be defined`);
-  } else {
-    return value;
   }
+  return value;
 };
 
 // https://stackoverflow.com/a/18650828
@@ -26,5 +27,31 @@ export const formatBytes = (bytes: number, decimals = 2) => {
 
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  return `${Number.parseFloat((bytes / k ** i).toFixed(dm))} ${sizes[i]}`;
 };
+
+export const formatTitle = (key: string, replacement = " ") =>
+  key.replaceAll("_", replacement);
+
+// https://stackoverflow.com/a/42623277
+export const arrayMinMax = (arr: number[]): [number, number] =>
+  arr.reduce(
+    ([min, max], val) => [Math.min(min, val), Math.max(max, val)],
+    [Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY],
+  );
+
+export const isSDTFile = (fileType: string) =>
+  fileType === "application/vnd.sdt";
+
+export const splitFilePath = (filePath: string) => {
+  const parts = filePath.split(/(\/|\\)/);
+  const name = parts.pop();
+  // remove trailing slash
+  parts.pop();
+  const dir = parts.join("");
+  return { dir, name };
+};
+
+export const isRasterFormat = (
+  format: SaveableImageFormat,
+): format is RasterFormat => ["png", "jpeg"].includes(format);

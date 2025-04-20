@@ -1,0 +1,95 @@
+.heatmap-sidebar {
+  .form .field .colorscale-setting {
+    grid-template-columns: 1fr auto;
+    gap: 0.4rem;
+
+    .react-aria-Select {
+      width: 100%;
+
+      .react-aria-Button {
+        padding-left: 0.6rem;
+        padding-right: 0.6rem;
+        font-weight: 450;
+        width: 100%;
+
+        > span {
+          justify-content: flex-start;
+          width: 100%;
+          padding-left: 0.4rem;
+        }
+      }
+    }
+
+    .react-aria-ToggleButton {
+      width: 3.4rem;
+      padding: 0.9rem;
+      flex-shrink: 0;
+
+      &:not([data-hovered]):not([data-selected]) {
+        color: rgba(0, 0, 0, 0.75);
+      }
+    }
+  }
+}
+
+.color-scale-list-item {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr;
+  gap: 0.8rem;
+  align-items: center;
+  overflow: hidden;
+
+  span {
+    justify-self: flex-start;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    display: inline-block;
+    width: 100%;
+    text-align: left;
+  }
+  span.preview {
+    width: 2.4rem;
+    height: 1.4rem;
+    box-shadow: inset 0 0 0.1rem rgba(0, 0, 0, 0.75);
+  }
+}
+
+.react-aria-Popover .react-aria-ListBox [data-key="Discrete"] {
+  position: relative;
+
+  &::after {
+    content: "";
+    display: block;
+    border-bottom: 0.1rem solid var(--border-color);
+    position: absolute;
+    margin-bottom: 0.1rem;
+    bottom: -0.2rem;
+    left: 0.4rem;
+    right: 0.4rem;
+  }
+}
+
+.heatmap-tooltip {
+  display: block;
+  position: absolute;
+  background: #fff;
+  border-radius: 0.4rem;
+  padding: 0.8rem;
+  pointer-events: none;
+  background-color: rgba(255,255,255,0.9);
+  box-shadow: 0 0 0.3rem #444;
+  backdrop-filter: blur(0.3rem);
+  > * {
+    display: flex;
+    gap: 0.5ch;
+  }
+
+  dt {
+    font-weight: bold;
+  }
+
+  dd {
+    font-variant-numeric: tabular-nums;
+  }
+}

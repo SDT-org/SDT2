@@ -1,221 +1,189 @@
 import React from "react";
-import { AppState, SetAppState } from "../appState";
-import {
-  HeatmapData,
-  HeatmapSettings,
-  HistogramData,
-  HistogramSettings,
-} from "../plotTypes";
+import { type Key, Tab, TabList, TabPanel, Tabs } from "react-aria-components";
+import type { DocState, SetDocState, UpdateDocState } from "../appState";
+import { useGetData } from "../hooks/useGetData";
+import { Clustermap } from "./Clustermap";
+import { DistributionPanels } from "./DistributionPanels";
 import { Heatmap } from "./Heatmap";
-import { Histogram } from "./Histogram";
-import {
-  Button,
-  Key,
-  Tab,
-  TabList,
-  TabPanel,
-  Tabs,
-} from "react-aria-components";
 
 export const Viewer = ({
-  appState,
-  setAppState,
-  mainMenu,
+  docState,
+  setDocState,
+  updateDocState,
+  leftSidebarCollapsed,
 }: {
-  appState: AppState;
-  setAppState: SetAppState;
-  mainMenu: React.ReactNode;
+  docState: DocState;
+  setDocState: SetDocState;
+  updateDocState: UpdateDocState;
+  leftSidebarCollapsed: boolean;
+  tabView: "tabs" | "select";
 }) => {
-  const [loading, setLoading] = React.useState(false);
-  const [heatmapTickText, setHeatmapTickText] = React.useState<string[]>([""]);
-  const [heatmapData, setHeatmapData] = React.useState<HeatmapData>();
-  const [histogramData, setHisogramData] = React.useState<HistogramData>();
+  const { loading, tickText, heatmapData, distributionData, metaData } =
+    useGetData(docState, setDocState);
 
-  const [heatmapSettings, setHeatmapSettings] = React.useState<HeatmapSettings>(
-    {
-      colorscale: "Portland",
-      reverse: false,
-      vmax: 100,
-      vmin: 65,
-      cellspace: 1,
-      annotation: false,
-      annotation_font_size: 10,
-      annotation_rounding: 0,
-      annotation_alpha: "0",
-      color: "white",
-      showscale: true,
-      cbar_shrink: 1,
-      cbar_aspect: "25",
-      cbar_pad: "10",
-      axis_labels: false,
-      axlabel_xrotation: 270,
-      axlabel_xfontsize: 12,
-      axlabel_yrotation: 360,
-      axlabel_yfontsize: 12,
-      cutoff_1: 95,
-      cutoff_2: 75,
+  const setDataView = React.useCallback(
+    (newValue: Key) => {
+      updateDocState(
+        {
+          dataView: newValue as DocState["dataView"],
+        },
+        false,
+      );
     },
+    [updateDocState],
   );
 
-  const [histogramSettings, setHistogramSettings] =
-    React.useState<HistogramSettings>({
-      lineColor: "tomato",
-      lineWidth: 3,
-      lineShape: "linear",
-      barlineColor: "tomato",
-      barOutlineWidth: 1,
-      barColor: "lightblue",
-      showHistogram: true,
-      showLinePlot: false,
-      showScatterPlot: false,
-      markerSymbol: "square",
-      markerColor: "tomato",
-      markerSize: 7,
-      showGrid: true,
-      showLine: true,
-      showZeroLine: true,
-      plotTitle: "Distribution of Percent Identities",
-      showTickLabels: true,
-      showAxisLabels: true,
-    });
-
-  const getData = () => {
-    setLoading(true);
-    Promise.all([
-      window.pywebview.api.get_heatmap_data().then((rawData) => {
-        const {
-          metadata,
-          data,
-        }: {
-          metadata: {
-            minVal: number;
-            maxVal: number;
-          };
-          data: string[][];
-        } = JSON.parse(rawData.replace(/\bNaN\b/g, "null"));
-        const [tickText, ...parsedData] = data;
-        setHeatmapTickText(tickText as string[]);
-        setHeatmapData(parsedData);
-        updateHeatmapState({
-          vmin: metadata.minVal,
-          ...(appState.sequences_count > 99 && {
-            axis_labels: false,
-            cellspace: 0,
-          }),
-        });
-      }),
-      window.pywebview.api.get_line_histo_data().then((data) => {
-        const histogramData = JSON.parse(data.replace(/\bNaN\b/g, "null"));
-        setHisogramData(histogramData);
-      }),
-    ])
-      .catch(() => {
-        setLoading(false);
-        alert(
-          "An error occured while processing this file. Please ensure it is a valid, SDT-compatible file.",
-        );
-        window.pywebview.api.reset_state();
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  };
-
-  React.useEffect(() => {
-    getData();
-  }, [appState.basename]);
-
-  const updateHeatmapState = (newState: Partial<HeatmapSettings>) => {
-    setHeatmapSettings((previous) => {
-      return {
-        ...previous,
-        ...newState,
-      };
-    });
-  };
-  const updateHistogramSettings = (newState: Partial<HistogramSettings>) => {
-    setHistogramSettings((previous) => {
-      return {
-        ...previous,
-        ...newState,
-      };
-    });
-  };
-
-  const setDataView = (newValue: Key) =>
-    setAppState((previous) => {
-      return {
-        ...previous,
-        client: {
-          ...previous.client,
-          dataView: newValue as AppState["client"]["dataView"],
-        },
-      };
-    });
-
   return (
-    <Tabs
-      className="app-wrapper with-header"
-      selectedKey={appState.client.dataView}
-      onSelectionChange={setDataView}
-    >
-      <div className="app-header">
-        <div className="left">
-          {mainMenu}
-          <div className="run-info">
-            <strong>
-              {appState.sequences_count > 0 ? (
-                <>
-                  {appState.sequences_count} Sequence
-                  {appState.sequences_count === 1 ? "" : "s"}
-                </>
-              ) : null}
-            </strong>
-            <span className="filename">{appState.basename}</span>
-          </div>
-        </div>
-        <div>
-          <TabList className="data-view">
-            <Tab id="heatmap">Heatmap</Tab>
-            <Tab id="plot">Distribution</Tab>
+    <TabPanel id={docState.id} key={docState.id}>
+      <Tabs
+        selectedKey={docState.dataView}
+        onSelectionChange={setDataView}
+        className="react-aria-Tabs app-panels with-sidebar"
+        orientation="vertical"
+        data-left-sidebar-collapsed={leftSidebarCollapsed}
+      >
+        <div className="app-sidebar app-sidebar-left heatmap-sidebar">
+          <TabList data-collapsed={leftSidebarCollapsed}>
+            <Tab
+              id="pairwise"
+              isDisabled={true}
+              className={"react-aria-Tab header"}
+              data-hidden={leftSidebarCollapsed}
+            >
+              Pairwise
+            </Tab>
+            <Tab id="heatmap">
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}
+              >
+                <svg
+                  height={12}
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 30 30"
+                  aria-hidden={true}
+                  color="currentcolor"
+                >
+                  <rect id="one" x="0" y="0" width={8} height={8} />
+                  <rect x="0" y="10" width={8} height={8} />
+                  <rect x="10" y="10" width={8} height={8} />
+                  <rect x="0" y="20" width={8} height={8} />
+                  <rect x="10" y="20" width={8} height={8} />
+                  <rect x="20" y="20" width={8} height={8} />
+                </svg>
+                <span>Heatmap</span>
+              </div>
+            </Tab>
+            <Tab id="clustermap">
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}
+              >
+                <svg
+                  height={12}
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 30 30"
+                  aria-hidden={true}
+                  color="currentcolor"
+                >
+                  <circle cx="6" cy="6" r="5" />
+                  <circle cx="25" cy="6" r="5" />
+                  <circle cx="6" cy="24" r="5" />
+                  <circle cx="25" cy="24" r="5" />
+                  <circle cx="16" cy="15" r="4" />
+                </svg>
+                <span>Clustermap</span>
+              </div>
+            </Tab>
+            <Tab
+              id="distribution"
+              isDisabled={true}
+              className={"react-aria-Tab header"}
+            >
+              {leftSidebarCollapsed ? <hr /> : "Distribution"}
+            </Tab>
+            <Tab id="distribution_histogram">
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.8rem",
+                }}
+              >
+                <svg
+                  height={12}
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 30 30"
+                  aria-hidden={true}
+                  color="currentcolor"
+                >
+                  <rect x="0" y="18" width={6} height={10} fill="black" />
+                  <rect x="10" y="0" width={6} height={28} fill="black" />
+                  <rect x="20" y="10" width={6} height={18} fill="black" />
+                </svg>
+                <span>Histogram</span>
+              </div>
+            </Tab>
+            <Tab id="distribution_violin">
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.8rem",
+                }}
+              >
+                <svg
+                  height={12}
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 30 30"
+                  aria-hidden={true}
+                  color="currentcolor"
+                >
+                  <path d="M15 1.5c1 0 5 5 5 9s-4 9-5 9-5-5-5-9 4-9 5-9z" />
+                  <rect x="12" y="12" width="6" height="9" fill="black" />
+                  <rect x="7" y="11.25" width="16" height="7.5" fill="black" />
+                  <circle cx="15" cy="23.25" r="1.75" fill="black" />
+                  <circle cx="15" cy="26.75" r="1.75" fill="black" />
+                </svg>
+                <span>Violin</span>
+              </div>
+            </Tab>
           </TabList>
+          <div className="app-sidebar-body" />
+          <div className="app-sidebar-footer" />
         </div>
-        <div className="right">
-          <Button
-            onPress={() =>
-              setAppState((previous) => {
-                return {
-                  ...previous,
-                  client: { ...previous.client, showExportModal: true },
-                };
-              })
-            }
-          >
-            Export
-          </Button>
-        </div>
-      </div>
-
-      <TabPanel id="heatmap" className="app-panel">
-        {heatmapData ? (
-          <Heatmap
-            data={heatmapData}
-            settings={heatmapSettings}
-            updateSettings={updateHeatmapState}
-            tickText={heatmapTickText}
+        <TabPanel id="heatmap" className="app-panel">
+          {!loading && heatmapData && metaData ? (
+            <Heatmap
+              data={heatmapData}
+              metaData={metaData}
+              tickText={tickText}
+              docState={docState}
+              setDocState={setDocState}
+              updateDocState={updateDocState}
+              leftSidebarCollapsed={leftSidebarCollapsed}
+            />
+          ) : null}
+        </TabPanel>
+        <TabPanel id="clustermap" className="app-panel">
+          {!loading && heatmapData ? (
+            <Clustermap
+              data={heatmapData}
+              docState={docState}
+              setDocState={setDocState}
+              tickText={tickText}
+              leftSidebarCollapsed={leftSidebarCollapsed}
+            />
+          ) : null}
+        </TabPanel>
+        {distributionData && metaData ? (
+          <DistributionPanels
+            data={distributionData}
+            metaData={metaData}
+            docState={docState}
+            setDocState={setDocState}
           />
         ) : null}
-      </TabPanel>
-      <TabPanel id="plot" className="app-panel">
-        {histogramData ? (
-          <Histogram
-            data={histogramData}
-            settings={histogramSettings}
-            updateSettings={updateHistogramSettings}
-          />
-        ) : null}
-      </TabPanel>
-      {loading ? <div className="api-loader"></div> : null}
-    </Tabs>
+        {loading ? <div className="app-overlay app-loader" /> : null}
+      </Tabs>
+    </TabPanel>
   );
 };

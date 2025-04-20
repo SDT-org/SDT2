@@ -1,96 +1,116 @@
-import os
+from tempfile import TemporaryDirectory
+import time
 import numpy as np
-from scipy.sparse import csr_matrix
-from scipy.sparse.csgraph import connected_components
+from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 import pandas as pd
 from collections import defaultdict
+from scipy.spatial.distance import squareform, pdist
+from sklearn.manifold import MDS
+from joblib import Memory
 
-def process_groups(threshold, data, index):
-    # create adjacensy matrix to id which cells are related by the threshold marking as binary with (1) for related or (0) for not meeting the threshold
-    adjacency_matrix = (data >= threshold).astype(int)
-    # create sparse matrix(absent 0s) for memeory efficiancy
-    sparse_matrix = csr_matrix(adjacency_matrix)
-    # identify connected components
-    _, labels = connected_components(
-        csgraph=sparse_matrix, directed=False, return_labels=True
-    )
-    groups_dict = defaultdict(list)
-    for i, label in enumerate(labels):
-        groups_dict[label].append(index[i])
-    groups = {}
-    for indx, clade in enumerate(labels):
-        groups.update({indx: clade})
-    return groups_dict
+cache_dir = TemporaryDirectory()
+memory = Memory(cache_dir.name, verbose=1)
+
+@memory.cache
+def calculate_linkage(data, method) -> np.ndarray:
+    dist_data = data.copy()
+
+    # Check if it's a similarity matrix (values near 100) or distance matrix
+    if np.max(dist_data) > 90:
+        distance_mat = 100 - dist_data
+    else:
+        distance_mat = dist_data
+
+    if method in ["ward", "centroid", "median"]:
+        start = time.perf_counter()
+        # MDS for methods that need Euclidean distance
+        mds_coords = get_mds_coords(distance_mat)
+        if mds_coords is None:
+            raise ValueError("MDS failed to compute coordinates.")
+        end = time.perf_counter()
+        print(f"mds coords {end - start:.2f} seconds")
+        y = pdist(mds_coords)
+        metric = "euclidean"
+    else:
+        start = time.perf_counter()
+        y = squareform(distance_mat)
+        metric = "precomputed"
+        end = time.perf_counter()
+        print(f"Linkage methods took {end - start:.2f} seconds")
+
+    return linkage(y, method=method, metric=metric)
+
+@memory.cache
+def get_mds_coords(distance_mat):
+    return MDS(
+        n_components=2, dissimilarity="precomputed", random_state=42
+    ).fit_transform(distance_mat)
+
+def get_linkage(data: np.ndarray, method: str) -> np.ndarray:
+    return calculate_linkage(data, method)
 
 
-def cluster_by_identity(clusters, nodes):
-    output = []
-    reverse_clusters = {}
+def get_linkage_method_order(data, method, index):
+    Z = get_linkage(data, method)
 
-    # Create reverse lookup dictionary were values in value list are extracted to key and groups are assigned to value
-    for group, values in clusters.items():
-        for value in values:
-            reverse_clusters[value] = group
+    # Create dendrogram to get leaf order
+    dendro = dendrogram(Z, no_plot=True)
+    leaf_indices = dendro["leaves"]
+    new_order = [index[i] for i in leaf_indices]
 
-    # Initialize subgroup counters
-    subgroup_counters = {group: 1 for group in clusters.keys()}
-
-    # Iterate through nodes to determine the subgroup_number within each group_number
-    for node_key, node_list in nodes.items():
-        if node_list:
-            first_value = node_list[0]
-            if first_value in reverse_clusters:
-                group_number = reverse_clusters[first_value] + 1
-                subgroup_number = subgroup_counters[reverse_clusters[first_value]]
-                for value in node_list:
-                    if value in reverse_clusters:
-                        output.append((value, group_number, subgroup_number))
-                subgroup_counters[reverse_clusters[first_value]] += 1
-
-    return output
+    return new_order
 
 
+def get_clusters_dataframe(data, method, threshold, index):
+    Z = get_linkage(data, method)
+    cluster_data = get_cluster_data_dict(Z, threshold, index)
+    return cluster_data_to_dataframe(cluster_data, threshold)
 
-def export(matrix_path, threshold_1=79, threshold_2=0):
-    output_dir = os.path.dirname(matrix_path)
-    file_name = os.path.basename(matrix_path)
-    file_base, _ = os.path.splitext(file_name)
-    file_name = file_base.replace("_mat", "")
-    output_file = os.path.join(output_dir, file_name + "_cluster.csv")
 
-    # https://stackoverflow.com/a/57824142
-    # SDT1 matrix CSVs do not have padding for columns
-    with open(matrix_path, 'r') as temp_f:
-        col_count = [ len(l.split(",")) for l in temp_f.readlines() ]
+def export(matrix_path, cluster_path, threshold, method):
+    with open(matrix_path, "r") as temp_f:
+        col_count = [len(l.split(",")) for l in temp_f.readlines()]
         column_names = [i for i in range(0, max(col_count))]
 
-    df = pd.read_csv(matrix_path, delimiter=",", index_col=0, header=None, names=column_names)
-    # extract index
+    df = pd.read_csv(
+        matrix_path, delimiter=",", index_col=0, header=None, names=column_names
+    )
     index = df.index.tolist()
-    # convert df to np array
     data = df.to_numpy()
-    # format values
     data = np.round(data, 2)
-    # maintain order of threshold processing
-    if threshold_2 != 0 and threshold_1 >= threshold_2:
-        threshold_1, threshold_2 = threshold_2, threshold_1
-    # handle instances of no threshold_2
-    if threshold_2 is None or threshold_2 == 0:
-        output = process_groups(threshold_1, data, index)
-        flattened_output = [
-            (item, key + 1) for key, sublist in output.items() for item in sublist
-        ]
-        df = pd.DataFrame(flattened_output)
-        df.columns = ["ID", "Group 1 - Theshold: " + str(threshold_1)]
 
-    else:
-        clusters = process_groups(threshold_1, data, index)
-        nodes = process_groups(threshold_2, data, index)
-        output = cluster_by_identity(clusters, nodes)
-        df = pd.DataFrame(output)
-        df.columns = [
-            "ID",
-            "Group 1 - Theshold: " + str(threshold_1),
-            "Group 2 - Theshold: " + str(threshold_2),
-        ]
-    df.to_csv(output_file, index=False)
+    df_result = get_clusters_dataframe(data, method, threshold, index)
+    df_result.to_csv(cluster_path, index=False)
+
+    return df_result
+
+
+def get_cluster_data_dict(Z, threshold, index):
+    # Set cut threshold
+    cutby = 100 - threshold
+    # Identify clusters from threshold cut
+    clusters = fcluster(Z, t=cutby, criterion="distance")
+    # Store as dict
+    cluster_dict = defaultdict(list)
+    for i, label in enumerate(clusters):
+        cluster_dict[label - 1].append(index[i])
+
+    return cluster_dict
+
+
+def cluster_data_to_dataframe(cluster_data: dict, threshold: int):
+    flattened_output = [
+        (item, key + 1) for key, sublist in cluster_data.items() for item in sublist
+    ]
+    dataframe = pd.DataFrame(flattened_output)
+    dataframe.columns = ["ID", "Cluster - Threshold: " + str(threshold)]
+
+    return dataframe
+
+
+def order_clusters_sequentially(clusters):
+    # Let's make it NP
+    labels = np.array(clusters)
+    # Create newly reordered labels that make sense
+    new_order_labels = np.searchsorted(np.unique(labels), labels)
+    return (new_order_labels + 1).tolist()

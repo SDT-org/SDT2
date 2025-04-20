@@ -1,0 +1,238 @@
+.form.runner-form {
+  .field + .field {
+    border-top: 0;
+    margin: 0;
+  }
+
+  .field {
+    margin: 0;
+
+    padding: var(--app-container-padding) 0;
+    border-bottom: 0.1rem solid var(--border-color);
+
+    &:first-child {
+      padding-top: 0;
+      padding-bottom: 0.55rem;
+    }
+
+    &:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+
+    button {
+      &[data-primary] {
+        min-width: 24rem;
+      }
+    }
+
+    .setting {
+      margin: 1.2rem 0;
+
+      .react-aria-Select {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+
+        .react-aria-Label {
+          font-weight: 450;
+        }y
+
+        .react-aria-Button {
+          display: flex;
+          padding: 0.4rem 10px;
+          width: 100%;
+        }
+      }
+    }
+
+    .react-aria-Switch {
+      font-weight: 500;
+    }
+
+    &.inline-toggle {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      min-height: 5.4rem;
+
+      .react-aria-Switch {
+        flex-shrink: 0;
+      }
+
+      .setting {
+        margin: 0;
+      }
+    }
+
+    &.clustering {
+      .clustering-method {
+        margin: 0;
+      }
+    }
+
+    &.output {
+      .setting {
+        display: flex;
+        gap: 0.8rem;
+
+        .folder {
+          display: flex;
+          user-select: text;
+          align-items: center;
+          border: 0.1rem solid var(--border-color);
+          border-radius: 0.2rem;
+          max-width: 19.2rem;
+          font-size: 1.2rem;
+          padding: 0.2rem 0.6rem;
+
+          > * {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            direction: rtl;
+          }
+        }
+
+        button {
+          padding-top: 0.3rem;
+          padding-bottom: 0.3rem;
+        }
+      }
+    }
+
+    &.performance {
+      .performance-settings {
+        gap: 1.6rem;
+        display: grid;
+        grid-template-rows: 1fr;
+
+        .inline {
+          display: grid;
+          grid-template-columns: 1fr 21.6rem;
+          place-content: center;
+          align-items: flex-start;
+        }
+
+        .cores-used {
+          .react-aria-Slider {
+            grid-template-areas: "track" "label output";
+          }
+
+          .react-aria-Label {
+            display: block;
+          }
+
+          output {
+            font-size: 1.3rem;
+            font-weight: 500;
+          }
+        }
+
+        .cores-used,
+        .memory-used {
+          output,
+          .value {
+            margin-top: 0.2rem;
+            margin-bottom: 0.4rem;
+          }
+
+          small {
+            font-size: 1.25rem;
+          }
+        }
+
+        svg {
+          width: 14px;
+          margin: 0 2px 2px 0;
+          color: var(--impact-medium-color);
+        }
+
+        &[data-impact="extreme"] svg {
+          color: var(--impact-extreme-color);
+        }
+        &[data-impact="high"] svg {
+          color: var(--impact-high-color);
+        }
+        &[data-impact="medium"] svg {
+          color: var(--impact-medium-color);
+        }
+
+        .react-aria-Meter {
+          gap: 6px;
+          font-weight: 500;
+        }
+
+        .react-aria-Meter + small {
+          display: block;
+          margin-top: 0.8rem;
+          text-align: right;
+        }
+
+        .swap {
+          color: var(--impact-extreme-color);
+          font-weight: 500;
+        }
+      }
+    }
+  }
+  .actions {
+    padding-top: 0.8rem;
+    button {
+      max-width: 20.8rem;
+    }
+  }
+
+  .field.file-selector {
+    border-bottom: 0;
+    button {
+      width: 100%;
+      font-weight: 500;
+      height: 4rem;
+    }
+    margin: 0.4rem 0;
+  }
+
+  .recent-files {
+    h2 {
+      margin: 1.2rem 0;
+      padding-bottom: 0.4rem;
+      font-size: 1.4rem;
+      border-bottom: 0.1rem solid var(--border-color);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem;
+    }
+
+    button {
+      display: block;
+      text-align: left;
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      border: 0.1rem solid #e5e5e5;
+      font-size: 1.2rem;
+      display: grid;
+      grid-template-columns: 1.6rem 1fr;
+      gap: 0.8rem;
+
+      * {
+        margin: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        line-height: 1.6rem;
+      }
+
+      svg {
+        color: #999;
+      }
+
+      .dir {
+        color: #666;
+      }
+    }
+  }
+}

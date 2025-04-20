@@ -1,11 +1,10 @@
-import React from "react";
 import {
   Button,
   Group,
   Input,
   Label,
   NumberField,
-  NumberFieldProps,
+  type NumberFieldProps,
 } from "react-aria-components";
 
 export const NumberInput = ({
@@ -22,8 +21,8 @@ export const NumberInput = ({
   max: number;
   type?: "int" | "float";
 } & (
-  | { updateValue: ({}) => void; field: string }
-  | { updateValue?: ({}) => void; field?: string }
+  | { updateValue: React.Dispatch<{ [key: string]: number }>; field: string }
+  | { updateValue?: React.Dispatch<{ [key: string]: number }>; field?: string }
 ) &
   NumberFieldProps) => {
   return (
@@ -47,8 +46,9 @@ export const NumberInput = ({
       >
         <Label>{label}</Label>
         <Group className="react-aria-Group number-input-group">
-          <Button slot="decrement">
+          <Button slot="decrement" aria-label="decrement">
             <svg
+              aria-hidden="true"
               height="8"
               width="8"
               viewBox="0 0 8 8"
@@ -65,8 +65,9 @@ export const NumberInput = ({
             </svg>
           </Button>
           <Input />
-          <Button slot="increment">
+          <Button slot="increment" aria-label="increment">
             <svg
+              aria-hidden="true"
               height="8"
               width="8"
               viewBox="0 0 8 8"

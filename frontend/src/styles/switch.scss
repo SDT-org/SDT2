@@ -1,0 +1,70 @@
+.react-aria-Switch {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: var(--foreground-color);
+  font-weight: 600;
+  line-height: 0;
+
+  .indicator {
+    width: 3.4rem;
+    min-width: 3.4rem;
+    height: 1.8rem;
+    border: 0.1rem solid var(--switch-border-color);
+    background: var(--border-color);
+    border-radius: 1.2rem;
+    transition: all 200ms outline 0ms;
+
+    &:before {
+      content: "";
+      display: block;
+      width: 1.6rem;
+      height: 1.6rem;
+      background: var(--background-color);
+      border-radius: 1.2rem;
+      transition: all 200ms outline 0ms;
+      box-shadow: 0 0 0.1rem var(--secondary-foreground-color);
+    }
+  }
+
+  &[data-pressed] .indicator {
+    &:before {
+      box-shadow: 0 0 0.1rem var(--foreground-color);
+      background: var(--pressed-color);
+    }
+  }
+
+  &[data-selected] {
+    .indicator {
+      border-color: var(--fill-color);
+      background: var(--fill-color);
+
+      &:before {
+        transform: translateX(100%);
+      }
+    }
+
+    &[data-pressed] {
+      .indicator:before {
+        border-color: var(--pressed-color);
+        background: var(--pressed-color);
+      }
+    }
+  }
+
+  &[data-focus-visible] .indicator {
+    outline: 0.2rem solid var(--focus-ring-color);
+    outline-offset: 0.1rem;
+  }
+}
+
+.react-aria-Switch {
+  font-weight: 500;
+}
+
+.react-aria-Switch[data-split],
+.app-sidebar .react-aria-Switch {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+}

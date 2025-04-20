@@ -1,132 +1,658 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sequence Demarcation Tool 2.0.0 Beta2</title>
-  </head>
-  <body>
-    <div>
-      <h1>Sequence Demarcation Tool2.0.0 Beta2</h1>
-      <h2>Description</h2>
-      <p>
-        SDT 2.0.0 is a standalone application for Windows/Mac/Linux. It allows
-        analysis of FASTA files or SDT/SDT2 matrices using pairwise alignments
-        and computes pairwise identity scores. Clustering is available via
-        Neighbor-Joining or UPGMA. Results are visualized as a heatmap and a
-        distribution plot.
-      </p>
 
-      <h2>Features</h2>
-      <h3>I. Main Loading Screen</h3>
-      <img src="/images/manual-02.jpg" width="524" height="178" />
-      <p>
-        Select a file via <b>Select File</b>. For FASTA, the
-        <b>Run Options</b> screen is loaded. For SDT/SDT2 matrices, the
-        <b>Viewer</b> screen is loaded.
-      </p>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sequence Demarcation Tool 2.0.0 Beta 4</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
 
-      <h3>II. Run Options</h3>
-      <img src="/images/manual-run.png" width="489" height="450" />
-      <p>
-        Choose clustering method and performance options.
-      </p>
+    h1,
+    h2,
+    h3,
+    h4 {
+      color: #333;
+    }
 
-      <h3>III. File Input</h3>
+    h2 {
+      border-bottom: 2px solid #0066cc;
+      padding-bottom: 8px;
+      margin-top: 40px;
+    }
+
+    h3 {
+      border-bottom: 1px solid #0066cc;
+      padding-bottom: 5px;
+      margin-top: 30px;
+      max-width: 600px;
+    }
+
+    h4 {
+      border-bottom: 1px solid #88bbff;
+      padding-bottom: 3px;
+      max-width: 500px;
+      margin-top: 25px;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+
+    ul {
+      padding-left: 20px;
+    }
+
+    .note {
+      background-color: #ffffff;
+      border-bottom: 2px solid #007bff;
+      padding: 10px;
+      margin: 15px 0;
+      max-width: 600px;
+      border-image: linear-gradient(to right, #0066cc, #8cc0f3) 1;
+    }
+
+    .header {
+      line-height: 1.8;
+      padding: 10px;
+      margin: 15px 0;
+      text-align: left;
+    }
+
+    .section-divider {
+      border-bottom: 1px solid #88bbff;
+      margin: 40px 0 20px 0;
+      max-width: 700px;
+    }
+
+    .plot-img {
+      max-width: 85%;
+      margin: 15px 0;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .warning {
+      background-color: #fff8e8;
+      border-left: 4px solid #ffcc00;
+      padding: 10px 15px;
+      margin: 15px 0;
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background-color: #0066cc;
+      margin: 30px 0;
+    }
+
+    /* Control panels layout for consistent display of images with explanations */
+    .control-panel {
+      display: flex;
+      margin: 20px 0;
+      gap: 20px;
+      max-width: 900px;
+    }
+
+    .control-image {
+      flex: 0 0 auto;
+      max-width: 300px;
+    }
+
+    .control-image img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    .control-options {
+      flex: 1 1 auto;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .control-panel {
+        flex-direction: column;
+      }
+
+      .control-image {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <h1>Sequence Demarcation Tool 2.0.0 Beta 4</h1>
+  </div>
+
+  <h2>Description</h2>
+  <p>
+    Sequence Demarcation Tool 2 (SDT 2) is a standalone application for Windows, Mac, and Linux, created as the modern
+    successor to the original SDT. Like its predecessor, SDT2 is designed to explore, visualize, and demarcate
+    biological sequences through lightning-fast global pairwise sequence alignments.
+    SDT2 employs the highly optimized Parasail library for Needleman-Wunsch global sequence alignments. Copmbined with
+    seamless multiprocessing
+    support, SDT2 is capable of handling large datasets and longer sequence lengths.
+    Alignments can be organized into easy-to-interpret clusters using Neighbor
+    Joining or UPGMA phylogenies. Additionally, SDT2 utilizes the powerful D3 graphing library to visualize pairwise
+    sequence identities in a highly customizable, interactive lower triangle heatmap, which can be exported as
+    high-resolution vector images. The tool also provides distribution statistics for pairwise sequence identity values,
+    sequence lengths, and GC content, which can be displayed in either histogram or violin plot formats.
+  </p>
+
+  <h2>Getting Started</h2>
+
+  <h3>Main Loading Screen</h3>
+  <p>
+    When first launched SDT2, the loading interface provides two primary options for loading data:
+  </p>
+  <div class="control-panel">
+    <img src="/images/LoadMain.png" alt="SDT2 Main Loading Screen" width="347" height="378" />
+    <div class="control-options">
+
+      <h3>I. File Selection</h3>
+      <p>Click "Select FASTA or SDT Matrix file..." to choose from:</p>
       <ul>
-        <li><b>FASTA or SDT Matrix File:</b> Change the input file.</li>
-        <li><b>Select file...</b>: Browse and select the file.</li>
+        <li>FASTA files (`.fasta`, `.fas`, `.faa`, `.fnt`, `.fa`)</li>
+        <li>SDT Matrix files (`.csv`, `.txt`)</li>
+        <li>Previously saved SDT files (`.sdt`)</li>
       </ul>
-
-      <h3>IV. Run Settings</h3>
-      <ul>
-        <li>
-          <b>Clustering Method:</b> Select clustering by Neighbor-Joining,
-          UPGMA, or None.
-        </li>
-        <li><b>Alignment Type:</b> Choose local or global alignment.</li>
-      </ul>
-
-      <h3>V. Compute Performance</h3>
-      <ul>
-        <li><b>Performance Selection:</b> Choose Best, Balanced, or Low.</li>
-        <li><b>Processing Cores:</b> Specify the number of cores to use.</li>
-      </ul>
-
-      <h3>VI. Run Button</h3>
-      <p><b>Run</b>: Start the sequence comparison process.</p>
-
-      <h3>VII. Advanced Settings</h3>
-      <img src="/images/manual-advanced.jpg" width="524" height="324" />
-      <p><b>Select Folder</b>: Choose an output directory for alignments.</p>
-
-      <h4>Alignment Output Folder</h4>
-      <p><b>Select...</b>: Choose the folder for alignment output files.</p>
-
-      <h3>VIII. Menu </h3>
-      <img src="/images/manual-menu.jpg" width="341" height="341" />
-      <p>
-        Provides options to load a new file, export change settings, and view manual and
-        SDT2 project information.
-      </p>
-
-      <h3>IX. Export Data</h3>
-      <img src="/images/manual-export.jpg" width="424" height="424" />
-      <ul>
-        <li><b>Output Folder:</b> Enter or select the path for saving data.</li>
-        <li>
-          <b>Cluster By Percent Identity:</b> Enable or disable clustering.
-        </li>
-        <li><b>Thresholds:</b> Set threshold values for clustering.</li>
-        <li><b>Actions:</b> Cancel or Export.</li>
-      </ul>
-
-      <h3>X. Heatmap</h3>
-      <img src="/images/manual-10.jpg" width="507" height="344" />
-      <h4>Heatmap Settings</h4>
-      <ul>
-        <li><b>Color Scale:</b>
-        Choose the heatmap color scheme.</li>
-        <li><b>Cell Spacing:</b>
-        Adjust the spacing between cells.</li>
-        <li><b>Percent Identities:</b>
-        Set decimal precision and font size.</li>
-        <li><b>Axis Labels:</b>
-        Set font size and rotation for X and Y labels.</li>
-        <li><b>Scale Bar:</b>
-        Adjust height, width, padding, and min/max values.</li>
-      </ul>
-
-      <h3>XI. Distribution Plot</h3>
-      <img src="/images/manual-16.jpg" width="624" height="421" />
-      <h4>Layout options</h4>
-      <ul>
-        <li><b>Title Text:</b> Set the plot title.</li>
-        <li><b>Grid:</b> Toggle grid lines.</li>
-        <li><b>Tick Labels:</b> Toggle tick labels.</li>
-        <li><b>Axis Lines:</b> Toggle axis lines.</li>
-        <li><b>Axis Title:</b> Toggle axis title.</li>
-      </ul>
-
-      <h4>Bar Plot</h4>
-      <ul>
-        <li><b>Color:</b> Set bar colors.</li>
-        <li><b>Outline:</b> Set bar outline color and width.</li>
-      </ul>
-
-      <h4>Line Plot</h4>
-      <ul>
-        <li><b>Shape:</b> Set the shape of the line plot.</li>
-        <li><b>Color:</b> Set the line color.</li>
-        <li><b>Width:</b> Adjust the line width.</li>
-      </ul>
-
-      <h4>Markers</h4>
-      <ul>
-        <li><b>Symbol:</b> Set marker symbols.</li>
-        <li><b>Color:</b> Set marker color.</li>
-        <li><b>Size:</b> Adjust marker size.</li>
+      </li>
+      <h3>II. Recent Files</h3>A section displaying recently used files for quick access
       </ul>
     </div>
-  </body>
+  </div>
+  <div class="warning">
+    <p>For FASTA files, the <b>Runner Interface</b> screen is loaded to prepare for sequence alignment and analysis.</p>
+    <p>For SDT/SDT2 matrices, the<b>Viewer</b> screen is loaded, and the pre-run data is displayed as a heatmap.</p>
+    <p> Relocated files will still show in the Recent Files directory if you have moved them since the last they were
+      used</p>
+  </div>
+
+  <h3>Application Run Interface</h3>
+  <p>
+    Once a file is selected, the application interface displays several key components and controls.
+  </p>
+
+
+  <img src="/images/AppRun.png" alt="Application Run Interface"
+    style="max-width: 100%; height: auto; margin-bottom: 20px;" />
+
+
+  <div class="control-panel">
+    <div class="control-image">
+      <img src="/images/2AppRun.png" alt="Data File Section" style="max-width: 100%; height: auto;" />
+    </div>
+    <div class="control-options">
+      <h4>Data File Section</h4>
+      <ul>
+        <li><b>Data File</b>: Displays the selected file name from the user's file selection</li>
+        <li><b>Select file...</b> Button to change or browse for a different file</li>
+      </ul>
+    </div>
+  </div>
+
+
+  <div class="control-panel">
+    <div class="control-image">
+      <img src="/images/3AppRun.png" alt="Reorder By Section" style="max-width: 100%; height: auto;" />
+    </div>
+    <div class="control-options">
+      <h4>Reorder by</h4>
+      <p>
+        SDT2 offers sequence order rearrangement based on a phylogenetic tree to better organize the evolutionary
+        relationships of the sequences:
+      </p>
+      <ul>
+        <li><b>Toggle switch</b> to enable/disable phylogenetic reordering</li>
+        <li>If enabled, choose tree construction method:
+          <ul>
+            <li><b>Neighbor-Joining</b>: Constructs a tree based on minimizing the total branch length</li>
+            <li><b>UPGMA</b>: Creates a tree using average genetic distances</li>
+            <li><b>None</b>: Sequences remain in the original order of the input data</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+
+  <div class="control-panel">
+    <div class="control-image">
+      <img src="/images/4AppRun.png" alt="Performance Settings" style="max-width: 100%; height: auto;" />
+    </div>
+    <div class="control-options">
+      <h4>Performance Settings</h4>
+      <ul>
+        <li><b>Cores</b>: Slider to adjust computational cores used</li>
+        <li><b>Memory</b>: Meter showing estimated memory usage</li>
+      </ul>
+
+      <h4>Starting Analysis</h4>
+      <ul>
+        <li><b>Start Analysis</b> button becomes active when all requirements are met</li>
+        <li>Keyboard shortcut: Ctrl/Cmd/Alt + Enter</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4>Performance</h4>
+  <p>The core selection feature in SDT2 significantly increases both compute speed and memory usage during analysis. The
+    application leverages Python's Multiprocessing capabilities to dramatically increase processing speed through
+    parallelization. By distributing the computational workload across multiple CPU cores, analysis times can be reduced
+    by orders of magnitude.
+    However, users should be aware that increased parallelization comes with higher memory requirements. Each additional
+    core allocated to the analysis requires its own memory space, causing total memory usage to scale with the number of
+    cores selected. The application provides best-estimate memory usage indicators to help users understand these
+    increasing memory requirements and make appropriate selections based on their available system resources.</p>
+  <div class="warning">
+    <p><b>Note:</b> Users on systems that can use hard disk space as a page file to increase available memory may be
+      able to align very long sequences (100-200kb) by setting cores to a minimal value. However, this approach may
+      cause system instability and should be used at your own risk. Even with additional virtual memory, the system
+      performance may degrade significantly when physical memory limits are exceeded.</p>
+  </div>
+
+  <h4>Menu and File Operations</h4>
+  <div class="control-panel">
+    <div class="control-image">
+      <img src="/images/FileMenu.png" alt="File Menu Interface" />
+    </div>
+    <div class="control-options">
+      <p>The application menu provides access to all core functions:</p>
+      <ul>
+        <li><b>New</b>: Start a new SDT2 session</li>
+        <li><b>Open...</b>: Select and open a file</li>
+        <li><b>Open Recent</b>: Access a submenu of recently used files</li>
+        <li><b>Save</b>: Save the current analysis</li>
+        <li><b>Save As...</b>: Save the current analysis with a new name or location</li>
+        <li><b>Export...</b>: Export the current visualization or data (see Export section)</li>
+        <li><b>Close</b>: Close the current file</li>
+        <li><b>Manual</b>: Access this user manual</li>
+        <li><b>About</b>: View application information, version, and credits</li>
+        <li><b>Exit</b>: Close the application</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Loader Interface</h3>
+  <div class="control-panel">
+    <div class="control-image">
+      <img src="/images/Loader.png" alt="Loader Interface" />
+    </div>
+    <div class="control-options">
+      <p>During analysis:</p>
+      <ul>
+        <li><b>Progress bar</b> Shows current percentage of analysis complete</li>
+        <li><b>Estimated time remaining</b>Calculates estimated runtimebased on current performance</li>
+        <li><b>Cancel Run </b> Clicl and confirm to cancel a run</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Heatmap</h3>
+
+  <img src="/images/Heatmap.png" alt="Heatmap Example" class="plot-img" />
+  <p>
+    The heatmap visualization in SDT2 provides a color-coded representation of pairwise sequence identity.
+    It displays sequence relationships in a triangular matrix format where each cell represents the percent
+    identity between two sequences.
+  </p>
+  <div class="control-panel">
+    <div class="control-image">
+      <img src="/images/HeatmapBar.png" alt="Heatmap Controls" />
+    </div>
+    <div class="control-options">
+      <h4>Colorscale</h4>
+      <ul>
+        <li><b>Colorscale Selection</b>: Choose from various predefined color schemes (Portland, Viridis, Plasma, etc.)
+        </li>
+        <li><b>Color Inversion</b>: Toggle to create a negative image effect, reversing dark and light values</li>
+        <li><b>Cell Spacing</b>: Adjust the gap between cells in the heatmap matrix</li>
+        <li><b>Discrete Cutoff Values</b> (Discrete Colorscale Only): Set thresholds to create distinct color regions
+        </li>
+      </ul>
+
+      <h4>Percent Identities</h4>
+      <p>Toggle this option to show or hide percent pairwise identity values within each cell of the heatmap.</p>
+      <ul>
+        <li><b>Precision</b>: Select the number of decimal places to display for percent identities (0, 1, or 2)</li>
+        <li><b>Font Size</b>: Adjust the text size for the percentage values</li>
+      </ul>
+
+      <h4>Plot Titles</h4>
+      <p>Toggle this option to show or hide plot titles on the heatmap.</p>
+      <ul>
+        <li><b>Font Type</b>: Choose between Sans Serif or Monospace</li>
+        <li><b>Title and Subtitle</b>: Enter the desired text to appear above the heatmap</li>
+      </ul>
+
+      <h4>Axis Labels</h4>
+      <p>Toggle this option to show or hide sequence identifiers along the axes of the heatmap.</p>
+      <ul>
+        <li><b>Font Size</b>: Adjust font size for X and Y axis labels</li>
+        <li><b>Rotation</b>: Set rotation angle for X and Y labels</li>
+      </ul>
+
+      <h4>Scale Bar</h4>
+      <p>Toggle to show or hide the color reference scale.</p>
+      <ul>
+        <li><b>Height</b>: Adjust the height of the scale bar</li>
+        <li><b>Width</b>: Adjust the width of the scale bar</li>
+        <li><b>Min</b>: Adjust the minimum value represented on the color scale</li>
+        <li><b>Max</b>: Adjust the maximum value represented on the color scale</li>
+      </ul>
+    </div>
+  </div>
+  <div class="warning">
+    <p><b>Note:</b> Displaying percentage values in large datasets may significantly impact rendering performance.</p>
+  </div>
+
+  <h3>Clustermap</h3>
+
+  <img src="/images/Clustermap.png" alt="Clustermap Example" class="plot-img" />
+  <p>
+    The Clustermap plot provides a new way to visualize sequence data in SDT2, allowing you to set specific clustering
+    thresholds and clustering methods to explore relationships within datasets. SDT 2 provides severa agglomerative,
+    linkage-based clustering methods through the SciPy package library.
+    To create a heirirchacle, a precomputed pairwise distance matrix is used to perfeorm Single, Complete, and Average
+    linkage methods. For the Centroid and Median and Wards linkage methods,the dimensionality of the dataset must first be reduced to 
+    2D Euclidean distances through multidimensional scaling (MDS)through the sci-kit lean packageprior to clustering. 
+    dendrogram is visulized using the D3  to reorder the heatmap, 
+
+  </p>
+  <div class="control-panel">
+    <div class="control-image">
+      <img src="/images/ClusterSidebar.png" alt="Clustermap Controls" />
+    </div>
+    <div class="control-options">
+      <h4>Clusters</h4>
+      <ul>
+        <li><b>Threshold</b>: Set the similarity threshold for clustering sequences. Higher values require greater
+          similarity for sequences to be grouped together.</li>
+        <li><b>Linkage Method</b>: Choose the algorithm for hierarchical clustering (Single, Complete, Average,
+          Centroid,
+          or Median).</li>
+        <li><b>Cell Spacing</b>: Adjust the gap between cells in the clustermap matrix.</li>
+      </ul>
+
+      <h4>Percent Identities</h4>
+      <p>Toggle this option to show or hide percent pairwise identity values within each cell of the clustermap.</p>
+
+      <h4>Axis Labels</h4>
+      <p>Toggle this option to show or hide sequence identifiers along the axes of the clustermap.</p>
+      <ul>
+        <li><b>Font Size</b>: Adjust text size for sequence labels.</li>
+        <li><b>X Rotation</b>: Set rotation angle for X-axis labels to improve readability.</li>
+        <li><b>Y Rotation</b>: Set rotation angle for Y-axis labels to improve readability.</li>
+      </ul>
+
+      <h4>Plot Titles</h4>
+      <p>Toggle this option to show or hide plot titles on the clustermap.</p>
+      <ul>
+        <li><b>Font Type</b>: Choose between Sans Serif or other typefaces for titles.</li>
+        <li><b>Title</b>: Enter the desired text to appear above the clustermap.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="warning">
+    <p><b>Note:</b> Processing large datasets with complex clustering algorithms may require additional computational
+      time.</p>
+  </div>
+  <div class="custom-table-container responsive">
+    <table class="custom-table bordered">
+      <thead>
+        <tr>
+          <th class="sortable sort-asc">Clustering Method</th>
+          <th>Linkage Type</th>
+          <th>Calculation</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="background-color: #f0f8ff;">
+          <td>Nearest Neighbor</td>
+          <td>Single</td>
+          <td class="align-center">d(u, v) = min(dist(t[i], t[j]))
+            for all points i in cluster u and j in cluster v.</td>
+          <td>The shortest distance between any two points in different clusters</td>
+        </tr>
+        <tr style="background-color: #e6f2ff;">
+          <td>Farthest Neighbor</td>
+          <td>Complete</td>
+          <td class="align-center">d(u, v) = max(dist(t[i], t[j]))
+            for all points i in cluster u and j in cluster v</td>
+          <td>The maximum distance between any two points in different clusters</td>
+        </tr>
+        <tr style="background-color: #f0f8ff;">
+          <td>UPGMA</td>
+          <td>Average</td>
+          <td class="align-center">d(u, v) = ∑(d(t[i], t[j])) / (|u| * |v|)</td>
+          <td>Average distance between all pairs of points in different clusters</td>
+        </tr>
+        <tr style="background-color: #e6f2ff;">
+          <td>WPGMA</td>
+          <td>Weighted</td>
+          <td class="align-center">d(u, v) = (dist(s, v) + dist(t, v))/2</td>
+          <td>Average of distances from cluster v to the two clusters that formed u</td>
+        </tr>
+        <tr style="background-color: #f0f8ff;">
+          <td>UPGMC</td>
+          <td>Centroid</td>
+          <td class="align-center">dist(s, t) = ||cs - ct||₂</td>
+          <td>Distance between cluster centroids</td>
+        </tr>
+        <tr style="background-color: #e6f2ff;">
+          <td>WPGMC</td>
+          <td>Median</td>
+          <td class="align-center">Uses centroid method with new centroid as average of merged centroids</td>
+          <td>Distance between median points of clusters</td>
+        </tr>
+        <tr style="background-color: #f0f8ff;">
+          <td>Minimum Variance</td>
+          <td>Ward's</td>
+          <td class="align-center">d(u, v) = √(((|v|+|s|)/T)d(v,s)² + ((|v|+|t|)/T)d(v,t)² - (|v|/T)d(s,t)²)</td>
+          <td>Minimizes variance increase when merging clusters</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+
+
+  <h3>Distribution Plots</h3>
+  <p>
+    SDT2 provides visualization tools for examining the distribution of your sequence data:
+    Histogram and Violin plots.
+  </p>
+
+  <h3>Histogram</h3>
+
+  <img src="/images/Histogram.png" alt="Histogram Example" class="plot-img" />
+  <p>
+    Histograms divide your data into bins and display the frequency of values within each bin as
+    bars. This helps identify patterns, peaks, and outliers in your sequence data.
+  </p>
+  <div class="control-panel">
+    <div class="control-image">
+      <img src="/images/HistoBar.png" alt="Histogram Controls" />
+    </div>
+    <div class="control-options">
+      <h4>Data Set Options</h4>
+      <p>Choose which data to visualize:</p>
+      <ul>
+        <li><b>Scores</b>: Pairwise sequence identity percentages</li>
+        <li><b>GC Content</b>: Percentage of G and C nucleotides in each sequence</li>
+        <li><b>Length</b>: Number of nucleotides in each sequence</li>
+      </ul>
+      <ul>
+        <li><b>Toggle Buttons</b>: Show or hide grid, axis lines, labels, and tick values</li>
+        <li><b>Orientation</b>: Choose between Vertical or Horizontal display</li>
+      </ul>
+      <h4>Histogram Options</h4>
+      <ul>
+        <li><b>Bin Color</b>: Click the color box to select the fill color for the histogram bars</li>
+        <li><b>Bin Width</b>: Adjust the width of values included in each bin</li>
+        <li><b>Outline Color</b>: Click the color box select the color for bar outlines</li>
+        <li><b>Outline Width</b>: Adjust the thickness of bar outlines</li>
+        <li><b>Bar Gap</b>: Control the spacing between bars</li>
+        <li><b>Plot Titles</b>: Configure title and axis labels</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4>Violin Plot</h4>
+  <img src="/images/Violin.png" alt="Violin Plot Example" class="plot-img" />
+  <p>
+    Violin plots combine box plots with kernel density plots to show the distribution shape,
+    central tendency, and variability of your data.
+  </p>
+  <div class="control-panel">
+    <div class="control-image">
+      <img src="/images/ViolinButtons.png" alt="Violin buttons" />
+      <img src="/images/ViolinBar.png" alt="Violin options bar" style="margin-top: 10px;" />
+    </div>
+    <div class="control-options">
+      <h4>Data Set Options</h4>
+      <p>Choose which data to visualize:</p>
+      <ul>
+        <li><b>Scores</b>: Pairwise sequence identity percentages</li>
+        <li><b>GC Content</b>: Percentage of G and C nucleotides in each sequence</li>
+        <li><b>Length</b>: Number of nucleotides in each sequence</li>
+      </ul>
+      <ul>
+        <li><b>Toggle Buttons</b>: Toggle the display of: grid, axis lines, tick values, and mean-line</li>
+        <li><b>Orientation</b>: Choose between Vertical or Horizontal plot orientation</li>
+      </ul>
+      <h4>Violin Options</h4>
+      <ul>
+        <li><b>Band Width</b>: Control the smoothness of the violin curve</li>
+        <li><b>Fill Color</b>: Click the color box to customize the fill color within the violin</li>
+        <li><b>Line Color</b>: Click the color box to customize the line color of the violin</li>
+        <li><b>Line Width</b>: Adjust the thickness of the violin outline</li>
+      </ul>
+      <h4>Box Options</h4>
+      <ul>
+        <li><b>Box Width</b>: Control the width of the box plot</li>
+        <li><b>Fill/Line Color</b>: Customize the appearance of the box</li>
+        <li><b>Whiskers</b>: Control the whisker lines extending from the box</li>
+      </ul>
+      <h4>Points Options</h4>:(Examples in Vertical Orientation)
+      <ul>
+        <li><b>Size</b>: Controls the diameter of each data point in pixels</li>
+        <li><b>Position</b>:Determines the horizontal position offset of points from the central violin/box
+          <ul>
+
+            <li>Negative values: Points appear to the left of the violin/box </li>
+            <li>Positive values: Points appear to the right of the violin/box</li>
+            <li>Zero: Points are centered on the violin/box</li>
+            <li>Range: Typically -2.0 to 2.0, where each unit represents a fraction of the violin/box width</li>
+          </ul>
+        </li>
+        <li><b>Jitter</b>: Add random horizontal displacement to prevent point overlap
+          <ul>
+            <li>0: No jittering, points with the same value will overlap precisely</li>
+            <li>1: Maximum jittering, points are distributed across the full allowed width</li>
+            <li>This is especially useful for discrete or rounded data where many points might share the same value</li>
+          </ul>
+    </div>
+  </div>
+  <div class="warning">
+    <p><b>Note:</b> For large sequence sets, consider hiding individual data points to improve performance.</p>
+  </div>
+
+  <h3>Export Options</h3>
+  <div class="control-panel">
+    <div class="control-image">
+      <img src="/images/Export.png" alt="Export Interface" />
+    </div>
+    <div class="control-options">
+      <p>
+        The Export dialog provides options to save your visualizations and data for use in publications, presentations,
+        or
+        further analysis:
+      </p>
+      <h4>Export Dialog Options</h4>
+      <ul>
+        <li><b>Output Folder</b>: Specify where exported files will be saved</li>
+        <li><b>Image Format</b>: Select the file format for visualization exports
+          <ul>
+            <li><b>SVG</b>: Recommended for publications, maintains quality at any size</li>
+            <li><b>PNG</b>: Good for presentations and web use</li>
+            <li><b>JPEG</b>: Suitable for general purpose use, smaller file size</li>
+          </ul>
+        </li>
+        <li><b>Cancel/Export</b>: Close dialog or save files with current settings</li>
+        <p></p>
+        <li><b>Cluster by Percent Identity</b>: Toggle whether to cluster sequences in exported data</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>Best Practices</h2>
+  <ul>
+    <li>Check recommended cores and memory before starting analysis</li>
+    <li>Use recent files for quick access to previous work</li>
+    <li>When using phylogenetic reordering:
+      <ul>
+        <li>Neighbor-Joining works best for more diverse sequence sets</li>
+        <li>UPGMA works well for more closely related sequences</li>
+      </ul>
+    </li>
+    <li>For distribution plots:
+      <ul>
+        <li>Use histograms to understand frequency patterns</li>
+        <li>Use violin plots to see distribution shape and statistics together</li>
+        <li>Use contrasting colors for better readability</li>
+      </ul>
+    </li>
+    <li>For exporting:
+      <ul>
+        <li>Use SVG format for publications</li>
+        <li>PNG or JPEG formats are good for presentations</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2>Troubleshooting</h2>
+  <p>If "Start Analysis" is disabled, check:</p>
+  <ol>
+    <li>File is selected</li>
+    <li>Alignment export path (if enabled)</li>
+    <li>No active runs in progress</li>
+  </ol>
+
+  <p>If performance is slow:</p>
+  <ol>
+    <li>Reduce the number of computational cores used</li>
+    <li>For large datasets, disable percent identities display in heatmaps</li>
+    <li>For large datasets, hide individual data points in violin plots</li>
+    <li>Check available system memory before running large analyses</li>
+  </ol>
+
+  <h2>System Requirements</h2>
+  <ul>
+    <li>Multicore processor recommended</li>
+    <li>Sufficient RAM based on sequence file size</li>
+    <li>Graphics card supporting hardware acceleration</li>
+    <li>Tested compatible with Windows 10 and 11, macOS, and Linux</li>
+  </ul>
+
+  <hr>
+  <p style="text-align: center; font-size: 0.9em;">SDT2 Documentation © 2023-2025 | Version 2.0.0 Beta 4</p>
+
+</body>
+
 </html>

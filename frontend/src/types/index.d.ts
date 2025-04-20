@@ -1,42 +1,109 @@
-import { SaveableImageFormat } from "../appState";
-import { RunProcessDataArgs } from "../components/Runner";
-import { AppState } from "../src/appState";
+import type {
+  DocState,
+  SaveableImageFormat,
+  SaveableImageKey,
+  SyncProgressEvent,
+  SyncStateEvent,
+} from "../appState";
+import type { RunProcessDataArgs } from "../components/Runner";
+import { DistributionState } from "../distributionState";
+import { type GetDataResponse, HeatmapSettings } from "../plotTypes";
+import type { AppState } from "../src/appState";
 
 declare global {
   interface Window {
     pywebview: {
       api: {
-        app_config: () => Promise<string>;
+        app_config: () => Promise<AppState["config"]>;
+        app_settings: () => Promise<{
+          recent_files: string[];
+          export_path: string;
+        }>;
         get_state: () => Promise<AppState>;
         reset_state: () => Promise<void>;
-        open_file_dialog: () => Promise<void>;
-        select_alignment_output_path: () => Promise<void>;
-        select_export_path: () => Promise<void>;
-        export_data: (args: {
+        new_doc: () => Promise<string>;
+        get_doc: (doc_id: string) => Promise<DocState>;
+        save_doc: (
+          doc_id: string,
+          path: string,
+          save_as: boolean,
+        ) => Promise<boolean>;
+        close_doc: (doc_id: string) => Promise<void>;
+        save_doc_settings: (docState: DocState) => Promise<void>;
+        open_file: (
+          filepath: string,
+          doc_id?: string,
+        ) => Promise<[string, string]>;
+        open_file_dialog: (
+          doc_id?: string,
+          last_data_filepath?: string,
+        ) => Promise<[string, string]> | Promise<void>;
+        save_file_dialog: (
+          filename: string,
+          defaultDirectory?: string,
+        ) => Promise<string>;
+        select_path_dialog: (defaultDirectory?: string) => Promise<string>;
+        get_clustermap_data: (
+          doc_id: string,
+          threshold: number,
+          method: string,
+        ) => Promise<{
+          matrix: HeatmapData;
+          tickText: string[];
+          clusterData: ClusterDataItem[];
+        }>;
+        export: (args: {
+          doc_id: string;
+          export_path: string;
           output_cluster: boolean;
-          cluster_threshold_one: number;
-          cluster_threshold_two: number;
-          heatmap_image_data: string;
-          distribution_image_data: string;
+          cluster_threshold: number;
+          cluster_method: string;
           image_format: SaveableImageFormat;
+          open_folder: boolean;
+          prefix: string;
         }) => Promise<boolean>;
-        save_image: (args: {
-          data: string;
-          format: AppState["client"]["saveFormat"];
-        }) => Promise<void>;
-        run_process_data: (args: RunProcessDataArgs) => Promise<void>;
-        processes_info: () => Promise<any>;
+        save_svg_element: (
+          doc_id: string,
+          selector: string,
+          key: SaveableImageKey,
+        ) => Promise<void>;
+        save_svg_data: (
+          doc_id: string,
+          data: string,
+          key: SaveableImageKey,
+          format: SaveableImageFormat,
+        ) => Promise<void>;
+        save_raster_image: (
+          doc_id: string,
+          data: string,
+          key: SaveableImageKey,
+          format: SaveableImageFormat,
+        ) => Promise<void>;
+        start_run: (args: RunProcessDataArgs) => Promise<void>;
+        set_window_title: (title: string) => Promise<void>;
+        processes_info: () => Promise<string>;
         get_available_memory: () => Promise<number>;
-        cancel_run: () => Promise<void>;
-        get_heatmap_data: () => Promise<string>;
-        get_line_histo_data: () => Promise<string>;
+        cancel_run: (
+          doc_id: string,
+          run_settings?: "preserve" | "clear",
+        ) => Promise<void>;
+        get_data: (docId: string) => Promise<string>;
         show_about: () => Promise<void>;
         show_manual: () => Promise<void>;
         close_app: () => Promise<void>;
+        open_doc_folder: (doc_id: string) => Promise<void>;
       };
     };
     syncAppState: (state: AppState) => void;
+    APP_STATE: AppState;
+    LAST_ERROR: {
+      error: Error;
+      errorInfo: React.ErrorInfo;
+    };
+  }
+
+  interface GlobalEventHandlersEventMap {
+    "sync-state": SyncStateEvent;
+    "sync-progress": SyncProgressEvent;
   }
 }
-
-export type {};

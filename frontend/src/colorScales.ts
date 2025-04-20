@@ -1,10 +1,15 @@
-type scaleNames =
+export type ColorScaleArray = [
+  [number, string],
+  [number, string],
+  ...[number, string][],
+];
+type ColorScaleKey =
   | "Greys"
-  | "YlGnBu"
+  | "Yellow_Green_Blue"
   | "Greens"
-  | "YlOrRd"
-  | "Bluered"
-  | "RdBu"
+  | "Yellow_Orange_Red"
+  | "Blue_Red"
+  | "Red_Blue"
   | "Reds"
   | "Blues"
   | "Picnic"
@@ -20,14 +25,14 @@ type scaleNames =
 
 // https://github.com/plotly/plotly.js/blob/482802bd31cbf2638040357fcc4ff3bafa3292f8/src/components/colorscale/scales.js
 export const colorScales: {
-  [K in scaleNames]: [[number, string], ...[number, string][]];
+  [K in ColorScaleKey]: ColorScaleArray;
 } = {
   Greys: [
     [0, "rgb(0,0,0)"],
-    [1, "rgb(255,255,255)"],
+    [1, "rgb(235,235,235)"],
   ],
 
-  YlGnBu: [
+  Yellow_Green_Blue: [
     [0, "rgb(8,29,88)"],
     [0.125, "rgb(37,52,148)"],
     [0.25, "rgb(34,94,168)"],
@@ -51,7 +56,7 @@ export const colorScales: {
     [1, "rgb(247,252,245)"],
   ],
 
-  YlOrRd: [
+  Yellow_Orange_Red: [
     [0, "rgb(128,0,38)"],
     [0.125, "rgb(189,0,38)"],
     [0.25, "rgb(227,26,28)"],
@@ -63,14 +68,14 @@ export const colorScales: {
     [1, "rgb(255,255,204)"],
   ],
 
-  Bluered: [
+  Blue_Red: [
     [0, "rgb(0,0,255)"],
     [1, "rgb(255,0,0)"],
   ],
 
   // modified RdBu based on
   // http://www.kennethmoreland.com/color-maps/
-  RdBu: [
+  Red_Blue: [
     [0, "rgb(5,10,172)"],
     [0.35, "rgb(106,137,247)"],
     [0.5, "rgb(190,190,190)"],

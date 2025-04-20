@@ -5,25 +5,22 @@ import os
 import sys
 import re
 import random
+from datetime import datetime
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 from itertools import combinations_with_replacement as cwr
 from functools import partial
-import numpy as np
-import pandas as pd
+from pandas import DataFrame
+from numpy import zeros
 import parasail
-from Bio import SeqIO, Phylo
-from Bio.Phylo.TreeConstruction import (
-    DistanceTreeConstructor,
-    DistanceMatrix,
-)
+from Bio import SeqIO
+from Bio.SeqUtils import gc_fraction
+from cluster import get_linkage_method_order
+from heatmap import dataframe_to_triangle
+from document_paths import build_document_paths
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
-
-start_time = time.time()
-start_run = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-
 
 def run_preprocessing(raw_seq_dict):
     # convert seqrecord element in raw dict to key,vale of ids and seqs
@@ -40,6 +37,18 @@ def run_preprocessing(raw_seq_dict):
     return seq_dict
 
 
+def grab_stats(seq_dict):
+    # https://stackoverflow.com/questions/20585920/how-to-add-multiple-values-to-a-dictionary-key
+    seq_stats = {}
+    for key, record in seq_dict.items():
+        gcCount = round(gc_fraction(str(record)), 2) * 100
+        genLen = len(record)
+        seq_stats.setdefault(key, [])
+        seq_stats[key].append(gcCount)
+        seq_stats[key].append(genLen)
+    return seq_stats
+
+
 ##Calculate the similarity scores from the alignments by iterating through each position in the alignemtn files as a zip
 def get_similarity(seq1, seq2):
     if len(seq1) != len(seq2):
@@ -53,6 +62,7 @@ def get_similarity(seq1, seq2):
                 dist += 1
         else:
             gaps += 1
+
     similarity = float((float(dist)) / (len(seq1) - gaps))
     # convert to percentile
     similarity_percentile = similarity * 100
@@ -64,9 +74,8 @@ def residue_check(seq):
 
 
 def process_pair(id_sequence_pair, settings):
-    ids = id_sequence_pair[0]
-    id1 = ids[0]
-    id2 = ids[1]
+    id1 = id_sequence_pair[0][0]
+    id2 = id_sequence_pair[0][1]
     seq1 = id_sequence_pair[1][0]
     seq2 = id_sequence_pair[1][1]
     if id1 == id2:
@@ -86,8 +95,8 @@ def process_pair(id_sequence_pair, settings):
             settings["aln_out"], str(id1 + "_" + id2) + "_aligned.fasta"
         )
         seq_records = [
-            SeqRecord(Seq(result.traceback.query), id=ids[0], description=""),
-            SeqRecord(Seq(result.traceback.ref), id=ids[1], description=""),
+            SeqRecord(Seq(result.traceback.query), id=id1, description=""),
+            SeqRecord(Seq(result.traceback.ref), id=id2, description=""),
         ]
         SeqIO.write(seq_records, fname, "fasta")
 
@@ -100,7 +109,7 @@ def get_alignment_scores(
 ):
     seq_ids = list(seq_dict.keys())
     n = len(seq_ids)
-    dist_scores = np.zeros((n, n))
+    dist_scores = zeros((n, n))
     # for each sequence id in seq_id add to new dict as key and the index position is enumerated and stored as value for later reference
     order = {seq_id: i for i, seq_id in enumerate(seq_ids)}
     # create list  combinations including self v. self
@@ -143,35 +152,17 @@ def get_alignment_scores(
     return dist_scores, order
 
 
-# Reorder the scores matrix based on the tree and save it to a new CSV
-def tree_clustering(settings, dm, filename):
-    constructor = DistanceTreeConstructor()
-    clustering_method = getattr(constructor, settings["cluster_method"])
-    tree_file = filename + "_tree.nwk"
-    tree = clustering_method(dm)
-    Phylo.write(tree, tree_file, "newick")
-    tree = Phylo.read(tree_file, "newick")
-    new_order = [leaf.name for leaf in tree.get_terminals()]
-    return tree_file, new_order  # Return the tree file name instead of the tree object
-
-
-# Format distance scores to triangle matrix for NJ tree creation
-def create_distance_matrix(dist_scores, order):
-    lower_triangle = [
-        dist_scores[i, : i + 1].tolist() for i in range(len(order))
-    ]  ##this has to be list, cant use np
-    # Create the DistanceMatrix object
-    dm = DistanceMatrix(order, lower_triangle)
-    return dm
-
-
 # Save similarity scores as 2d matrix csv
-def save_matrix_to_csv(df, filename):
-    df.to_csv(filename, mode="w", header=False, index=True)
-
+def save_matrix_to_csv(df, matrix_path, triangle_path):
+    index = df.index
+    triangle = dataframe_to_triangle(df)
+    triangle.index = index
+    triangle.to_csv(triangle_path, mode="wt", header=False, index=True)
+    df.to_csv(matrix_path, mode="w", header=False, index=True)
 
 # Save similarity scores as 3 column csv
-def save_cols_to_csv(df, filename):
+## this can be rewriten using pandas melt
+def save_cols_to_csv(df, path):
     order = df.index
     df.columns = df.index
     columnar_output = []
@@ -180,48 +171,54 @@ def save_cols_to_csv(df, filename):
             if i > j:  # lower triangular part (excluding diagonal)
                 columnar_output.append([row, col, df.loc[row, col]])
     # Convert to a DataFrame
-    columnar_df = pd.DataFrame(
+    columnar_df = DataFrame(
         columnar_output,
         columns=["First Sequence", "Second Sequence", "Identity Score"],
     )
-    columnar_df.to_csv(filename + "_cols.csv", mode="w", header=True, index=False)
+    columnar_df.to_csv(path, mode="w", header=True, index=False)
 
+def save_stats_to_csv(seq_stats, filename):
+    stats_list = []
+    for key, value in seq_stats.items():
+        stats_list.append([key, value[0], value[1]])
+    stats_df = DataFrame(stats_list, columns=["Sequence", "GC %", "Sequence Length"])
+    # Use the filename directly as it already contains the full path
+    stats_df.to_csv(filename, mode="w", header=True, index=False)
 
-def output_summary(file_name, start_time, end_time, run_summary):
-    # Adjust the indentation of each line
+def friendly_total_time(total_time):
+    m, s = divmod(total_time, 60)
+    return f'{int(m)} minute, {s:.2f} second' if m == 1 else f'{int(m)} minutes, {s:.2f} seconds' if m > 0 else f'{s:.2f} seconds'
+
+def output_summary(file_name, start_time, end_time, start_counter, end_counter):
     build_type = f"{platform.system()} {platform.release()} {platform.machine()}"
-    kernel_info = platform.processor()
-    cpu_cores = os.cpu_count()
+    total_cores = os.cpu_count()
     total_ram = psutil.virtual_memory().total / (1024**3)
+    total_counter = end_counter - start_counter
 
-    # Run Summary
-
-    output_content = f"""
+    return f"""
     SDT {app_version} release for {platform.system()}
     Developed by Michael Lund and Josiah Ivey; Brejnev Muhire,
     Darren Martin, Simona Kraberger, Qiyun Zhu, Pierre Lefeuvre, Philippe Roumagnac, Arvind Varsani
 
     System info:
-    Host:    {platform.node()} ({kernel_info}, {total_ram:.2f} GB RAM)
-    Kernel:  {kernel_info} - auto-detect threads ({cpu_cores} CPU cores detected)
-    OS - build: {build_type}
+    Host:   {platform.node()}
+    OS:     {build_type}
+    CPU:    {platform.processor()} - {total_cores} cores
+    Memory: {total_ram:.2f} GB RAM
+
     Run info for {file_name}:
-    Start time:    {start_time}
+    Start time: {start_time.strftime("%b %d %Y, %I:%M %p %Z")}
+    End time:   {end_time.strftime("%b %d %Y, %I:%M %p %Z")}
+    Total time: {friendly_total_time(total_counter)}
 
     Parasail
     Using the Needleman-Wunsch algorithm with affine gap scoring:
-    Nucleotide: Open gap penalty:13 Extend gap: 1
-    Amino acid: Open gap penalty:10 Extend gap: 1
-    End time: {end_time}
-    Total runtime: {run_summary}
+    Nucleotide: Open gap penalty: 13, Extend gap: 1
+    Amino acid: Open gap penalty: 10, Extend gap: 1
     """
-
-    return output_content
-
 
 def fasta_alignments(seq_records, fname):
     SeqIO.write(seq_records, fname, "fasta")
-
 
 def process_data(
     settings,
@@ -231,16 +228,15 @@ def process_data(
     set_stage=lambda stage: print(f"Stage: {stage}"),
     set_pair_count=lambda count: print(f"Pair count: {count}"),
 ):
+    start_time = datetime.now()
+    start_counter = time.perf_counter()
     input_file = settings["input_file"]
-    INPUT_PATH = input_file
-
     file_name = os.path.basename(input_file)
-    file_base = os.path.splitext(file_name)[0]
 
     set_stage("Preparing")
     print("Stage: Preparing")
 
-    sequences = SeqIO.parse(open(INPUT_PATH, encoding="utf-8"), "fasta")
+    sequences = SeqIO.parse(open(input_file, encoding="utf-8"), "fasta")
 
     # Create a dictionary with the full description as the key, replacing spaces with underscores
     processed_seq_dict = {
@@ -249,6 +245,7 @@ def process_data(
 
     set_stage("Preprocessing")
     seq_dict = run_preprocessing(processed_seq_dict)
+    seq_stats = grab_stats(seq_dict)
 
     set_stage("Analyzing")
     print("Stage: Analyzing")
@@ -260,54 +257,51 @@ def process_data(
     if cancelled.value:
         return
 
-    set_stage("Postprocessing")
-    print("Stage: Postprocessing")
+    set_stage("Clustering")
+    print("Stage: Clustering")
 
     order = list(order.keys())
 
-    dm = create_distance_matrix(dist_scores, order)
     aln_scores = 100 - dist_scores
 
     out_dir = settings["out_dir"]
     cluster_method = settings["cluster_method"]
+    doc_paths = build_document_paths(out_dir)
+    if cluster_method is not None:
+        new_order = get_linkage_method_order(dist_scores, cluster_method, order)
 
-    if cluster_method == "nj" or cluster_method == "upgma":
-        _, new_order = tree_clustering(
-            settings, dm, os.path.join(out_dir, f"{file_base}")
-        )
         reorder_index = [
-            order.index(id_) for id_ in new_order
+            order.index(id) for id in new_order
         ]  # create numerical index of order and  of new order IDs
 
-        aln_reordered = aln_scores[reorder_index, :][:, reorder_index]
-        aln_lowt = np.tril(np.around(aln_reordered, 2))
-        aln_lowt[np.triu_indices(aln_lowt.shape[0], k=1)] = np.nan
-        # Create a DataFrame from the lower triangular matrix
-        df = pd.DataFrame(aln_lowt, index=new_order)
-        save_matrix_to_csv(df, os.path.join(out_dir, f"{file_base}_mat.csv"))
-        save_cols_to_csv(df, os.path.join(out_dir, f"{file_base}"))
-    else:
-        aln_lowt = np.tril(np.around(aln_scores, 2))
-        aln_lowt[np.triu_indices(aln_lowt.shape[0], k=1)] = np.nan
-        df = pd.DataFrame(aln_lowt, index=order)
-        save_matrix_to_csv(df, os.path.join(out_dir, f"{file_base}_mat.csv"))
-        save_cols_to_csv(df, os.path.join(out_dir, f"{file_base}"))
+        # numpy array indexing syntax rows/cols
+        aln_scores = aln_scores[reorder_index, :][:, reorder_index]
+        order = new_order
+
+        df = DataFrame(aln_scores, index=new_order)
+
+    df = DataFrame(aln_scores, index=order)
+
+    set_stage("Postprocessing")
+    print("Stage: Postprocessing")
+
+    save_cols_to_csv(df, doc_paths.columns)
+    save_stats_to_csv(seq_stats, doc_paths.stats)
+    save_matrix_to_csv(df, doc_paths.matrix, doc_paths.triangle)
 
     set_stage("Finalizing")
     print("Stage: Finalizing")
 
-    # Finalize run
-    end_time = time.time()
-    end_run = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    elapsed_time = end_time - start_time
-    run_summary = time.strftime("%H:%M:%S", time.gmtime(elapsed_time))
+    end_time = datetime.now()
+    end_counter = time.perf_counter()
     save_output_summary = output_summary(
         file_name,
-        start_run,
-        end_run,
-        run_summary,
+        start_time,
+        end_time,
+        start_counter,
+        end_counter
     )
-    # Write to a text file
-    with open(os.path.join(out_dir, f"{file_base}_summary.txt"), "w") as file:
+
+    with open(doc_paths.summary, "w") as file:
         file.write(save_output_summary)
-    print(f"Elapsed time: {elapsed_time} seconds")
+    print(f"Elapsed time: {friendly_total_time(end_counter - start_counter)}")

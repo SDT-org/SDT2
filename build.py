@@ -4,7 +4,7 @@ import subprocess
 import platform
 import argparse
 
-venv_path = os.path.join(".", "venv-pywebview")
+venv_path = os.path.join(".", "venv")
 build_path = os.path.join(".", "build")
 os.makedirs(build_path, exist_ok=True)
 assets_path = "./assets"
@@ -39,7 +39,7 @@ def get_parasail_library_name():
 def get_parasail_library_path(library_name):
     venv_path = os.environ.get("VIRTUAL_ENV")
     if not venv_path:
-        raise RuntimeError("VIRTUAL_ENV not set. Activate your virtual environment.")
+        raise RuntimeError(f"Virtual environment path {venv_path} does not exist.")
 
     for root, _, files in os.walk(venv_path):
         if library_name in files:
@@ -61,10 +61,9 @@ def make_platform_build_command(settings):
         python_executable,
         "-m",
         "nuitka",
+        "--include-package-data=webview",
         f"--include-data-dir={bio_data_src_path}={bio_data_dest_path}",
         f"--include-data-file={parasail_library_path}={os.path.join('parasail', parasail_library_name)}",
-        f"--report={report_path}",
-        "--standalone",
         "--include-data-dir=gui=gui",
         "--include-data-dir=docs=docs",
         "--include-data-dir=assets=assets",
@@ -73,12 +72,14 @@ def make_platform_build_command(settings):
         "--output-filename=SDT2",
         f"--output-dir={build_path}",
         "--assume-yes-for-downloads",
+        f"--report={report_path}",
     ]
 
     match platform.system():
         case "Windows":
             command.extend(
                 [
+                    "--standalone",
                     f"--windows-icon-from-ico={os.path.join(assets_path, 'app.ico')}",
                     "--windows-console-mode=disable",
                 ]
@@ -91,10 +92,7 @@ def make_platform_build_command(settings):
                 ]
             )
         case _:
-            pass
-
-    if not platform.system() == "Darwin" and not settings.disable_onefile:
-        command.append("--onefile")
+            command.extend(["--standalone", "--onefile"])
 
     command.append(path)
 

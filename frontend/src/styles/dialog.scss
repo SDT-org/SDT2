@@ -1,0 +1,12 @@
+.react-aria-Dialog {
+  outline: none;
+  padding: 2.4rem;
+  max-height: inherit;
+  box-sizing: border-box;
+  overflow: auto;
+
+  .react-aria-Heading[slot=title] {
+    line-height: 1em;
+    margin-top: 0;
+  }
+}
