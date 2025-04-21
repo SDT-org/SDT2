@@ -85,7 +85,7 @@ jobs:
           timestamp-digest: SHA256
 
       - name: macOS - Sign artifact
-        if: runner.os == 'macOS'
+        if: matrix.os == 'macos-latest'
         run: |
           echo ${{ secrets.MACOS_CERTIFICATE }} | base64 --decode > certificate.p12
           security create-keychain -p "${{ secrets.MACOS_CI_KEYCHAIN_PWD }}" build.keychain
@@ -97,7 +97,7 @@ jobs:
           /usr/bin/codesign -vvv ./build/SDT2.app
 
       - name: macOS - Notarize artifact
-        if: runner.os == 'macOS'
+        if: matrix.os == 'macos-latest'
         run: |
           ditto -c -k --keepParent "build/SDT2.app" "build/SDT2.app.zip"
           xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}" --team-id "${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}" --password "${{ secrets.MACOS_NOTARIZATION_PWD }}" > /dev/null
