@@ -38,6 +38,7 @@ body {
   z-index: 10;
   font-size: 1.3rem;
   height: var(--app-header-height);
+  border-top: 0.1rem solid var(--app-header-border-color);
 
   @media (max-width: 55rem) {
     grid-template-columns: auto 1fr auto;
