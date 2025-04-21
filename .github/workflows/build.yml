@@ -96,10 +96,14 @@ jobs:
           /usr/bin/codesign -f -o runtime --timestamp -s "${{ secrets.MACOS_CERTIFICATE_NAME }}" --deep ./build/SDT2.app
           /usr/bin/codesign -vvv ./build/SDT2.app
 
+      - name: macOS - Compress app
+        if: runner.os == 'macOS'
+        run: |
+          ditto -c -k --keepParent "build/SDT2.app" "build/SDT2.app.zip"
+
       - name: macOS - Notarize artifact
         if: matrix.os == 'macos-latest'
         run: |
-          ditto -c -k --keepParent "build/SDT2.app" "build/SDT2.app.zip"
           xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}" --team-id "${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}" --password "${{ secrets.MACOS_NOTARIZATION_PWD }}" > /dev/null
           xcrun notarytool submit "build/SDT2.app.zip" --keychain-profile "notarytool-profile" --wait
           xcrun stapler staple "./build/SDT2.app"
