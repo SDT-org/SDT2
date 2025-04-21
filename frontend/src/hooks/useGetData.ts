@@ -53,6 +53,21 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
           parsedData.map(Boolean).length,
         );
 
+        const highSequenceCountSettings = {
+          annotation: false,
+          axis_labels: false,
+          cellspace: 0,
+        };
+
+        const heatmapSettings = {
+          ...(docState.filetype === "application/vnd.sdt"
+            ? null
+            : {
+                axlabel_fontsize: scaledAxisLabelFontSize,
+                axlabel_yfontsize: scaledAxisLabelFontSize,
+              }),
+        };
+
         setDocState(
           (prev) => ({
             ...prev,
@@ -61,29 +76,15 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
               ...prev.heatmap,
               ...state.heatmap,
               vmin: metadata.minVal,
+              ...heatmapSettings,
               ...(docState.sequences_count > 99
-                ? {
-                    annotation: false,
-                    axis_labels: false,
-                    cellspace: 0,
-                  }
+                ? highSequenceCountSettings
                 : null),
-              ...(docState.filetype === "application/vnd.sdt"
-                ? null
-                : {
-                    axlabel_fontsize: scaledAxisLabelFontSize,
-                    axlabel_yfontsize: scaledAxisLabelFontSize,
-                  }),
             },
             clustermap: {
               ...prev.clustermap,
               ...state.clustermap,
-              ...(docState.filetype === "application/vnd.sdt"
-                ? null
-                : {
-                    axlabel_fontsize: scaledAxisLabelFontSize,
-                    axlabel_yfontsize: scaledAxisLabelFontSize,
-                  }),
+              ...heatmapSettings,
             },
             ...(docState.sequences_count > 99
               ? {

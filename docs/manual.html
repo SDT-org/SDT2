@@ -130,6 +130,26 @@
         max-width: 100%;
       }
     }
+    
+    /* Link styling */
+    a {
+      color: #0066cc;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    
+    a:hover {
+      color: #004080;
+      text-decoration: underline;
+    }
+    
+    .library-info {
+      background-color: #f8f9fa;
+      border-left: 4px solid #0066cc;
+      padding: 10px 15px;
+      margin: 15px 0;
+      border-radius: 0 4px 4px 0;
+    }
   </style>
 </head>
 
@@ -141,26 +161,31 @@
   <h2>Description</h2>
   <p>
     Sequence Demarcation Tool 2 (SDT 2) is a standalone application for Windows, Mac, and Linux, created as the modern
-    successor to the original SDT. Like its predecessor, SDT2 is designed to explore, visualize, and demarcate
+    successor to the original SDT. Like its predecessor,  SDT 2 is designed to explore, visualize, and demarcate
     biological sequences through lightning-fast global pairwise sequence alignments.
-    SDT2 employs the highly optimized Parasail library for Needleman-Wunsch global sequence alignments. Copmbined with
+     SDT 2 employs the highly optimized Parasail library for Needleman-Wunsch global sequence alignments. Combined with
     seamless multiprocessing
-    support, SDT2 is capable of handling large datasets and longer sequence lengths.
+    support,  SDT 2 is capable of handling large datasets and longer sequence lengths.
     Alignments can be organized into easy-to-interpret clusters using Neighbor
-    Joining or UPGMA phylogenies. Additionally, SDT2 utilizes the powerful D3 graphing library to visualize pairwise
+    Joining or UPGMA phylogenies. Additionally,  SDT 2 utilizes the powerful D3 graphing library to visualize pairwise
     sequence identities in a highly customizable, interactive lower triangle heatmap, which can be exported as
     high-resolution vector images. The tool also provides distribution statistics for pairwise sequence identity values,
     sequence lengths, and GC content, which can be displayed in either histogram or violin plot formats.
   </p>
+  
+  <div class="library-info">
+    <h4>Parasail Library</h4>
+    <p>SDT 2 uses<a href="https://github.com/jeffdaily/parasail" target="_blank">Parasail</a>, a high-performance Single Instruction Multiple Data (SIMD) C pairwise sequence alignment library for vectorized implementation Needleman-Wunsch (global) pairwise sequence alignments. The Parasail SIMD capabilities allow SDT 2 to perform dramatically accelerated alignment computations, making it particularly capable for analyzing large datasets and long sequences.</p>
+  </div>
 
   <h2>Getting Started</h2>
 
   <h3>Main Loading Screen</h3>
   <p>
-    When first launched SDT2, the loading interface provides two primary options for loading data:
+    When first launched  SDT 2, the loading interface provides two primary options for loading data:
   </p>
   <div class="control-panel">
-    <img src="/images/LoadMain.png" alt="SDT2 Main Loading Screen" width="347" height="378" />
+    <img src="/images/LoadMain.png" alt=" SDT 2 Main Loading Screen" width="347" height="378" />
     <div class="control-options">
 
       <h3>I. File Selection</h3>
@@ -177,7 +202,7 @@
   </div>
   <div class="warning">
     <p>For FASTA files, the <b>Runner Interface</b> screen is loaded to prepare for sequence alignment and analysis.</p>
-    <p>For SDT/SDT2 matrices, the<b>Viewer</b> screen is loaded, and the pre-run data is displayed as a heatmap.</p>
+    <p>For SDT/ SDT 2 matrices, the<b>Viewer</b> screen is loaded, and the pre-run data is displayed as a heatmap.</p>
     <p> Relocated files will still show in the Recent Files directory if you have moved them since the last they were
       used</p>
   </div>
@@ -213,7 +238,7 @@
     <div class="control-options">
       <h4>Reorder by</h4>
       <p>
-        SDT2 offers sequence order rearrangement based on a phylogenetic tree to better organize the evolutionary
+         SDT 2 offers sequence order rearrangement based on a phylogenetic tree to better organize the evolutionary
         relationships of the sequences:
       </p>
       <ul>
@@ -250,7 +275,7 @@
   </div>
 
   <h4>Performance</h4>
-  <p>The core selection feature in SDT2 significantly increases both compute speed and memory usage during analysis. The
+  <p>The core selection feature in  SDT 2 significantly increases both compute speed and memory usage during analysis. The
     application leverages Python's Multiprocessing capabilities to dramatically increase processing speed through
     parallelization. By distributing the computational workload across multiple CPU cores, analysis times can be reduced
     by orders of magnitude.
@@ -273,7 +298,7 @@
     <div class="control-options">
       <p>The application menu provides access to all core functions:</p>
       <ul>
-        <li><b>New</b>: Start a new SDT2 session</li>
+        <li><b>New</b>: Start a new  SDT 2 session</li>
         <li><b>Open...</b>: Select and open a file</li>
         <li><b>Open Recent</b>: Access a submenu of recently used files</li>
         <li><b>Save</b>: Save the current analysis</li>
@@ -306,7 +331,7 @@
 
   <img src="/images/Heatmap.png" alt="Heatmap Example" class="plot-img" />
   <p>
-    The heatmap visualization in SDT2 provides a color-coded representation of pairwise sequence identity.
+    The heatmap visualization in  SDT 2 provides a color-coded representation of pairwise sequence identity.
     It displays sequence relationships in a triangular matrix format where each cell represents the percent
     identity between two sequences.
   </p>
@@ -364,16 +389,18 @@
 
   <img src="/images/Clustermap.png" alt="Clustermap Example" class="plot-img" />
   <p>
-    The Clustermap plot provides a new way to visualize sequence data in SDT2, allowing you to set specific clustering
-    thresholds and clustering methods to explore relationships within datasets. SDT 2 provides severa agglomerative,
+    The Clustermap plot provides a new way to visualize sequence data in  SDT 2, allowing you to set specific clustering
+    thresholds and clustering methods to explore relationships within datasets. SDT 2 provides several agglomerative,
     linkage-based clustering methods through the SciPy package library.
-    To create a heirirchacle, a precomputed pairwise distance matrix is used to perfeorm Single, Complete, and Average
-    linkage methods. For the Centroid and Median and Wards linkage methods,the dimensionality of the dataset must first be reduced to 
-    2D Euclidean distances through multidimensional scaling (MDS)through the sci-kit lean packageprior to clustering. 
-    dendrogram is visulized using the D3  to reorder the heatmap, 
-
+    To create a hierarchical clustering, a precomputed pairwise distance matrix is used to perform Single, Complete, and Average
+    linkage methods. For the Centroid, Median and Ward's linkage methods, the dimensionality of the dataset must first be reduced to 
+    2D Euclidean distances through multidimensional scaling (MDS) via the sci-kit learn package prior to clustering. 
+    The dendrogram is visualized using the D3 library to reorder the heatmap.
   </p>
-  <div class="control-panel">
+  
+  <div class="library-info">
+    <h4>SciPy Hierarchical Clustering</h4>
+<p> SDT 2 uses <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html" target="_blank">SciPy hierarchical  linkage methods</a> for clustering. By using pre-computed pairwise distances from the Parasail library with a user selected linkage clustering method (Single, Complete, Average, Weighted, Centroid, Median, or Ward),users may order sequences into a hierarchical structure. These linkage methods determine the criteria for cluster membership. SDT 2 offers users a cutoff threshold slider to directly change the numerical threshold for cluster membership. </p>  <div class="control-panel">
     <div class="control-image">
       <img src="/images/ClusterSidebar.png" alt="Clustermap Controls" />
     </div>
@@ -474,7 +501,7 @@
 
   <h3>Distribution Plots</h3>
   <p>
-    SDT2 provides visualization tools for examining the distribution of your sequence data:
+     SDT 2 provides visualization tools for examining the distribution of your sequence data:
     Histogram and Violin plots.
   </p>
 
@@ -651,7 +678,7 @@
   </ul>
 
   <hr>
-  <p style="text-align: center; font-size: 0.9em;">SDT2 Documentation © 2023-2025 | Version 2.0.0 Beta 4</p>
+  <p style="text-align: center; font-size: 0.9em;"> SDT 2 Documentation © 2023-2025 | Version 2.0.0 Beta 4</p>
 
 </body>
 

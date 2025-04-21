@@ -173,9 +173,9 @@ export const initialDocState: DocState = {
   clustermap: {
     threshold: 70,
     method: "average",
-    annotation: false,
+    annotation: true,
     titleFont: "Sans Serif",
-    showTitles: false,
+    showTitles: true,
     title: "",
     xtitle: "",
     ytitle: "",
