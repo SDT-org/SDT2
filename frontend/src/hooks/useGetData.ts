@@ -85,6 +85,9 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
               ...prev.clustermap,
               ...state.clustermap,
               ...heatmapSettings,
+              ...(docState.sequences_count > 99
+                ? highSequenceCountSettings
+                : null),
             },
             ...(docState.sequences_count > 99
               ? {
