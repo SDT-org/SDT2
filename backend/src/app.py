@@ -804,4 +804,4 @@ if __name__ == "__main__":
         on_update=lambda _: push_backend_state(window),
     )
 
-    webview.start(debug=get_state().debug, private_mode=False)
+    webview.start(debug=get_state().debug, private_mode=False, icon="assets/app.ico")
