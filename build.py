@@ -96,7 +96,6 @@ def make_platform_build_command(settings):
                 [
                     "--standalone",
                     "--onefile",
-                    "--enable-plugin=pyqt6"
                 ]
             )
 
