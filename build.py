@@ -92,7 +92,13 @@ def make_platform_build_command(settings):
                 ]
             )
         case _:
-            command.extend(["--standalone", "--onefile"])
+            command.extend(
+                [
+                    "--standalone",
+                    "--onefile",
+                    "--enable-plugin=pyqt6"
+                ]
+            )
 
     command.append(path)
 
