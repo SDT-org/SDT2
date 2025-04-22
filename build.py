@@ -92,7 +92,7 @@ def make_platform_build_command(settings):
                 ]
             )
         case _:
-            command.extend(["--standalone", "--onefile"])
+            command.extend(["--standalone"])
 
     command.append(path)
 
