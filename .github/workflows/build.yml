@@ -28,14 +28,6 @@ jobs:
         if: runner.os == 'macOS'
         run: brew install autoconf automake libtool
 
-      - name: Linux - Install dependencies
-        run: |
-          sudo apt-get install -y \
-            libqt5gui5 \
-            libqt5core5a \
-            libqt5widgets5 \
-            qt5-default
-
       - name: Run init
         run: bun run init
 
