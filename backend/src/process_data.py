@@ -5,6 +5,7 @@ import os
 import sys
 import re
 import random
+import json
 from datetime import datetime
 from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
@@ -18,6 +19,7 @@ from Bio.SeqUtils import gc_fraction
 from cluster import get_linkage_method_order
 from heatmap import dataframe_to_triangle
 from document_paths import build_document_paths
+
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
@@ -48,6 +50,8 @@ def grab_stats(seq_dict):
         seq_stats[key].append(genLen)
     return seq_stats
 
+def residue_check(seq):
+    return bool(re.search(r"[EFILPQZ]", seq))
 
 ##Calculate the similarity scores from the alignments by iterating through each position in the alignemtn files as a zip
 def get_similarity(seq1, seq2):
@@ -67,11 +71,6 @@ def get_similarity(seq1, seq2):
     # convert to percentile
     similarity_percentile = similarity * 100
     return similarity_percentile
-
-
-def residue_check(seq):
-    return bool(re.search(r"[EFILPQZ]", seq))
-
 
 def process_pair(id_sequence_pair, settings):
     id1 = id_sequence_pair[0][0]
@@ -185,6 +184,14 @@ def save_stats_to_csv(seq_stats, filename):
     # Use the filename directly as it already contains the full path
     stats_df.to_csv(filename, mode="w", header=True, index=False)
 
+
+
+def seq_dict_to_json(seq_dict, filename):
+    with open(filename,"w") as file:
+        json.dump(seq_dict, file, indent=4)
+        
+
+
 def friendly_total_time(total_time):
     m, s = divmod(total_time, 60)
     return f'{int(m)} minute, {s:.2f} second' if m == 1 else f'{int(m)} minutes, {s:.2f} seconds' if m > 0 else f'{s:.2f} seconds'
@@ -245,6 +252,7 @@ def process_data(
 
     set_stage("Preprocessing")
     seq_dict = run_preprocessing(processed_seq_dict)
+    print(seq_dict)
     seq_stats = grab_stats(seq_dict)
 
     set_stage("Analyzing")
@@ -288,7 +296,7 @@ def process_data(
     save_cols_to_csv(df, doc_paths.columns)
     save_stats_to_csv(seq_stats, doc_paths.stats)
     save_matrix_to_csv(df, doc_paths.matrix, doc_paths.triangle)
-
+    seq_dict_to_json(seq_dict, doc_paths.seq_dict)
     set_stage("Finalizing")
     print("Stage: Finalizing")
 
@@ -305,3 +313,4 @@ def process_data(
     with open(doc_paths.summary, "w") as file:
         file.write(save_output_summary)
     print(f"Elapsed time: {friendly_total_time(end_counter - start_counter)}")
+    

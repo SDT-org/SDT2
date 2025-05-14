@@ -1,5 +1,6 @@
 import os
 import sys
+import json
 import time
 import urllib.parse
 
@@ -250,6 +251,21 @@ def handle_open_file(filepath: str, doc_id: str | None):
         else:
             raise Exception(message)
 
+def load_seq_dict_from_json(seq_dict_path: str):
+    if not os.path.exists(seq_dict_path):
+        print(f"Sequence dictionarynot found")
+        return None
+    try:
+        with open (seq_dict_path, "r") as f:
+            seq_dict = json.load(f)
+            return seq_dict
+    except json.JSONDecodeError:
+            print(f"Error decoding JSON from {seq_dict_path}")
+            return None
+    except Exception as e:
+            print(f"Error loading sequence dictionary: {e}")
+            return None 
+    return seq_dict
 
 class Api:
     def close_app(self):
@@ -607,6 +623,7 @@ class Api:
         data_no_diag = where(diag_mask, nan, data)
         min_val = int(nanmin(data_no_diag))
         max_val = int(nanmax(data_no_diag))
+        seq_dict = load_seq_dict_from_json(doc_paths.seq_dict)
 
         # TODO might be able to make one tick text object for both to use?
         return data, tick_text, min_val, max_val, ids, identity_scores, stats_df
@@ -627,6 +644,7 @@ class Api:
             full_stats=stats_df.values.tolist(),
         )
         return json.dumps(data_to_dump)
+
 
     def get_clustermap_data(self, doc_id: str, threshold: float, method: str):
         doc = get_document(doc_id)
@@ -651,11 +669,14 @@ class Api:
             }
         )
 
+
         clusters = seqid_clusters_df["cluster"].tolist()
         reorder_clusters = cluster.order_clusters_sequentially(clusters)
         seqid_clusters_df["cluster"] = reorder_clusters
-
-        # Sort by group
+        
+        # Map the cluster IDs to the original sequence IDs
+        #mapped_seqs =seqid_clusters_df["id"] = seqid_clusters_df["id"].map(seq_dict)
+        #print(mapped_seqs)        # Sort by group
         seqid_clusters_df = seqid_clusters_df.sort_values(by=["cluster", "id"])
         sorted_ids = seqid_clusters_df["id"].tolist()
 
@@ -667,9 +688,14 @@ class Api:
             "matrix": numpy_to_triangle(reordered_matrix_np).tolist(),
             "tickText": sorted_ids,
         }
+        # lets loop through seq_dict and match to seqid_clusters_df
+        # for id, cluster in seqid_clusters_df.items():
+        #     if id in seq_dict:
+        #         seqid_clusters_df.at[id, "id"] = seq_dict[id]
 
+        
         cluster_data = seqid_clusters_df.to_dict(orient="records")
-
+        print(cluster_data)
         return {
             "matrix": reordered_data["matrix"],
             "tickText": reordered_data["tickText"],
