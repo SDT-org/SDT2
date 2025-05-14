@@ -688,14 +688,12 @@ class Api:
             "matrix": numpy_to_triangle(reordered_matrix_np).tolist(),
             "tickText": sorted_ids,
         }
-        # lets loop through seq_dict and match to seqid_clusters_df
-        # for id, cluster in seqid_clusters_df.items():
-        #     if id in seq_dict:
-        #         seqid_clusters_df.at[id, "id"] = seq_dict[id]
-
-        
+       
         cluster_data = seqid_clusters_df.to_dict(orient="records")
         print(cluster_data)
+
+        
+        
         return {
             "matrix": reordered_data["matrix"],
             "tickText": reordered_data["tickText"],
