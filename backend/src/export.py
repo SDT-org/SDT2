@@ -18,7 +18,7 @@ EXPORTABLE_DATA_KEYS: List[DataKey] = [
     "triangle",
     "columns",
     "summary",
-    "cluster",
+    "cluster_dir", 
 ]
 
 MATRIX_ONLY_EXPORTABLE_DATA_KEYS: List[DataKey] = [
@@ -68,5 +68,18 @@ def build_source_target_pairs(
 def do_export(source_target_pairs):
     for source, target in source_target_pairs:
         temp_target = target + ".tmp"
-        shutil.copy2(source, temp_target)
+        if os.path.isdir(source):
+            # If temp_target exists from a previous failed attempt, remove it before copytree
+            if os.path.exists(temp_target):
+                shutil.rmtree(temp_target)
+            shutil.copytree(source, temp_target)
+        else:
+            shutil.copy2(source, temp_target)
+        
+    
+        if os.path.isdir(target) and os.path.isdir(temp_target):
+             shutil.rmtree(target) 
+        elif os.path.isfile(target) and os.path.isdir(temp_target):
+             os.remove(target) # Ensure target file is removed before replacing with a dir
+        
         os.replace(temp_target, target)

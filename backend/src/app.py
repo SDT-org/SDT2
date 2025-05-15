@@ -538,11 +538,11 @@ class Api:
 
         if args["output_cluster"] == True:
             cluster.export(
-                doc_paths.matrix,
-                doc_paths.cluster,
-                args["cluster_threshold"],
-                # Note this is not the same as the cluster_method param in the runner api
-                args["cluster_method"],
+                matrix_path=doc_paths.matrix,
+                cluster_data_output_dir=doc_paths.cluster_dir, # Use the new cluster_dir path
+                seq_dict_path=doc_paths.seq_dict,             # Pass the seq_dict path
+                threshold=args["cluster_threshold"],
+                method=args["cluster_method"]                 # Pass the cluster_method
             )
 
         prefix_default = os.path.splitext(doc.basename)[0]

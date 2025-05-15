@@ -7,6 +7,9 @@ from collections import defaultdict
 from scipy.spatial.distance import squareform, pdist
 from sklearn.manifold import MDS
 from joblib import Memory
+import os
+import json
+from Bio import SeqIO, Seq, SeqRecord
 
 cache_dir = TemporaryDirectory()
 memory = Memory(cache_dir.name, verbose=1)
@@ -67,7 +70,10 @@ def get_clusters_dataframe(data, method, threshold, index):
     return cluster_data_to_dataframe(cluster_data, threshold)
 
 
-def export(matrix_path, cluster_path, threshold, method):
+def export(matrix_path, cluster_data_output_dir, seq_dict_path, threshold, method):
+    os.makedirs(cluster_data_output_dir, exist_ok=True)
+    cluster_csv_path = os.path.join(cluster_data_output_dir, "cluster.csv")
+
     with open(matrix_path, "r") as temp_f:
         col_count = [len(l.split(",")) for l in temp_f.readlines()]
         column_names = [i for i in range(0, max(col_count))]
@@ -80,8 +86,48 @@ def export(matrix_path, cluster_path, threshold, method):
     data = np.round(data, 2)
 
     df_result = get_clusters_dataframe(data, method, threshold, index)
-    df_result.to_csv(cluster_path, index=False)
+    df_result.to_csv(cluster_csv_path, index=False)
 
+    seq_dict = {}
+    if os.path.exists(seq_dict_path):
+        try:
+            with open(seq_dict_path, "r") as f:
+                seq_dict = json.load(f)
+        except Exception as e:
+            print(f"Error loading sequence dictionary: {e}")
+    else:
+        print(f"Sequence dictionary not found at {seq_dict_path}")
+
+    if seq_dict:
+        # The first column is 'ID', the second is 'Cluster - Threshold: X'
+        # We rename for consistency with the logic that generates FASTA files.
+        df_result.columns = ["ID", "Cluster"]
+        try:
+            df_result['Cluster'] = df_result['Cluster'].astype(int)
+        except ValueError:
+            # This might happen if cluster names are not purely numeric after thresholding.
+            # The FASTA filenames will use these non-integer cluster names.
+            print("Warning: Cluster names may not be purely numeric.")
+
+
+        grouped_ids_by_cluster = df_result.groupby('Cluster')['ID'].apply(list).to_dict()
+
+        for cluster_num, list_of_seq_ids in grouped_ids_by_cluster.items():
+            records_for_this_cluster = []
+            for seq_id in list_of_seq_ids:
+                if seq_id in seq_dict:
+                    sequence_string = seq_dict[seq_id]
+                    bio_seq = Seq.Seq(sequence_string)
+                    seq_record_obj = SeqRecord.SeqRecord(bio_seq, id=str(seq_id), description="")
+                    records_for_this_cluster.append(seq_record_obj)
+
+            if records_for_this_cluster:
+                fasta_filename = os.path.join(cluster_data_output_dir, f"cluster_{cluster_num}.fasta")
+                with open(fasta_filename, "w") as output_handle:
+                    SeqIO.write(records_for_this_cluster, output_handle, "fasta")
+    else:
+        print("Sequence dictionary is empty or not loaded. Skipping FASTA file generation.")
+        
     return df_result
 
 
