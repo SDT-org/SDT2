@@ -85,6 +85,19 @@ export const Violin = ({
 
   const exportPlotly = useExportPlotly("distribution_violin");
 
+  const axisTitle = React.useMemo(() => {
+    if (dataSetKey === "scores") {
+      return "Percent Pairwise Identity";
+    }
+    if (dataSetKey === "gc") {
+      return "GC Percentage";
+    }
+    if (dataSetKey === "length") {
+      return "Length (nt)";
+    }
+    return "";
+  }, [dataSetKey]);
+
   const hoverData = {
     scores: {
       index: 0,
@@ -222,6 +235,14 @@ export const Violin = ({
             },
             uirevision: settings.plotOrientation,
             xaxis: {
+              title: {
+                text: settings.showAxisLabels
+                  ? settings.plotOrientation === "vertical"
+                    ? "Distribution"
+                    : axisTitle
+                  : "",
+                font: { family: "sans-serif", size: 12 },
+              },
               ...(settings.plotOrientation === "vertical"
                 ? {
                     fixedrange: true,
@@ -245,6 +266,14 @@ export const Violin = ({
                   }),
             },
             yaxis: {
+              title: {
+                text: settings.showAxisLabels
+                  ? settings.plotOrientation === "horizontal"
+                    ? "Distribution"
+                    : axisTitle
+                  : "",
+                font: { family: "sans-serif", size: 12 },
+              },
               ...(settings.plotOrientation === "vertical"
                 ? {
                     side: "left",

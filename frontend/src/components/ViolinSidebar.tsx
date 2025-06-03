@@ -8,6 +8,7 @@ import {
 } from "react-aria-components";
 import {
   TbGrid4X4,
+  TbLetterA,
   TbLineDashed,
   TbNumber10,
   TbTableDashed,
@@ -84,6 +85,14 @@ export const ViolinSidebar = ({
               <Tooltip tooltip="Toggle axis lines">
                 <ToggleButton id="showAxisLines" aria-label="Toggle axis lines">
                   <TbTableDashed size={18} />
+                </ToggleButton>
+              </Tooltip>
+              <Tooltip tooltip="Toggle axis labels">
+                <ToggleButton
+                  id="showAxisLabels"
+                  aria-label="Toggle axis labels"
+                >
+                  <TbLetterA size={18} />
                 </ToggleButton>
               </Tooltip>
               <Tooltip tooltip="Toggle tick values">

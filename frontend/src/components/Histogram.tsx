@@ -43,6 +43,19 @@ export const Histogram = ({
   useRelayoutHideSubtitle(!settings.showTitles);
   const exportPlotly = useExportPlotly("distribution_histogram");
 
+  const axisTitle = React.useMemo(() => {
+    if (dataSetKey === "scores") {
+      return "Percent Pairwise Identity";
+    }
+    if (dataSetKey === "gc") {
+      return "GC Percentage";
+    }
+    if (dataSetKey === "length") {
+      return "Length (nt)";
+    }
+    return "";
+  }, [dataSetKey]);
+
   const histogramTrace = React.useMemo(() => {
     const orientation = settings.plotOrientation;
     return {
@@ -97,6 +110,14 @@ export const Histogram = ({
             uirevision: "true",
             bargap: settings.barGap,
             xaxis: {
+              title: {
+                text: settings.showAxisLabels
+                  ? settings.plotOrientation === "vertical"
+                    ? axisTitle
+                    : "Distribution"
+                  : "",
+                font: { family: "sans-serif", size: 12 },
+              },
               tickfont: { family: "sans-serif", size: 11 },
               side: "bottom",
               linecolor: settings.histlineColor,
@@ -112,6 +133,14 @@ export const Histogram = ({
               autotick: true,
             },
             yaxis: {
+              title: {
+                text: settings.showAxisLabels
+                  ? settings.plotOrientation === "horizontal"
+                    ? axisTitle
+                    : "Distribution"
+                  : "",
+                font: { family: "sans-serif", size: 12 },
+              },
               tickfont: { family: "sans-serif", size: 11 },
               side: "left",
               linecolor: settings.histlineColor,
