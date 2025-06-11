@@ -86,10 +86,10 @@ export const Heatmap = ({
   const discreteColorScale: ColorScaleArray = React.useMemo(() => {
     const scales = [
       [metaData.minVal, "#CDF0FF"],
-      [settings.cutoff_2 - 1, "#20B9FF"],
+      [settings.cutoff_2, "#20B9FF"],
       [settings.cutoff_2, "#C3E8D3"],
       [settings.cutoff_1, "#009942"],
-      [Math.min(100, settings.cutoff_1 + 1), "#FFDCDD"],
+      [Math.min(100, settings.cutoff_1 ), "#FFDCDD"],
     ];
 
     if (settings.cutoff_1 < 100) {
