@@ -89,7 +89,7 @@ export const Heatmap = ({
       [settings.cutoff_2, "#20B9FF"],
       [settings.cutoff_2, "#C3E8D3"],
       [settings.cutoff_1, "#009942"],
-      [Math.min(100, settings.cutoff_1 ), "#FFDCDD"],
+      [Math.min(100, settings.cutoff_1), "#FFDCDD"],
     ];
 
     if (settings.cutoff_1 < 100) {
