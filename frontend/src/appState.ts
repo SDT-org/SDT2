@@ -59,6 +59,9 @@ export type DocState = {
   heatmap: HeatmapSettings;
   clustermap: ClustermapSettings;
   exportPrefix: string;
+  invalid?: {
+    reason: string;
+  };
 };
 
 export type AppState = {

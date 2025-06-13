@@ -1,6 +1,7 @@
 import React from "react";
 import { type DocState, useAppState } from "../appState";
 import { useDocState } from "../hooks/useDocState";
+import { ErrorPanel } from "./ErrorPanel";
 import { Loader } from "./Loader";
 import { Runner } from "./Runner";
 import { Viewer } from "./Viewer";
@@ -52,6 +53,10 @@ export const Document = ({
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [id, appState.activeDocumentId]);
+
+  if (docState.invalid) {
+    return <ErrorPanel docState={docState} />;
+  }
 
   return VIEWS[docState?.view || "viewer"];
 };

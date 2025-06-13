@@ -244,6 +244,12 @@ body {
     background: #fff;
     position: relative;
   }
+
+  &.error {
+    details {
+      margin-top: 1.6rem;
+    }
+  }
 }
 
 .app-footer {

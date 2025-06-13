@@ -6,7 +6,6 @@ import type {
   HeatmapData,
 } from "../plotTypes";
 import { getScaledFontSize } from "../plotUtils";
-import { services } from "../services";
 import { getDocument } from "../services/documents";
 
 export const useGetData = (docState: DocState, setDocState: SetDocState) => {
@@ -24,8 +23,8 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
   // so we aren't parsing it out here.
   React.useEffect(() => {
     setLoading(true);
-    services
-      .getData(docState.id)
+    window.pywebview.api
+      .get_data(docState.id)
       .then(async (rawData) => {
         const parsedResponse: GetDataResponse = JSON.parse(
           rawData.replace(/\bNaN\b/g, "null"),
@@ -105,6 +104,15 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
           }),
           false,
         );
+      })
+      .catch(async (e) => {
+        console.error(e);
+        setDocState((prev) => ({
+          ...prev,
+          invalid: {
+            reason: String(e),
+          },
+        }));
       })
       .finally(() => {
         setLoading(false);

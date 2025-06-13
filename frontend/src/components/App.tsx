@@ -322,7 +322,8 @@ export const App = () => {
                     </Select>
                   )}
                 </div>
-                {activeDocument?.view === "viewer" ? (
+                {activeDocument?.view === "viewer" &&
+                !activeDocument.invalid ? (
                   <div className="app-header-right">
                     <Button
                       className={"react-aria-Button with-svg"}
