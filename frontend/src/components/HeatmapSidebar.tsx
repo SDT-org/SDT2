@@ -122,7 +122,7 @@ export const HeatmapSidebar = ({
                       field="cutoff_1"
                       value={settings.cutoff_1}
                       updateValue={updateSettings}
-                      min={settings.cutoff_2 + 1}
+                      min={settings.cutoff_2}
                       max={100}
                       step={1}
                     />
@@ -134,7 +134,7 @@ export const HeatmapSidebar = ({
                       value={settings.cutoff_2}
                       updateValue={updateSettings}
                       min={settings.vmin + 1}
-                      max={settings.cutoff_1 - 1}
+                      max={settings.cutoff_1}
                       step={1}
                     />
                   </div>

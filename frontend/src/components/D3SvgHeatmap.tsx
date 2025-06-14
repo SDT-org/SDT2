@@ -189,7 +189,10 @@ export const D3SvgHeatmap = ({
       }
 
       if (showscale) {
-        const scaleBarX = width - cbarWidth - margin.left - margin.right;
+        const scaleBarX = Math.min(
+          plotSize - cbarWidth - margin.left,
+          width - cbarWidth - margin.left - margin.right,
+        );
 
         const gradientGroup = g
           .append("g")
@@ -238,7 +241,10 @@ export const D3SvgHeatmap = ({
         const lineGap = 20;
         const labelGap = 5;
         const columnGap = 20;
-        const positionX = width - legendWidth * 2 - columnGap - margin.right;
+        const positionX = Math.min(
+          plotSize - margin.left,
+          width - legendWidth * 2 - columnGap - margin.right,
+        );
 
         const uniqueClusters = [...new Set(clusterData.map((i) => i.cluster))]
           .sort((a, b) => a - b)
