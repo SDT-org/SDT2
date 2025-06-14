@@ -189,7 +189,11 @@ export const D3CanvasHeatmap = ({
     }
 
     if (showscale) {
-      const positionX = width - cbarWidth - margin.right;
+      // sticky the colorbar to the right side of the canvas or plot, depending on the space available
+      const positionX = Math.min(
+        margin.left + plotSize + cbarWidth,
+        width - cbarWidth - margin.right,
+      );
       const gradient = ctx.createLinearGradient(
         margin.left,
         margin.top + cbarHeight,
@@ -229,7 +233,12 @@ export const D3CanvasHeatmap = ({
       const lineGap = 20;
       const labelGap = 5;
       const columnGap = 20;
-      const positionX = width - legendWidth * 2 - columnGap - margin.right;
+
+      // sticky the legend to the right side of the canvas or plot, depending on the space available
+      const positionX = Math.min(
+        margin.left + plotSize,
+        width - legendWidth * 2 - columnGap - margin.right,
+      );
 
       const uniqueClusters = [...new Set(clusterData.map((i) => i.cluster))]
         .sort((a, b) => a - b)
