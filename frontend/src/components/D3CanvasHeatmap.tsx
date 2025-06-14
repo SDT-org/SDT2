@@ -245,7 +245,7 @@ export const D3CanvasHeatmap = ({
         .slice(0, 50); // Arbitrarily set to 50
 
       const clusterColors = uniqueClusters.map((cluster) =>
-        distinctColor(cluster + 1),
+        distinctColor(cluster),
       );
       ctx.font = `10px 'Roboto Mono'`;
       ctx.textAlign = "left";
