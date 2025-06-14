@@ -17,12 +17,15 @@ from numpy import zeros
 import parasail
 from Bio import SeqIO
 from Bio.SeqUtils import gc_fraction
-from scipy.cluster import hierarchy 
+from scipy.cluster import hierarchy
 from cluster import get_linkage_method_order
 from heatmap import dataframe_to_triangle
 from document_paths import build_document_paths
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
+
+def supports_striped_32():
+    return parasail.can_use_sse41() or parasail.can_use_avx2() or parasail.can_use_neon()
 
 def run_preprocessing(raw_seq_dict):
     seq_dict = {}
@@ -36,7 +39,7 @@ def run_preprocessing(raw_seq_dict):
 
 def grab_stats(seq_dict):
     seq_stats = {}
-    for key, record_str in seq_dict.items(): 
+    for key, record_str in seq_dict.items():
         gcCount = round(gc_fraction(record_str), 2) * 100
         genLen = len(record_str)
         seq_stats.setdefault(key, [])
@@ -47,40 +50,61 @@ def grab_stats(seq_dict):
 def residue_check(seq):
     return bool(re.search(r"[EFILPQZ]", seq))
 
+##Calculate the similarity scores from the alignments by iterating through each position in the alignemtn files as a zip
+def get_similarity(seq1, seq2):
+    if len(seq1) != len(seq2):
+        raise ValueError("Strings must be of equal length.")
+    dist = 0
+    gaps = 0
+    alns = zip(seq1, seq2)
+    for a, b in alns:
+        if a != "-" and b != "-":
+            if a != b:
+                dist += 1
+        else:
+            gaps += 1
+
+    similarity = float((float(dist)) / (len(seq1) - gaps))
+    # convert to percentile
+    similarity_percentile = similarity * 100
+    return similarity_percentile
+
+def get_traceback_score(seq1, seq2, open_penalty, extend_penalty, matrix) -> float:
+    try:
+        result = parasail.nw_trace(seq1, seq2, open_penalty, extend_penalty, matrix)
+        query = result.traceback.query
+    except:
+        raise Exception("PARASAIL_TRACEBACK")
+
+    return get_similarity(query, result.traceback.ref)
+
+def get_stats_score(seq1, seq2, open_penalty, extend_penalty, matrix) -> float:
+    # Use 32-bit version to prevent score overflow with long sequences
+    result = parasail.nw_stats_striped_32(seq1, seq2, open_penalty, extend_penalty, matrix)
+    num_ungapped_cols = len(seq1) + len(seq2) - result.length
+    identity_score_percent = (float(result.matches) / num_ungapped_cols) * 100.0
+    distance_score = 100.0 - identity_score_percent
+
+    return distance_score
 
 def process_pair(id_sequence_pair, settings):
     id1 = id_sequence_pair[0][0]
     id2 = id_sequence_pair[0][1]
-    seq1_orig = id_sequence_pair[1][0]
-    seq2_orig = id_sequence_pair[1][1]
-
-    L1 = len(seq1_orig)
-    L2 = len(seq2_orig)
+    seq1 = id_sequence_pair[1][0]
+    seq2 = id_sequence_pair[1][1]
 
     if id1 == id2:
-        return id_sequence_pair[0], 0.0 
+        return id_sequence_pair[0], 0.0
 
     is_aa = settings["is_aa"]
     open_penalty = 10 if is_aa else 13
-    extend_penalty = 1 
+    extend_penalty = 1
     matrix_to_use = parasail.blosum62
-    if is_aa:
-        open_penalty = 10 
-    else: # DNA/RNA
-        open_penalty = 13 
-    
-    # Use 32-bit version to prevent score overflow with long sequences
-    alignment_function = parasail.nw_stats_striped_32
 
-    distance_score = 100.0 
-    result = alignment_function(seq1_orig, seq2_orig, open_penalty, extend_penalty, matrix_to_use)
-    
-    num_ungapped_cols = L1 + L2 - result.length
-    
-    identity_score_percent = (float(result.matches) / num_ungapped_cols) * 100.0
-    distance_score = 100.0 - identity_score_percent 
+    alignment_function = get_stats_score if supports_striped_32() else get_traceback_score
+    result = alignment_function(seq1, seq2, open_penalty, extend_penalty, matrix_to_use)
 
-    return id_sequence_pair[0], distance_score
+    return id_sequence_pair[0], result
 
 
 def get_alignment_scores(
@@ -88,7 +112,7 @@ def get_alignment_scores(
 ):
     seq_ids = list(seq_dict.keys())
     n = len(seq_ids)
-    dist_scores = zeros((n, n)) 
+    dist_scores = zeros((n, n))
     order = {seq_id: i for i, seq_id in enumerate(seq_ids)}
     combos = list(cwr(seq_ids, 2))
     id_sequence_pairs = []
@@ -96,7 +120,7 @@ def get_alignment_scores(
     for ids_tuple in combos:
         id_sequence_pairs.append([ids_tuple, [seq_dict[ids_tuple[0]], seq_dict[ids_tuple[1]]]])
 
-    total_pairs = len(id_sequence_pairs) 
+    total_pairs = len(id_sequence_pairs)
     set_pair_count(total_pairs)
 
     print(f"\rNumber of sequences: {len(seq_ids)}\r", flush=True)
@@ -136,17 +160,17 @@ def save_matrix_to_csv(df, matrix_path, triangle_path):
         triangle = dataframe_to_triangle(df)
         triangle.index = index
         triangle.to_csv(triangle_path, mode="wt", header=False, index=True, sep=',')
-    except Exception: 
-        pass 
+    except Exception:
+        pass
     df.to_csv(matrix_path, mode="w", header=False, index=True, sep=',')
 
 def save_cols_to_csv(df, path):
     order = df.index
-    df.columns = df.index 
+    df.columns = df.index
     columnar_output = []
     for i_idx, row_id in enumerate(order):
         for j_idx, col_id in enumerate(order):
-            if i_idx > j_idx: 
+            if i_idx > j_idx:
                 columnar_output.append([row_id, col_id, df.loc[row_id, col_id]])
     columnar_df = DataFrame(columnar_output, columns=["First Sequence", "Second Sequence", "Identity Score"])
     columnar_df.to_csv(path, mode="w", header=True, index=False, sep=',')
@@ -178,7 +202,7 @@ def output_summary(file_name, start_time, end_time, start_counter, end_counter):
     Parasail: Using Needleman-Wunsch (stats) algorithm. Nucleotide: Open={13}, Extend={1} (BLOSUM62). Amino acid: Open={10}, Extend={1} (BLOSUM62).
     """
 
-def fasta_alignments(seq_records, fname): 
+def fasta_alignments(seq_records, fname):
     SeqIO.write(seq_records, fname, "fasta")
 
 def process_data(
@@ -199,7 +223,7 @@ def process_data(
     seq_stats = grab_stats(seq_dict_processed_strings)
 
     set_stage("Analyzing")
-    dist_scores, order_map = get_alignment_scores( 
+    dist_scores, order_map = get_alignment_scores(
         seq_dict_processed_strings, settings, pool, cancelled, increment_pair_progress, set_pair_count
     )
 
@@ -207,8 +231,8 @@ def process_data(
 
     set_stage("Clustering")
     seq_ids_in_order = list(order_map.keys())
-    
-    aln_scores = 100.0 - dist_scores 
+
+    aln_scores = 100.0 - dist_scores
 
     out_dir, cluster_method = settings["out_dir"], settings.get("cluster_method")
     doc_paths = build_document_paths(out_dir)
@@ -216,10 +240,10 @@ def process_data(
     final_ordered_ids, final_matrix_for_df = seq_ids_in_order, aln_scores
 
     if cluster_method is not None and len(seq_ids_in_order) > 1:
-        current_dist_matrix_for_clustering = np.copy(dist_scores) 
+        current_dist_matrix_for_clustering = np.copy(dist_scores)
         np.fill_diagonal(current_dist_matrix_for_clustering, 0)
         condensed_dist_matrix = [current_dist_matrix_for_clustering[i, j] for i in range(len(seq_ids_in_order)) for j in range(i + 1, len(seq_ids_in_order))]
-        
+
         if condensed_dist_matrix:
             try:
                 linked = hierarchy.linkage(np.array(condensed_dist_matrix), method=cluster_method)
@@ -230,17 +254,17 @@ def process_data(
             except Exception as e:
                 print(f"Warning: Clustering failed: {e}. Using original order.", file=sys.stderr)
                 final_ordered_ids, final_matrix_for_df = seq_ids_in_order, aln_scores
-        else: 
+        else:
             final_ordered_ids, final_matrix_for_df = seq_ids_in_order, aln_scores
 
     df = DataFrame(final_matrix_for_df, index=final_ordered_ids, columns=final_ordered_ids)
 
     set_stage("Postprocessing")
     save_cols_to_csv(df, doc_paths.columns)
-    save_stats_to_csv(seq_stats, doc_paths.stats) 
-    save_matrix_to_csv(df, doc_paths.matrix, doc_paths.triangle) 
-    seq_dict_to_json(seq_dict_processed_strings, doc_paths.seq_dict) 
-    
+    save_stats_to_csv(seq_stats, doc_paths.stats)
+    save_matrix_to_csv(df, doc_paths.matrix, doc_paths.triangle)
+    seq_dict_to_json(seq_dict_processed_strings, doc_paths.seq_dict)
+
     set_stage("Finalizing")
     end_time, end_counter = datetime.now(), time.perf_counter()
     summary_text = output_summary(file_name, start_time, end_time, start_counter, end_counter)
