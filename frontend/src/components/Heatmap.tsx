@@ -210,7 +210,7 @@ export const Heatmap = ({
             settings={settings}
             updateSettings={updateSettings}
             sequences_count={sequences_count}
-            colorScales={colorScales}
+            continuousColorScales={defaultColorScales}
           />
         </>
       ) : null}

@@ -1,28 +1,27 @@
 import React from "react";
 import { ToggleButton, ToggleButtonGroup } from "react-aria-components";
-import { TbRepeat } from "react-icons/tb";
 import type { DocState } from "../appState";
 import type { ColorScaleArray } from "../colorScales";
 import { formatTitle } from "../helpers";
-import type { ColorScaleKey, HeatmapSettings } from "../plotTypes";
+import type { ColorScaleKey } from "../plotTypes";
+import { Checkbox } from "./Checkbox";
 import { NumberInput } from "./NumberInput";
 import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";
 import { Switch } from "./Switch";
-import { Tooltip } from "./Tooltip";
 import { TitleField } from "./fields/TitleField";
 
 export const HeatmapSidebar = ({
   settings,
   updateSettings,
   sequences_count,
-  colorScales,
+  continuousColorScales,
 }: {
   settings: DocState["heatmap"];
   updateSettings: (values: Partial<DocState["heatmap"]>) => void;
   sequences_count: number;
-  colorScales: {
-    [K in HeatmapSettings["colorScaleKey"]]: ColorScaleArray;
+  continuousColorScales: {
+    [K in ColorScaleKey]: ColorScaleArray;
   };
 }) => {
   const maybeWarnPerformance = React.useCallback(
@@ -41,6 +40,12 @@ export const HeatmapSidebar = ({
     [sequences_count],
   );
 
+  const [colorScaleMode, setColorScaleMode] = React.useState<
+    "continuous" | "discrete"
+  >(settings.colorScaleKey === "Discrete" ? "discrete" : "continuous");
+  const [continuousColorScaleKey, setContinuousColorScaleKey] =
+    React.useState<ColorScaleKey>("Portland");
+
   return (
     <div className="app-sidebar app-sidebar-right heatmap-sidebar">
       <div className="app-sidebar-toolbar">
@@ -52,15 +57,67 @@ export const HeatmapSidebar = ({
 
             <div className="drawer">
               <div className="field">
-                <div className="col-2 onefr-atuo colorscale-setting">
+                <ToggleButtonGroup
+                  selectionMode="single"
+                  disallowEmptySelection={true}
+                  selectedKeys={[colorScaleMode]}
+                  onSelectionChange={(value) => {
+                    const mode = value.values().next().value as
+                      | "continuous"
+                      | "discrete";
+                    setColorScaleMode(mode);
+                    updateSettings({
+                      colorScaleKey:
+                        mode === "continuous"
+                          ? continuousColorScaleKey
+                          : "Discrete",
+                    });
+                  }}
+                >
+                  <ToggleButton id="continuous">Continuous</ToggleButton>
+                  <ToggleButton id="discrete">Discrete</ToggleButton>
+                </ToggleButtonGroup>
+              </div>
+              {settings.colorScaleKey === "Discrete" ? (
+                <>
+                  <hr />
+                  <div className="col-2">
+                    <div className="field">
+                      <NumberInput
+                        label="Cutoff 1"
+                        field="cutoff_1"
+                        value={settings.cutoff_1}
+                        updateValue={updateSettings}
+                        min={settings.cutoff_2}
+                        max={100}
+                        step={1}
+                      />
+                    </div>
+                    <div className="field">
+                      <NumberInput
+                        label="Cutoff 2"
+                        field="cutoff_2"
+                        value={settings.cutoff_2}
+                        updateValue={updateSettings}
+                        min={settings.vmin + 1}
+                        max={settings.cutoff_1}
+                        step={1}
+                      />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="field">
                   <Select
+                    wide
                     id="colorscale"
-                    items={Object.keys(colorScales).map((name) => ({
+                    items={Object.keys(continuousColorScales).map((name) => ({
                       id: name,
                       name,
                     }))}
                     selectedKey={settings.colorScaleKey}
                     onSelectionChange={(value) => {
+                      setContinuousColorScaleKey(value as ColorScaleKey);
                       updateSettings({
                         colorScaleKey: value as ColorScaleKey,
                       });
@@ -73,7 +130,7 @@ export const HeatmapSidebar = ({
                             className="preview"
                             aria-hidden="true"
                             style={{
-                              background: `linear-gradient(to right, ${colorScales[item.name as ColorScaleKey].map((v) => v[1]).join(", ")})`,
+                              background: `linear-gradient(to right, ${continuousColorScales[item.name as ColorScaleKey].map((v) => v[1]).join(", ")})`,
                             }}
                           />
                           <span>{formatTitle(item.name)}</span>
@@ -81,23 +138,26 @@ export const HeatmapSidebar = ({
                       </SelectItem>
                     )}
                   </Select>
-                  <Tooltip tooltip="Invert colorscale" delay={600}>
-                    <ToggleButton
-                      aria-label="Toggle invert colorscale"
-                      id="reverse"
-                      isSelected={settings.reverse}
-                      onChange={(value) => {
-                        updateSettings({
-                          reverse: value,
-                        });
-                      }}
-                    >
-                      <TbRepeat />
-                    </ToggleButton>
-                  </Tooltip>
+                </div>
+              )}
+              <hr />
+              <div className="field">
+                <div className="2-col">
+                  <Checkbox
+                    aria-label="Toggle invert colorscale"
+                    id="reverse"
+                    isSelected={settings.reverse}
+                    onChange={(value) => {
+                      updateSettings({
+                        reverse: value,
+                      });
+                    }}
+                  >
+                    Invert scale
+                  </Checkbox>
                 </div>
               </div>
-
+              <hr />
               <div className="field" style={{ paddingTop: "0.4rem" }}>
                 <Slider
                   label="Cell Spacing"
@@ -109,32 +169,6 @@ export const HeatmapSidebar = ({
                   value={settings.cellspace}
                 />
               </div>
-              {settings.colorScaleKey === "Discrete" ? (
-                <div className="col-2">
-                  <div className="field">
-                    <NumberInput
-                      label="Cutoff 1"
-                      field="cutoff_1"
-                      value={settings.cutoff_1}
-                      updateValue={updateSettings}
-                      min={settings.cutoff_2}
-                      max={100}
-                      step={1}
-                    />
-                  </div>
-                  <div className="field">
-                    <NumberInput
-                      label="Cutoff 2"
-                      field="cutoff_2"
-                      value={settings.cutoff_2}
-                      updateValue={updateSettings}
-                      min={settings.vmin + 1}
-                      max={settings.cutoff_1}
-                      step={1}
-                    />
-                  </div>
-                </div>
-              ) : null}
             </div>
           </div>
           <div className="group">

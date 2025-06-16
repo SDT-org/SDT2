@@ -699,7 +699,7 @@ small {
     }
   }
 
-  .react-aria-Switch,
+  .group > .react-aria-Switch,
   .drawer,
   .setting-header {
     padding: var(--app-container-padding);
@@ -716,7 +716,7 @@ small {
     margin-right: 0.4rem;
   }
 
-  label.react-aria-Switch,
+  .group > label.react-aria-Switch,
   .setting-header {
     font-weight: 600;
   }
@@ -731,6 +731,10 @@ small {
     button {
       width: 100%;
     }
+  }
+
+  .group > .drawer > .field:first-child > .react-aria-ToggleButtonGroup:first-child {
+    margin-top: 0;
   }
 
   .color-picker {
@@ -1408,6 +1412,76 @@ label.sublabel,
   &[data-focus-visible]:before {
     outline: 2px solid var(--focus-ring-color);
     outline-offset: 2px;
+  }
+}
+
+// https://react-spectrum.adobe.com/react-aria/Checkbox.html
+.react-aria-Checkbox {
+  --selected-color: var(--highlight-background);
+  --selected-color-pressed: var(--highlight-background-pressed);
+  --checkmark-color: var(--highlight-foreground);
+
+  display: flex;
+  /* This is needed so the HiddenInput is positioned correctly */
+  position: relative;
+  align-items: center;
+  gap: 0.571rem;
+  font-size: 1.143rem;
+  color: var(--text-color);
+  forced-color-adjust: none;
+
+  .checkbox {
+    width: 1.6rem;
+    height: 1.6rem;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: var(--checkmark-color);
+    stroke-width: 3px;
+    stroke-dasharray: 22px;
+    stroke-dashoffset: 66;
+  }
+
+  &[data-pressed] .checkbox {
+    border-color: var(--border-color-pressed);
+  }
+
+  &[data-focus-visible] .checkbox {
+    outline: 2px solid var(--focus-ring-color);
+    outline-offset: 2px;
+  }
+
+  &[data-selected],
+  &[data-indeterminate] {
+    .checkbox {
+      border-color: var(--selected-color);
+      background: var(--selected-color);
+    }
+
+    &[data-pressed] .checkbox {
+      border-color: var(--selected-color-pressed);
+      background: var(--selected-color-pressed);
+    }
+
+    svg {
+      stroke-dashoffset: 44;
+    }
+  }
+
+  &[data-indeterminate] {
+    & svg {
+      stroke: none;
+      fill: var(--checkmark-color);
+    }
   }
 }
 
