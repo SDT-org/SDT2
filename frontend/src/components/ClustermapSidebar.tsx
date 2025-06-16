@@ -1,10 +1,11 @@
 import React from "react";
-import { Input, Label, Text, TextField } from "react-aria-components";
+import { Label, Text } from "react-aria-components";
 import type { DocState } from "../appState";
 import { reorderMethods } from "../constants";
 import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";
 import { Switch } from "./Switch";
+import { TitleField } from "./fields/TitleField";
 
 export const ClustermapSidebar = ({
   settings,
@@ -194,35 +195,13 @@ export const ClustermapSidebar = ({
               data-hidden={!settings.showTitles}
               aria-hidden={!settings.showTitles}
             >
-              <div className="col-2 auto-onefr align-items-center">
-                <Label htmlFor="font">Font Type</Label>
-                <Select
-                  id="font"
-                  data-compact
-                  selectedKey={settings.titleFont}
-                  onSelectionChange={(value: React.Key) =>
-                    updateSettings({
-                      titleFont: value as typeof settings.titleFont,
-                    })
-                  }
-                  items={["Sans Serif", "Monospace"].map((name) => ({
-                    id: name,
-                    name,
-                  }))}
-                >
-                  {(item) => (
-                    <SelectItem textValue={item.name}>{item.name}</SelectItem>
-                  )}
-                </Select>
-              </div>
-              <div className="field">
-                <TextField
-                  onChange={(value) => updateSettings({ title: value })}
-                  value={settings.title}
-                >
-                  <Input />
-                </TextField>
-              </div>
+              <TitleField
+                textId="title"
+                textValue={settings.title}
+                onTextChange={(value) => updateSettings({ title: value })}
+                fontValue={settings.titleFont}
+                onFontChange={(value) => updateSettings({ titleFont: value })}
+              />
             </div>
           </div>
         </div>

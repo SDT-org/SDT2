@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Input,
-  Label,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
-} from "react-aria-components";
+import { Label, ToggleButton, ToggleButtonGroup } from "react-aria-components";
 import {
   TbGrid4X4,
   TbLetterA,
@@ -20,6 +14,7 @@ import { Select, SelectItem } from "./Select";
 import { Slider } from "./Slider";
 import { Switch } from "./Switch";
 import { Tooltip } from "./Tooltip";
+import { TitleField } from "./fields/TitleField";
 
 export const ViolinSidebar = ({
   sidebarComponent,
@@ -384,35 +379,13 @@ export const ViolinSidebar = ({
             data-hidden={!settings.showTitles}
             aria-hidden={!settings.showTitles}
           >
-            <div className="col-2 auto-onefr align-items-center">
-              <Label htmlFor="font">Font Type</Label>
-              <Select
-                id="font"
-                data-compact
-                selectedKey={settings.titleFont}
-                onSelectionChange={(value) =>
-                  updateSettings({
-                    titleFont: value as typeof settings.titleFont,
-                  })
-                }
-                items={["Sans Serif", "Monospace"].map((name) => ({
-                  id: name,
-                  name,
-                }))}
-              >
-                {(item) => (
-                  <SelectItem textValue={item.name}>{item.name}</SelectItem>
-                )}
-              </Select>
-            </div>
-            <div className="field">
-              <TextField
-                onChange={(value) => updateSettings({ title: value })}
-                value={settings.title}
-              >
-                <Input />
-              </TextField>
-            </div>
+            <TitleField
+              textId="title"
+              textValue={settings.title}
+              onTextChange={(value) => updateSettings({ title: value })}
+              fontValue={settings.titleFont}
+              onFontChange={(value) => updateSettings({ titleFont: value })}
+            />
           </div>
         </div>
       </div>

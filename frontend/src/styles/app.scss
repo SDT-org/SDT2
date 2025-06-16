@@ -959,6 +959,12 @@ small {
   }
 }
 
+.field {
+  .react-aria-Label + .react-aria-TextField {
+    margin-top: 0.8rem;
+  }
+}
+
 label.sublabel,
 .form .field label.sublabel {
   font-weight: 500;
