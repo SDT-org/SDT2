@@ -3,89 +3,26 @@ import platform
 import psutil
 import os
 import sys
-import re
 import random
 import json
 import numpy as np
 from datetime import datetime
-from Bio.SeqRecord import SeqRecord
-from Bio.Seq import Seq
 from itertools import combinations_with_replacement as cwr
 from functools import partial
 from pandas import DataFrame
 from numpy import zeros
 import parasail
 from Bio import SeqIO
-from Bio.SeqUtils import gc_fraction
 from scipy.cluster import hierarchy
-from cluster import get_linkage_method_order
 from heatmap import dataframe_to_triangle
 from document_paths import build_document_paths
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
-
+from pre_run import run_preprocessing, grab_stats, residue_check
+from SIMD import get_stats_score
+from non_SIMD import get_traceback_score
 def supports_striped_32():
     return parasail.can_use_sse41() or parasail.can_use_avx2() or parasail.can_use_neon()
-
-def run_preprocessing(raw_seq_dict):
-    seq_dict = {}
-    for key, record in raw_seq_dict.items():
-        sequence = str(record.seq).upper()
-        sequence = re.sub(r"[^A-Z]", "", sequence)
-        key= re.sub(r"[, -]", "_", key)
-        key = key[:50] ## hardcap for id length
-        seq_dict[key] = str(sequence)
-    return seq_dict
-
-def grab_stats(seq_dict):
-    seq_stats = {}
-    for key, record_str in seq_dict.items():
-        gcCount = round(gc_fraction(record_str), 2) * 100
-        genLen = len(record_str)
-        seq_stats.setdefault(key, [])
-        seq_stats[key].append(gcCount)
-        seq_stats[key].append(genLen)
-    return seq_stats
-
-def residue_check(seq):
-    return bool(re.search(r"[EFILPQZ]", seq))
-
-##Calculate the similarity scores from the alignments by iterating through each position in the alignemtn files as a zip
-def get_similarity(seq1, seq2):
-    if len(seq1) != len(seq2):
-        raise ValueError("Strings must be of equal length.")
-    dist = 0
-    gaps = 0
-    alns = zip(seq1, seq2)
-    for a, b in alns:
-        if a != "-" and b != "-":
-            if a != b:
-                dist += 1
-        else:
-            gaps += 1
-
-    similarity = float((float(dist)) / (len(seq1) - gaps))
-    # convert to percentile
-    similarity_percentile = similarity * 100
-    return similarity_percentile
-
-def get_traceback_score(seq1, seq2, open_penalty, extend_penalty, matrix) -> float:
-    try:
-        result = parasail.nw_trace(seq1, seq2, open_penalty, extend_penalty, matrix)
-        query = result.traceback.query
-    except:
-        raise Exception("PARASAIL_TRACEBACK")
-
-    return get_similarity(query, result.traceback.ref)
-
-def get_stats_score(seq1, seq2, open_penalty, extend_penalty, matrix) -> float:
-    # Use 32-bit version to prevent score overflow with long sequences
-    result = parasail.nw_stats_striped_32(seq1, seq2, open_penalty, extend_penalty, matrix)
-    num_ungapped_cols = len(seq1) + len(seq2) - result.length
-    identity_score_percent = (float(result.matches) / num_ungapped_cols) * 100.0
-    distance_score = 100.0 - identity_score_percent
-
-    return distance_score
 
 def process_pair(id_sequence_pair, settings):
     id1 = id_sequence_pair[0][0]
@@ -196,7 +133,7 @@ def output_summary(file_name, start_time, end_time, start_counter, end_counter):
     return f"""
     SDT {app_version} release for {platform.system()}
     Developed by Michael Lund and Josiah Ivey; Brejnev Muhire,
-    Darren Martin, Simona Kraberger, Qiyun Zhu, Pierre Lefeuvre, Philippe Roumagnac, Arvind Varsani
+    Darren Martin, Simona Kraberger, Qiyun Zhu, Pierre Lefeuvre, Jean-Michele Lett, Philippe Roumagnac, Arvind Varsani
     System info: Host: {platform.node()}, OS: {build_type}, CPU: {platform.processor()} - {total_cores} cores, Memory: {total_ram:.2f} GB RAM
     Run info for {file_name}: Start: {start_time.strftime("%b %d %Y, %I:%M %p %Z")}, End: {end_time.strftime("%b %d %Y, %I:%M %p %Z")}, Total: {friendly_total_time(total_counter)}
     Parasail: Using Needleman-Wunsch (stats) algorithm. Nucleotide: Open={13}, Extend={1} (BLOSUM62). Amino acid: Open={10}, Extend={1} (BLOSUM62).
