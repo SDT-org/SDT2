@@ -178,7 +178,7 @@ def process_data(
     doc_paths = build_document_paths(out_dir)
 
     final_ordered_ids, final_matrix_for_df = seq_ids_in_order, aln_scores
-
+##3 lets bring this out as a compoennt for LZAZANI and parasail alike, just do some handling
     if cluster_method is not None and len(seq_ids_in_order) > 1:
         current_dist_matrix_for_clustering = np.copy(dist_scores)
         np.fill_diagonal(current_dist_matrix_for_clustering, 0)
@@ -196,7 +196,7 @@ def process_data(
                 final_ordered_ids, final_matrix_for_df = seq_ids_in_order, aln_scores
         else:
             final_ordered_ids, final_matrix_for_df = seq_ids_in_order, aln_scores
-
+##
     df = DataFrame(final_matrix_for_df, index=final_ordered_ids, columns=final_ordered_ids)
 
     set_stage("Postprocessing")

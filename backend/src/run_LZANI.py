@@ -17,7 +17,7 @@ def lzani_to_full_matrix(results_tsv_path, ids_tsv_path, score_column='ani'):
     df = pd.read_csv(results_tsv_path, sep='\t')
     matrix = df.pivot_table(index='query', columns='reference',
                            values=score_column, aggfunc='first') * 100
-    matrix = matrix.reindex(index=all_ids, columns=all_ids)
+    matrix = matrix.reindex(index=all_ids, columns=all_ids) ## can probs plug in reorder logic here
     matrix = matrix.fillna(25.0) ## filling NAs with biological floor
     matrix = matrix.replace(0.0, 25.0)
     symmetric_matrix = (matrix + matrix.T) / 2 ## average the two triangles for symmetic matrix??
@@ -87,15 +87,15 @@ def run_lzani(
         dist_matrix = 100.0 - matrix.values
         np.fill_diagonal(dist_matrix, 0)
         condensed_dist = [dist_matrix[i, j] for i in range(len(matrix)) for j in range(i + 1, len(matrix))]
-        if condensed_dist:
-            linked = hierarchy.linkage(np.array(condensed_dist), method=cluster_method)
-            dendro_data = hierarchy.dendrogram(linked, orientation='right', no_plot=True)
-            reordered_indices = [int(i) for i in dendro_data['ivl']]
-            seq_ids = matrix.index.tolist()
-            reordered_ids = [seq_ids[i] for i in reordered_indices]
-            matrix = matrix.loc[reordered_ids, reordered_ids]
+      ##--need to plug in the reorder logic from parasail here as a component
+        linked = hierarchy.linkage(np.array(condensed_dist), method=cluster_method)
+        dendro_data = hierarchy.dendrogram(linked, orientation='right', no_plot=True)
+        reordered_indices = [int(i) for i in dendro_data['ivl']]
+        seq_ids = matrix.index.tolist()
+        reordered_ids = [seq_ids[i] for i in reordered_indices]
+        matrix = matrix.loc[reordered_ids, reordered_ids]
+            
     set_stage("Postprocessing")
-    # Convert the tab-separated results.tsv to a comma-separated columns.csv
     results_df = pd.read_csv(results_tsv_path, sep='\t')
     results_df.to_csv(doc_paths.columns, sep=',', index=False)
     save_stats_to_csv(seq_stats, doc_paths.stats)
