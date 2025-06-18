@@ -357,12 +357,13 @@ class Api:
                 start_time = perf_counter()
                 try:
                     update_document(doc_id, stage="Analyzing with LZ-ANI")
-                    matrix_df = run_lzani( 
+                    matrix_df = run_lzani(
                         raw_input_fasta=raw_input_fasta,
-                        lz_ani_output_prefix=base_lzani_output_path, 
+                        lz_ani_output_prefix=base_lzani_output_path,
                         lz_ani_executable_path=lzani_executable_path,
-                        score_type=args.get('lzani_score_type', 'ani'), 
-                        threads=lzani_threads
+                        score_type=args.get('lzani_score_type', 'ani'),
+                        threads=lzani_threads,
+                        out_dir=doc.tempdir_path
                     )
                     
 

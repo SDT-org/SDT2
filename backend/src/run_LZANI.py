@@ -21,12 +21,12 @@ def lzani_to_full_matrix(results_tsv_path, ids_tsv_path, score_column='ani'):
     
     return symmetric_matrix
 
-def get_output_paths(output_prefix_base):
-    os.makedirs("tempy", exist_ok=True)
+def get_output_paths(output_prefix_base, out_dir):
+    os.makedirs(out_dir, exist_ok=True)
     prefix = os.path.basename(output_prefix_base or "lzani_out")
     return (
-        os.path.join("tempy", f"{prefix}_results.tsv"),
-        os.path.join("tempy", f"{prefix}_ids.tsv")
+        os.path.join(out_dir, f"{prefix}_results.tsv"),
+        os.path.join(out_dir, f"{prefix}_ids.tsv")
     )
     
 def execute_lzani(lz_ani_executable, input_fasta, 
@@ -46,10 +46,11 @@ def run_lzani(
     raw_input_fasta: str,
     lz_ani_executable_path: str,
     score_type: str,
+    out_dir: str,
     threads: int = 0,
     lz_ani_output_prefix: str | None = None
 ):
-    results_tsv_path, ids_tsv_path = get_output_paths(lz_ani_output_prefix)
+    results_tsv_path, ids_tsv_path = get_output_paths(lz_ani_output_prefix, out_dir)
     
     execute_lzani(
         lz_ani_executable=lz_ani_executable_path,
