@@ -7,8 +7,8 @@ current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(current_file_path, "../../"))
 sys.path.append(os.path.join(current_file_path, "."))
 import numpy as np
-import threading 
-from run_LZANI import run_lzani 
+import threading
+from run_LZANI import run_lzani
 from multiprocessing import Lock, Manager, Pool, cpu_count as get_cpu_count
 from tempfile import TemporaryDirectory
 from platformdirs import user_documents_dir
@@ -221,7 +221,7 @@ def load_seq_dict_from_json(seq_dict_path: str):
             return None
     except Exception as e:
             print(f"Error loading sequence dictionary: {e}")
-            return None 
+            return None
     return seq_dict
 class Api:
     def close_app(self):
@@ -305,7 +305,7 @@ class Api:
     def start_run(self, args: dict):
         global pool, cancelled, start_time
 
-        analysis_method = args.get('analysisMethod') 
+        analysis_method = args.get('analysisMethod')
         if get_state().active_run_document_id:
             raise Exception("Multiple runs are not supported")
         doc_id = args["doc_id"]
@@ -315,7 +315,6 @@ class Api:
         settings = dict()
         settings["input_file"] = doc.filename
         settings["out_dir"] = doc.tempdir_path
-        
         if args.get("cluster_method") == "None":
             settings["cluster_method"] = None
         else:
@@ -342,68 +341,45 @@ class Api:
             current_script_dir = os.path.dirname(os.path.abspath(__file__)) # .../backend/src
             backend_dir = os.path.dirname(current_script_dir) # .../backend
             bin_dir = os.path.join(backend_dir, "bin") # .../backend/bin
-            lzani_executable_name = "lz-ani.exe" 
+            lzani_executable_name = "lz-ani.exe"
             lzani_executable_path = os.path.join(bin_dir, lzani_executable_name)
-            
-    
             if not os.path.exists(lzani_executable_path):
                 print(f"LZ-ANI executable not found at the expected relative path: {lzani_executable_path}.")
                 update_document(doc_id, view="runner", stage="Error: LZ-ANI path not configured")
                 set_state(active_run_document_id=None)
-                return 
-            lzani_threads = settings.get("num_processes", 1) 
+                return
+            lzani_threads = settings.get("num_processes", 1)
             def lzani_task_wrapper():
                 global start_time
                 start_time = perf_counter()
                 try:
                     update_document(doc_id, stage="Analyzing with LZ-ANI")
-                    matrix_df = run_lzani(
-                        raw_input_fasta=raw_input_fasta,
-                        lz_ani_output_prefix=base_lzani_output_path,
-                        lz_ani_executable_path=lzani_executable_path,
-                        score_type=args.get('lzani_score_type', 'ani'),
-                        threads=lzani_threads,
-                        out_dir=doc.tempdir_path
-                    )
-                    
+                    lzani_settings = {
+                        "input_file": raw_input_fasta,
+                        "lz_ani_output_prefix": base_lzani_output_path,
+                        "lz_ani_executable_path": lzani_executable_path,
+                        "score_type": args.get('lzani_score_type', 'ani'),
+                        "num_processes": lzani_threads,
+                        "out_dir": doc.tempdir_path,
+                        "cluster_method": args.get("cluster_method")
+                    }
 
-                    doc_paths = build_document_paths(doc.tempdir_path)
-                    
-                    # Apply clustering reordering only if cluster method is specified
-                    cluster_method = args.get("cluster_method")
-                    if cluster_method and cluster_method != "None":
-                        # Convert to distance matrix (100 - similarity)
-                        dist_matrix = 100.0 - matrix_df.values
-                        np.fill_diagonal(dist_matrix, 0)
-                        
-                        # Create condensed distance matrix for clustering
-                        condensed_dist = [dist_matrix[i, j] for i in range(len(matrix_df)) for j in range(i + 1, len(matrix_df))]
-                        
-                        from scipy.cluster import hierarchy
-                        linked = hierarchy.linkage(np.array(condensed_dist), method=cluster_method)
-                        dendro_data = hierarchy.dendrogram(linked, orientation='right', no_plot=True)
-                        reordered_indices = [int(i) for i in dendro_data['ivl']]
-                        
-                        # Reorder the matrix
-                        seq_ids = matrix_df.index.tolist()
-                        reordered_ids = [seq_ids[i] for i in reordered_indices]
-                        matrix_df = matrix_df.loc[reordered_ids, reordered_ids]
-                
-                    matrix_df.to_csv(doc_paths.matrix, header=False, index=True)
+                    run_lzani(
+                        settings=lzani_settings,
+                        set_stage=lambda stage: update_document(doc_id, stage=stage)
+                    )
+
                     update_document(doc_id, view="viewer", stage="Processed (LZ-ANI)")
 
-                except Exception as e: 
+                except Exception as e:
                     print(f"Error during LZ-ANI execution or saving: {e}")
                     update_document(doc_id, view="runner", stage=f"Error: {e}")
                 finally:
                     set_state(active_run_document_id=None)
-            
             # Run LZ-ANI in a separate thread
             lzani_thread = threading.Thread(target=lzani_task_wrapper)
             lzani_thread.daemon = True # Allows main program to exit even if thread is running
             lzani_thread.start()
-            
-    
         elif analysis_method == 'parasail' or analysis_method is None: # Default to Parasail
             print("Dispatching to Parasail handler (process_data)...")
             with Pool(
@@ -450,7 +426,6 @@ class Api:
                 pass
         else:
             print(f"Error loading analysis method: {analysis_method}")
-        
     def cancel_run(self, doc_id: str, run_settings: str):
         do_cancel_run()
         if run_settings == "preserve":
@@ -557,7 +532,7 @@ class Api:
         else:
             stats_df = DataFrame([])
         if os.path.exists(doc_paths.columns):
-            cols_data = read_csv(doc_paths.columns, skiprows=1).values.tolist()
+            cols_data = read_csv(doc_paths.columns).values.tolist()
             id_map = {}
             identity_scores = []
             for row in cols_data:
@@ -610,12 +585,14 @@ class Api:
             doc_paths.matrix, delimiter=",", index_col=0, header=None
         )
         matrix_np = matrix_df.to_numpy()
-        print(matrix_np)
         matrix_np = np.round(matrix_np, 2)
-        row_ids = matrix_df.index.tolist()
-        # Get cluster assignments
+        sorted_ids = matrix_df.index.tolist()
+        reordered_data = {
+            "matrix": numpy_to_triangle(matrix_np).tolist(),
+            "tickText": sorted_ids,
+        }
         seqid_clusters_df = cluster.get_clusters_dataframe(
-            matrix_np, method, threshold, row_ids
+            matrix_np, method, threshold, sorted_ids
         )
         seqid_clusters_df = seqid_clusters_df.rename(
             columns={
@@ -626,24 +603,8 @@ class Api:
         clusters = seqid_clusters_df["cluster"].tolist()
         reorder_clusters = cluster.order_clusters_sequentially(clusters)
         seqid_clusters_df["cluster"] = reorder_clusters
-        
-        # Map the cluster IDs to the original sequence IDs
-        #mapped_seqs =seqid_clusters_df["id"] = seqid_clusters_df["id"].map(seq_dict)
-        #print(mapped_seqs)        # Sort by group
-        seqid_clusters_df = seqid_clusters_df.sort_values(by=["cluster", "id"])
-        sorted_ids = seqid_clusters_df["id"].tolist()
-        # Get the new index order and reorder the matrix in one step using numpy
-        new_order = [row_ids.index(id) for id in sorted_ids if id in row_ids]
-        reordered_matrix_np = matrix_np[new_order, :][:, new_order]
-        reordered_data = {
-            "matrix": numpy_to_triangle(reordered_matrix_np).tolist(),
-            "tickText": sorted_ids,
-        }
-    
         cluster_data = seqid_clusters_df.to_dict(orient="records")
-        print(cluster_data)
-        
-        
+
         return {
             "matrix": reordered_data["matrix"],
             "tickText": reordered_data["tickText"],

@@ -93,8 +93,9 @@ def export(matrix_path, cluster_data_output_dir, seq_dict_path, threshold, metho
         with open(seq_dict_path, "r") as f:
             seq_dict = json.load(f)
 
-    df_result['Cluster'] = df_result['Cluster'].astype(int)
-    grouped_ids_by_cluster = df_result.groupby('Cluster')['ID'].apply(list).to_dict()
+    cluster_col_name = [col for col in df_result.columns if 'Cluster' in col][0]
+    df_result[cluster_col_name] = df_result[cluster_col_name].astype(int)
+    grouped_ids_by_cluster = df_result.groupby(cluster_col_name)['ID'].apply(list).to_dict()
     for cluster_num, list_of_seq_ids in grouped_ids_by_cluster.items():
         records_for_this_cluster = []
         for seq_id in list_of_seq_ids:
