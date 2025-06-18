@@ -90,43 +90,24 @@ def export(matrix_path, cluster_data_output_dir, seq_dict_path, threshold, metho
 
     seq_dict = {}
     if os.path.exists(seq_dict_path):
-        try:
-            with open(seq_dict_path, "r") as f:
-                seq_dict = json.load(f)
-        except Exception as e:
-            print(f"Error loading sequence dictionary: {e}")
-    else:
-        print(f"Sequence dictionary not found at {seq_dict_path}")
+        with open(seq_dict_path, "r") as f:
+            seq_dict = json.load(f)
 
-    if seq_dict:
-        # The first column is 'ID', the second is 'Cluster - Threshold: X'
-        # We rename for consistency with the logic that generates FASTA files.
-        df_result.columns = ["ID", "Cluster"]
-        try:
-            df_result['Cluster'] = df_result['Cluster'].astype(int)
-        except ValueError:
-            # This might happen if cluster names are not purely numeric after thresholding.
-            # The FASTA filenames will use these non-integer cluster names.
-            print("Warning: Cluster names may not be purely numeric.")
+    df_result['Cluster'] = df_result['Cluster'].astype(int)
+    grouped_ids_by_cluster = df_result.groupby('Cluster')['ID'].apply(list).to_dict()
+    for cluster_num, list_of_seq_ids in grouped_ids_by_cluster.items():
+        records_for_this_cluster = []
+        for seq_id in list_of_seq_ids:
+            if seq_id in seq_dict:
+                sequence_string = seq_dict[seq_id]
+                bio_seq = Seq.Seq(sequence_string)
+                seq_record_obj = SeqRecord.SeqRecord(bio_seq, id=str(seq_id), description="")
+                records_for_this_cluster.append(seq_record_obj)
+        if records_for_this_cluster:
+            fasta_filename = os.path.join(cluster_data_output_dir, f"cluster_{cluster_num}.fasta")
+            with open(fasta_filename, "w") as output_handle:
+                SeqIO.write(records_for_this_cluster, output_handle, "fasta")
 
-
-        grouped_ids_by_cluster = df_result.groupby('Cluster')['ID'].apply(list).to_dict()
-
-        for cluster_num, list_of_seq_ids in grouped_ids_by_cluster.items():
-            records_for_this_cluster = []
-            for seq_id in list_of_seq_ids:
-                if seq_id in seq_dict:
-                    sequence_string = seq_dict[seq_id]
-                    bio_seq = Seq.Seq(sequence_string)
-                    seq_record_obj = SeqRecord.SeqRecord(bio_seq, id=str(seq_id), description="")
-                    records_for_this_cluster.append(seq_record_obj)
-
-            if records_for_this_cluster:
-                fasta_filename = os.path.join(cluster_data_output_dir, f"cluster_{cluster_num}.fasta")
-                with open(fasta_filename, "w") as output_handle:
-                    SeqIO.write(records_for_this_cluster, output_handle, "fasta")
-    else:
-        print("Sequence dictionary is empty or not loaded. Skipping FASTA file generation.")
         
     return df_result
 

@@ -21,6 +21,8 @@ from config import app_version
 from pre_run import run_preprocessing, grab_stats, residue_check
 from SIMD import get_stats_score
 from non_SIMD import get_traceback_score
+
+
 def supports_striped_32():
     return parasail.can_use_sse41() or parasail.can_use_avx2() or parasail.can_use_neon()
 
@@ -156,6 +158,7 @@ def process_data(
     raw_seq_dict_for_preprocessing = {record.id: record for record in sequences}
 
     set_stage("Preprocessing")
+
     seq_dict_processed_strings = run_preprocessing(raw_seq_dict_for_preprocessing)
     seq_stats = grab_stats(seq_dict_processed_strings)
 

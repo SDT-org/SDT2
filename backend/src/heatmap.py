@@ -4,10 +4,7 @@ from pandas.core.frame import DataFrame
 from pandas import DataFrame
 
 def dataframe_to_triangle(matrix: DataFrame) -> DataFrame:
-    dataframe = tril(around(matrix, 2))
-    dataframe[triu_indices(dataframe.shape[0], k=1)] = nan
-
-    return DataFrame(dataframe)
+    return matrix.where(np.tril(np.ones(matrix.shape, dtype=bool))).round(2)
 
 def numpy_to_triangle(matrix: np.ndarray) -> np.ndarray:
     result = tril(around(matrix, 2))

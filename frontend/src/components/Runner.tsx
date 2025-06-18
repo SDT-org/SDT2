@@ -10,6 +10,8 @@ import {
   SliderTrack,
   TabPanel,
   Text,
+  ToggleButton,
+  ToggleButtonGroup,
 } from "react-aria-components";
 import { TbAlertTriangleFilled, TbFile } from "react-icons/tb";
 import useAppState, {
@@ -27,10 +29,15 @@ import messages from "../messages";
 import { Select, SelectItem } from "./Select";
 import { Switch } from "./Switch";
 
-export type RunProcessDataArgs = Pick<AppState, "compute_cores"> & {
+export type RunProcessDataArgs = Pick<
+  AppState,
+  "compute_cores" | "analysisMethod"
+> & {
   doc_id: string;
   cluster_method: AppState["cluster_method"] | "None";
   export_alignments: "True" | "False";
+  lzani_score_type: AppState["lzaniScoreType"];
+  lzaniExecutablePath?: string; // Optional: if you decide to pass this from frontend
 };
 
 const RunnerSettings = ({
@@ -167,6 +174,59 @@ const RunnerSettings = ({
                   Select file&#8230;
                 </Button>
               </div>
+            </div>
+            <div className="field">
+              <Label className="header">Analysis Method</Label>
+              <div className="setting">
+                <ToggleButtonGroup
+                  data-compact
+                  selectionMode="single"
+                  disallowEmptySelection={true}
+                  selectedKeys={[appState.analysisMethod]}
+                  onSelectionChange={(value) =>
+                    updateAppState({
+                      analysisMethod: value.values().next()
+                        .value as typeof appState.analysisMethod,
+                    })
+                  }
+                >
+                  <ToggleButton id="parasail">Parasail</ToggleButton>
+                  <ToggleButton id="lzani">LZ-ANI</ToggleButton>
+                </ToggleButtonGroup>
+              </div>
+              {appState.analysisMethod === "lzani" && (
+                <div className="setting">
+                  <Select
+                    aria-label="Score Type"
+                    selectedKey={appState.lzaniScoreType}
+                    onSelectionChange={(value) => {
+                      updateAppState({
+                        lzaniScoreType: value as typeof appState.lzaniScoreType,
+                      });
+                    }}
+                    items={[
+                      {
+                        id: "ani",
+                        name: "ANI (Average Nucleotide Identity)",
+                      },
+                      {
+                        id: "gani",
+                        name: "gANI (Genome Average Nucleotide Identity)",
+                      },
+                      {
+                        id: "tani",
+                        name: "tANI (Total Average Nucleotide Identity)",
+                      },
+                    ]}
+                  >
+                    {(item) => (
+                      <SelectItem id={item.id} textValue={item.name}>
+                        {item.name}
+                      </SelectItem>
+                    )}
+                  </Select>
+                </div>
+              )}
             </div>
             <div className="field clustering inline-toggle">
               <Switch

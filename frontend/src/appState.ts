@@ -81,6 +81,8 @@ export type AppState = {
   debug: boolean;
   enableClustering: boolean;
   enableOutputAlignments: boolean;
+  analysisMethod: "parasail" | "lzani";
+  lzaniScoreType: "ani" | "gani" | "tani";
   cluster_method: keyof typeof reorderMethods;
   compute_cores: number;
   showExportModal: boolean;
@@ -200,6 +202,8 @@ export const initialAppState: AppState = {
   lastDataFilePath: "",
   enableClustering: true,
   enableOutputAlignments: false,
+  analysisMethod: "parasail",
+  lzaniScoreType: "ani",
   cluster_method: "average",
   saveFormat: "svg",
   showExportModal: false,

@@ -9,6 +9,8 @@ export const startRun = (docId: string, appState: AppState) =>
         : "None",
       compute_cores: appState.compute_cores,
       export_alignments: appState.enableOutputAlignments ? "True" : "False",
+      analysisMethod: appState.analysisMethod,
+      lzani_score_type: appState.lzaniScoreType,
     })
     .catch((e) => {
       if (e.toString().includes("PARASAIL_TRACEBACK")) {
