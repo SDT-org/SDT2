@@ -85,7 +85,8 @@ export const D3CanvasHeatmap = ({
     canvas.style.width = `${width}px`;
     canvas.style.height = `${height}px`;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.scale(pixelRatio, pixelRatio);
 
     ctx.textRendering = "optimizeSpeed";
