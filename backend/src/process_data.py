@@ -19,8 +19,9 @@ from document_paths import build_document_paths
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 from config import app_version
 from pre_run import run_preprocessing, grab_stats, residue_check
-from SIMD import get_stats_score
-from non_SIMD import get_traceback_score
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "analysis")))
+from run_parasail import get_stats_score, get_traceback_score
+
 
 
 def supports_striped_32():
