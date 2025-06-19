@@ -6,6 +6,7 @@ import urllib.parse
 current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(current_file_path, "../../"))
 sys.path.append(os.path.join(current_file_path, "."))
+sys.path.append(os.path.join(current_file_path, "..", "analysis"))
 import numpy as np
 import threading
 from run_LZANI import run_lzani
