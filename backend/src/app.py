@@ -33,7 +33,7 @@ from export import (
 )
 from save_document import pack_document, unpack_document
 from app_state import create_app_state
-from validations import validate_fasta
+from validations import validate_fasta, warn_parasail
 import cluster
 import platform
 from Bio import SeqIO
@@ -395,6 +395,9 @@ class Api:
             lzani_thread.start()
         elif analysis_method == 'parasail' or analysis_method is None: # Default to Parasail
             print("Dispatching to Parasail handler (process_data)...")
+            if warn_parasail(doc.filename):
+                set_state(active_run_document_id=None) # Release the run lock
+                raise Exception("PARASAIL_PERFORMANCE_WARNING")
             with Pool(
                 settings["num_processes"],
             ) as pool:
