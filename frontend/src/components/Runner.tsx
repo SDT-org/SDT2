@@ -400,7 +400,9 @@ const RunnerSettings = ({
                 type="button"
                 onPress={() => {
                   setStartingRun(true);
-                  startRun();
+                  startRun().finally(() => {
+                    setStartingRun(false);
+                  });
                 }}
                 isDisabled={Boolean(
                   startingRun ||

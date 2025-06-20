@@ -1,4 +1,5 @@
 import type { AppState } from "../appState";
+import messages from "../messages";
 
 export const startRun = (docId: string, appState: AppState) =>
   window.pywebview.api
@@ -19,6 +20,15 @@ export const startRun = (docId: string, appState: AppState) =>
             "Please ensure you have adequate swap/page size and system memory.\n\n" +
             "Error ID: PARASAIL_TRACEBACK",
         );
+        cancelRun(docId, "preserve");
+      } else if (
+        e &&
+        typeof e === "object" &&
+        "message" in e &&
+        typeof e.message === "string" &&
+        Object.keys(messages).includes(e.message)
+      ) {
+        alert(`Error: ${messages[e.message as keyof typeof messages]}`);
         cancelRun(docId, "preserve");
       } else {
         throw e;

@@ -9,6 +9,8 @@ sys.path.append(os.path.join(current_file_path, "."))
 sys.path.append(os.path.join(current_file_path, "..", "analysis"))
 import numpy as np
 import threading
+import random
+from pre_run import residue_check
 from run_LZANI import run_lzani
 from multiprocessing import Lock, Manager, Pool, cpu_count as get_cpu_count
 from tempfile import TemporaryDirectory
@@ -333,6 +335,16 @@ class Api:
         set_state(active_run_document_id=doc_id)
         if analysis_method == 'lzani':
             print("Dispatching to LZ-ANI handler...")
+            # AA Check for LZ-ANI
+            sequences = list(SeqIO.parse(open(doc.filename, encoding="utf-8"), "fasta"))
+            sample_size = min(3, len(sequences))
+            if sample_size > 0:
+                sampled_seqs = random.sample(sequences, sample_size)
+                is_aa = any(residue_check(str(rec.seq).upper()) for rec in sampled_seqs)
+                if is_aa:
+                    set_state(active_run_document_id=None)
+                    raise Exception("AMINO_ACID_NOT_SUPPORTED_LZANI")
+
             update_document(doc_id, view="loader", stage="Preparing LZ-ANI")
             # --- Parameters for run_lzani ---
             raw_input_fasta = doc.filename

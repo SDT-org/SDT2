@@ -8,4 +8,6 @@ export default {
     "This file contains duplicate sequence names. Sequence names must be unique.",
   ZERO_LENGTH_SEQUENCE:
     "This file contains a zero length sequence. Sequences cannot be empty.",
+  AMINO_ACID_NOT_SUPPORTED_LZANI:
+    "LZ-ANI only supports nucleotide ANI calculations at this time.",
 };
