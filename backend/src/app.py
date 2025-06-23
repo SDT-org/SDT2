@@ -5,7 +5,7 @@ import sys
 import json
 import urllib.parse
 
-from workflow import parse, postprocess
+from export_utils import save_cols_to_csv
 
 current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(current_file_path, "../../"))
@@ -173,7 +173,7 @@ def handle_open_file(filepath: str, doc_id: str | None):
             data_no_diag = where(diag_mask, nan, data)
             int(nanmin(data_no_diag))
             int(nanmax(data_no_diag))
-            postprocess.initial.save_cols_to_csv(df, doc_paths.columns)
+            save_cols_to_csv(df, doc_paths.columns)
 
             # We need a full matrix for doing things but we don't have
             # it yet because this was a .txt/.csv lower triangle matrix
