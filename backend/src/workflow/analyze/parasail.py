@@ -5,7 +5,7 @@ from functools import partial
 from itertools import combinations_with_replacement as cwr
 from numpy import zeros
 
-from workflow.runner import RunSettings, WorkflowResult
+from workflow.models import RunSettings, WorkflowResult
 
 def run(
     result: WorkflowResult,

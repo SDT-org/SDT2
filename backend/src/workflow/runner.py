@@ -1,79 +1,19 @@
-from dataclasses import dataclass
 from datetime import datetime
 from multiprocessing.pool import Pool
 import os
 import platform
 import sys
 import time
-from typing import Literal, NamedTuple
-from typing import Iterator, List
-
-from Bio.SeqRecord import SeqRecord
-from pandas.core.frame import DataFrame
 import psutil
 
 import analyze
 import cluster
 from config import app_version
-from document_paths import DocumentPaths
 import parse
 import postprocess
+from workflow.models import WorkflowResult, WorkflowRun
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
-
-
-class LzaniSettings(NamedTuple):
-    exec_path: str
-    score_type: Literal["ani"] | Literal["gani"] | Literal["tani"]
-
-
-class ParasailSettings(NamedTuple):
-    process_count: int
-
-
-class RunSettings(NamedTuple):
-    doc_paths: DocumentPaths
-    analysis_method: Literal["parasail"] | Literal["lzani"]
-    fasta_path: str
-    output_path: str
-    cluster_method: str  # Literal[reorder_methods]
-    lzani: LzaniSettings
-    parasail: ParasailSettings
-
-
-class WorkflowResult(NamedTuple):
-    records: Iterator[SeqRecord]
-    record_count: int
-    seq_dict: dict[str, str] | None
-    max_sequence_length: int
-    matrix: DataFrame | None
-    is_aa: bool | None
-    warnings: List[str]
-    errors: List[str]
-
-
-@dataclass
-class WorkflowRun:
-    result: WorkflowResult
-    settings: RunSettings
-    stage: str = ""
-    progress: int = 0
-    analyze_start_time: datetime | None = None
-    analyze_start_counter: float | None = None
-
-    def set_stage(self, stage: str):
-        self.stage = stage
-        if self.analyze_start_time is None and stage == "Analyzing":
-            self.analyze_start_time = datetime.now()
-            self.analyze_start_counter = time.perf_counter()
-        print(f"Stage: {stage}")
-
-    def set_progress(self, progress: int):
-        self.progress = progress
-        print(f"Progress: {progress}%")
-
-    def valid(self) -> bool:
-        return not self.result.errors
 
 
 def run_parse(fasta_path: str) -> WorkflowResult:

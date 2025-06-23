@@ -4,7 +4,7 @@ import time
 from typing import Callable
 import pandas as pd
 import numpy as np
-from workflow.runner import RunSettings, WorkflowResult
+from workflow.models import RunSettings, WorkflowResult
 
 
 def run(

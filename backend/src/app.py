@@ -16,7 +16,7 @@ from multiprocessing import cpu_count as get_cpu_count
 from tempfile import TemporaryDirectory
 from platformdirs import user_documents_dir
 from utils import get_child_process_info, make_doc_id, open_folder
-from workflow.runner import (
+from workflow.models import (
     LzaniSettings,
     ParasailSettings,
     RunSettings,

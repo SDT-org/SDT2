@@ -4,7 +4,7 @@ from typing import Iterator
 from Bio import SeqIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from workflow.runner import WorkflowResult
+from workflow.models import WorkflowResult
 
 INVALID_SYMBOLS_RE = re.compile(r"[, -]")
 INVALID_CHARACTERS_RE = re.compile(r"[^A-Z]")
