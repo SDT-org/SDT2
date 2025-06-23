@@ -2,18 +2,13 @@ from datetime import datetime
 from multiprocessing.pool import Pool
 import os
 import platform
-import sys
 import time
+
 import psutil
 
-import analyze
-import cluster
 from config import app_version
-import parse
-import postprocess
+from workflow import analyze, cluster, parse, postprocess
 from workflow.models import WorkflowResult, WorkflowRun
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
 
 
 def run_parse(fasta_path: str) -> WorkflowResult:
