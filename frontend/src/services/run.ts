@@ -3,13 +3,12 @@ import messages from "../messages";
 
 export const startRun = (docId: string, appState: AppState) =>
   window.pywebview.api
-    .start_run({
+    .start_workflow_run({
       doc_id: docId,
       cluster_method: appState.enableClustering
         ? appState.cluster_method
         : "None",
       compute_cores: appState.compute_cores,
-      export_alignments: appState.enableOutputAlignments ? "True" : "False",
       analysisMethod: appState.analysisMethod,
       lzani_score_type: appState.lzaniScoreType,
     })

@@ -3,7 +3,7 @@ from collections import namedtuple
 from typing import Literal, Dict, List
 
 DataKey = Literal[
-    "stats", "matrix", "triangle", "columns", "summary", "settings", "cluster", "seq_dict", "cluster_dir"
+    "stats", "matrix", "triangle", "columns", "summary", "settings", "cluster", "sequences", "cluster_dir", "lzani_results", "lzani_results_ids"
 ]
 
 ImageKey = Literal["heatmap", "clustermap", "distribution_histogram", "distribution_violin"]
@@ -16,9 +16,10 @@ DATA_FILES: Dict[DataKey, str] = {
     "columns": "columns.csv",
     "summary": "summary.txt",
     "settings": "settings.json",
-    "seq_dict": "seq_dict.json",
-    "cluster": "cluster_data/cluster.csv", 
-    "cluster_dir": "cluster_data",        
+    "cluster": "cluster_data/cluster.csv",
+    "cluster_dir": "cluster_data", # TODO: make a data directory list?
+    "lzani_results": "lzani_results.tsv",
+    "lzani_results_ids": "lzani_results_ids.tsv",
 }
 
 IMAGE_KEYS: List[ImageKey] = ["heatmap", "clustermap", "distribution_histogram", "distribution_violin"]

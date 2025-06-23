@@ -29,15 +29,10 @@ import messages from "../messages";
 import { Select, SelectItem } from "./Select";
 import { Switch } from "./Switch";
 
-export type RunProcessDataArgs = Pick<
-  AppState,
-  "compute_cores" | "analysisMethod"
-> & {
+export type RunSettings = Pick<AppState, "compute_cores" | "analysisMethod"> & {
   doc_id: string;
   cluster_method: AppState["cluster_method"] | "None";
-  export_alignments: "True" | "False";
   lzani_score_type: AppState["lzaniScoreType"];
-  lzaniExecutablePath?: string; // Optional: if you decide to pass this from frontend
 };
 
 const RunnerSettings = ({
@@ -408,9 +403,7 @@ const RunnerSettings = ({
                   startingRun ||
                     appState.active_run_document_id ||
                     !fileName ||
-                    docState.validation_error_id ||
-                    (appState.enableOutputAlignments &&
-                      !appState.alignmentExportPath.length),
+                    docState.validation_error_id,
                 )}
               >
                 {startingRun ? "Starting..." : "Start Analysis"}

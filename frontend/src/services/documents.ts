@@ -1,4 +1,3 @@
-import type { DocState } from "../appState";
 import { saveFileDialog } from "./files";
 
 export const saveDocument = async (

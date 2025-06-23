@@ -5,7 +5,7 @@ import type {
   SyncProgressEvent,
   SyncStateEvent,
 } from "../appState";
-import type { RunProcessDataArgs } from "../components/Runner";
+import type { RunSettings } from "../components/Runner";
 import { DistributionState } from "../distributionState";
 import { type GetDataResponse, HeatmapSettings } from "../plotTypes";
 import type { AppState } from "../src/appState";
@@ -79,7 +79,7 @@ declare global {
           key: SaveableImageKey,
           format: SaveableImageFormat,
         ) => Promise<void>;
-        start_run: (args: RunProcessDataArgs) => Promise<void>;
+        start_workflow_run: (args: RunSettings) => Promise<void>;
         set_window_title: (title: string) => Promise<void>;
         processes_info: () => Promise<string>;
         get_available_memory: () => Promise<number>;
