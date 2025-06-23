@@ -1,3 +1,4 @@
+import type { DocState } from "../appState";
 import { saveFileDialog } from "./files";
 
 export const saveDocument = async (
@@ -18,11 +19,17 @@ export const saveDocument = async (
     }
   }
 
-  return window.pywebview.api
-    .save_doc_settings(docState)
-    .then(() =>
-      window.pywebview.api.save_doc(docState.id, filename, saveAs || false),
-    );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { parsed, exportPrefix, invalid, ...docStateToSend } = docState;
+
+  return (
+    window.pywebview.api
+      // biome-ignore lint/suspicious/noExplicitAny: backend type is different
+      .save_doc_settings(docStateToSend as any)
+      .then(() =>
+        window.pywebview.api.save_doc(docState.id, filename, saveAs || false),
+      )
+  );
 };
 
 export const closeDocument = (docId: string) =>
