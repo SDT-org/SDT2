@@ -10,7 +10,7 @@ from workflow import parse, postprocess
 current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(current_file_path, "../../"))
 sys.path.append(os.path.join(current_file_path, "."))
-import cluster
+import cluster_rename_to_something_else
 import numpy as np
 from multiprocessing import cpu_count as get_cpu_count
 from tempfile import TemporaryDirectory
@@ -22,9 +22,8 @@ from workflow.models import (
     RunSettings,
     WorkflowResult,
     WorkflowRun,
-    run_parse,
-    run_process,
 )
+from workflow.runner import run_process, run_parse
 from document_state import save_document_settings
 from app_settings import (
     add_recent_file,
@@ -458,7 +457,7 @@ class Api:
         )
         doc_paths = build_document_paths(doc.tempdir_path)
         if args["output_cluster"] == True:
-            cluster.export(
+            cluster_rename_to_something_else.export(
                 matrix_path=doc_paths.matrix,
                 cluster_data_output_dir=doc_paths.cluster_dir,  # Use the new cluster_dir path
                 seq_dict_path=doc_paths.seq_dict,  # Pass the seq_dict path
@@ -558,7 +557,7 @@ class Api:
             "matrix": numpy_to_triangle(matrix_np).tolist(),
             "tickText": sorted_ids,
         }
-        seqid_clusters_df = cluster.get_clusters_dataframe(
+        seqid_clusters_df = cluster_rename_to_something_else.get_clusters_dataframe(
             matrix_np, method, threshold, sorted_ids
         )
         seqid_clusters_df = seqid_clusters_df.rename(
@@ -568,7 +567,9 @@ class Api:
             }
         )
         clusters = seqid_clusters_df["cluster"].tolist()
-        reorder_clusters = cluster.order_clusters_sequentially(clusters)
+        reorder_clusters = cluster_rename_to_something_else.order_clusters_sequentially(
+            clusters
+        )
         seqid_clusters_df["cluster"] = reorder_clusters
         cluster_data = seqid_clusters_df.to_dict(orient="records")
 
