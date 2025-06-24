@@ -5,12 +5,9 @@ from heatmap import dataframe_to_triangle
 
 def save_matrix_to_csv(df, matrix_path, triangle_path):
     index = df.index
-    try:
-        triangle = dataframe_to_triangle(df)
-        triangle.index = index
-        triangle.to_csv(triangle_path, mode="wt", header=False, index=True, sep=",")
-    except Exception:
-        pass
+    triangle = dataframe_to_triangle(df)
+    triangle.index = index
+    triangle.to_csv(triangle_path, mode="wt", header=False, index=True, sep=",")
     df.to_csv(matrix_path, mode="w", header=False, index=True, sep=",")
 
 
