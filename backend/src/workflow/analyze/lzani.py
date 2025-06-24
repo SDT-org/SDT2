@@ -58,7 +58,7 @@ def run(
         settings.lzani.score_type,
     )
 
-    return result._replace(matrix=matrix)
+    return result._replace(distance_matrix=matrix)
 
 
 def lzani_to_full_matrix(results_tsv_path, ids_tsv_path, score_column="ani"):

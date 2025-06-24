@@ -19,8 +19,10 @@ def run_parse(fasta_path: str) -> WorkflowResult:
         max_sequence_length=0,
         warnings=[],
         errors=[],
-        matrix=numpy.ndarray([]),
+        distance_matrix=numpy.ndarray([]),
+        similarity_matrix=numpy.ndarray([]),
         is_aa=False,
+        min_score=0,
     )
     result = parse.run(result, fasta_path)
     if result.errors:
