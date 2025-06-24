@@ -30,8 +30,8 @@ def run(
 
     print(f"\rNumber of sequences: {len(seq_ids)}\r", flush=True)
     print(f"\rNumber of pairs: {total_pairs}\r", flush=True)
-
-    bound_process_pair = partial(process_pair, result.is_aa)
+    print(result.is_aa)
+    bound_process_pair = partial(process_pair, is_aa=result.is_aa)
 
     with pool:
         results = pool.imap(bound_process_pair, id_sequence_pairs)
@@ -57,7 +57,7 @@ def run(
 def supports_striped_32():
     return parasail.can_use_sse41() or parasail.can_use_avx2() or parasail.can_use_neon()
 
-def process_pair(id_sequence_pair, is_aa: bool):
+def process_pair(id_sequence_pair, is_aa):
     id1 = id_sequence_pair[0][0]
     id2 = id_sequence_pair[0][1]
     seq1 = id_sequence_pair[1][0]

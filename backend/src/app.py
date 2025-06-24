@@ -377,6 +377,7 @@ class Api:
         workflow_runs[doc.id] = workflow_run
 
         num_processes = max(min(args.get("compute_cores", 1), get_cpu_count()), 1)
+        update_document(doc.id, view="loader")
         with Pool(num_processes) as pool:
             result = run_process(workflow_run, pool, cancel_event)
 
