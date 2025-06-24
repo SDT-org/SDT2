@@ -31,10 +31,11 @@ class RunSettings(NamedTuple):
 class WorkflowResult(NamedTuple):
     records: Iterator[SeqRecord]
     record_count: int
-    seq_dict: dict[str, str] | None
+    ordered_ids: List[str]
+    seq_dict: dict[str, str]
     max_sequence_length: int
-    matrix: DataFrame | None
-    is_aa: bool | None
+    matrix: DataFrame
+    is_aa: bool
     warnings: List[str]
     errors: List[str]
 

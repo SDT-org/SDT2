@@ -14,13 +14,6 @@ def run(
     pool,
     cancel_event,
 ) -> WorkflowResult:
-    # process_result = run_lzani_all2all(
-    #     lz_ani_executable=settings.lzani.exec_path,
-    #     input_fasta=settings.fasta_path,
-    #     results_tsv_path=settings.doc_paths.lzani_results,
-    #     ids_tsv_path=settings.doc_paths.lzani_results_ids,
-    # )
-
     process = subprocess.Popen(
         [
             os.path.abspath(os.path.normpath(settings.lzani.exec_path)),
@@ -34,7 +27,7 @@ def run(
             "--out-format",
             "complete",
             "--threads",
-            "0",
+            "0",  # 0 will auto-detect
             "--verbose",
             "2",
         ],
@@ -87,26 +80,3 @@ def lzani_to_full_matrix(results_tsv_path, ids_tsv_path, score_column="ani"):
     ) / 2  ## average the two triangles for symmetic matrix??
     np.fill_diagonal(symmetric_matrix.values, 100.0)
     return symmetric_matrix
-
-
-# def run_lzani_all2all(lz_ani_executable, input_fasta, results_tsv_path, ids_tsv_path):
-#     abs_lzani_executable_path = os.path.abspath(os.path.normpath(lz_ani_executable))
-
-#     cmd = [
-#         abs_lzani_executable_path,
-#         "all2all",
-#         "--in-fasta",
-#         input_fasta,
-#         "--out",
-#         results_tsv_path,
-#         "--out-ids",
-#         ids_tsv_path,
-#         "--out-format",
-#         "complete",
-#         "--threads",
-#         0,  # TODO: make sure autodetect (0) is what we want to do...
-#         "--verbose",
-#         "2",
-#     ]
-
-#     return subprocess.run(cmd, check=True, capture_output=True, text=True)

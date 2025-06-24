@@ -14,7 +14,8 @@ def run(
     pool,
     cancel_event
 ) -> WorkflowResult:
-    seq_ids = list(result.records.keys())
+    seq_ids = list(result.seq_dict.keys())
+    seq_dict = result.seq_dict
     n = len(seq_ids)
     dist_scores = zeros((n, n))
     order = {seq_id: i for i, seq_id in enumerate(seq_ids)}
@@ -25,30 +26,31 @@ def run(
         id_sequence_pairs.append([ids_tuple, [seq_dict[ids_tuple[0]], seq_dict[ids_tuple[1]]]])
 
     total_pairs = len(id_sequence_pairs)
-    set_pair_count(total_pairs)
+    # set_pair_count(total_pairs)
 
     print(f"\rNumber of sequences: {len(seq_ids)}\r", flush=True)
     print(f"\rNumber of pairs: {total_pairs}\r", flush=True)
 
-    bound_process_pair = partial(process_pair, is_aa)
+    bound_process_pair = partial(process_pair, result.is_aa)
 
     with pool:
         results = pool.imap(bound_process_pair, id_sequence_pairs)
         for i, result_item in enumerate(results, 1):
-            if cancel_event.is_set(): return dist_scores, order
+            if cancel_event.is_set(): return result
             if result_item is None:
-                increment_pair_progress(); continue
+                set_progress(round(i / total_pairs * 100))
+                continue
+                # increment_pair_progress(); continue
             (seqid1_key, seqid2_key), score = result_item
             if seqid1_key in order and seqid2_key in order:
                 idx1, idx2 = order[seqid1_key], order[seqid2_key]
                 dist_scores[idx1, idx2] = score
                 dist_scores[idx2, idx1] = score
-            increment_pair_progress()
+            # increment_pair_progress()
 
     return result._replace(
-        scores=distance_scores,
         ordered_ids=list(order.keys()),
-        matrix=distance_scores,
+        matrix=dist_scores,
         is_aa=result.is_aa
     )
 

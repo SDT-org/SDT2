@@ -17,8 +17,6 @@ def run(result: WorkflowResult, fasta_path: str) -> WorkflowResult:
     if not filetype or filetype != "text/fasta":
         result.errors.append("INVALID_FILE_TYPE")
         return result
-    else:
-        result = result._replace(filetype=filetype)
 
     try:
         unparsed_records = SeqIO.parse(fasta_path, "fasta")

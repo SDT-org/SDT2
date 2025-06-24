@@ -3,6 +3,7 @@ from multiprocessing.pool import Pool
 import os
 import sys
 import json
+from typing import Dict, List
 import urllib.parse
 
 current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
@@ -78,7 +79,8 @@ window = None
 pool = None
 cancel_event = multiprocessing.Event()
 start_time = None  # TODO: move into workflow
-workflow_runs = {}
+workflow_runs: Dict[str, WorkflowRun] = {}
+parsed_workflow_results: Dict[str, WorkflowResult] = {}
 
 
 def do_cancel_run():
@@ -201,6 +203,8 @@ def handle_open_file(filepath: str, doc_id: str | None):
         result = run_parse(filepath)
         if result.errors:
             raise Exception(result.errors[0])
+
+        parsed_workflow_results[doc_id] = result
 
         compute_stats = get_compute_stats(result)
         new_document(
@@ -339,11 +343,13 @@ class Api:
             raise Exception("Multiple runs are not supported")
 
         doc = get_document(args["doc_id"])
-        workflow_run = workflow_runs.get(doc.id)
-        if not workflow_run or not workflow_run.result:
-            raise Exception("Workflow parsing failed")
+        parsed_result = parsed_workflow_results.get(doc.id)
+        if not parsed_result:
+            raise Exception(
+                "Parsed workflow result not found. Close the document and reselect the file."
+            )
 
-        if workflow_run.result.errors:
+        if parsed_result.errors:
             raise Exception("Workflow has errors that must be resolved.")
 
         settings = RunSettings(
@@ -362,11 +368,13 @@ class Api:
         )
 
         workflow_run = WorkflowRun(
-            result=workflow_run.result,  # preserve parsing result
+            result=parsed_result,
             settings=settings,
             stage="",
             progress=0,
         )
+
+        workflow_runs[doc.id] = workflow_run
 
         num_processes = max(min(args.get("compute_cores", 1), get_cpu_count()), 1)
         with Pool(num_processes) as pool:
@@ -376,7 +384,7 @@ class Api:
             raise Exception(f"Workflow processing step failed: {result.errors}")
 
         set_state(active_run_document_id=None)
-        workflow_runs[doc.id] = None
+        del workflow_runs[doc.id]
         update_document(doc.id, view="viewer")
 
     def get_workflow_run_status(self, doc_id: str):
