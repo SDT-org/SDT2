@@ -41,7 +41,7 @@ def residue_check(seq):
 
 
 def parse_records(input: Iterator[SeqRecord], result: WorkflowResult) -> WorkflowResult:
-    if result.records:
+    if result.seq_dict:
         # If records are already parsed, we can skip parsing again
         return result
 
@@ -51,52 +51,46 @@ def parse_records(input: Iterator[SeqRecord], result: WorkflowResult) -> Workflo
     sequence_names = set()
     seq_dict = result.seq_dict or {}
 
-    def process_generator():
-        nonlocal max_length, is_aa, count, sequence_names
+    for record in input:
+        count += 1
 
-        for record in input:
-            count += 1
+        if not record.id:
+            result.errors.append("MISSING_SEQUENCE_ID")
+            return result
 
-            if not record.id:
-                result.errors.append("MISSING_SEQUENCE_ID")
-                return
+        if not record.seq:
+            result.errors.append("ZERO_LENGTH_SEQUENCE")
+            return result
 
-            if not record.seq:
-                result.errors.append("ZERO_LENGTH_SEQUENCE")
-                return
+        if record.id in sequence_names:
+            result.errors.append("DUPLICATE_SEQUENCE_NAME")
+            return result
 
-            if record.id in sequence_names:
-                result.errors.append("DUPLICATE_SEQUENCE_NAME")
-                return
+        sequence_names.add(record.id)
 
-            sequence_names.add(record.id)
+        # replace some characters so we can export to CSV later
+        formatted_id = INVALID_SYMBOLS_RE.sub("_", record.id)[:50]
+        upcased_sequence = str(record.seq).upper()
+        formatted_sequence = INVALID_CHARACTERS_RE.sub("", upcased_sequence)
 
-            # replace some characters so we can export to CSV later
-            formatted_id = INVALID_SYMBOLS_RE.sub("_", record.id)[:50]
-            upcased_sequence = str(record.seq).upper()
-            formatted_sequence = INVALID_CHARACTERS_RE.sub("", upcased_sequence)
+        if not formatted_sequence:
+            result.errors.append("ZERO_LENGTH_SEQUENCE")
+            return result
 
-            if not formatted_sequence:
-                result.errors.append("ZERO_LENGTH_SEQUENCE")
-                return
+        # check every three sequences for amino acids
+        # TODO: do we want to check this every time?
+        if is_aa == None and count % 3 == 0:
+            is_aa = residue_check(formatted_sequence)
 
-            # check every three sequences for amino acids
-            # TODO: do we want to check this every time?
-            if is_aa == None and count % 3 == 0:
-                is_aa = residue_check(formatted_sequence)
+        max_length = max(max_length, len(record.seq))
 
-            max_length = max(max_length, len(record.seq))
+        seq_dict[formatted_id] = formatted_sequence
 
-            seq_dict[formatted_id] = formatted_sequence
-
-            yield SeqRecord(Seq(formatted_sequence), id=formatted_id, description="")
-
-        if count < 2:
-            result.errors.append("NOT_ENOUGH_SEQUENCES")
+    if count < 2:
+        result.errors.append("NOT_ENOUGH_SEQUENCES")
 
     return result._replace(
-        records=process_generator(),
+        seq_dict=seq_dict,
         max_sequence_length=max_length,
         is_aa=is_aa,
-        record_count=count,
     )

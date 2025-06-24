@@ -4,6 +4,7 @@ from typing import Iterator, List, Literal, NamedTuple
 from datetime import datetime
 
 from Bio.SeqRecord import SeqRecord
+import numpy
 from pandas.core.frame import DataFrame
 
 from document_paths import DocumentPaths
@@ -29,12 +30,10 @@ class RunSettings(NamedTuple):
 
 
 class WorkflowResult(NamedTuple):
-    records: Iterator[SeqRecord]
-    record_count: int
     ordered_ids: List[str]
     seq_dict: dict[str, str]
     max_sequence_length: int
-    matrix: DataFrame
+    matrix: numpy.ndarray
     is_aa: bool
     warnings: List[str]
     errors: List[str]

@@ -3,7 +3,7 @@ from multiprocessing.pool import Pool
 import os
 import platform
 import time
-from pandas.core.frame import DataFrame
+import numpy
 
 import psutil
 
@@ -14,20 +14,18 @@ from workflow.models import WorkflowResult, WorkflowRun
 
 def run_parse(fasta_path: str) -> WorkflowResult:
     result = WorkflowResult(
-        records=iter([]),
-        record_count=0,
         seq_dict={},
         ordered_ids=[],
         max_sequence_length=0,
         warnings=[],
         errors=[],
-        matrix=DataFrame(),
+        matrix=numpy.ndarray([]),
         is_aa=False,
     )
     result = parse.run(result, fasta_path)
     if result.errors:
         return result
-
+    print(result.seq_dict)
     return result
 
 
@@ -59,19 +57,11 @@ def run_process(workflow_run: WorkflowRun, pool: Pool, cancel_event) -> Workflow
     #     if result.errors:
     #         return result
 
-    #     result = cluster.jobs[settings.analysis_method].run(result, settings)
-    #     if result.errors:
-    #         return result
-
     workflow_run.set_stage("Finalizing")
 
-    result = postprocess.initial.run(result, settings)
+    result = postprocess.run(result, settings)
     if result.errors:
         return result
-
-    # result = postprocess.jobs[settings.analysis_method].run(result, settings)
-    # if result.errors:
-    #     return result
 
     end_time, end_counter = datetime.now(), time.perf_counter()
     file_name = os.path.basename(settings.fasta_path)
