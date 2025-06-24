@@ -9,7 +9,7 @@ def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
     doc_paths = settings.doc_paths
     matrix, ordered_ids = result.matrix, result.ordered_ids
 
-    seq_stats = get_seq_stats()
+    seq_stats = get_seq_stats(result.seq_dict)
     df = DataFrame(matrix, index=ordered_ids, columns=ordered_ids)
     save_cols_to_csv(df, doc_paths.columns)
     save_stats_to_csv(seq_stats, doc_paths.stats)
