@@ -542,7 +542,11 @@ class Api:
             self.load_data_and_stats(doc_id)
         )
         heat_data = DataFrame(data, index=tick_text)
+        # print("input")
+        print(heat_data)
         heat_data = dataframe_to_triangle(heat_data)
+        # print("output")
+        print(heat_data)
         parsedData = heat_data.values.tolist()
         data_to_dump = dict(
             metadata=dict(minVal=min_val, maxVal=max_val),

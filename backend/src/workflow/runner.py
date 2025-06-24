@@ -25,7 +25,7 @@ def run_parse(fasta_path: str) -> WorkflowResult:
     result = parse.run(result, fasta_path)
     if result.errors:
         return result
-    print(result.seq_dict)
+
     return result
 
 

@@ -8,7 +8,7 @@ from workflow.models import RunSettings, WorkflowResult
 
 def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
     doc_paths = settings.doc_paths
-    matrix, ordered_ids = result.matrix, result.ordered_ids
+    matrix, ordered_ids = result.similarity_matrix, result.ordered_ids
 
     seq_stats = get_seq_stats(result.seq_dict)
     df = DataFrame(matrix, index=ordered_ids, columns=ordered_ids)

@@ -21,12 +21,12 @@ def run(
     order = {seq_id: i for i, seq_id in enumerate(seq_ids)}
     combos = list(cwr(seq_ids, 2))
     id_sequence_pairs = []
+    min_score = 0
 
     for ids_tuple in combos:
         id_sequence_pairs.append([ids_tuple, [seq_dict[ids_tuple[0]], seq_dict[ids_tuple[1]]]])
 
     total_pairs = len(id_sequence_pairs)
-    # set_pair_count(total_pairs)
 
     print(f"\rNumber of sequences: {len(seq_ids)}\r", flush=True)
     print(f"\rNumber of pairs: {total_pairs}\r", flush=True)
@@ -46,12 +46,18 @@ def run(
                 idx1, idx2 = order[seqid1_key], order[seqid2_key]
                 dist_scores[idx1, idx2] = score
                 dist_scores[idx2, idx1] = score
+                if min_score is None or score < min_score:
+                    min_score = score
             progress = int((i / total_pairs) * 100)
             set_progress(progress)
 
+
+    # print("dist_scores\n", dist_scores)
+
     return result._replace(
         ordered_ids=list(order.keys()),
-        matrix=dist_scores,
+        distance_matrix=dist_scores,
+        min_score=min_score
     )
 
 def supports_striped_32():
