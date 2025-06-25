@@ -83,7 +83,6 @@ def parse_records(input: Iterator[SeqRecord], result: WorkflowResult) -> Workflo
             is_aa = residue_check(formatted_sequence)
 
         max_length = max(max_length, len(record.seq))
-
         seq_dict[formatted_id] = formatted_sequence
 
     if count < 2:

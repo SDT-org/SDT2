@@ -52,7 +52,6 @@ def run(
             set_progress(progress)
 
 
-    # print("dist_scores\n", dist_scores)
 
     return result._replace(
         ordered_ids=list(order.keys()),
@@ -88,7 +87,6 @@ def get_stats_score(seq1, seq2, open_penalty, extend_penalty, matrix) -> float:
     num_ungapped_cols = len(seq1) + len(seq2) - result.length
     identity_score_percent = (float(result.matches) / num_ungapped_cols) * 100.0
     distance_score = 100.0 - identity_score_percent
-
     return distance_score
 
 def get_similarity(seq1, seq2):
@@ -106,12 +104,13 @@ def get_similarity(seq1, seq2):
 
     similarity = float((float(dist)) / (len(seq1) - gaps))
     # convert to percentile
-    similarity_percentile = similarity * 100
-    return similarity_percentile
+
+    return similarity
 
 def get_traceback_score(seq1, seq2, open_penalty, extend_penalty, matrix) -> float:
     try:
         result = parasail.nw_trace(seq1, seq2, open_penalty, extend_penalty, matrix)
+        print(result,"result_traceback")
         query = result.traceback.query
     except:
         raise Exception("PARASAIL_TRACEBACK")

@@ -356,7 +356,7 @@ class Api:
             fasta_path=doc.filename,
             doc_paths=build_document_paths(doc.tempdir_path),
             output_path=doc.tempdir_path,
-            cluster_method=args.get("cluster_method", None),
+            cluster_method=args.get("cluster_method", ""),
             analysis_method=args.get("analysisMethod", "parasail"),
             lzani=LzaniSettings(
                 exec_path=get_lzani_exec_path(),
@@ -497,6 +497,7 @@ class Api:
 
     def load_data_and_stats(self, doc_id: str):
         doc = get_document(doc_id)
+        print(doc_id, "app.py")
         doc_paths = build_document_paths(doc.tempdir_path)
         with open(doc_paths.matrix, "r") as temp_f:
             col_count = [len(l.split(",")) for l in temp_f.readlines()]
@@ -542,11 +543,9 @@ class Api:
             self.load_data_and_stats(doc_id)
         )
         heat_data = DataFrame(data, index=tick_text)
-        # print("input")
-        print(heat_data)
+
         heat_data = dataframe_to_triangle(heat_data)
-        # print("output")
-        print(heat_data)
+
         parsedData = heat_data.values.tolist()
         data_to_dump = dict(
             metadata=dict(minVal=min_val, maxVal=max_val),

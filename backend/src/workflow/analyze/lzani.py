@@ -5,6 +5,7 @@ from typing import Callable
 import pandas as pd
 import numpy as np
 from workflow.models import RunSettings, WorkflowResult
+from pandas import DataFrame
 
 
 def run(
@@ -52,31 +53,30 @@ def run(
         result.errors.append(f"Error running LZ-ANI: {stderr.strip()}")
         return result
 
-    matrix = lzani_to_full_matrix(
+    matrix, ids = lzani_to_full_matrix(
         settings.doc_paths.lzani_results,
         settings.doc_paths.lzani_results_ids,
         settings.lzani.score_type,
     )
-
-    return result._replace(distance_matrix=matrix)
+    
+    return result._replace(distance_matrix=matrix, ordered_ids=ids)
 
 
 def lzani_to_full_matrix(results_tsv_path, ids_tsv_path, score_column="ani"):
     all_ids = pd.read_csv(ids_tsv_path, sep="\t")["id"].tolist()
     df = pd.read_csv(results_tsv_path, sep="\t")
+    
     matrix = (
         df.pivot_table(
             index="query", columns="reference", values=score_column, aggfunc="first"
         )
         * 100
     )
-    matrix = matrix.reindex(
-        index=all_ids, columns=all_ids
-    )  ## can probs plug in reorder logic here
-    matrix = matrix.fillna(25.0)  ## filling NAs with biological floor
+    matrix = matrix.reindex(index=all_ids, columns=all_ids)
+    matrix = matrix.fillna(25.0)
     matrix = matrix.replace(0.0, 25.0)
-    symmetric_matrix = (
-        matrix + matrix.T
-    ) / 2  ## average the two triangles for symmetic matrix??
+    
+    symmetric_matrix = (matrix + matrix.T) / 2
     np.fill_diagonal(symmetric_matrix.values, 100.0)
-    return symmetric_matrix
+    #returning np arrau and ids as tuple instead of DF
+    return symmetric_matrix.values, all_ids
