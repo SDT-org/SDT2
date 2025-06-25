@@ -9,7 +9,8 @@ from workflow.models import RunSettings, WorkflowResult
 
 def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
     doc_paths = settings.doc_paths
-    similarity_matrix, ordered_ids = 100 - result.distance_matrix, result.ordered_ids
+    print(result.distance_matrix)
+    similarity_matrix, ordered_ids = result.distance_matrix, result.ordered_ids
 
     seq_stats = get_seq_stats(result.seq_dict)
     df = DataFrame(similarity_matrix, index=ordered_ids, columns=ordered_ids)
@@ -29,22 +30,3 @@ def get_seq_stats(seq_dict: Dict[str, str]) -> dict[str, list[float]]:
         seq_stats[id].append(gcCount)
         seq_stats[id].append(genLen)
     return seq_stats
-def lzani_to_full_matrix(results_tsv_path, ids_tsv_path, score_column="ani"):
-    all_ids = pd.read_csv(ids_tsv_path, sep="\t")["id"].tolist()
-    df = pd.read_csv(results_tsv_path, sep="\t")
-    matrix = (
-        df.pivot_table(
-            index="query", columns="reference", values=score_column, aggfunc="first"
-        )
-        * 100
-    )
-    matrix = matrix.reindex(
-        index=all_ids, columns=all_ids
-    )  ## can probs plug in reorder logic here
-    matrix = matrix.fillna(25.0)  ## filling NAs with biological floor
-    matrix = matrix.replace(0.0, 25.0)
-    symmetric_matrix = (
-        matrix + matrix.T
-    ) / 2  ## average the two triangles for symmetic matrix??
-    np.fill_diagonal(symmetric_matrix.values, 100.0)
-    return symmetric_matrix

@@ -30,12 +30,14 @@ class RunSettings(NamedTuple):
 
 
 class WorkflowResult(NamedTuple):
-    ordered_ids: List[str]
     seq_dict: dict[str, str]
+    ordered_ids: List[str]
+    reordered_ids: List[str]
     min_score: float
     max_sequence_length: int
     distance_matrix: numpy.ndarray
-    similarity_matrix: numpy.ndarray
+    similarity_matrix: DataFrame 
+    reordered_ids: List[str]
     is_aa: bool
     warnings: List[str]
     errors: List[str]

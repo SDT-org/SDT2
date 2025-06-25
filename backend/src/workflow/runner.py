@@ -4,7 +4,7 @@ import os
 import platform
 import time
 import numpy
-
+from pandas import DataFrame
 import psutil
 
 from config import app_version
@@ -16,11 +16,12 @@ def run_parse(fasta_path: str) -> WorkflowResult:
     result = WorkflowResult(
         seq_dict={},
         ordered_ids=[],
+        reordered_ids=[],
         max_sequence_length=0,
         warnings=[],
         errors=[],
         distance_matrix=numpy.ndarray([]),
-        similarity_matrix=numpy.ndarray([]),
+        similarity_matrix=DataFrame(),
         is_aa=False,
         min_score=0,
     )

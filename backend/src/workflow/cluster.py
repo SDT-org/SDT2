@@ -43,14 +43,14 @@ def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
     if ordered_ids:
         reordered_ids = [ordered_ids[i] for i in reordered_indices]
         if hasattr(distance_matrix, "loc"):
-            reordered_matrix = distance_matrix.loc[reordered_ids, reordered_ids]
+            reordered_matrix = matrix_np[np.ix_(reordered_indices, reordered_indices)]
         else:
             reordered_matrix = matrix_np[np.ix_(reordered_indices, reordered_indices)]
     else:
         reordered_matrix = matrix_np[np.ix_(reordered_indices, reordered_indices)]
         reordered_ids = reordered_indices
 
-    return result._replace(matrix=reordered_matrix, ordered_ids=reordered_ids)
+    return result._replace(distance_matrix=reordered_matrix, reordered_ids=reordered_ids)
 
 
 @memory.cache
@@ -69,6 +69,7 @@ def calculate_linkage(distance_matrix: np.ndarray, method: str) -> np.ndarray:
     else:
         # For other methods, use the distance matrix directly
         start = time.perf_counter()
+        print(distance_matrix)
         y = squareform(distance_matrix)
         metric = "precomputed"
         end = time.perf_counter()
