@@ -70,13 +70,15 @@ def lzani_to_full_matrix(results_tsv_path, ids_tsv_path, score_column="ani"):
         df.pivot_table(
             index="query", columns="reference", values=score_column, aggfunc="first"
         )
-        * 100
+       
     )
     matrix = matrix.reindex(index=all_ids, columns=all_ids)
+    matrix = matrix * 100
     matrix = matrix.fillna(25.0)
     matrix = matrix.replace(0.0, 25.0)
+    symmetric_matrix = (matrix + matrix.T) / 2
     
     symmetric_matrix = (matrix + matrix.T) / 2
     np.fill_diagonal(symmetric_matrix.values, 100.0)
-    #returning np arrau and ids as tuple instead of DF
-    return symmetric_matrix.values, all_ids
+    distance_matrix = 100 - symmetric_matrix
+    return distance_matrix, all_ids

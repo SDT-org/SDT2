@@ -53,7 +53,7 @@ from shutil import copy
 from debug import open_doc_folder
 from config import app_version, dev_frontend_host
 from constants import matrix_filetypes, default_window_title
-from heatmap import (
+from transformations import (
     dataframe_to_triangle,
     triangle_to_matrix,
     numpy_to_triangle,
@@ -497,7 +497,6 @@ class Api:
 
     def load_data_and_stats(self, doc_id: str):
         doc = get_document(doc_id)
-        print(doc_id, "app.py")
         doc_paths = build_document_paths(doc.tempdir_path)
         with open(doc_paths.matrix, "r") as temp_f:
             col_count = [len(l.split(",")) for l in temp_f.readlines()]

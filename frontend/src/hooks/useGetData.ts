@@ -17,7 +17,8 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
   const [metaData, setMetaData] = React.useState<
     GetDataResponse["metadata"] | undefined
   >();
-
+  console.log("useGetData ticks", tickText);
+  console.log("useGetData heat", heatmapData);
   // TODO: replace this entire thing, docstate already gets pushed by the backend
   // so only make this set the defaults. also move all the data into the document
   // so we aren't parsing it out here.

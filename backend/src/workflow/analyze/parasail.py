@@ -30,7 +30,6 @@ def run(
 
     print(f"\rNumber of sequences: {len(seq_ids)}\r", flush=True)
     print(f"\rNumber of pairs: {total_pairs}\r", flush=True)
-    print(result.is_aa)
     bound_process_pair = partial(process_pair, is_aa=result.is_aa)
 
     with pool:
@@ -110,7 +109,6 @@ def get_similarity(seq1, seq2):
 def get_traceback_score(seq1, seq2, open_penalty, extend_penalty, matrix) -> float:
     try:
         result = parasail.nw_trace(seq1, seq2, open_penalty, extend_penalty, matrix)
-        print(result,"result_traceback")
         query = result.traceback.query
     except:
         raise Exception("PARASAIL_TRACEBACK")

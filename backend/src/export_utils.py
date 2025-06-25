@@ -1,6 +1,6 @@
 import json
 from pandas.core.frame import DataFrame
-from heatmap import dataframe_to_triangle
+from transformations import dataframe_to_triangle
 
 
 def save_matrix_to_csv(df, matrix_path, triangle_path):
