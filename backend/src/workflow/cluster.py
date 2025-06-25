@@ -17,16 +17,17 @@ memory = Memory(cache_dir.name, verbose=1)
 
 
 def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
-    if result.matrix is None:
+    distance_matrix=  result.distance_matrix
+    if result.distance_matrix is None:
         return result
 
     cluster_method = settings.cluster_method
 
-    if hasattr(result.matrix, "to_numpy"):
-        matrix_np = result.matrix
-        ordered_ids = result.matrix.index.tolist()
+    if hasattr(distance_matrix, "to_numpy"):
+        matrix_np = distance_matrix
+        ordered_ids = result.ordered_ids
     else:
-        matrix_np = result.matrix
+        matrix_np = distance_matrix
         ordered_ids = result.ordered_ids or []
 
     distance_matrix = matrix_np
@@ -41,8 +42,8 @@ def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
 
     if ordered_ids:
         reordered_ids = [ordered_ids[i] for i in reordered_indices]
-        if hasattr(result.matrix, "loc"):
-            reordered_matrix = result.matrix.loc[reordered_ids, reordered_ids]
+        if hasattr(distance_matrix, "loc"):
+            reordered_matrix = distance_matrix.loc[reordered_ids, reordered_ids]
         else:
             reordered_matrix = matrix_np[np.ix_(reordered_indices, reordered_indices)]
     else:
