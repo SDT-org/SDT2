@@ -57,6 +57,7 @@ from transformations import (
     dataframe_to_triangle,
     triangle_to_matrix,
     numpy_to_triangle,
+    read_csv_matrix,
 )
 from document_paths import ImageKey, build_document_paths
 
@@ -156,49 +157,38 @@ def handle_open_file(filepath: str, doc_id: str | None):
 
     if filetype in matrix_filetypes:
         copy(filepath, unique_dir)
-        # Maybe can remove this if we can find a way to make pandas
-        # infer the max column length based on the latest column length
-        with open(filepath, "r") as temp_f:
-            col_count = [len(l.split(",")) for l in temp_f.readlines()]
-            column_names = [i for i in range(0, max(col_count))]
-            df = read_csv(
-                filepath,
-                delimiter=",",
-                index_col=0,
-                header=None,
-                names=column_names,
-            )
-            # Test that the file is gonna work in get_data
-            df.index.tolist()
-            data = df.to_numpy()
-            diag_mask = eye(data.shape[0], dtype=bool)
-            data_no_diag = where(diag_mask, nan, data)
-            int(nanmin(data_no_diag))
-            int(nanmax(data_no_diag))
-            save_cols_to_csv(df, doc_paths.columns)
+        df = read_csv_matrix(filepath)
+        # Test that the file is gonna work in get_data
+        df.index.tolist()
+        data = df.to_numpy()
+        diag_mask = eye(data.shape[0], dtype=bool)
+        data_no_diag = where(diag_mask, nan, data)
+        int(nanmin(data_no_diag))
+        int(nanmax(data_no_diag))
+        save_cols_to_csv(df, doc_paths.columns)
 
-            # We need a full matrix for doing things but we don't have
-            # it yet because this was a .txt/.csv lower triangle matrix
-            matrix_dataframe = triangle_to_matrix(df)
-            matrix_dataframe.to_csv(
-                doc_paths.matrix,
-                mode="w",
-                header=False,
-                index=True,
-            )
-            new_document(
-                doc_id,
-                view="viewer",
-                filename=filepath,
-                filemtime=os.path.getmtime(filepath),
-                tempdir_path=unique_dir,
-                basename=basename,
-                pair_progress=0,
-                pair_count=0,
-                filetype=filetype,
-            )
-            add_recent_file(filepath)
-            return [doc_id, filepath]
+        # We need a full matrix for doing things but we don't have
+        # it yet because this was a .txt/.csv lower triangle matrix
+        matrix_dataframe = triangle_to_matrix(df)
+        matrix_dataframe.to_csv(
+            doc_paths.matrix,
+            mode="w",
+            header=False,
+            index=True,
+        )
+        new_document(
+            doc_id,
+            view="viewer",
+            filename=filepath,
+            filemtime=os.path.getmtime(filepath),
+            tempdir_path=unique_dir,
+            basename=basename,
+            pair_progress=0,
+            pair_count=0,
+            filetype=filetype,
+        )
+        add_recent_file(filepath)
+        return [doc_id, filepath]
     else:
         result = run_parse(filepath)
         if result.errors:
@@ -538,13 +528,20 @@ class Api:
         return data, tick_text, min_val, max_val, ids, identity_scores, stats_df
 
     def get_data(self, doc_id: str):
-        data, tick_text, min_val, max_val, ids, identity_scores, stats_df = (
+        data, tick_text, _, _, ids, identity_scores, stats_df = (
             self.load_data_and_stats(doc_id)
         )
         heat_data = DataFrame(data, index=tick_text)
 
         heat_data = dataframe_to_triangle(heat_data)
-
+        
+        # Recalculate min/max after conversion to similarity values
+        heat_data_np = heat_data.to_numpy()
+        diag_mask = eye(heat_data_np.shape[0], dtype=bool)
+        heat_data_no_diag = where(diag_mask, nan, heat_data_np)
+        min_val = int(nanmin(heat_data_no_diag))
+        max_val = int(nanmax(heat_data_no_diag))
+        
         parsedData = heat_data.values.tolist()
         data_to_dump = dict(
             metadata=dict(minVal=min_val, maxVal=max_val),
@@ -578,6 +575,10 @@ class Api:
             }
         )
         clusters = seqid_clusters_df["cluster"].tolist()
+        
+        # Store original cluster numbers before reordering
+        seqid_clusters_df["original_cluster"] = seqid_clusters_df["cluster"]
+        
         reorder_clusters = cluster.order_clusters_sequentially(clusters)
         seqid_clusters_df["cluster"] = reorder_clusters
         cluster_data = seqid_clusters_df.to_dict(orient="records")

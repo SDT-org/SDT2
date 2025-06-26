@@ -52,13 +52,12 @@ def run_process(workflow_run: WorkflowRun, pool: Pool, cancel_event) -> Workflow
     if result.errors:
         return result
 
-    # Skip clustering for now...
-    # if settings.cluster_method and settings.cluster_method != "None":
-    #     workflow_run.set_stage("Clustering")
+    if settings.cluster_method and settings.cluster_method != "None":
+        workflow_run.set_stage("Clustering")
 
-    #     result = cluster.initial.run(result, settings)
-    #     if result.errors:
-    #         return result
+        result = cluster.run(result, settings)
+        if result.errors:
+            return result
 
     workflow_run.set_stage("Finalizing")
 

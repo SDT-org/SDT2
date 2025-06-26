@@ -90,9 +90,12 @@ export const formatClustermapData = (
   clusterData?: ClusterDataItem[],
 ) => {
   const clusterMap = new Map();
+  const originalClusterMap = new Map();
   if (clusterData) {
     for (const item of clusterData) {
       clusterMap.set(item.id, item.cluster);
+      // Use original_cluster if available, otherwise use cluster
+      originalClusterMap.set(item.id, item.original_cluster ?? item.cluster);
     }
   }
 
@@ -102,6 +105,8 @@ export const formatClustermapData = (
     row.filter(Number).map((value, x) => {
       const clusterX = clusterMap.get(tickText[x]);
       const clusterY = clusterMap.get(tickText[y]);
+      const originalClusterX = originalClusterMap.get(tickText[x]);
+      const originalClusterY = originalClusterMap.get(tickText[y]);
 
       const clusterMatch =
         clusterX !== undefined &&
@@ -109,11 +114,16 @@ export const formatClustermapData = (
         clusterX === clusterY;
 
       const clusterGroup = clusterMatch ? clusterX : null;
+      const originalClusterGroup =
+        clusterMatch && originalClusterX === originalClusterY
+          ? originalClusterX
+          : null;
 
       let backgroundColor = "rgb(245, 245, 245)";
-      if (clusterGroup) {
+      if (clusterGroup && originalClusterGroup) {
         if (!colorCache.has(clusterGroup)) {
-          colorCache.set(clusterGroup, distinctColor(clusterGroup));
+          // Use original cluster number for color generation
+          colorCache.set(clusterGroup, distinctColor(originalClusterGroup));
         }
         backgroundColor = colorCache.get(clusterGroup);
       }

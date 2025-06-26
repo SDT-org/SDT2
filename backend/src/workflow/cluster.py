@@ -11,35 +11,36 @@ import os
 import json
 from Bio import SeqIO, Seq, SeqRecord
 from workflow.models import RunSettings, WorkflowResult
+from transformations import read_csv_matrix
 
 cache_dir = TemporaryDirectory()
 memory = Memory(cache_dir.name, verbose=1)
 
 
 def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
-    distance_matrix=  result.distance_matrix
-    if result.distance_matrix is None:
+    distance_matrix = result.distance_matrix
+    if distance_matrix is None:
         return result
 
     cluster_method = settings.cluster_method
+    ordered_ids = result.ordered_ids or []
 
+    # Convert to numpy array if needed
     if hasattr(distance_matrix, "to_numpy"):
-        matrix_np = distance_matrix
-        ordered_ids = result.ordered_ids
+        matrix_np = distance_matrix.to_numpy()
+    elif not isinstance(distance_matrix, np.ndarray):
+        matrix_np = np.array(distance_matrix)
     else:
         matrix_np = distance_matrix
-        ordered_ids = result.ordered_ids or []
 
-    distance_matrix = matrix_np
-
-    if not isinstance(distance_matrix, np.ndarray):
-        distance_matrix = np.array(distance_matrix)
-
-    Z = calculate_linkage(distance_matrix, cluster_method)
+    Z = calculate_linkage(matrix_np, cluster_method)
 
     dendro = dendrogram(Z, no_plot=True)
     reordered_indices = dendro["leaves"]
 
+    # Reorder the matrix
+    reordered_matrix = matrix_np[np.ix_(reordered_indices, reordered_indices)]
+    
     if ordered_ids:
         reordered_ids = [ordered_ids[i] for i in reordered_indices]
         if hasattr(distance_matrix, "loc"):

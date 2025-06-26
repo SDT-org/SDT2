@@ -142,4 +142,5 @@ export const ClustermapSettingsSchema = z.object({
 export type ClusterDataItem = {
   id: string;
   cluster: number;
+  original_cluster?: number;
 };

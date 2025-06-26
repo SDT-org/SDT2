@@ -245,8 +245,19 @@ export const D3CanvasHeatmap = ({
         .sort((a, b) => a - b)
         .slice(0, 50); // Arbitrarily set to 50
 
+      // Create a map of cluster to original cluster for color consistency
+      const clusterToOriginal = new Map();
+      for (const item of clusterData) {
+        if (!clusterToOriginal.has(item.cluster)) {
+          clusterToOriginal.set(
+            item.cluster,
+            item.original_cluster ?? item.cluster,
+          );
+        }
+      }
+
       const clusterColors = uniqueClusters.map((cluster) =>
-        distinctColor(cluster),
+        distinctColor(clusterToOriginal.get(cluster) ?? cluster),
       );
       ctx.font = `10px 'Roboto Mono'`;
       ctx.textAlign = "left";
