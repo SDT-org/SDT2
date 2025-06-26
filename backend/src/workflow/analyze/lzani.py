@@ -8,6 +8,7 @@ from workflow.models import RunSettings, WorkflowResult
 from pandas import DataFrame
 from transformations import lzani_tsv_to_distance_matrix
 
+
 def run(
     result: WorkflowResult,
     settings: RunSettings,
@@ -44,6 +45,7 @@ def run(
                 process.wait(timeout=5)
             except subprocess.TimeoutExpired:
                 process.kill()
+            cancel_event.clear()
             return result
         time.sleep(0.1)
 
@@ -58,5 +60,5 @@ def run(
         settings.doc_paths.lzani_results_ids,
         settings.lzani.score_type,
     )
-    
+
     return result._replace(distance_matrix=matrix, ordered_ids=ids)

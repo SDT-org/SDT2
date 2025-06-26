@@ -7,12 +7,13 @@ from numpy import zeros
 
 from workflow.models import RunSettings, WorkflowResult
 
+
 def run(
     result: WorkflowResult,
     settings: RunSettings,
     set_progress: Callable[[int], None],
     pool,
-    cancel_event
+    cancel_event,
 ) -> WorkflowResult:
     seq_ids = list(result.seq_dict.keys())
     seq_dict = result.seq_dict
@@ -24,7 +25,9 @@ def run(
     min_score = 0
 
     for ids_tuple in combos:
-        id_sequence_pairs.append([ids_tuple, [seq_dict[ids_tuple[0]], seq_dict[ids_tuple[1]]]])
+        id_sequence_pairs.append(
+            [ids_tuple, [seq_dict[ids_tuple[0]], seq_dict[ids_tuple[1]]]]
+        )
 
     total_pairs = len(id_sequence_pairs)
 
@@ -35,7 +38,9 @@ def run(
     with pool:
         results = pool.imap(bound_process_pair, id_sequence_pairs)
         for i, result_item in enumerate(results, 1):
-            if cancel_event.is_set(): return result
+            if cancel_event.is_set():
+                cancel_event.clear()
+                return result
             if result_item is None:
                 progress = int((i / total_pairs) * 100)
                 set_progress(progress)
@@ -50,16 +55,16 @@ def run(
             progress = int((i / total_pairs) * 100)
             set_progress(progress)
 
-
-
     return result._replace(
-        ordered_ids=list(order.keys()),
-        distance_matrix=dist_scores,
-        min_score=min_score
+        ordered_ids=list(order.keys()), distance_matrix=dist_scores, min_score=min_score
     )
 
+
 def supports_striped_32():
-    return parasail.can_use_sse41() or parasail.can_use_avx2() or parasail.can_use_neon()
+    return (
+        parasail.can_use_sse41() or parasail.can_use_avx2() or parasail.can_use_neon()
+    )
+
 
 def process_pair(id_sequence_pair, is_aa):
     id1 = id_sequence_pair[0][0]
@@ -74,7 +79,9 @@ def process_pair(id_sequence_pair, is_aa):
     extend_penalty = 1
     matrix_to_use = parasail.blosum62
 
-    alignment_function = get_stats_score if supports_striped_32() else get_traceback_score
+    alignment_function = (
+        get_stats_score if supports_striped_32() else get_traceback_score
+    )
     result = alignment_function(seq1, seq2, open_penalty, extend_penalty, matrix_to_use)
 
     return id_sequence_pair[0], result
@@ -82,11 +89,14 @@ def process_pair(id_sequence_pair, is_aa):
 
 def get_stats_score(seq1, seq2, open_penalty, extend_penalty, matrix) -> float:
     # Use 32-bit version to prevent score overflow with long sequences
-    result = parasail.nw_stats_striped_32(seq1, seq2, open_penalty, extend_penalty, matrix)
+    result = parasail.nw_stats_striped_32(
+        seq1, seq2, open_penalty, extend_penalty, matrix
+    )
     num_ungapped_cols = len(seq1) + len(seq2) - result.length
     identity_score_percent = (float(result.matches) / num_ungapped_cols) * 100.0
     distance_score = 100.0 - identity_score_percent
     return distance_score
+
 
 def get_similarity(seq1, seq2):
     if len(seq1) != len(seq2):
@@ -105,6 +115,7 @@ def get_similarity(seq1, seq2):
     # convert to percentile
 
     return similarity
+
 
 def get_traceback_score(seq1, seq2, open_penalty, extend_penalty, matrix) -> float:
     try:
