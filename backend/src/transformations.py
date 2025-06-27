@@ -44,9 +44,27 @@ def read_csv_matrix(filepath):
     )
 
 
+def read_stats_csv(filepath):
+    """Read a stats CSV file with headers."""
+    return pd.read_csv(filepath, header=0)
+
+
+def read_columns_csv(filepath):
+    """Read a columns CSV file and return as list."""
+    return pd.read_csv(filepath).values.tolist()
+
+
+def read_tsv_file(filepath, id_column=None):
+    """Read a TSV file, optionally extracting a specific column as list."""
+    df = pd.read_csv(filepath, sep="\t")
+    if id_column:
+        return df[id_column].tolist()
+    return df
+
+
 def lzani_tsv_to_distance_matrix(results_tsv_path, ids_tsv_path, score_column="ani"):
-    all_ids = pd.read_csv(ids_tsv_path, sep="\t")["id"].tolist()
-    df = pd.read_csv(results_tsv_path, sep="\t")
+    all_ids = read_tsv_file(ids_tsv_path, "id")  # This returns a list
+    df = read_tsv_file(results_tsv_path)  # This returns a DataFrame
     
     # Create pivot table with similarity scores (still 0-1 scale)
     if df.empty:

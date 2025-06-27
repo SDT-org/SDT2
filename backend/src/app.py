@@ -58,6 +58,8 @@ from transformations import (
     triangle_to_matrix,
     numpy_to_triangle,
     read_csv_matrix,
+    read_stats_csv,
+    read_columns_csv,
 )
 from document_paths import ImageKey, build_document_paths
 
@@ -492,11 +494,11 @@ class Api:
             col_count = [len(l.split(",")) for l in temp_f.readlines()]
             column_names = [i for i in range(0, max(col_count))]
         if os.path.exists(doc_paths.stats):
-            stats_df = read_csv(doc_paths.stats, header=0)
+            stats_df = read_stats_csv(doc_paths.stats)
         else:
             stats_df = DataFrame([])
         if os.path.exists(doc_paths.columns):
-            cols_data = read_csv(doc_paths.columns).values.tolist()
+            cols_data = read_columns_csv(doc_paths.columns)
             id_map = {}
             identity_scores = []
             for row in cols_data:
@@ -510,13 +512,7 @@ class Api:
         else:
             ids = []
             identity_scores = []
-        df = read_csv(
-            doc_paths.matrix,
-            delimiter=",",
-            index_col=0,
-            header=None,
-            names=column_names,
-        )
+        df = read_csv_matrix(doc_paths.matrix)
         tick_text = df.index.tolist()
         update_document(doc_id, sequences_count=len(tick_text))
         data = df.to_numpy()
@@ -555,9 +551,7 @@ class Api:
     def get_clustermap_data(self, doc_id: str, threshold: float, method: str):
         doc = get_document(doc_id)
         doc_paths = build_document_paths(doc.tempdir_path)
-        matrix_df = pd.read_csv(
-            doc_paths.matrix, delimiter=",", index_col=0, header=None
-        )
+        matrix_df = read_csv_matrix(doc_paths.matrix)
         matrix_np = matrix_df.to_numpy()
         matrix_np = np.round(matrix_np, 2)
         sorted_ids = matrix_df.index.tolist()

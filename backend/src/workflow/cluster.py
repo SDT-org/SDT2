@@ -113,9 +113,7 @@ def export(matrix_path, cluster_data_output_dir, seq_dict_path, threshold, metho
         col_count = [len(l.split(",")) for l in temp_f.readlines()]
         column_names = [i for i in range(0, max(col_count))]
 
-    df = pd.read_csv(
-        matrix_path, delimiter=",", index_col=0, header=None, names=column_names
-    )
+    df = read_csv_matrix(matrix_path)
     index = df.index.tolist()
     data = df.to_numpy()
     data = np.round(data, 2)
