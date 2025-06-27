@@ -54,9 +54,8 @@ from debug import open_doc_folder
 from config import app_version, dev_frontend_host
 from constants import matrix_filetypes, default_window_title
 from transformations import (
-    dataframe_to_triangle,
+    to_triangle,
     triangle_to_matrix,
-    numpy_to_triangle,
     read_csv_matrix,
     read_stats_csv,
     read_columns_csv,
@@ -529,7 +528,7 @@ class Api:
         )
         heat_data = DataFrame(data, index=tick_text)
 
-        heat_data = dataframe_to_triangle(heat_data)
+        heat_data = to_triangle(heat_data)
         
         # Recalculate min/max after conversion to similarity values
         heat_data_np = heat_data.to_numpy()
@@ -556,7 +555,7 @@ class Api:
         matrix_np = np.round(matrix_np, 2)
         sorted_ids = matrix_df.index.tolist()
         reordered_data = {
-            "matrix": numpy_to_triangle(matrix_np).tolist(),
+            "matrix": to_triangle(matrix_np, fill_value=None).tolist(),
             "tickText": sorted_ids,
         }
         seqid_clusters_df = cluster.get_clusters_dataframe(

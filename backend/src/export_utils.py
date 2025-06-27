@@ -1,13 +1,14 @@
 import json
 from pandas.core.frame import DataFrame
-from transformations import dataframe_to_triangle
+from transformations import to_triangle
 
 
 def save_matrix_to_csv(df, matrix_path, triangle_path):
-    index = df.index
-    triangle = dataframe_to_triangle(df)
-    triangle.index = index
-    triangle.to_csv(triangle_path, mode="wt", header=False, index=True, sep=",")
+    # to_triangle returns a DataFrame when given a DataFrame
+    triangle = to_triangle(df)
+    # stupid type error
+    if isinstance(triangle, DataFrame):
+        triangle.to_csv(triangle_path, mode="wt", header=False, index=True, sep=",")
     df.to_csv(matrix_path, mode="w", header=False, index=True, sep=",")
 
 
