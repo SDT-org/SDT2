@@ -13,8 +13,9 @@ from Bio import SeqIO, Seq, SeqRecord
 from workflow.models import RunSettings, WorkflowResult
 from transformations import read_csv_matrix
 
-cache_dir = TemporaryDirectory()
-memory = Memory(cache_dir.name, verbose=1)
+# Don't create cache directory at module level - this causes issues
+# Instead, we'll disable caching for now to avoid intermittent issues
+memory = Memory(None, verbose=0)
 
 
 def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
@@ -26,12 +27,12 @@ def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
     ordered_ids = result.ordered_ids or []
 
     # Convert to numpy array if needed
-    if hasattr(distance_matrix, "to_numpy"):
-        matrix_np = distance_matrix.to_numpy()
-    elif not isinstance(distance_matrix, np.ndarray):
-        matrix_np = np.array(distance_matrix)
-    else:
+    if isinstance(distance_matrix, np.ndarray):
         matrix_np = distance_matrix
+    elif hasattr(distance_matrix, "to_numpy"):
+        matrix_np = distance_matrix.to_numpy()
+    else:
+        matrix_np = np.array(distance_matrix)
 
     Z = calculate_linkage(matrix_np, cluster_method)
 
@@ -54,7 +55,6 @@ def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
     return result._replace(distance_matrix=reordered_matrix, reordered_ids=reordered_ids)
 
 
-@memory.cache
 def calculate_linkage(distance_matrix: np.ndarray, method: str) -> np.ndarray:
     """Calculate hierarchical clustering linkage matrix."""
     if method in ["ward", "centroid", "median"]:
@@ -70,7 +70,6 @@ def calculate_linkage(distance_matrix: np.ndarray, method: str) -> np.ndarray:
     else:
         # For other methods, use the distance matrix directly
         start = time.perf_counter()
-        print(distance_matrix)
         y = squareform(distance_matrix)
         metric = "precomputed"
         end = time.perf_counter()
@@ -79,7 +78,6 @@ def calculate_linkage(distance_matrix: np.ndarray, method: str) -> np.ndarray:
     return linkage(y, method=method, metric=metric)
 
 
-@memory.cache
 def get_mds_coords(distance_mat):
     return MDS(
         n_components=2, dissimilarity="precomputed", random_state=42

@@ -38,18 +38,14 @@ def run(
         text=True,
     )
 
-    while process.poll() is None:
-        if cancel_event.is_set():
-            process.terminate()
-            try:
-                process.wait(timeout=5)
-            except subprocess.TimeoutExpired:
-                process.kill()
-            cancel_event.clear()
-            return result
-        time.sleep(0.1)
-
-    _, stderr = process.communicate()
+    # Use communicate() to avoid pipe buffer issues
+    try:
+        stdout, stderr = process.communicate(timeout=300)  # 5 minute timeout
+    except subprocess.TimeoutExpired:
+        process.kill()
+        stdout, stderr = process.communicate()
+        result.errors.append("LZ-ANI timed out after 5 minutes")
+        return result
 
     if process.returncode != 0:
         result.errors.append(f"Error running LZ-ANI: {stderr.strip()}")

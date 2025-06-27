@@ -49,9 +49,12 @@ def lzani_tsv_to_distance_matrix(results_tsv_path, ids_tsv_path, score_column="a
     df = pd.read_csv(results_tsv_path, sep="\t")
     
     # Create pivot table with similarity scores (still 0-1 scale)
-    matrix = df.pivot_table(
-        index="query", columns="reference", values=score_column, aggfunc="first"
-    )
+    if df.empty:
+        matrix = pd.DataFrame(index=all_ids, columns=all_ids)
+    else:
+        matrix = df.pivot_table(
+            index="query", columns="reference", values=score_column, aggfunc="first"
+        )
     
     # Reindex to ensure all IDs are present
     matrix = matrix.reindex(index=all_ids, columns=all_ids)
