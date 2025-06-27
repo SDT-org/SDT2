@@ -39,7 +39,6 @@ def to_triangle(matrix, convert_to_similarity=True, fill_value=nan):
 
 
 def triangle_to_matrix(matrix_lower: DataFrame) -> DataFrame:
-    """Convert a lower triangle matrix to a full symmetric matrix."""
     index = matrix_lower.index
     lower = np.round(np.tril(matrix_lower), 2)
     df = lower + np.triu(lower.T, 1)
@@ -104,13 +103,8 @@ def lzani_tsv_to_distance_matrix(results_tsv_path, ids_tsv_path, score_column="a
     
     # Find the minimum non-zero, non-NaN value to use as floor
     valid_values = matrix_np[~np.isnan(matrix_np) & (matrix_np > 0)]
-    if len(valid_values) > 0:
-        min_value = np.min(valid_values)
-        # Use 90% of minimum value as floor for unaligned sequences
-        floor_value = min_value * 0.9
-    else:
-        # Fallback if no valid values found
-        floor_value = 25.0
+    ## hard coding biological floor of 25%  for unaligned sequences
+    floor_value = 25.0
     
     # Replace unaligned NANs or 0s with the calculated floor
     matrix_np = np.where(np.isnan(matrix_np) | (matrix_np == 0), floor_value, matrix_np)
