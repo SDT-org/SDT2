@@ -19,8 +19,8 @@ def save_cols_to_csv(df, path):
     for i_idx, row_id in enumerate(order):
         for j_idx, col_id in enumerate(order):
             if i_idx > j_idx:
-                # convert back to a sim matrix )
-                columnar_output.append([row_id,col_id, df.iloc[i_idx,j_idx]])
+                # convert back to a sim matrix - distance to similarity
+                columnar_output.append([row_id, col_id, 100 - df.iloc[i_idx, j_idx]])
     columnar_df = DataFrame(
         columnar_output, columns=["First Sequence", "Second Sequence", "Identity Score"]
     )
