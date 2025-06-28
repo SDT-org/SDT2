@@ -73,7 +73,10 @@ def read_stats_csv(filepath):
 
 
 def read_columns_csv(filepath):
-    return read_csv_file(filepath, as_list=True)
+    # need typimg for id coliumn  **DtypeWarning: Columns (2) have mixed types. Specify dtype option on import or set low_memory=False.
+    dtype_spec = {0: str, 1: str, 2: float}  # First Sequence, Second Sequence, Identity Score
+    df = pd.read_csv(filepath, header=0, dtype=dtype_spec)
+    return df.values.tolist()
 
 
 def read_tsv_file(filepath, id_column=None):
