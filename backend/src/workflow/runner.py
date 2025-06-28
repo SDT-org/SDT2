@@ -19,20 +19,20 @@ def run_parse(fasta_path: str) -> WorkflowResult:
         reordered_ids=[],
         max_sequence_length=0,
         warnings=[],
-        errors=[],
+        error=None,
         distance_matrix=numpy.ndarray([]),
         similarity_matrix=DataFrame(),
         is_aa=False,
         min_score=0,
     )
     result = parse.run(result, fasta_path)
-    if result.errors:
+    if result.error:
         return result
 
     return result
 
 
-def run_process(workflow_run: WorkflowRun, pool: Pool, cancel_event) -> WorkflowResult:
+def run_process(workflow_run: WorkflowRun, cancel_event) -> WorkflowResult:
     result = workflow_run.result
     settings = workflow_run.settings
 
@@ -46,23 +46,23 @@ def run_process(workflow_run: WorkflowRun, pool: Pool, cancel_event) -> Workflow
         result,
         settings,
         workflow_run.set_progress,
-        pool,
         cancel_event,
     )
-    if result.errors:
+
+    if result.error:
         return result
 
     if settings.cluster_method and settings.cluster_method != "None":
         workflow_run.set_stage("Clustering")
 
         result = cluster.run(result, settings)
-        if result.errors:
+        if result.error:
             return result
 
     workflow_run.set_stage("Finalizing")
 
     result = postprocess.run(result, settings)
-    if result.errors:
+    if result.error:
         return result
 
     end_time, end_counter = datetime.now(), time.perf_counter()

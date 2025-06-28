@@ -13,7 +13,6 @@ def run(
     result: WorkflowResult,
     settings: RunSettings,
     set_progress: Callable[[int], None],
-    pool,
     cancel_event,
 ) -> WorkflowResult:
     process = subprocess.Popen(
@@ -44,12 +43,10 @@ def run(
     except subprocess.TimeoutExpired:
         process.kill()
         stdout, stderr = process.communicate()
-        result.errors.append("LZ-ANI timed out after 5 minutes")
-        return result
+        return result._replace(error="LZ-ANI timed out after 5 minutes")
 
     if process.returncode != 0:
-        result.errors.append(f"Error running LZ-ANI: {stderr.strip()}")
-        return result
+        return result._replace(error=f"Error running LZ-ANI: {stderr.strip()}")
 
     matrix, ids = lzani_tsv_to_distance_matrix(
         settings.doc_paths.lzani_results,

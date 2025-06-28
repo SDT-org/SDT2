@@ -1,3 +1,4 @@
+from multiprocessing.pool import Pool
 from typing import Callable
 import parasail
 import sys
@@ -12,8 +13,7 @@ def run(
     result: WorkflowResult,
     settings: RunSettings,
     set_progress: Callable[[int], None],
-    pool,
-    cancel_event,
+    canceled,
 ) -> WorkflowResult:
     seq_ids = list(result.seq_dict.keys())
     seq_dict = result.seq_dict
@@ -35,23 +35,23 @@ def run(
     print(f"\rNumber of pairs: {total_pairs}\r", flush=True)
     bound_process_pair = partial(process_pair, is_aa=result.is_aa)
 
-    with pool:
+    with Pool(settings.parasail.process_count) as pool:
         results = pool.imap(bound_process_pair, id_sequence_pairs)
-        for i, result_item in enumerate(results, 1):
-            if cancel_event.is_set():
-                cancel_event.clear()
-                return result
-            if result_item is None:
-                progress = int((i / total_pairs) * 100)
-                set_progress(progress)
-                continue
-            (seqid1_key, seqid2_key), score = result_item
-            if seqid1_key in order and seqid2_key in order:
-                idx1, idx2 = order[seqid1_key], order[seqid2_key]
-                dist_scores[idx1, idx2] = score
-                dist_scores[idx2, idx1] = score
-                if min_score is None or score < min_score:
-                    min_score = score
+        for i, pair_result in enumerate(results, 1):
+            print("canceled: ", canceled.value)
+            print(i, pair_result)
+            if canceled.value:
+                pool.close()
+                pool.terminate()
+                pool.join()
+                canceled.value = False
+                return result._replace(distance_matrix=None, error="PROCESS_CANCELED")
+            [seqid1, seqid2], score = pair_result
+            seqid1, seqid2 = order[seqid1], order[seqid2]
+            dist_scores[seqid1, seqid2] = score
+            dist_scores[seqid2, seqid1] = score
+            if min_score is None or score < min_score:
+                min_score = score
             progress = int((i / total_pairs) * 100)
             set_progress(progress)
 

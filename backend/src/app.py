@@ -1,9 +1,8 @@
 import multiprocessing
-from multiprocessing.pool import Pool
 import os
 import sys
 import json
-from typing import Dict, List
+from typing import Dict
 import urllib.parse
 
 current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
@@ -13,7 +12,7 @@ sys.path.append(os.path.join(current_file_path, "."))
 from export_utils import save_cols_to_csv
 from workflow import cluster
 import numpy as np
-from multiprocessing import cpu_count as get_cpu_count
+from multiprocessing import Manager, cpu_count as get_cpu_count
 from tempfile import TemporaryDirectory
 from platformdirs import user_documents_dir
 from utils import get_child_process_info, make_doc_id, open_folder
@@ -78,21 +77,33 @@ mimetypes.add_type("text/fasta", ".fnt")
 mimetypes.add_type("text/fasta", ".fa")
 mimetypes.add_type("application/vnd.sdt", ".sdt")
 window = None
-pool = None
-cancel_event = multiprocessing.Event()
+canceled = None
 start_time = None  # TODO: move into workflow
 workflow_runs: Dict[str, WorkflowRun] = {}
 parsed_workflow_results: Dict[str, WorkflowResult] = {}
 
 
 def do_cancel_run():
-    global pool, cancel_event
-    cancel_event.set()
-    if pool:
-        pool.close()
-        pool.terminate()
-        pool.join()
+    global cancel_event
+    if canceled:
+        # It's ok if the manager has already released the resource
+        try:
+            canceled.value = True
+        except:
+            pass
+    doc_id = get_state().active_run_document_id
+    if doc_id:
+        del workflow_runs[doc_id]
+        update_document(
+            doc_id,
+            view="runner",
+            doc_id=doc_id,
+            progress=0,
+            pair_progress=0,
+            pair_count=0,
+        )
     set_state(active_run_document_id=None)
+    print("Run canceled")
 
 
 def assert_window():
@@ -192,8 +203,8 @@ def handle_open_file(filepath: str, doc_id: str | None):
         return [doc_id, filepath]
     else:
         result = run_parse(filepath)
-        if result.errors:
-            raise Exception(result.errors[0])
+        if result.error:
+            raise Exception(result.error[0])
 
         parsed_workflow_results[doc_id] = result
 
@@ -325,7 +336,7 @@ class Api:
         assert_window().title = default_window_title
 
     def start_workflow_run(self, args: dict):
-        global pool, canceled
+        global canceled
         app_state = get_state()
         if app_state.debug:
             print("\nAPI args:", args)
@@ -334,14 +345,15 @@ class Api:
             raise Exception("Multiple runs are not supported")
 
         doc = get_document(args["doc_id"])
+
         parsed_result = parsed_workflow_results.get(doc.id)
         if not parsed_result:
             raise Exception(
                 "Parsed workflow result not found. Close the document and reselect the file."
             )
 
-        if parsed_result.errors:
-            raise Exception("Workflow has errors that must be resolved.")
+        if parsed_result.error:
+            raise Exception("Workflow has an error that must be resolved.")
 
         settings = RunSettings(
             fasta_path=doc.filename,
@@ -354,7 +366,9 @@ class Api:
                 score_type=args.get("lzani_score_type", "ani"),
             ),
             parasail=ParasailSettings(
-                process_count=args.get("compute_cores", get_cpu_count()),
+                process_count=max(
+                    min(args.get("compute_cores", 1), get_cpu_count()), 1
+                ),
             ),
         )
 
@@ -367,13 +381,16 @@ class Api:
 
         workflow_runs[doc.id] = workflow_run
 
-        num_processes = max(min(args.get("compute_cores", 1), get_cpu_count()), 1)
         update_document(doc.id, view="loader")
-        with Pool(num_processes) as pool:
-            result = run_process(workflow_run, pool, cancel_event)
+        with Manager() as manager:
+            canceled = manager.Value("b", False)
+            result = run_process(workflow_run, canceled)
 
-        if result.errors:
-            raise Exception(f"Workflow processing step failed: {result.errors}")
+            if result.error:
+                if result.error == "PROCESS_CANCELED":
+                    # nothing to do - the state was reset in do_cancel_run when setting canceled
+                    return
+                raise Exception(f"Workflow processing step failed: {result.error}")
 
         set_state(active_run_document_id=None)
         del workflow_runs[doc.id]
@@ -529,14 +546,14 @@ class Api:
         heat_data = DataFrame(data, index=tick_text)
 
         heat_data = to_triangle(heat_data)
-        
+
         # Recalculate min/max after conversion to similarity values
         heat_data_np = heat_data.to_numpy()
         diag_mask = eye(heat_data_np.shape[0], dtype=bool)
         heat_data_no_diag = where(diag_mask, nan, heat_data_np)
         min_val = int(nanmin(heat_data_no_diag))
         max_val = int(nanmax(heat_data_no_diag))
-        
+
         parsedData = heat_data.values.tolist()
         data_to_dump = dict(
             metadata=dict(minVal=min_val, maxVal=max_val),
@@ -568,10 +585,10 @@ class Api:
             }
         )
         clusters = seqid_clusters_df["cluster"].tolist()
-        
+
         # Store original cluster numbers before reordering
         seqid_clusters_df["original_cluster"] = seqid_clusters_df["cluster"]
-        
+
         reorder_clusters = cluster.order_clusters_sequentially(clusters)
         seqid_clusters_df["cluster"] = reorder_clusters
         cluster_data = seqid_clusters_df.to_dict(orient="records")

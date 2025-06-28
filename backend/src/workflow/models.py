@@ -36,11 +36,11 @@ class WorkflowResult(NamedTuple):
     min_score: float
     max_sequence_length: int
     distance_matrix: numpy.ndarray
-    similarity_matrix: DataFrame 
+    similarity_matrix: DataFrame
     reordered_ids: List[str]
     is_aa: bool
     warnings: List[str]
-    errors: List[str]
+    error: str | None
 
 
 @dataclass
@@ -64,4 +64,4 @@ class WorkflowRun:
         print(f"Progress: {progress}%")
 
     def valid(self) -> bool:
-        return not self.result.errors
+        return not self.result.error

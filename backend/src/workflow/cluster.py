@@ -13,10 +13,6 @@ from Bio import SeqIO, Seq, SeqRecord
 from workflow.models import RunSettings, WorkflowResult
 from transformations import read_csv_matrix
 
-# Don't create cache directory at module level - this causes issues
-# Instead, we'll disable caching for now to avoid intermittent issues
-memory = Memory(None, verbose=0)
-
 
 def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
     distance_matrix = result.distance_matrix
@@ -25,7 +21,6 @@ def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
 
     cluster_method = settings.cluster_method
     ordered_ids = result.ordered_ids or []
-
     # Convert to numpy array if needed
     if isinstance(distance_matrix, np.ndarray):
         matrix_np = distance_matrix
@@ -41,7 +36,7 @@ def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
 
     # Reorder the matrix
     reordered_matrix = matrix_np[np.ix_(reordered_indices, reordered_indices)]
-    
+
     if ordered_ids:
         reordered_ids = [ordered_ids[i] for i in reordered_indices]
         if hasattr(distance_matrix, "loc"):
@@ -52,7 +47,9 @@ def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
         reordered_matrix = matrix_np[np.ix_(reordered_indices, reordered_indices)]
         reordered_ids = reordered_indices
 
-    return result._replace(distance_matrix=reordered_matrix, reordered_ids=reordered_ids)
+    return result._replace(
+        distance_matrix=reordered_matrix, reordered_ids=reordered_ids
+    )
 
 
 def calculate_linkage(distance_matrix: np.ndarray, method: str) -> np.ndarray:
@@ -74,7 +71,7 @@ def calculate_linkage(distance_matrix: np.ndarray, method: str) -> np.ndarray:
         metric = "precomputed"
         end = time.perf_counter()
         print(f"Distance matrix prepared in {end - start:.2f} seconds")
-
+    # print(method, metric, y)
     return linkage(y, method=method, metric=metric)
 
 

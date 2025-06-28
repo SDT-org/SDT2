@@ -15,14 +15,12 @@ def run(result: WorkflowResult, fasta_path: str) -> WorkflowResult:
     filetype, _ = mimetypes.guess_type(fasta_path)
 
     if not filetype or filetype != "text/fasta":
-        result.errors.append("INVALID_FILE_TYPE")
-        return result
+        return result._replace(error="INVALID_FILE_TYPE")
 
     try:
         unparsed_records = SeqIO.parse(fasta_path, "fasta")
     except Exception as exception:
-        result.errors.append(f"INVALID_FASTA_FORMAT: {exception}")
-        return result
+        return result._replace(error=f"INVALID_FASTA_FORMAT: {exception}")
 
     result = parse_records(unparsed_records, result)
 
@@ -55,16 +53,13 @@ def parse_records(input: Iterator[SeqRecord], result: WorkflowResult) -> Workflo
         count += 1
 
         if not record.id:
-            result.errors.append("MISSING_SEQUENCE_ID")
-            return result
+            return result._replace(error="MISSING_SEQUENCE_ID")
 
         if not record.seq:
-            result.errors.append("ZERO_LENGTH_SEQUENCE")
-            return result
+            return result._replace(error="ZERO_LENGTH_SEQUENCE")
 
         if record.id in sequence_names:
-            result.errors.append("DUPLICATE_SEQUENCE_NAME")
-            return result
+            return result._replace(error="DUPLICATE_SEQUENCE_NAME")
 
         sequence_names.add(record.id)
 
@@ -74,8 +69,7 @@ def parse_records(input: Iterator[SeqRecord], result: WorkflowResult) -> Workflo
         formatted_sequence = INVALID_CHARACTERS_RE.sub("", upcased_sequence)
 
         if not formatted_sequence:
-            result.errors.append("ZERO_LENGTH_SEQUENCE")
-            return result
+            return result._replace(error="ZERO_LENGTH_SEQUENCE")
 
         # check every three sequences for amino acids
         # TODO: do we want to check this every time?
@@ -86,7 +80,7 @@ def parse_records(input: Iterator[SeqRecord], result: WorkflowResult) -> Workflo
         seq_dict[formatted_id] = formatted_sequence
 
     if count < 2:
-        result.errors.append("NOT_ENOUGH_SEQUENCES")
+        result = result._replace(error="NOT_ENOUGH_SEQUENCES")
 
     return result._replace(
         seq_dict=seq_dict,
