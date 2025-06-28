@@ -47,8 +47,8 @@ class WorkflowResult(NamedTuple):
 class WorkflowRun:
     result: WorkflowResult
     settings: RunSettings
-    stage: str = ""
-    progress: int = 0
+    progress: int | None
+    stage: str = "Initializing"
     analyze_start_time: datetime | None = None
     analyze_start_counter: float | None = None
 
@@ -59,9 +59,11 @@ class WorkflowRun:
             self.analyze_start_counter = time.perf_counter()
         print(f"Stage: {stage}")
 
-    def set_progress(self, progress: int):
+    def set_progress(self, progress: int | None):
+        old_progress = self.progress
         self.progress = progress
-        print(f"Progress: {progress}%")
+        if progress and old_progress is not None and progress > old_progress:
+            print(f"Progress: {progress}%")
 
     def valid(self) -> bool:
         return not self.result.error

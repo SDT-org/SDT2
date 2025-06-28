@@ -375,7 +375,6 @@ class Api:
         workflow_run = WorkflowRun(
             result=parsed_result,
             settings=settings,
-            stage="",
             progress=0,
         )
 

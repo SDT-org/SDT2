@@ -1,12 +1,10 @@
 import React from "react";
 import { Button, Label, ProgressBar, TabPanel } from "react-aria-components";
 import type { DocState, SetDocState, UpdateDocState } from "../appState";
-import { services } from "../services";
 import { LoadingAnimation } from "./LoadingAnimation";
 
 export const Loader = ({
-  docState: { id: docId, stage, progress, estimated_time },
-  setDocState,
+  docState: { id: docId, estimated_time },
 }: {
   docState: DocState;
   setDocState: SetDocState;
@@ -17,6 +15,8 @@ export const Loader = ({
   const [estimatedDisplay, setEstimatedDisplay] = React.useState("");
   const startTime = React.useRef(Date.now());
   const updatedTime = React.useRef(Date.now());
+  const [stage, setStage] = React.useState("Initializing");
+  const [progress, setProgress] = React.useState<number | undefined>();
 
   React.useEffect(() => {
     if (!estimated_time || Date.now() - updatedTime.current < 3000) {
@@ -38,20 +38,21 @@ export const Loader = ({
 
   React.useEffect(() => {
     const handler = () => {
-      services.getDocument(docId).then((data) => {
-        setDocState((prev) => ({ ...prev, ...data }));
+      window.pywebview.api.get_workflow_run_status(docId).then((data) => {
+        setStage(data.stage);
+        setProgress(data.progress);
       });
     };
     const id = setInterval(handler, 120);
     return () => clearInterval(id);
-  }, [docId, setDocState]);
+  }, [docId]);
 
   return (
     <TabPanel id={docId} key={docId} className={"app-panel full-width"}>
       <div className="app-main centered loader">
         <div className="loader-wrapper">
-          <ProgressBar value={progress}>
-            {({ percentage, valueText }) => (
+          <ProgressBar isIndeterminate={!progress} value={progress || 0}>
+            {({ percentage, valueText, isIndeterminate }) => (
               <>
                 <Label>
                   {stage ? (
@@ -73,6 +74,7 @@ export const Loader = ({
                       width: `${percentage}%`,
                     }}
                     data-animation
+                    data-indeterminate={isIndeterminate}
                   />
                 </div>
                 <div className="estimate text-secondary">

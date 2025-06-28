@@ -13,7 +13,7 @@ def run(
     result: WorkflowResult,
     settings: RunSettings,
     set_progress: Callable[[int], None],
-    cancel_event,
+    canceled,
 ) -> WorkflowResult:
     process = subprocess.Popen(
         [

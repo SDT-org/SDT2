@@ -54,12 +54,14 @@ def run_process(workflow_run: WorkflowRun, cancel_event) -> WorkflowResult:
 
     if settings.cluster_method and settings.cluster_method != "None":
         workflow_run.set_stage("Clustering")
+        workflow_run.set_progress(None)
 
         result = cluster.run(result, settings)
         if result.error:
             return result
 
     workflow_run.set_stage("Finalizing")
+    workflow_run.set_progress(100)
 
     result = postprocess.run(result, settings)
     if result.error:

@@ -80,6 +80,9 @@ declare global {
           format: SaveableImageFormat,
         ) => Promise<void>;
         start_workflow_run: (args: RunSettings) => Promise<void>;
+        get_workflow_run_status: (
+          doc_id: string,
+        ) => Promise<{ stage: string; progress?: number }>;
         set_window_title: (title: string) => Promise<void>;
         processes_info: () => Promise<string>;
         get_available_memory: () => Promise<number>;
