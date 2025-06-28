@@ -38,8 +38,6 @@ def run(
     with Pool(settings.parasail.process_count) as pool:
         results = pool.imap(bound_process_pair, id_sequence_pairs)
         for i, pair_result in enumerate(results, 1):
-            print("canceled: ", canceled.value)
-            print(i, pair_result)
             if canceled.value:
                 pool.close()
                 pool.terminate()
