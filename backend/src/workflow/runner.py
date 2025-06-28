@@ -37,6 +37,7 @@ def run_process(workflow_run: WorkflowRun, cancel_event) -> WorkflowResult:
     settings = workflow_run.settings
 
     workflow_run.set_stage("Analyzing")
+    workflow_run.set_progress(0)
     start_time, start_counter = (
         workflow_run.analyze_start_time or datetime.now(),
         workflow_run.analyze_start_counter or time.perf_counter(),

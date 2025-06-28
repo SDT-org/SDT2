@@ -5,6 +5,7 @@ import { LoadingAnimation } from "./LoadingAnimation";
 
 export const Loader = ({
   docState: { id: docId, estimated_time },
+  updateDocState,
 }: {
   docState: DocState;
   setDocState: SetDocState;
@@ -41,17 +42,26 @@ export const Loader = ({
       window.pywebview.api.get_workflow_run_status(docId).then((data) => {
         setStage(data.stage);
         setProgress(data.progress);
+
+        // TODO: start passing down an active workflow state from app tabs so this isn't needed
+        updateDocState({
+          ...(progress !== undefined && { progress: data.progress }),
+          stage: data.stage,
+        });
       });
     };
     const id = setInterval(handler, 120);
     return () => clearInterval(id);
-  }, [docId]);
+  }, [docId, updateDocState, progress]);
 
   return (
     <TabPanel id={docId} key={docId} className={"app-panel full-width"}>
       <div className="app-main centered loader">
         <div className="loader-wrapper">
-          <ProgressBar isIndeterminate={!progress} value={progress || 0}>
+          <ProgressBar
+            isIndeterminate={Number.isNaN(progress)}
+            value={progress || 0}
+          >
             {({ percentage, valueText, isIndeterminate }) => (
               <>
                 <Label>
@@ -98,7 +108,7 @@ export const Loader = ({
           }}
           isDisabled={canceling}
         >
-          {canceling ? "Canceling..." : "Cancel Run"}
+          {canceling ? "Canceling..." : "Cancel"}
         </Button>
       </div>
     </TabPanel>
