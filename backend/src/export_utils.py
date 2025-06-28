@@ -11,7 +11,7 @@ def save_matrix_to_csv(df, matrix_path, triangle_path):
         triangle.to_csv(triangle_path, mode="wt", header=False, index=True, sep=",")
     df.to_csv(matrix_path, mode="w", header=False, index=True, sep=",")
 
-
+## takes dissimalrity matrix and converts it to a columnar format       
 def save_cols_to_csv(df, path):
     order = df.index
     df.columns = df.index
@@ -19,7 +19,8 @@ def save_cols_to_csv(df, path):
     for i_idx, row_id in enumerate(order):
         for j_idx, col_id in enumerate(order):
             if i_idx > j_idx:
-                columnar_output.append([row_id, col_id, df.loc[row_id, col_id]])
+                # convert back to a sim matrix )
+                columnar_output.append([row_id,col_id, df.iloc[i_idx,j_idx]])
     columnar_df = DataFrame(
         columnar_output, columns=["First Sequence", "Second Sequence", "Identity Score"]
     )
