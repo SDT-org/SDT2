@@ -475,10 +475,10 @@ class Api:
         if args["output_cluster"] == True:
             cluster.export(
                 matrix_path=doc_paths.matrix,
-                cluster_data_output_dir=doc_paths.cluster_dir,  # Use the new cluster_dir path
-                seq_dict_path=doc_paths.seq_dict,  # Pass the seq_dict path
+                cluster_data_output_dir=doc_paths.cluster_dir,
+                seq_dict_path=doc_paths.seq_dict,
                 threshold=args["cluster_threshold"],
-                method=args["cluster_method"],  # Pass the cluster_method
+                method=args["cluster_method"],
             )
         prefix_default = os.path.splitext(doc.basename)[0]
         args["prefix"] = args.get("prefix", prefix_default) or prefix_default

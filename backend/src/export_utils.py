@@ -11,7 +11,8 @@ def save_matrix_to_csv(df, matrix_path, triangle_path):
         triangle.to_csv(triangle_path, mode="wt", header=False, index=True, sep=",")
     df.to_csv(matrix_path, mode="w", header=False, index=True, sep=",")
 
-## takes dissimalrity matrix and converts it to a columnar format       
+
+# takes dissimilarity matrix and converts it to a columnar format
 def save_cols_to_csv(df, path):
     order = df.index
     df.columns = df.index
@@ -35,6 +36,6 @@ def save_stats_to_csv(seq_stats, filename):
     stats_df.to_csv(filename, mode="w", header=True, index=False, sep=",")
 
 
-def seq_dict_to_json(seq_dict, filename):
+def save_seq_dict_to_json(seq_dict, filename):
     with open(filename, "w") as file:
         json.dump(seq_dict, file, indent=4)
