@@ -308,7 +308,9 @@ export const App = () => {
                     <Select
                       wide
                       selectedKey={appState.activeDocumentId}
-                      onSelectionChange={(value) => setActiveDocumentId(value)}
+                      onSelectionChange={(value) =>
+                        value && setActiveDocumentId(value)
+                      }
                       items={appState.documents.map((doc) => ({
                         id: doc.id,
                         name: doc.basename,

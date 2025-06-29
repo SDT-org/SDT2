@@ -564,10 +564,10 @@ small {
     }
   }
 
-  label {
+  label, .react-aria-Label {
     font-weight: 500;
 
-    &.header {
+    &.header, &[data-header] {
       display: block;
       font-size: 1.4rem;
       font-weight: 600;
@@ -1373,8 +1373,37 @@ label.sublabel,
   flex-direction: column;
   gap: 8px;
 
-  .react-aria-Label {
-    font-weight: 600;
+  &[data-card] {
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+
+      p {
+        font-weight: 400;
+      }
+
+      .react-aria-Radio {
+        display: flex;
+        flex-direction: column;
+        border: 0.1rem solid var(--border-color);
+        border-radius: 0.4rem;
+        padding: 0.6rem 2.4rem 1.2rem 3.2rem;
+        align-items: flex-start;
+        position: relative;
+        gap: 0.2rem;
+
+        &[data-selected] {
+          border-color: var(--highlight-background);
+        }
+
+        &:before {
+          position: absolute;
+          left: 0.8rem;
+          top: 1rem;
+        }
+      }
+    }
   }
 }
 
@@ -1388,8 +1417,8 @@ label.sublabel,
   &:before {
     content: "";
     display: block;
-    width: 1rem;
-    height: 1rem;
+    width: 1.4rem;
+    height: 1.4rem;
     box-sizing: border-box;
     border: 0.2rem solid var(--border-color);
     background: var(--field-background);

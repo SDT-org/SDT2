@@ -363,7 +363,7 @@ class Api:
             analysis_method=args.get("analysisMethod", "parasail"),
             lzani=LzaniSettings(
                 exec_path=get_lzani_exec_path(),
-                score_type=args.get("lzani_score_type", "ani"),
+                score_type=args.get("lzani_score_type", "tani"),
             ),
             parasail=ParasailSettings(
                 process_count=max(
@@ -698,7 +698,7 @@ if __name__ == "__main__":
         # TODO: store last window size and position
         width=1200,
         height=900,
-        min_size=(640, 480),
+        min_size=(900, 700),
         confirm_close=False,
         # frameless=True,
         # easy_drag=False,

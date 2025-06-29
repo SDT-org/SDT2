@@ -1,5 +1,5 @@
 import React from "react";
-import { Label, Text } from "react-aria-components";
+import { type Key, Label, Text } from "react-aria-components";
 import type { DocState } from "../appState";
 import { reorderMethods } from "../constants";
 import { Select, SelectItem } from "./Select";
@@ -51,7 +51,8 @@ export const ClustermapSidebar = ({
                       id="method"
                       wide
                       selectedKey={settings.method}
-                      onSelectionChange={(value: React.Key) =>
+                      onSelectionChange={(value: Key | null) =>
+                        value &&
                         updateSettings({
                           ...settings,
                           method: value as typeof settings.method,

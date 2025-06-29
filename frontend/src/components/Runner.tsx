@@ -4,14 +4,14 @@ import {
   Input,
   Label,
   Meter,
+  Radio,
+  RadioGroup,
   Slider,
   SliderOutput,
   SliderThumb,
   SliderTrack,
   TabPanel,
   Text,
-  ToggleButton,
-  ToggleButtonGroup,
 } from "react-aria-components";
 import { TbAlertTriangleFilled, TbFile } from "react-icons/tb";
 import useAppState, {
@@ -32,7 +32,6 @@ import { Switch } from "./Switch";
 export type RunSettings = Pick<AppState, "compute_cores" | "analysisMethod"> & {
   doc_id: string;
   cluster_method: AppState["cluster_method"] | "None";
-  lzani_score_type: AppState["lzaniScoreType"];
 };
 
 const RunnerSettings = ({
@@ -171,57 +170,35 @@ const RunnerSettings = ({
               </div>
             </div>
             <div className="field">
-              <Label className="header">Analysis Method</Label>
-              <div className="setting">
-                <ToggleButtonGroup
-                  data-compact
-                  selectionMode="single"
-                  disallowEmptySelection={true}
-                  selectedKeys={[appState.analysisMethod]}
-                  onSelectionChange={(value) =>
+              <RadioGroup
+                data-card
+                onChange={(value) => {
+                  value &&
                     updateAppState({
-                      analysisMethod: value.values().next()
-                        .value as typeof appState.analysisMethod,
-                    })
-                  }
-                >
-                  <ToggleButton id="parasail">Parasail</ToggleButton>
-                  <ToggleButton id="lzani">LZ-ANI</ToggleButton>
-                </ToggleButtonGroup>
-              </div>
-              {appState.analysisMethod === "lzani" && (
-                <div className="setting">
-                  <Select
-                    aria-label="Score Type"
-                    selectedKey={appState.lzaniScoreType}
-                    onSelectionChange={(value) => {
-                      updateAppState({
-                        lzaniScoreType: value as typeof appState.lzaniScoreType,
-                      });
-                    }}
-                    items={[
-                      {
-                        id: "ani",
-                        name: "ANI (Average Nucleotide Identity)",
-                      },
-                      {
-                        id: "gani",
-                        name: "gANI (Genome Average Nucleotide Identity)",
-                      },
-                      {
-                        id: "tani",
-                        name: "tANI (Total Average Nucleotide Identity)",
-                      },
-                    ]}
-                  >
-                    {(item) => (
-                      <SelectItem id={item.id} textValue={item.name}>
-                        {item.name}
-                      </SelectItem>
-                    )}
-                  </Select>
+                      analysisMethod: value as AppState["analysisMethod"],
+                    });
+                }}
+                value={appState.analysisMethod}
+              >
+                <Label data-header>Analysis Method</Label>
+                <div className="cards">
+                  <Radio value="parasail">
+                    Parasail
+                    <p className="text-deemphasis">
+                      Best for small datasets. Supports amino acid calculations.
+                    </p>
+                  </Radio>
+                  <Radio value="lzani">
+                    LZ-ANI
+                    <div style={{}}>
+                      <p className="text-deemphasis">
+                        Best for large datasets. Only supports nucleotide ANI
+                        calculations.
+                      </p>
+                    </div>
+                  </Radio>
                 </div>
-              )}
+              </RadioGroup>
             </div>
             <div className="field clustering inline-toggle">
               <Switch
@@ -238,6 +215,7 @@ const RunnerSettings = ({
                 aria-hidden={!appState.enableClustering}
               >
                 <Select
+                  data-flat
                   selectedKey={appState.cluster_method}
                   onSelectionChange={(value) => {
                     updateAppState({
@@ -259,7 +237,10 @@ const RunnerSettings = ({
                 </Select>
               </div>
             </div>
-            <div className="field performance">
+            <div
+              className="field performance"
+              data-hidden={appState.analysisMethod === "lzani"}
+            >
               <label className="header" htmlFor="compute-cores">
                 Performance
               </label>
@@ -378,7 +359,8 @@ const RunnerSettings = ({
               ) : null}
             </div>
 
-            {docState.compute_stats &&
+            {appState.analysisMethod === "parasail" &&
+            docState.compute_stats &&
             (docState.compute_stats?.recommended_cores === 0 ||
               estimatedMemory > appState.platform.memory ||
               appState.compute_cores >
