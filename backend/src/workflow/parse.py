@@ -39,10 +39,6 @@ def residue_check(seq):
 
 
 def parse_records(input: Iterator[SeqRecord], result: WorkflowResult) -> WorkflowResult:
-    if result.seq_dict:
-        # If records are already parsed, we can skip parsing again
-        return result
-
     max_length = 0
     count = 0
     is_aa = result.is_aa
