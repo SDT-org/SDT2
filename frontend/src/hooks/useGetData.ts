@@ -32,10 +32,10 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
 
         const { data, metadata, ids, identity_scores, full_stats } =
           parsedResponse;
-        const [tickText, ...parsedData] = data;
+        const [tickTextData, ...parsedData] = data;
 
         setMetaData(metadata);
-        setTickText(tickText as string[]);
+        setTickText(tickTextData?.map((t) => String(t ?? "")) as string[]);
         setHeatmapData(parsedData);
         setDistributionData({
           full_stats,
