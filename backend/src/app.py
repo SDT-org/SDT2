@@ -364,7 +364,7 @@ class Api:
             analysis_method=args.get("analysisMethod", "parasail"),
             lzani=LzaniSettings(
                 exec_path=get_lzani_exec_path(),
-                score_type=args.get("lzani_score_type", "tani"),
+                score_type=args.get("lzani_score_type", "ani"),
             ),
             parasail=ParasailSettings(
                 process_count=max(
