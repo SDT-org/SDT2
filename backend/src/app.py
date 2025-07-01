@@ -52,9 +52,8 @@ from debug import open_doc_folder
 from config import app_version, dev_frontend_host
 from constants import matrix_filetypes, default_window_title
 from transformations import (
-    read_csv_file,
     to_triangle,
-    triangle_to_matrix,
+    similarity_triangle_to_matrix,
     read_csv_matrix,
     read_stats_csv,
     read_columns_csv,
@@ -181,7 +180,7 @@ def handle_open_file(filepath: str, doc_id: str | None):
 
         # We need a full matrix for doing things but we don't have
         # it yet because this was a .txt/.csv lower triangle matrix
-        matrix_dataframe = triangle_to_matrix(df)
+        matrix_dataframe = similarity_triangle_to_matrix(df)
         matrix_dataframe.to_csv(
             doc_paths.matrix,
             mode="w",
