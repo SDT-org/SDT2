@@ -82,6 +82,13 @@ export type GetDataResponse = {
   metadata: {
     minVal: number;
     maxVal: number;
+    run?: {
+      analysis_method: "parasail" | "lzani";
+      cluster_method: (typeof reorderMethodKeys)[number];
+      lzani: {
+        score_type: string;
+      };
+    };
   };
   ids: string[];
   identity_scores: [number, number, number][];

@@ -1,9 +1,10 @@
-import multiprocessing
 import os
 import sys
 import json
 from typing import Dict
 import urllib.parse
+
+from file_utils import read_json_file
 
 current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(current_file_path, "../../"))
@@ -44,8 +45,7 @@ import platform
 import psutil
 import webview
 import json
-import pandas as pd
-from pandas import read_csv, DataFrame
+from pandas import DataFrame
 from numpy import eye, where, nan, nanmin, nanmax
 import mimetypes
 from shutil import copy
@@ -53,6 +53,7 @@ from debug import open_doc_folder
 from config import app_version, dev_frontend_host
 from constants import matrix_filetypes, default_window_title
 from transformations import (
+    read_csv_file,
     to_triangle,
     triangle_to_matrix,
     read_csv_matrix,
@@ -554,8 +555,15 @@ class Api:
         max_val = int(nanmax(heat_data_no_diag))
 
         parsedData = heat_data.values.tolist()
+
+        doc_paths = build_document_paths(get_document(doc_id).tempdir_path)
+
+        metadata = dict(minVal=min_val, maxVal=max_val)
+        if file_exists(doc_paths.run_settings):
+            metadata["run"] = read_json_file(doc_paths.run_settings)
+
         data_to_dump = dict(
-            metadata=dict(minVal=min_val, maxVal=max_val),
+            metadata=metadata,
             data=[tick_text] + parsedData,
             ids=ids,
             identity_scores=identity_scores,

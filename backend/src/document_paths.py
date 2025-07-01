@@ -15,6 +15,7 @@ DataKey = Literal[
     "lzani_results",
     "lzani_results_ids",
     "seq_dict",
+    "run_settings",
 ]
 
 ImageKey = Literal[
@@ -34,6 +35,7 @@ DATA_FILES: Dict[DataKey, str] = {
     "lzani_results": "lzani_results.tsv",
     "lzani_results_ids": "lzani_results_ids.tsv",
     "seq_dict": "seq_dict.json",
+    "run_settings": "run_settings.json",
 }
 
 IMAGE_KEYS: List[ImageKey] = [

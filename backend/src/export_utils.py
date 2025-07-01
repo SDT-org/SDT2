@@ -1,6 +1,8 @@
 import json
+from typing import Dict
 from pandas.core.frame import DataFrame
 from transformations import to_triangle
+from workflow.models import RunSettings
 
 
 def save_matrix_to_csv(df, matrix_path, triangle_path):
@@ -39,3 +41,8 @@ def save_stats_to_csv(seq_stats, filename):
 def save_seq_dict_to_json(seq_dict, filename):
     with open(filename, "w") as file:
         json.dump(seq_dict, file, indent=4)
+
+
+def save_run_settings_to_json(run_settings: Dict, path: str):
+    with open(path, "w") as file:
+        json.dump(run_settings, file, indent=4)

@@ -110,7 +110,6 @@ def get_similarity(seq1, seq2):
             gaps += 1
 
     similarity = float((float(dist)) / (len(seq1) - gaps))
-    # convert to percentile
 
     return similarity
 
@@ -125,6 +124,4 @@ def get_traceback_score(seq1, seq2, open_penalty, extend_penalty, matrix) -> flo
     similarity = get_similarity(query, result.traceback.ref)
 
     similarity_percent = similarity * 100.0
-   ## uncomment if it doesnt work still
-   # distance_score = 100.0 - similarity_percent
     return similarity_percent

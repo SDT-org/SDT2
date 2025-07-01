@@ -8,6 +8,8 @@ from pandas import DataFrame
 import psutil
 
 from config import app_version
+from export_utils import save_run_settings_to_json
+from utils import friendly_total_time
 from workflow import analyze, cluster, parse, postprocess
 from workflow.models import WorkflowResult, WorkflowRun
 
@@ -69,6 +71,17 @@ def run_process(workflow_run: WorkflowRun, cancel_event) -> WorkflowResult:
         return result
 
     end_time, end_counter = datetime.now(), time.perf_counter()
+
+    run_settings = {
+        "analysis_method": settings.analysis_method,
+        "cluster_method": settings.cluster_method,
+        "lzani": {
+            "score_type": settings.lzani.score_type,
+        },
+    }
+
+    save_run_settings_to_json(run_settings, settings.doc_paths.run_settings)
+
     file_name = os.path.basename(settings.fasta_path)
     summary_text = output_summary(
         file_name, start_time, end_time, start_counter, end_counter
@@ -78,11 +91,6 @@ def run_process(workflow_run: WorkflowRun, cancel_event) -> WorkflowResult:
     print(f"Elapsed time: {friendly_total_time(end_counter - start_counter)}")
 
     return result
-
-
-def friendly_total_time(total_time):
-    m, s = divmod(total_time, 60)
-    return f"{int(m)}m {s:.2f}s" if m > 0 else f"{s:.2f}s"
 
 
 def output_summary(file_name, start_time, end_time, start_counter, end_counter):
@@ -97,7 +105,3 @@ def output_summary(file_name, start_time, end_time, start_counter, end_counter):
     Run info for {file_name}: Start: {start_time.strftime("%b %d %Y, %I:%M %p %Z")}, End: {end_time.strftime("%b %d %Y, %I:%M %p %Z")}, Total: {friendly_total_time(total_counter)}
     Parasail: Using Needleman-Wunsch (stats) algorithm. Nucleotide: Open={13}, Extend={1} (BLOSUM62). Amino acid: Open={10}, Extend={1} (BLOSUM62).
     """
-
-
-# def fasta_alignments(seq_records, fname):
-#     SeqIO.write(seq_records, fname, "fasta")

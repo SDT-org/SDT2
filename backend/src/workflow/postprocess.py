@@ -12,7 +12,6 @@ from workflow.models import RunSettings, WorkflowResult
 
 def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
     doc_paths = settings.doc_paths
-    print(result.distance_matrix)
 
     # Use reordered_ids if clustering was performed, otherwise use ordered_ids
     ids_to_use = result.reordered_ids if result.reordered_ids else result.ordered_ids

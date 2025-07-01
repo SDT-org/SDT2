@@ -45,3 +45,8 @@ def open_folder(path: str):
 
     shell = system == "windows"
     subprocess.Popen(cmd, close_fds=True, shell=shell)
+
+
+def friendly_total_time(total_time):
+    m, s = divmod(total_time, 60)
+    return f"{int(m)}m {s:.2f}s" if m > 0 else f"{s:.2f}s"
