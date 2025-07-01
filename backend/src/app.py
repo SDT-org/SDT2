@@ -577,9 +577,10 @@ class Api:
         matrix_np = matrix_df.to_numpy()
         matrix_np = np.round(matrix_np, 2)
         sorted_ids = matrix_df.index.tolist()
+        stringified_sorted_ids = [str(id) for id in sorted_ids]
         reordered_data = {
             "matrix": to_triangle(matrix_np, fill_value=None).tolist(),
-            "tickText": sorted_ids,
+            "tickText": stringified_sorted_ids,
         }
         seqid_clusters_df = cluster.get_clusters_dataframe(
             matrix_np, method, threshold, sorted_ids
@@ -593,6 +594,7 @@ class Api:
         clusters = seqid_clusters_df["cluster"].tolist()
 
         # Store original cluster numbers before reordering
+        seqid_clusters_df["id"] = seqid_clusters_df["id"].astype(str)
         seqid_clusters_df["original_cluster"] = seqid_clusters_df["cluster"]
 
         reorder_clusters = cluster.order_clusters_sequentially(clusters)
