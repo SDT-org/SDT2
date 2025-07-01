@@ -4,12 +4,11 @@ import json
 from typing import Dict
 import urllib.parse
 
-from file_utils import read_json_file
-
 current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(current_file_path, "../../"))
 sys.path.append(os.path.join(current_file_path, "."))
 
+from file_utils import read_json_file
 from export_utils import save_cols_to_csv
 from workflow import cluster
 import numpy as np
