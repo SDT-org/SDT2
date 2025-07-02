@@ -5,6 +5,7 @@ from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 import pandas as pd
 from collections import defaultdict
 from scipy.spatial.distance import squareform, pdist
+from scipy.cluster import hierarchy
 from sklearn.manifold import MDS
 from joblib import Memory
 import os
@@ -32,8 +33,12 @@ def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
     Z = calculate_linkage(matrix_np, cluster_method)
 
     dendro = dendrogram(Z, no_plot=True)
-    reordered_indices = dendro["leaves"]
-
+    ## squareform for optimpal leaf ordering
+    Z = hierarchy.ward(matrix_np)
+    
+    #reordered_indices = dendro["leaves"]
+    #organize leave indicies for heatmap
+    reordered_indices = hierarchy.leaves_list(hierarchy.optimal_leaf_ordering(Z, matrix_np))
     # Reorder the matrix
     reordered_matrix = matrix_np[np.ix_(reordered_indices, reordered_indices)]
 
