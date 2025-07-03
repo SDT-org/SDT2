@@ -57,6 +57,7 @@ export const Violin = ({
   data,
   dataSets,
   dataSetKey,
+  metaData,
   settings,
   updateSettings,
   sidebarComponent,
@@ -87,7 +88,14 @@ export const Violin = ({
 
   const axisTitle = React.useMemo(() => {
     if (dataSetKey === "scores") {
-      return "Percent Pairwise Identity";
+      // Only use metadata labels for scores
+      const labels = {
+        lzani: "Average Nucleotide Identity",
+        parasail: "Percent Pairwise Identity",
+        default: "Percent Pairwise Identity", // fallback
+      };
+      const analysisMethod = metaData?.run?.analysis_method || "default";
+      return labels[analysisMethod] || labels.default;
     }
     if (dataSetKey === "gc") {
       return "GC Percentage";
@@ -96,7 +104,7 @@ export const Violin = ({
       return "Length (nt)";
     }
     return "";
-  }, [dataSetKey]);
+  }, [dataSetKey, metaData]);
 
   const hoverData = {
     scores: {

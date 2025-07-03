@@ -18,6 +18,7 @@ export const Histogram = ({
   data,
   dataSets,
   dataSetKey,
+  //metaData,
   sidebarComponent,
   settings,
   updateSettings,
@@ -25,6 +26,7 @@ export const Histogram = ({
   data: DistributionData | undefined;
   dataSets: DataSets;
   dataSetKey: keyof DataSets;
+  //metaData?: MetaData;
   sidebarComponent?: React.ReactNode;
   settings: DistributionState["histogram"];
   updateSettings: React.Dispatch<Partial<DistributionState["histogram"]>>;
