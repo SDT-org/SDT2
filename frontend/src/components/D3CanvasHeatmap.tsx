@@ -44,6 +44,8 @@ export const D3CanvasHeatmap = ({
     x: number;
     y: number;
     value: number | null;
+    percentId?: number | null;
+    cluster?: number | null;
     xLabel?: string;
     yLabel?: string;
   } | null>(null);
@@ -384,6 +386,8 @@ export const D3CanvasHeatmap = ({
         x,
         y,
         value: clusterData ? (clusterGroup ?? null) : cell.value,
+        percentId: cell.value,
+        cluster: clusterGroup ?? null,
         xLabel: tickText[cell.x] || "",
         yLabel: tickText[cell.y] || "",
       });
@@ -412,27 +416,32 @@ export const D3CanvasHeatmap = ({
           }}
         >
           <div>
-            <dt>SeqX:</dt>
+            <dt>"X" :</dt>
             <dd>{tooltipData.xLabel}</dd>
           </div>
           <div>
-            <dt> SeqY:</dt>
+            <dt> "Y" :</dt>
             <dd>{tooltipData.yLabel}</dd>
           </div>
-          <div>
-            <dt>
-              {clusterData
-                ? tooltipData.value
-                  ? "Cluster:"
-                  : ""
-                : "Percent ID:"}
-            </dt>
-            <dd>
-              {clusterData
-                ? tooltipData.value || ""
-                : `${tooltipData?.value?.toFixed(2)}%`}
-            </dd>
-          </div>
+          {clusterData ? (
+            <>
+              {tooltipData.cluster !== null && (
+                <div>
+                  <dt>Cluster:</dt>
+                  <dd>{tooltipData.cluster}</dd>
+                </div>
+              )}
+              <div>
+                <dt>Percent ID:</dt>
+                <dd>{tooltipData.percentId?.toFixed(2)}%</dd>
+              </div>
+            </>
+          ) : (
+            <div>
+              <dt>Percent ID:</dt>
+              <dd>{tooltipData.value?.toFixed(2)}%</dd>
+            </div>
+          )}
         </dl>
       )}
     </div>
