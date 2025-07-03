@@ -78,7 +78,6 @@ export const Violin = ({
       </div>
     );
   }
-
   const dataSet = dataSets[dataSetKey];
   const [minDataValue, maxDataValue] = arrayMinMax(dataSet);
   const updateTitles = useRelayoutUpdateTitles(updateSettings);

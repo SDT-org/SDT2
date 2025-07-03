@@ -9,7 +9,7 @@ import {
   useRelayoutHideSubtitle,
   useRelayoutUpdateTitles,
 } from "../hooks/useRelayoutUpdateTitles";
-import type { DistributionData } from "../plotTypes";
+import type { DistributionData, MetaData } from "../plotTypes";
 import { HistogramSidebar } from "./HistogramSidebar";
 
 const Plot = createPlotlyComponent(Plotly);
@@ -18,7 +18,7 @@ export const Histogram = ({
   data,
   dataSets,
   dataSetKey,
-  //metaData,
+  metaData,
   sidebarComponent,
   settings,
   updateSettings,
@@ -26,7 +26,7 @@ export const Histogram = ({
   data: DistributionData | undefined;
   dataSets: DataSets;
   dataSetKey: keyof DataSets;
-  //metaData?: MetaData;
+  metaData?: MetaData;
   sidebarComponent?: React.ReactNode;
   settings: DistributionState["histogram"];
   updateSettings: React.Dispatch<Partial<DistributionState["histogram"]>>;
@@ -47,7 +47,14 @@ export const Histogram = ({
 
   const axisTitle = React.useMemo(() => {
     if (dataSetKey === "scores") {
-      return "Percent Pairwise Identity";
+      // Only use metadata labels for scores
+      const labels = {
+        lzani: "Average Nucleotide Identity",
+        parasail: "Percent Pairwise Identity",
+        default: "Percent Pairwise Identity", // fallback
+      };
+      const analysisMethod = metaData?.run?.analysis_method || "default";
+      return labels[analysisMethod] || labels.default;
     }
     if (dataSetKey === "gc") {
       return "GC Percentage";
@@ -56,7 +63,7 @@ export const Histogram = ({
       return "Length (nt)";
     }
     return "";
-  }, [dataSetKey]);
+  }, [dataSetKey, metaData]);
 
   const histogramTrace = React.useMemo(() => {
     const orientation = settings.plotOrientation;
