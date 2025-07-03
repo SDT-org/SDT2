@@ -27,8 +27,7 @@ export const Clustermap = ({
     Array<ClusterDataItem> | undefined
   >(undefined);
   const [orderedMatrix, setOrderedMatrix] = React.useState<HeatmapData>(data);
-  const [orderedTickText, setOrderedTickText] =
-    React.useState<string[]>(tickText);
+  const [orderedIds, setOrderedIds] = React.useState<string[]>(tickText);
 
   React.useEffect(() => {
     const start = performance.now();
@@ -41,7 +40,7 @@ export const Clustermap = ({
       )
       .then((response) => {
         setClusterData(response.clusterData);
-        setOrderedTickText(response.tickText);
+        setOrderedIds(response.tickText);
         setOrderedMatrix(response.matrix);
         const end = performance.now();
         console.log(`Clustermap fetch time: ${end - start}ms`);
@@ -52,7 +51,7 @@ export const Clustermap = ({
   const elementRef = React.useRef<HTMLDivElement | null>(null);
   const size = useSize(elementRef, leftSidebarCollapsed);
   const { clustermap: settings } = docState;
-  const { margin } = useMetrics(settings, orderedTickText);
+  const { margin } = useMetrics(settings, orderedIds);
   const updateSettings = React.useCallback(
     (values: Partial<DocState["clustermap"]>) =>
       setDocState((prev) => ({
@@ -71,8 +70,8 @@ export const Clustermap = ({
   ];
 
   const clustermapData = React.useMemo(
-    () => formatClustermapData(orderedMatrix, orderedTickText, clusterData),
-    [orderedMatrix, orderedTickText, clusterData],
+    () => formatClustermapData(orderedMatrix, orderedIds, clusterData),
+    [orderedMatrix, orderedIds, clusterData],
   );
 
   const forceSvgRender = useHeatmapRenderToggle();
@@ -108,7 +107,7 @@ export const Clustermap = ({
                 data={clustermapData}
                 clusterData={clusterData}
                 settings={{ ...docState.heatmap, ...settings }}
-                tickText={orderedTickText}
+                tickText={orderedIds}
                 colorScale={colorScale}
                 minVal={0}
                 maxVal={100}
@@ -136,7 +135,7 @@ export const Clustermap = ({
               data={clustermapData}
               clusterData={clusterData}
               settings={{ ...docState.heatmap, ...settings }}
-              tickText={orderedTickText}
+              tickText={orderedIds}
               colorScale={colorScale}
               cbarHeight={0}
               cbarWidth={0}

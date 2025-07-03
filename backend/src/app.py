@@ -176,11 +176,14 @@ def handle_open_file(filepath: str, doc_id: str | None):
         data_no_diag = where(diag_mask, nan, data)
         int(nanmin(data_no_diag))
         int(nanmax(data_no_diag))
-        save_cols_to_csv(df, doc_paths.columns)
-
+        
         # We need a full matrix for doing things but we don't have
         # it yet because this was a .txt/.csv lower triangle matrix
         matrix_dataframe = similarity_triangle_to_matrix(df)
+        
+        # save_cols_to_csv expects distance values, not similarity
+        # The matrix_dataframe now contains distance values after similarity_triangle_to_matrix
+        save_cols_to_csv(matrix_dataframe, doc_paths.columns)
         matrix_dataframe.to_csv(
             doc_paths.matrix,
             mode="w",
@@ -501,68 +504,56 @@ class Api:
             open_folder(args["export_path"])
         return True
 
-    def load_data_and_stats(self, doc_id: str):
+    def get_data(self, doc_id: str):
+        # Load all data in one place
         doc = get_document(doc_id)
         doc_paths = build_document_paths(doc.tempdir_path)
-        with open(doc_paths.matrix, "r") as temp_f:
-            col_count = [len(l.split(",")) for l in temp_f.readlines()]
-            column_names = [i for i in range(0, max(col_count))]
+        
+        # Load matrix
+        df = read_csv_matrix(doc_paths.matrix)
+        ids = df.index.tolist()
+        update_document(doc_id, sequences_count=len(ids))
+        data = df.to_numpy()
+        
+        # Load stats if available
         if os.path.exists(doc_paths.stats):
             stats_df = read_stats_csv(doc_paths.stats)
         else:
             stats_df = DataFrame([])
-        if os.path.exists(doc_paths.columns):
-            cols_data = read_columns_csv(doc_paths.columns)
-            id_map = {}
-            identity_scores = []
-            for row in cols_data:
-                a, b = row[:2]
-                if a not in id_map:
-                    id_map[a] = len(id_map)
-                if b not in id_map:
-                    id_map[b] = len(id_map)
-                identity_scores.append([id_map[a], id_map[b]] + list(row[2:]))
-            ids = list(id_map.keys())
-        else:
-            ids = []
-            identity_scores = []
-        df = read_csv_matrix(doc_paths.matrix)
-        tick_text = df.index.tolist()
-        update_document(doc_id, sequences_count=len(tick_text))
-        data = df.to_numpy()
-        diag_mask = eye(data.shape[0], dtype=bool)
-        data_no_diag = where(diag_mask, nan, data)
-        min_val = int(nanmin(data_no_diag))
-        max_val = int(nanmax(data_no_diag))
-        # TODO might be able to make one tick text object for both to use?
-        return data, tick_text, min_val, max_val, ids, identity_scores, stats_df
-
-    def get_data(self, doc_id: str):
-        data, tick_text, _, _, ids, identity_scores, stats_df = (
-            self.load_data_and_stats(doc_id)
-        )
-        heat_data = DataFrame(data, index=tick_text)
-
+        
+        # Generate identity scores from matrix for CSV imports
+        # This ensures distribution plots have data to work with
+        identity_scores = []
+        id_map = {id: idx for idx, id in enumerate(ids)}         
+        # The matrix contains distance values, convert to similarity for identity scores
+        for i in range(len(ids)):
+            for j in range(i):
+                # Convert distance to similarity (identity score)
+                identity_score = 100 - data[i, j]
+                identity_scores.append([id_map[ids[i]], id_map[ids[j]], identity_score])
+        
+        # Convert matrix to triangle format for heatmap (converts distance to similarity)
+        heat_data = DataFrame(data, index=ids)
         heat_data = to_triangle(heat_data)
-
-        # Recalculate min/max after conversion to similarity values
+        
+        # Calculate min/max after conversion to similarity values
         heat_data_np = heat_data.to_numpy()
         diag_mask = eye(heat_data_np.shape[0], dtype=bool)
         heat_data_no_diag = where(diag_mask, nan, heat_data_np)
         min_val = int(nanmin(heat_data_no_diag))
         max_val = int(nanmax(heat_data_no_diag))
-
+        
         parsedData = heat_data.values.tolist()
-
-        doc_paths = build_document_paths(get_document(doc_id).tempdir_path)
-
+        
+        # Load run settings if available
         metadata = dict(minVal=min_val, maxVal=max_val)
         if file_exists(doc_paths.run_settings):
             metadata["run"] = read_json_file(doc_paths.run_settings)
-
+        
+        # Return all data
         data_to_dump = dict(
             metadata=metadata,
-            data=[tick_text] + parsedData,
+            data=[ids] + parsedData,
             ids=ids,
             identity_scores=identity_scores,
             full_stats=stats_df.values.tolist(),

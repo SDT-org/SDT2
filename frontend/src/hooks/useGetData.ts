@@ -10,7 +10,7 @@ import { getDocument } from "../services/documents";
 
 export const useGetData = (docState: DocState, setDocState: SetDocState) => {
   const [loading, setLoading] = React.useState(false);
-  const [tickText, setTickText] = React.useState<string[]>([""]);
+  const [ids, setIds] = React.useState<string[]>([""]);
   const [heatmapData, setHeatmapData] = React.useState<HeatmapData>();
   const [distributionData, setDistributionData] =
     React.useState<DistributionData>();
@@ -30,19 +30,24 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
           rawData.replace(/\bNaN\b/g, "null"),
         );
 
-        const { data, metadata, ids, identity_scores, full_stats } =
-          parsedResponse;
-        const [tickTextData, ...parsedData] = data;
+        const {
+          data,
+          metadata,
+          ids: responseIds,
+          identity_scores,
+          full_stats,
+        } = parsedResponse;
+        const [idsData, ...parsedData] = data;
 
         setMetaData(metadata);
-        setTickText(tickTextData?.map((t) => String(t ?? "")) as string[]);
+        setIds(idsData?.map((t) => String(t ?? "")) as string[]);
         setHeatmapData(parsedData);
         setDistributionData({
           full_stats,
           gc_stats: full_stats.map((row) => row[1]),
           length_stats: full_stats.map((row) => row[2]),
           raw_mat: identity_scores.map((i) => i[2]),
-          ids,
+          ids: responseIds,
           identity_combos: identity_scores.map((i) => [i[0], i[1]]),
         });
 
@@ -121,7 +126,7 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
 
   return {
     loading,
-    tickText,
+    tickText: ids,
     heatmapData,
     distributionData,
     metaData,
