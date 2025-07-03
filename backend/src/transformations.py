@@ -40,8 +40,8 @@ def to_triangle(matrix, convert_to_similarity=True, fill_value=nan):
 
 def similarity_triangle_to_matrix(matrix_lower: DataFrame) -> DataFrame:
     index = matrix_lower.index
-    lower = np.round(np.tril(matrix_lower), 2)
-    df = lower + np.triu(lower.T, 1)
+    sim_lower = np.round(np.tril(100 - matrix_lower), 2)
+    df = sim_lower + np.triu(sim_lower.T, 1)
     return DataFrame(df, index=index)
 
 
