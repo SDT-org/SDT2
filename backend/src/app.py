@@ -576,11 +576,8 @@ class Api:
         matrix_np = matrix_df.to_numpy()
         matrix_np = np.round(matrix_np, 2)
         sorted_ids = matrix_df.index.tolist()
-        stringified_sorted_ids = [str(id) for id in sorted_ids]
-        reordered_data = {
-            "matrix": to_triangle(matrix_np, fill_value=None).tolist(),
-            "tickText": stringified_sorted_ids,
-        }
+        
+        # Get cluster assignments
         seqid_clusters_df = cluster.get_clusters_dataframe(
             matrix_np, method, threshold, sorted_ids
         )
@@ -590,19 +587,34 @@ class Api:
                 str(seqid_clusters_df.columns[1]): "cluster",
             }
         )
-        clusters = seqid_clusters_df["cluster"].tolist()
-
-        # Store original cluster numbers before reordering
+        
+        # Store original cluster numbers
         seqid_clusters_df["id"] = seqid_clusters_df["id"].astype(str)
         seqid_clusters_df["original_cluster"] = seqid_clusters_df["cluster"]
-
+        print("Original clusters:", seqid_clusters_df["original_cluster"].unique())
+        # Reorder cluster numbers sequentially, so that
+        clusters = seqid_clusters_df["cluster"].tolist()
         reorder_clusters = cluster.order_clusters_sequentially(clusters)
         seqid_clusters_df["cluster"] = reorder_clusters
+        
+        # Get the linkage-based order to group sequences by cluster
+        new_order = cluster.get_linkage_method_order(matrix_np, method, sorted_ids, threshold)
+        
+        # Create a mapping from old index to new index
+        reorder_indices = [sorted_ids.index(id) for id in new_order]
+        
+        # Reorder the matrix
+        reordered_matrix = matrix_np[np.ix_(reorder_indices, reorder_indices)]
+        
+        # Reorder the tick text
+        reordered_tick_text = [str(sorted_ids[i]) for i in reorder_indices]
+        
+        # Update the cluster data to match the new order
         cluster_data = seqid_clusters_df.to_dict(orient="records")
-
+        
         return {
-            "matrix": reordered_data["matrix"],
-            "tickText": reordered_data["tickText"],
+            "matrix": to_triangle(reordered_matrix, fill_value=None).tolist(),
+            "tickText": reordered_tick_text,
             "clusterData": cluster_data,
         }
 

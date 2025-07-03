@@ -1,4 +1,3 @@
-from tempfile import TemporaryDirectory
 import time
 import numpy as np
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
@@ -7,7 +6,6 @@ from collections import defaultdict
 from scipy.spatial.distance import squareform, pdist
 from scipy.cluster import hierarchy
 from sklearn.manifold import MDS
-from joblib import Memory
 import os
 import json
 from Bio import SeqIO, Seq, SeqRecord
@@ -33,21 +31,15 @@ def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
     Z = calculate_linkage(matrix_np, cluster_method)
 
     dendro = dendrogram(Z, no_plot=True)
-    ## squareform for optimpal leaf ordering
-    Z = hierarchy.ward(matrix_np)
-    
-    #reordered_indices = dendro["leaves"]
-    #organize leave indicies for heatmap
+
+    #optimally organize leave indicies for heatmap
     reordered_indices = hierarchy.leaves_list(hierarchy.optimal_leaf_ordering(Z, matrix_np))
     # Reorder the matrix
     reordered_matrix = matrix_np[np.ix_(reordered_indices, reordered_indices)]
 
     if ordered_ids:
         reordered_ids = [ordered_ids[i] for i in reordered_indices]
-        if hasattr(distance_matrix, "loc"):
-            reordered_matrix = matrix_np[np.ix_(reordered_indices, reordered_indices)]
-        else:
-            reordered_matrix = matrix_np[np.ix_(reordered_indices, reordered_indices)]
+        reordered_matrix = matrix_np[np.ix_(reordered_indices, reordered_indices)]
     else:
         reordered_matrix = matrix_np[np.ix_(reordered_indices, reordered_indices)]
         reordered_ids = reordered_indices
@@ -58,7 +50,7 @@ def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
 
 
 def calculate_linkage(distance_matrix: np.ndarray, method: str) -> np.ndarray:
-    """Calculate hierarchical clustering linkage matrix."""
+ 
     if method in ["ward", "centroid", "median"]:
         # MDS for methods that need Euclidean distance
         start = time.perf_counter()
@@ -90,14 +82,47 @@ def get_linkage(data: np.ndarray, method: str) -> np.ndarray:
     return calculate_linkage(data, method)
 
 
-def get_linkage_method_order(data, method, index):
+def get_linkage_method_order(data, method, index, threshold=None):
     Z = get_linkage(data, method)
+    
+    if threshold is not None:
 
-    # Create dendrogram to get leaf order
-    dendro = dendrogram(Z, no_plot=True)
-    leaf_indices = dendro["leaves"]
-    new_order = [index[i] for i in leaf_indices]
+        cutby = 100 - threshold
+        clusters = fcluster(Z, t=cutby, criterion="distance")
+        
+        # Create a dictionary mapping cluster ID to sequence indices
+        cluster_to_indices = defaultdict(list)
+        for i, cluster_id in enumerate(clusters):
+            cluster_to_indices[cluster_id].append(i)
+        
+        # For each cluster, get the dendrogram order within that cluster
+        dendro = dendrogram(Z, no_plot=True)
+        leaf_order = dendro["leaves"]
+        
+        # create a mapping of the index and its position in the dendrogram
+        dendro_position = {idx: pos for pos, idx in enumerate(leaf_order)}
+        
+        # sort the clusters by the minimum dendrogram position of their members
+        sorted_clusters = sorted(cluster_to_indices.keys(), 
+                               key=lambda c: min(dendro_position[idx] for idx in cluster_to_indices[c]))
+        
 
+        # Within each cluster, maintain the dendrogram order
+        new_indices = []
+        for cluster_id in sorted_clusters:
+            cluster_indices = cluster_to_indices[cluster_id]
+            # Sort indices within cluster by their dendrogram position
+            cluster_indices.sort(key=lambda idx: dendro_position[idx])
+            new_indices.extend(cluster_indices)
+        
+        # Convert indices to lsit of sequence IDs
+        new_order = [index[i] for i in new_indices]
+    else:
+        #  no threshold,  use dendrogram order
+        dendro = dendrogram(Z, no_plot=True)
+        leaf_indices = dendro["leaves"]
+        new_order = [index[i] for i in leaf_indices]
+    
     return new_order
 
 
@@ -106,33 +131,37 @@ def get_clusters_dataframe(data, method, threshold, index):
     cluster_data = get_cluster_data_dict(Z, threshold, index)
     return cluster_data_to_dataframe(cluster_data, threshold)
 
-
+## export fasta files for each clusterr
 def export(matrix_path, cluster_data_output_dir, seq_dict_path, threshold, method):
     os.makedirs(cluster_data_output_dir, exist_ok=True)
+    
+    ###Prepare cluster.csv output
     cluster_csv_path = os.path.join(cluster_data_output_dir, "cluster.csv")
-
     with open(matrix_path, "r") as temp_f:
         col_count = [len(l.split(",")) for l in temp_f.readlines()]
         column_names = [i for i in range(0, max(col_count))]
-
+ 
     df = read_csv_matrix(matrix_path)
     index = df.index.tolist()
     data = df.to_numpy()
     data = np.round(data, 2)
-
+    ## save clsuters.csv
     df_result = get_clusters_dataframe(data, method, threshold, index)
     df_result.to_csv(cluster_csv_path, index=False)
-
+    ## Prepare sequence dictionary for fasta export
     seq_dict = {}
     if os.path.exists(seq_dict_path):
         with open(seq_dict_path, "r") as f:
             seq_dict = json.load(f)
-
+    # id the clsuters
     cluster_col_name = [col for col in df_result.columns if "Cluster" in col][0]
+    #gather the data
     df_result[cluster_col_name] = df_result[cluster_col_name].astype(int)
+    #group it
     grouped_ids_by_cluster = (
         df_result.groupby(cluster_col_name)["ID"].apply(list).to_dict()
     )
+    # Create fasta files for each cluster
     for cluster_num, list_of_seq_ids in grouped_ids_by_cluster.items():
         records_for_this_cluster = []
         for seq_id in list_of_seq_ids:
@@ -152,7 +181,7 @@ def export(matrix_path, cluster_data_output_dir, seq_dict_path, threshold, metho
 
     return df_result
 
-
+#
 def get_cluster_data_dict(Z, threshold, index):
     # Set cut threshold
     cutby = 100 - threshold
