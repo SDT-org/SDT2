@@ -579,14 +579,9 @@ class Api:
             }
         )
         
-        # Store original cluster numbers
+        # Store original cluster numbers for color consistency
         seqid_clusters_df["id"] = seqid_clusters_df["id"].astype(str)
         seqid_clusters_df["original_cluster"] = seqid_clusters_df["cluster"]
-        print("Original clusters:", seqid_clusters_df["original_cluster"].unique())
-        # Reorder cluster numbers sequentially, so that
-        clusters = seqid_clusters_df["cluster"].tolist()
-        reorder_clusters = cluster.order_clusters_sequentially(clusters)
-        seqid_clusters_df["cluster"] = reorder_clusters
         
         # Get the linkage-based order to group sequences by cluster
         new_order = cluster.get_linkage_method_order(matrix_np, method, sorted_ids, threshold)
@@ -600,7 +595,28 @@ class Api:
         # Reorder the tick text
         reordered_tick_text = [str(sorted_ids[i]) for i in reorder_indices]
         
-        # Update the cluster data to match the new order
+        # Now assign sequential cluster numbers based on visual order
+        # creates a mapping of sequence ID to its cluster
+        id_to_cluster = {row["id"]: row["cluster"] for _, row in seqid_clusters_df.iterrows()}
+        
+        # Track seen clusters 
+        seen_clusters = {}
+        next_cluster_num = 1
+        
+        # Go through sequences in descending order from the topmosost cluster and assign asending sequential cluster numbers
+        for seq_id in reordered_tick_text:
+            original_cluster = id_to_cluster.get(seq_id)
+            if original_cluster is not None and original_cluster not in seen_clusters:
+                seen_clusters[original_cluster] = next_cluster_num
+                next_cluster_num += 1
+        
+        # Update the dataframe with new sequential cluster numbers
+        for idx, row in seqid_clusters_df.iterrows():
+            original_cluster = row["cluster"]
+            if original_cluster in seen_clusters:
+                seqid_clusters_df.at[idx, "cluster"] = seen_clusters[original_cluster]
+        
+        # Update the cluster data to match the new order so that the legend matches
         cluster_data = seqid_clusters_df.to_dict(orient="records")
         
         return {
