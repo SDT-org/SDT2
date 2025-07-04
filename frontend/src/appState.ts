@@ -44,11 +44,6 @@ export type DocState = {
   pair_count: number;
   estimated_time?: number;
   validation_error_id?: keyof typeof messages;
-  compute_stats?: {
-    recommended_cores: number;
-    required_memory: number;
-    available_memory: number;
-  };
   dataView:
     | "heatmap"
     | "clustermap"
@@ -62,6 +57,16 @@ export type DocState = {
   invalid?: {
     reason: string;
   };
+  compute_stats?: {
+    recommended_cores: number;
+    required_memory: number;
+    available_memory: number;
+  };
+  enableClustering: boolean;
+  compute_cores?: number;
+  cluster_method: keyof typeof reorderMethods;
+  analysisMethod: "parasail" | "lzani";
+  lzaniScoreType: "ani" | "gani" | "tani";
 };
 
 export type AppState = {
@@ -79,11 +84,6 @@ export type AppState = {
     userPath: string;
   };
   debug: boolean;
-  enableClustering: boolean;
-  analysisMethod: "parasail" | "lzani";
-  lzaniScoreType: "ani" | "gani" | "tani";
-  cluster_method: keyof typeof reorderMethods;
-  compute_cores: number;
   showExportModal: boolean;
   saveFormat: SaveableImageFormat;
   dataExportPath: string;
@@ -149,6 +149,10 @@ export const initialDocState: DocState = {
   pair_count: 0,
   dataView: "heatmap",
   distribution: initialDistributionState,
+  enableClustering: true,
+  analysisMethod: "parasail",
+  lzaniScoreType: "ani",
+  cluster_method: "average",
   heatmap: {
     colorScaleKey: "Portland",
     reverse: false,
@@ -197,13 +201,8 @@ export const initialAppState: AppState = {
   debug: false,
   dataExportPath: "",
   lastDataFilePath: "",
-  enableClustering: true,
-  analysisMethod: "parasail",
-  lzaniScoreType: "ani",
-  cluster_method: "average",
   saveFormat: "svg",
   showExportModal: false,
-  compute_cores: 1,
   documents: [],
   platform: {
     cores: 1,

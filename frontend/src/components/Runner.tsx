@@ -3,47 +3,43 @@ import {
   Button,
   Input,
   Label,
-  Meter,
   Radio,
   RadioGroup,
-  Slider,
-  SliderOutput,
-  SliderThumb,
-  SliderTrack,
   TabPanel,
   Text,
 } from "react-aria-components";
-import { TbAlertTriangleFilled, TbFile } from "react-icons/tb";
+import { TbFile } from "react-icons/tb";
 import useAppState, {
-  type AppState,
   type DocState,
   type SetDocState,
   type UpdateDocState,
 } from "../appState";
 import { reorderMethods } from "../constants";
-import { formatBytes, splitFilePath } from "../helpers";
+import { splitFilePath } from "../helpers";
 import useOpenFileDialog from "../hooks/useOpenFileDialog";
 import { useRecentFiles } from "../hooks/useRecentFiles";
 import { useStartRun } from "../hooks/useStartRun";
 import messages from "../messages";
+import { RunnerPerformance } from "./RunnerPerformance";
 import { Select, SelectItem } from "./Select";
 import { Switch } from "./Switch";
 
-export type RunSettings = Pick<AppState, "compute_cores" | "analysisMethod"> & {
+export type RunSettings = Pick<DocState, "compute_cores" | "analysisMethod"> & {
   doc_id: string;
-  cluster_method: AppState["cluster_method"] | "None";
+  cluster_method: DocState["cluster_method"] | "None";
 };
 
 const RunnerSettings = ({
   docState,
   setDocState,
+  updateDocState,
 }: {
   docState: DocState;
   setDocState: SetDocState;
   updateDocState: UpdateDocState;
 }) => {
   const { appState, setAppState } = useAppState();
-  const startRun = useStartRun(docState, appState);
+  const startRun = useStartRun(docState);
   const [startingRun, setStartingRun] = React.useState(false);
   const initialized = React.useRef(false);
   const openFileDialog = useOpenFileDialog(appState, setAppState);
@@ -53,17 +49,6 @@ const RunnerSettings = ({
       ? docState.filename.split("/").pop()
       : undefined;
   const isFastaType = docState.filetype === "text/fasta";
-
-  const updateAppState = React.useCallback(
-    (value: Partial<AppState>) =>
-      setAppState((previous) => {
-        return {
-          ...previous,
-          ...value,
-        };
-      }),
-    [setAppState],
-  );
 
   React.useEffect(() => {
     const handleEnter = (event: KeyboardEvent) => {
@@ -83,66 +68,6 @@ const RunnerSettings = ({
       document.removeEventListener("keydown", handleEnter);
     };
   }, [docState.filename, docState.validation_error_id, startRun]);
-
-  React.useEffect(() => {
-    if (!docState.compute_stats || initialized.current) {
-      return;
-    }
-    updateAppState({
-      compute_cores: docState.compute_stats.recommended_cores,
-    });
-    initialized.current = true;
-  }, [docState.compute_stats, updateAppState]);
-
-  React.useEffect(() => {
-    const id = setInterval(() => {
-      if (!docState.filename) {
-        return;
-      }
-
-      window.pywebview.api.get_available_memory().then((available_memory) =>
-        setDocState((previous) => {
-          return {
-            ...previous,
-            compute_stats: {
-              ...(previous.compute_stats || {
-                recommended_cores: 1,
-                required_memory: 1,
-              }),
-              available_memory,
-            },
-          };
-        }),
-      );
-    }, 3000);
-
-    return () => clearInterval(id);
-  }, [docState.filename, setDocState]);
-
-  const estimatedMemory =
-    (docState.compute_stats?.required_memory || 1) *
-    (appState.compute_cores || 1);
-
-  const estimatedMemoryValue = docState.compute_stats
-    ? ((docState.compute_stats.required_memory *
-        (appState.compute_cores || 1)) /
-        docState.compute_stats.available_memory) *
-      100
-    : 1;
-
-  const impactName = (percentage: number) =>
-    percentage > 99
-      ? "extreme"
-      : percentage > 90
-        ? "high"
-        : percentage > 80
-          ? "medium"
-          : "low";
-
-  const coresImpact =
-    docState.compute_stats && docState.compute_stats.recommended_cores === 0
-      ? "extreme"
-      : impactName((appState.compute_cores / appState.platform.cores) * 100);
 
   return (
     <div className="form-wrapper runner-wrapper">
@@ -174,11 +99,11 @@ const RunnerSettings = ({
                 data-card
                 onChange={(value) => {
                   value &&
-                    updateAppState({
-                      analysisMethod: value as AppState["analysisMethod"],
+                    updateDocState({
+                      analysisMethod: value as DocState["analysisMethod"],
                     });
                 }}
-                value={appState.analysisMethod}
+                value={docState.analysisMethod}
               >
                 <Label data-header>Analysis Method</Label>
                 <div className="cards">
@@ -202,175 +127,52 @@ const RunnerSettings = ({
             </div>
             <div className="field clustering inline-toggle">
               <Switch
-                isSelected={appState.enableClustering}
+                isSelected={docState.enableClustering}
                 onChange={(value) => {
-                  updateAppState({ enableClustering: value });
+                  updateDocState({ enableClustering: value });
                 }}
               >
                 Reorder data by linkage clustering method
               </Switch>
-              <div
-                className="setting clustering-method"
-                data-hidden={!appState.enableClustering}
-                aria-hidden={!appState.enableClustering}
-              >
-                <Select
-                  data-flat
-                  selectedKey={appState.cluster_method}
-                  onSelectionChange={(value) => {
-                    updateAppState({
-                      cluster_method: value as typeof appState.cluster_method,
-                    });
-                  }}
-                  items={Object.entries(reorderMethods).map(([key, value]) => ({
-                    id: key,
-                    name: value.name,
-                    description: value.description,
-                  }))}
-                >
-                  {(item) => (
-                    <SelectItem textValue={item.name}>
-                      <Text slot="label">{item.name}</Text>
-                      <Text slot="description">{item.description}</Text>
-                    </SelectItem>
-                  )}
-                </Select>
-              </div>
-            </div>
-            <div
-              className="field performance"
-              data-hidden={appState.analysisMethod === "lzani"}
-            >
-              <label className="header" htmlFor="compute-cores">
-                Performance
-              </label>
-              {docState.compute_stats ? (
-                <div className="setting performance-settings">
-                  <div className="cores-used inline">
-                    <div>
-                      <Label id="compute-cores-label">Cores</Label>
-                      <small className="text-deemphasis">
-                        {docState.compute_stats.recommended_cores} Recommended /{" "}
-                        {appState.platform.cores} Total
-                      </small>
-                    </div>
-                    <Slider
-                      aria-labelledby="compute-cores-label"
-                      onChange={(value) =>
-                        updateAppState({ compute_cores: value })
-                      }
-                      minValue={1}
-                      maxValue={appState.platform.cores}
-                      value={appState.compute_cores}
-                    >
-                      <SliderOutput data-impact={coresImpact}>
-                        {({ state }) => (
-                          <>
-                            {docState.compute_stats &&
-                            (docState.compute_stats.recommended_cores === 0 ||
-                              appState.compute_cores >
-                                docState.compute_stats.recommended_cores) ? (
-                              <TbAlertTriangleFilled />
-                            ) : null}
-                            {state.getThumbValueLabel(0)} /{" "}
-                            {appState.platform.cores}
-                          </>
-                        )}
-                      </SliderOutput>
-                      <SliderTrack data-impact={coresImpact}>
-                        {({ state }) => (
-                          <>
-                            <div className="track" />
-                            <div
-                              className="fill"
-                              style={{
-                                width: `${state.getThumbPercent(0) * 100}%`,
-                              }}
-                            />
-                            <SliderThumb />
-                          </>
-                        )}
-                      </SliderTrack>
-                    </Slider>
-                  </div>
-                  <div className="memory-used inline">
-                    <div>
-                      <Label id="memory-used-label" htmlFor="meter">
-                        Memory
-                      </Label>
-                      <div>
-                        <small className="text-deemphasis">
-                          {docState.compute_stats?.available_memory
-                            ? `${formatBytes(
-                                docState.compute_stats?.available_memory || 0,
-                                0,
-                              )} Available`
-                            : null}{" "}
-                          / {formatBytes(appState.platform.memory)} Total
-                        </small>
-                      </div>
-                    </div>
-                    <div className="estimated-memory">
-                      <Meter
-                        value={estimatedMemoryValue}
-                        aria-labelledby="memory-used-label"
-                      >
-                        {({ percentage }) => (
-                          <>
-                            <span className="value">
-                              {formatBytes(estimatedMemory, 1)} /{" "}
-                              {docState.compute_stats?.available_memory
-                                ? `${formatBytes(
-                                    docState.compute_stats?.available_memory ||
-                                      0,
-                                    1,
-                                  )}`
-                                : null}
-                            </span>
-                            <div className="bar">
-                              <div
-                                className="fill"
-                                data-impact={impactName(percentage)}
-                                style={{
-                                  width: `${percentage}%`,
-                                  minWidth: "4px",
-                                }}
-                              />
-                            </div>
-                          </>
-                        )}
-                      </Meter>
-                      <small className="swap">
-                        {docState.compute_stats &&
-                        estimatedMemoryValue > 100 ? (
-                          <>
-                            {formatBytes(
-                              estimatedMemory -
-                                docState.compute_stats.available_memory,
-                              0,
-                            )}{" "}
-                            Swap
-                          </>
-                        ) : null}
-                      </small>
-                    </div>
-                  </div>
+              {docState.enableClustering ? (
+                <div className="setting clustering-method">
+                  <Select
+                    data-flat
+                    selectedKey={docState.cluster_method}
+                    onSelectionChange={(value) => {
+                      updateDocState({
+                        cluster_method: value as typeof docState.cluster_method,
+                      });
+                    }}
+                    items={Object.entries(reorderMethods).map(
+                      ([key, value]) => ({
+                        id: key,
+                        name: value.name,
+                        description: value.description,
+                      }),
+                    )}
+                  >
+                    {(item) => (
+                      <SelectItem textValue={item.name}>
+                        <Text slot="label">{item.name}</Text>
+                        <Text slot="description">{item.description}</Text>
+                      </SelectItem>
+                    )}
+                  </Select>
                 </div>
               ) : null}
             </div>
 
-            {appState.analysisMethod === "parasail" &&
-            docState.compute_stats &&
-            (docState.compute_stats?.recommended_cores === 0 ||
-              estimatedMemory > appState.platform.memory ||
-              appState.compute_cores >
-                docState.compute_stats?.recommended_cores) ? (
-              <div className="compute-forecast">
-                <b>Warning:</b> System instability may occur when exceeding
-                recommended cores or available memory. When exceeding available
-                memory, it is recommended to limit cores used.
-              </div>
+            {docState.analysisMethod === "parasail" ? (
+              <RunnerPerformance
+                appState={appState}
+                updateDocState={updateDocState}
+                setDocState={setDocState}
+                docState={docState}
+                initialized={initialized}
+              />
             ) : null}
+
             <div className="actions">
               <Button
                 data-primary

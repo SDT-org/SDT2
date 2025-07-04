@@ -1,15 +1,15 @@
-import type { AppState } from "../appState";
+import type { DocState } from "../appState";
 import messages from "../messages";
 
-export const startRun = (docId: string, appState: AppState) =>
+export const startRun = (docState: DocState) =>
   window.pywebview.api
     .start_workflow_run({
-      doc_id: docId,
-      cluster_method: appState.enableClustering
-        ? appState.cluster_method
+      doc_id: docState.id,
+      cluster_method: docState.enableClustering
+        ? docState.cluster_method
         : "None",
-      compute_cores: appState.compute_cores,
-      analysisMethod: appState.analysisMethod,
+      compute_cores: docState.compute_cores || 1,
+      analysisMethod: docState.analysisMethod,
     })
     .catch((e) => {
       if (e.toString().includes("PARASAIL_TRACEBACK")) {
@@ -18,7 +18,7 @@ export const startRun = (docId: string, appState: AppState) =>
             "Please ensure you have adequate swap/page size and system memory.\n\n" +
             "Error ID: PARASAIL_TRACEBACK",
         );
-        cancelRun(docId, "preserve");
+        cancelRun(docState.id, "preserve");
       } else if (
         e &&
         typeof e === "object" &&
@@ -27,7 +27,7 @@ export const startRun = (docId: string, appState: AppState) =>
         Object.keys(messages).includes(e.message)
       ) {
         alert(`Error: ${messages[e.message as keyof typeof messages]}`);
-        cancelRun(docId, "preserve");
+        cancelRun(docState.id, "preserve");
       } else {
         throw e;
       }
