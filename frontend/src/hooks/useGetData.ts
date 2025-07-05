@@ -46,7 +46,7 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
           full_stats,
           gc_stats: full_stats.map((row) => row[1]),
           length_stats: full_stats.map((row) => row[2]),
-          raw_mat: identity_scores.map((i) => i[2]),
+          raw_mat: identity_scores.map((i) => i[2]).filter(Number),
           ids: responseIds,
           identity_combos: identity_scores.map((i) => [i[0], i[1]]),
         });

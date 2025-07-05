@@ -396,6 +396,12 @@ export const D3CanvasHeatmap = ({
     }
   };
 
+  const idValue =
+    tooltipData &&
+    (clusterData ? tooltipData.percentId : tooltipData.value)?.toFixed(2);
+
+  const idDisplay = Number(idValue) === 0 ? "" : idValue;
+
   return (
     <div style={{ position: "relative" }}>
       <canvas
@@ -416,11 +422,11 @@ export const D3CanvasHeatmap = ({
           }}
         >
           <div>
-            <dt>"X" :</dt>
+            <dt>Seq X:</dt>
             <dd>{tooltipData.xLabel}</dd>
           </div>
           <div>
-            <dt> "Y" :</dt>
+            <dt>Seq Y:</dt>
             <dd>{tooltipData.yLabel}</dd>
           </div>
           {clusterData ? (
@@ -431,17 +437,12 @@ export const D3CanvasHeatmap = ({
                   <dd>{tooltipData.cluster}</dd>
                 </div>
               )}
-              <div>
-                <dt>Percent ID:</dt>
-                <dd>{tooltipData.percentId?.toFixed(2)}%</dd>
-              </div>
             </>
-          ) : (
-            <div>
-              <dt>Percent ID:</dt>
-              <dd>{tooltipData.value?.toFixed(2)}%</dd>
-            </div>
-          )}
+          ) : null}
+          <div>
+            <dt>Percent ID:</dt>
+            <dd>{idDisplay ? `${idDisplay}%` : "Unaligned"}</dd>
+          </div>
         </dl>
       )}
     </div>

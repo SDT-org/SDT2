@@ -76,8 +76,6 @@ def process_pair(id_sequence_pair, is_aa):
     open_penalty = 10 if is_aa else 8
     extend_penalty = 1
     matrix_to_use = parasail.blosum62 if is_aa else parasail.pam250
-    if is_aa:
-        print("something is fucked up")
     alignment_function = (
         get_stats_score if supports_striped_32() else get_traceback_score
     )

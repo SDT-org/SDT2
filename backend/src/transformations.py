@@ -119,7 +119,7 @@ def lzani_tsv_to_distance_matrix(results_tsv_path, ids_tsv_path, score_column="a
     # Find the minimum non-zero, non-NaN value to use as floor
     valid_values = matrix_np[~np.isnan(matrix_np) & (matrix_np > 0)]
     ## hard coding biological floor of 25%  for unaligned sequences
-    floor_value = 25.0
+    floor_value = 0
 
     # Replace unaligned NANs or 0s with the calculated floor
     matrix_np = np.where(np.isnan(matrix_np) | (matrix_np == 0), floor_value, matrix_np)

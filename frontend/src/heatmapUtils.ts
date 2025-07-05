@@ -63,24 +63,31 @@ export const formatHeatmapData = (
   );
 
   return data.flatMap((row, y) =>
-    row.filter(Number).map((value, x) => {
-      const backgroundColor = colorFn(Number(value));
-      const foregroundColor = tinycolor(backgroundColor).isLight()
-        ? "#000"
-        : "#fff";
-      const roundedValue = (value as number).toFixed(
-        settings.annotation_rounding,
-      );
+    row
+      .filter((datum) => datum === 0 || Number(datum))
+      .map((value, x) => {
+        const roundedValue = (value as number).toFixed(
+          settings.annotation_rounding,
+        );
 
-      return {
-        x,
-        y,
-        value: value as number,
-        displayValue: value === 100 ? "100" : roundedValue.toString(),
-        backgroundColor,
-        foregroundColor,
-      };
-    }),
+        const displayValue =
+          value === 100 ? "100" : value === 0 ? "" : roundedValue.toString();
+
+        const backgroundColor =
+          displayValue === "" ? "#f5f5f5" : colorFn(Number(value));
+        const foregroundColor = tinycolor(backgroundColor).isLight()
+          ? "#000"
+          : "#fff";
+
+        return {
+          x,
+          y,
+          value: value as number,
+          displayValue,
+          backgroundColor,
+          foregroundColor,
+        };
+      }),
   );
 };
 
