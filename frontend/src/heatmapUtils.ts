@@ -109,53 +109,55 @@ export const formatClustermapData = (
   const colorCache = new Map();
 
   const result = data.flatMap((row, y) =>
-    row.filter(Number).map((value, x) => {
-      const clusterX = clusterMap.get(tickText[x]);
-      const clusterY = clusterMap.get(tickText[y]);
-      const originalClusterX = originalClusterMap.get(tickText[x]);
-      const originalClusterY = originalClusterMap.get(tickText[y]);
+    row
+      .filter((datum) => datum === 0 || Number(datum))
+      .map((value, x) => {
+        const clusterX = clusterMap.get(tickText[x]);
+        const clusterY = clusterMap.get(tickText[y]);
+        const originalClusterX = originalClusterMap.get(tickText[x]);
+        const originalClusterY = originalClusterMap.get(tickText[y]);
 
-      const clusterMatch =
-        clusterX !== undefined &&
-        clusterY !== undefined &&
-        clusterX === clusterY;
+        const clusterMatch =
+          clusterX !== undefined &&
+          clusterY !== undefined &&
+          clusterX === clusterY;
 
-      const clusterGroup = clusterMatch ? clusterX : null;
-      const originalClusterGroup =
-        clusterMatch && originalClusterX === originalClusterY
-          ? originalClusterX
-          : null;
+        const clusterGroup = clusterMatch ? clusterX : null;
+        const originalClusterGroup =
+          clusterMatch && originalClusterX === originalClusterY
+            ? originalClusterX
+            : null;
 
-      let backgroundColor = "rgb(245, 245, 245)";
-      if (clusterGroup && originalClusterGroup) {
-        if (!colorCache.has(clusterGroup)) {
-          // Use original cluster number for color generation
-          colorCache.set(clusterGroup, distinctColor(originalClusterGroup));
+        let backgroundColor = "rgb(245, 245, 245)";
+        if (clusterGroup && originalClusterGroup) {
+          if (!colorCache.has(clusterGroup)) {
+            // Use original cluster number for color generation
+            colorCache.set(clusterGroup, distinctColor(originalClusterGroup));
+          }
+          backgroundColor = colorCache.get(clusterGroup);
         }
-        backgroundColor = colorCache.get(clusterGroup);
-      }
 
-      let foregroundColor = "rgb(0, 0, 0)";
-      if (!colorCache.has(`${backgroundColor}-fg`)) {
-        foregroundColor = tinycolor(backgroundColor).isLight()
-          ? "#000"
-          : "#fff";
-        colorCache.set(`${backgroundColor}-fg`, foregroundColor);
-      } else {
-        foregroundColor = colorCache.get(`${backgroundColor}-fg`);
-      }
+        let foregroundColor = "rgb(0, 0, 0)";
+        if (!colorCache.has(`${backgroundColor}-fg`)) {
+          foregroundColor = tinycolor(backgroundColor).isLight()
+            ? "#000"
+            : "#fff";
+          colorCache.set(`${backgroundColor}-fg`, foregroundColor);
+        } else {
+          foregroundColor = colorCache.get(`${backgroundColor}-fg`);
+        }
 
-      const roundedValue = (value as number).toFixed(2);
+        const roundedValue = (value as number).toFixed(2);
 
-      return {
-        x,
-        y,
-        value: value as number,
-        displayValue: value === 100 ? "100" : roundedValue.toString(),
-        backgroundColor,
-        foregroundColor,
-      };
-    }),
+        return {
+          x,
+          y,
+          value: value as number,
+          displayValue: value === 100 ? "100" : roundedValue.toString(),
+          backgroundColor,
+          foregroundColor,
+        };
+      }),
   );
 
   return result;
