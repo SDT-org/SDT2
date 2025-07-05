@@ -69,10 +69,8 @@ export const formatHeatmapData = (
         const roundedValue = (value as number).toFixed(
           settings.annotation_rounding,
         );
-
         const displayValue =
           value === 100 ? "100" : value === 0 ? "" : roundedValue.toString();
-
         const backgroundColor =
           displayValue === "" ? "#f5f5f5" : colorFn(Number(value));
         const foregroundColor = tinycolor(backgroundColor).isLight()
@@ -148,12 +146,14 @@ export const formatClustermapData = (
         }
 
         const roundedValue = (value as number).toFixed(2);
+        const displayValue =
+          value === 100 ? "100" : value === 0 ? "" : roundedValue.toString();
 
         return {
           x,
           y,
           value: value as number,
-          displayValue: value === 100 ? "100" : roundedValue.toString(),
+          displayValue,
           backgroundColor,
           foregroundColor,
         };
