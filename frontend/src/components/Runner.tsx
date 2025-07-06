@@ -268,7 +268,14 @@ const RunnerSettings = ({
                 }}
                 value={docState.analysisMethod}
               >
-                <Label data-header>Analysis Method</Label>
+                <Label data-header>
+                  Analysis Method
+                  {docState.result_metadata?.is_aa ? (
+                    <span className="text-deemphasis is-aa-detected">
+                      Amino acid detected
+                    </span>
+                  ) : null}
+                </Label>
                 <div className="cards">
                   <Radio value="parasail">
                     <div className="col-2 analysis-method-body">
@@ -281,7 +288,10 @@ const RunnerSettings = ({
                       </div>
                     </div>
                   </Radio>
-                  <Radio value="lzani">
+                  <Radio
+                    value="lzani"
+                    isDisabled={docState.result_metadata?.is_aa || false}
+                  >
                     <div className="col-2 analysis-method-body">
                       <div>
                         LZ-ANI

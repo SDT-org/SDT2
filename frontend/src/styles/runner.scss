@@ -275,4 +275,9 @@
   .warning {
     background: var(--button-warning-background-color);
   }
+
+  .is-aa-detected {
+    color: var(--fill-color);
+    padding: 0 0.2rem;
+  }
 }
