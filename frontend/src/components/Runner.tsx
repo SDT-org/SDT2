@@ -90,6 +90,8 @@ const ParasailSettings = ({
   updateDocState: UpdateDocState;
   setDocState: SetDocState;
 }) => {
+  const isAminoAcid = docState.result_metadata?.is_aa;
+
   return (
     <div className="field">
       <Switch
@@ -109,7 +111,8 @@ const ParasailSettings = ({
               wide
               data-compact
               selectedKey={
-                docState.parasail_settings?.scoring_matrix || "pam250"
+                docState.parasail_settings?.scoring_matrix ||
+                (isAminoAcid ? "blosum62" : "pam250")
               }
               onSelectionChange={(value) => {
                 setDocState((previous) => ({
@@ -144,7 +147,9 @@ const ParasailSettings = ({
           <NumberInput
             id="open-penalty"
             label="Open Penalty"
-            value={docState.parasail_settings?.open_penalty || 10}
+            value={
+              docState.parasail_settings?.open_penalty || (isAminoAcid ? 10 : 8)
+            }
             onChange={(value) => {
               setDocState((previous) => ({
                 ...previous,

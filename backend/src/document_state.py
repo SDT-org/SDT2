@@ -17,19 +17,20 @@ DocState = namedtuple(
         "filemtime",
         "basename",
         "modified",
-        "progress",  # TODO: remove
-        "stage",  # TODO: remove
+        "progress",
+        "stage",
         "tempdir_path",
         "sequences_count",
         "pair_progress",
         "pair_count",
         "estimated_time",
-        "validation_error_id",  # TODO: remove
+        "validation_error_id",
         "compute_stats",
         "cluster_method",
         "heatmap",
         "clustermap",
         "distribution",
+        "result_metadata",
     ],
 )
 
@@ -161,6 +162,7 @@ def create_doc_state(
     heatmap=default_heatmap_state,
     clustermap=default_clustermap_state,
     distribution=default_distribution_state,
+    result_metadata=None,
 ):
     if filetype == "application/vnd.sdt" and tempdir_path:
         settings = load_document_settings(tempdir_path)
@@ -192,6 +194,7 @@ def create_doc_state(
         heatmap=heatmap,
         clustermap=clustermap,
         distribution=distribution,
+        result_metadata=result_metadata,
     )
 
 

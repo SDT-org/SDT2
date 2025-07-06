@@ -40,9 +40,9 @@ class WorkflowResult(NamedTuple):
     distance_matrix: numpy.ndarray
     similarity_matrix: DataFrame
     reordered_ids: List[str]
-    is_aa: bool
     warnings: List[str]
     error: str | None
+    is_aa: bool | None
 
 
 @dataclass

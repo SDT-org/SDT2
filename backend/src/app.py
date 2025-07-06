@@ -224,6 +224,9 @@ def handle_open_file(filepath: str, doc_id: str | None):
             stage="",
             progress=0,
             compute_stats=compute_stats,
+            result_metadata={
+                "is_aa": result.is_aa,
+            },
         )
         if len(get_state().documents) == 1:
             remove_empty_documents()

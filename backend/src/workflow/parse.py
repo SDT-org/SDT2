@@ -81,5 +81,5 @@ def parse_records(input: Iterator[SeqRecord], result: WorkflowResult) -> Workflo
     return result._replace(
         seq_dict=seq_dict,
         max_sequence_length=max_length,
-        is_aa=is_aa,
+        is_aa=is_aa or False,
     )

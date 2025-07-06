@@ -37,6 +37,7 @@ export const useSyncState = (setAppState: SetAppState) => {
             overrideParasail: feDoc?.overrideParasail || false,
             parasail_settings: feDoc?.parasail_settings,
             cluster_method: feDoc?.cluster_method || beDoc.cluster_method,
+            result_metadata: beDoc.result_metadata,
           };
         }),
       }));

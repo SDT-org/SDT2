@@ -70,10 +70,14 @@ export type DocState = {
   overrideParasail: boolean;
   parasail_settings?:
     | {
-        // TODO: Specific to doc or store app wide in user settings
         scoring_matrix?: ScoringMatrix["id"];
         open_penalty?: number;
         extend_penalty?: number;
+      }
+    | undefined;
+  result_metadata?:
+    | {
+        is_aa?: boolean;
       }
     | undefined;
 };
