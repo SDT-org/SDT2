@@ -66,15 +66,19 @@ export const formatHeatmapData = (
     row
       .filter((datum) => datum === 0 || Number(datum))
       .map((value, x) => {
-        const roundedValue = (value as number).toFixed(
-          settings.annotation_rounding,
-        );
+        const numValue = value as number;
+        const roundedValue = numValue.toFixed(settings.annotation_rounding);
 
+        // Treat 0 values as empty/unaligned (backend sets all values below 70 to 0)
         const displayValue =
-          value === 100 ? "100" : value === 0 ? "" : roundedValue.toString();
+          numValue === 100
+            ? "100"
+            : numValue === 0
+              ? ""
+              : roundedValue.toString();
 
         const backgroundColor =
-          displayValue === "" ? "#f5f5f5" : colorFn(Number(value));
+          displayValue === "" ? "#f5f5f5" : colorFn(numValue);
         const foregroundColor = tinycolor(backgroundColor).isLight()
           ? "#000"
           : "#fff";
