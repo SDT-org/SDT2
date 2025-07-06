@@ -69,8 +69,10 @@ export const formatHeatmapData = (
         const roundedValue = (value as number).toFixed(
           settings.annotation_rounding,
         );
+
         const displayValue =
           value === 100 ? "100" : value === 0 ? "" : roundedValue.toString();
+
         const backgroundColor =
           displayValue === "" ? "#f5f5f5" : colorFn(Number(value));
         const foregroundColor = tinycolor(backgroundColor).isLight()

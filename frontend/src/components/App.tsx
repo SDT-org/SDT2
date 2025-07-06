@@ -111,11 +111,11 @@ export const App = () => {
     return () => clearTimeout(id);
   }, [appState.activeDocumentId, appState.documents]);
 
-  const setActiveDocumentId = React.useCallback(
-    (id: Key) =>
-      setAppState((prev) => ({ ...prev, activeDocumentId: id as string })),
-    [],
-  );
+  const setActiveDocumentId = React.useCallback((id: Key | null) => {
+    if (id !== null) {
+      setAppState((prev) => ({ ...prev, activeDocumentId: id as string }));
+    }
+  }, []);
 
   const tabView = React.useMemo(
     () => (appState.documents.length > 20 ? "select" : "tabs"),

@@ -3,7 +3,6 @@ import type { DocState, SetDocState } from "../appState";
 import { type DataSets, useDistributionState } from "../distributionState";
 import type { DistributionData, MetaData } from "../plotTypes";
 import { Histogram } from "./Histogram";
-import { Raincloud } from "./Raincloud";
 import { Select, SelectItem } from "./Select";
 import { Violin } from "./Violin";
 
@@ -13,39 +12,41 @@ const VisualizationSwitcher = ({
 }: {
   activeDataSet: keyof DataSets;
   setActiveDataSet: React.Dispatch<keyof DataSets>;
-}) => (
-  <>
-    <div className="group padded">
-      <div className="row">
-        <div className="field">
-          <label className="header" htmlFor="data-set">
-            Data Set
-          </label>
-          <Select
-            id="data-set"
-            wide
-            selectedKey={activeDataSet}
-            onSelectionChange={(value) =>
-              setActiveDataSet(value as keyof DataSets)
-            }
-            items={Object.entries({
-              scores: "Scores",
-              gc: "GC",
-              length: "Length",
-            }).map(([id, name]) => ({
-              id,
-              name,
-            }))}
-          >
-            {(item) => (
-              <SelectItem textValue={item.name}>{item.name}</SelectItem>
-            )}
-          </Select>
+}) => {
+  return (
+    <>
+      <div className="group padded">
+        <div className="row">
+          <div className="field">
+            <label className="header" htmlFor="data-set">
+              Data Set
+            </label>
+            <Select
+              id="data-set"
+              wide
+              selectedKey={activeDataSet}
+              onSelectionChange={(value) =>
+                setActiveDataSet(value as keyof DataSets)
+              }
+              items={Object.entries({
+                scores: "Scores",
+                gc: "GC",
+                length: "Length",
+              }).map(([id, name]) => ({
+                id,
+                name,
+              }))}
+            >
+              {(item) => (
+                <SelectItem textValue={item.name}>{item.name}</SelectItem>
+              )}
+            </Select>
+          </div>
         </div>
       </div>
-    </div>
-  </>
-);
+    </>
+  );
+};
 
 export const DistributionPanels = ({
   docState,
@@ -78,7 +79,6 @@ export const DistributionPanels = ({
     distributionState,
     updateDistributionState,
     updateHistogram,
-    updateRaincloud,
     updateViolin,
   } = useDistributionState(docState, setDocState);
 
@@ -118,14 +118,6 @@ export const DistributionPanels = ({
           {...commonProps}
           settings={distributionState.violin}
           updateSettings={updateViolin}
-        />
-      </TabPanel>
-
-      <TabPanel id="distribution_raincloud" className="app-panel">
-        <Raincloud
-          {...commonProps}
-          settings={distributionState.raincloud}
-          updateSettings={updateRaincloud}
         />
       </TabPanel>
     </>

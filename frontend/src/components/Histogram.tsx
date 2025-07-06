@@ -10,6 +10,7 @@ import {
   useRelayoutUpdateTitles,
 } from "../hooks/useRelayoutUpdateTitles";
 import type { DistributionData, MetaData } from "../plotTypes";
+import { AlignmentStats } from "./AlignmentStats";
 import { HistogramSidebar } from "./HistogramSidebar";
 
 const Plot = createPlotlyComponent(Plotly);
@@ -93,7 +94,14 @@ export const Histogram = ({
   }, [settings, dataSet]);
   return (
     <>
-      <div className="app-main">
+      <div className="app-main" style={{ position: "relative" }}>
+        {metaData && (
+          <AlignmentStats
+            metaData={metaData}
+            dataLength={dataSet.length}
+            activeDataSet={dataSetKey}
+          />
+        )}
         <Plot
           data={[histogramTrace]}
           layout={{

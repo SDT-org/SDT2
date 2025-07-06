@@ -22,10 +22,6 @@ export const parseDocState = (state: DocState) => {
           ...initialDocState.distribution.violin,
           ...validData.distribution?.violin,
         },
-        raincloud: {
-          ...initialDocState.distribution.raincloud,
-          ...validData.distribution?.raincloud,
-        },
       },
       heatmap: {
         ...initialDocState.heatmap,

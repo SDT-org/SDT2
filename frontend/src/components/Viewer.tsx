@@ -22,13 +22,15 @@ export const Viewer = ({
     useGetData(docState, setDocState);
 
   const setDataView = React.useCallback(
-    (newValue: Key) => {
-      updateDocState(
-        {
-          dataView: newValue as DocState["dataView"],
-        },
-        false,
-      );
+    (newValue: Key | null) => {
+      if (newValue !== null) {
+        updateDocState(
+          {
+            dataView: newValue as DocState["dataView"],
+          },
+          false,
+        );
+      }
     },
     [updateDocState],
   );
@@ -164,9 +166,10 @@ export const Viewer = ({
           ) : null}
         </TabPanel>
         <TabPanel id="clustermap" className="app-panel">
-          {!loading && heatmapData ? (
+          {!loading && heatmapData && metaData ? (
             <Clustermap
               data={heatmapData}
+              metaData={metaData}
               docState={docState}
               setDocState={setDocState}
               tickText={tickText}

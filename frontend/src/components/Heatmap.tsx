@@ -18,6 +18,7 @@ import type {
   HeatmapSettings,
   MetaData,
 } from "../plotTypes";
+import { AlignmentStats } from "./AlignmentStats";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3SvgHeatmap } from "./D3SvgHeatmap";
 import { HeatmapSidebar } from "./HeatmapSidebar";
@@ -143,7 +144,18 @@ export const Heatmap = ({
     <>
       {data ? (
         <>
-          <div className="app-main" ref={elementRef}>
+          <div
+            className="app-main"
+            ref={elementRef}
+            style={{ position: "relative" }}
+          >
+            {!renderSvg && (
+              <AlignmentStats
+                metaData={metaData}
+                dataLength={(data.length * (data.length - 1)) / 2}
+                activeDataSet="scores"
+              />
+            )}
             <div
               className="app-loader app-main-loader delay"
               aria-hidden="true"

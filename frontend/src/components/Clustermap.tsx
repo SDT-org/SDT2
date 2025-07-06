@@ -5,19 +5,22 @@ import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import { formatClustermapData } from "../heatmapUtils";
 import { useMetrics, useSize } from "../hooks/heatmap";
 import { useHeatmapRenderToggle } from "../hooks/useHeatmapRenderToggle";
-import type { ClusterDataItem, HeatmapData } from "../plotTypes";
+import type { ClusterDataItem, HeatmapData, MetaData } from "../plotTypes";
+import { AlignmentStats } from "./AlignmentStats";
 import { ClustermapSidebar } from "./ClustermapSidebar";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3SvgHeatmap } from "./D3SvgHeatmap";
 
 export const Clustermap = ({
   data,
+  metaData,
   docState,
   setDocState,
   tickText,
   leftSidebarCollapsed,
 }: {
   data: HeatmapData;
+  metaData: MetaData;
   docState: DocState;
   setDocState: SetDocState;
   tickText: string[];
@@ -89,7 +92,18 @@ export const Clustermap = ({
 
   return (
     <>
-      <div className="app-main" ref={elementRef}>
+      <div
+        className="app-main"
+        ref={elementRef}
+        style={{ position: "relative" }}
+      >
+        {!renderSvg && (
+          <AlignmentStats
+            metaData={metaData}
+            dataLength={(data.length * (data.length - 1)) / 2}
+            activeDataSet="scores"
+          />
+        )}
         <div
           className="app-overlay app-loader app-main-loader delay"
           aria-hidden="true"

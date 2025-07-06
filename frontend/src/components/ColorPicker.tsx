@@ -87,7 +87,6 @@ export const ColorPicker = ({
             {children || (
               <>
                 <ColorArea
-                  colorSpace="hsb"
                   xChannel="saturation"
                   yChannel="brightness"
                   value={value}
