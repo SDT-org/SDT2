@@ -26,6 +26,7 @@ DocState = namedtuple(
         "estimated_time",
         "validation_error_id",  # TODO: remove
         "compute_stats",
+        "cluster_method",
         "heatmap",
         "clustermap",
         "distribution",
@@ -156,6 +157,7 @@ def create_doc_state(
     estimated_time=None,
     validation_error_id=None,
     compute_stats=None,
+    cluster_method="average",
     heatmap=default_heatmap_state,
     clustermap=default_clustermap_state,
     distribution=default_distribution_state,
@@ -186,6 +188,7 @@ def create_doc_state(
         estimated_time=estimated_time,
         validation_error_id=validation_error_id,
         compute_stats=compute_stats,
+        cluster_method=cluster_method,
         heatmap=heatmap,
         clustermap=clustermap,
         distribution=distribution,

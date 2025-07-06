@@ -10,6 +10,9 @@ export const startRun = (docState: DocState) =>
         : "None",
       compute_cores: docState.compute_cores || 1,
       analysisMethod: docState.analysisMethod,
+      ...(docState.analysisMethod === "parasail" && docState.overrideParasail
+        ? docState.parasail_settings
+        : {}),
     })
     .catch((e) => {
       if (e.toString().includes("PARASAIL_TRACEBACK")) {

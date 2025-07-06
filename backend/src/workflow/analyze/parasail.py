@@ -1,7 +1,6 @@
 from multiprocessing.pool import Pool
 from typing import Callable
 import parasail
-import sys
 from functools import partial
 from itertools import combinations_with_replacement as cwr
 from numpy import zeros
@@ -33,7 +32,18 @@ def run(
 
     print(f"\rNumber of sequences: {len(seq_ids)}\r", flush=True)
     print(f"\rNumber of pairs: {total_pairs}\r", flush=True)
-    bound_process_pair = partial(process_pair, is_aa=result.is_aa)
+
+    matrix_to_use = settings.parasail.scoring_matrix or (
+        "blosum62" if result.is_aa else "pam250"
+    )
+    open_penalty = settings.parasail.open_penalty or (10 if result.is_aa else 8)
+    extend_penalty = settings.parasail.extend_penalty or 1
+    bound_process_pair = partial(
+        process_pair,
+        matrix_id=matrix_to_use,
+        open_penalty=open_penalty,
+        extend_penalty=extend_penalty,
+    )
 
     with Pool(settings.parasail.process_count) as pool:
         results = pool.imap(bound_process_pair, id_sequence_pairs)
@@ -64,7 +74,7 @@ def supports_striped_32():
     )
 
 
-def process_pair(id_sequence_pair, is_aa):
+def process_pair(id_sequence_pair, matrix_id, open_penalty, extend_penalty):
     id1 = id_sequence_pair[0][0]
     id2 = id_sequence_pair[0][1]
     seq1 = id_sequence_pair[1][0]
@@ -73,13 +83,13 @@ def process_pair(id_sequence_pair, is_aa):
     if id1 == id2:
         return id_sequence_pair[0], 0.0
 
-    open_penalty = 10 if is_aa else 8
-    extend_penalty = 1
-    matrix_to_use = parasail.blosum62 if is_aa else parasail.pam250
+    scoring_matrix = parasail.blosum62 if matrix_id == "blosum62" else parasail.pam250
     alignment_function = (
         get_stats_score if supports_striped_32() else get_traceback_score
     )
-    result = alignment_function(seq1, seq2, open_penalty, extend_penalty, matrix_to_use)
+    result = alignment_function(
+        seq1, seq2, open_penalty, extend_penalty, scoring_matrix
+    )
 
     return id_sequence_pair[0], result
 

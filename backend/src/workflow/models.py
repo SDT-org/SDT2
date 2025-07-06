@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 import time
-from typing import Iterator, List, Literal, NamedTuple
+from typing import List, Literal, NamedTuple
 from datetime import datetime
 
-from Bio.SeqRecord import SeqRecord
 import numpy
 from pandas.core.frame import DataFrame
 
@@ -17,6 +16,9 @@ class LzaniSettings(NamedTuple):
 
 class ParasailSettings(NamedTuple):
     process_count: int
+    scoring_matrix: Literal["blosum62"] | Literal["pam250"] | None = None
+    open_penalty: int | None = None
+    extend_penalty: int | None = None
 
 
 class RunSettings(NamedTuple):
