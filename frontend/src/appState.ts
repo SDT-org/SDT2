@@ -48,8 +48,7 @@ export type DocState = {
     | "heatmap"
     | "clustermap"
     | "distribution_histogram"
-    | "distribution_violin"
-    | "distribution_raincloud";
+    | "distribution_violin";
   distribution: DistributionState;
   heatmap: HeatmapSettings;
   clustermap: ClustermapSettings;
@@ -121,7 +120,6 @@ export const docStateSchema = z.object({
     "clustermap",
     "distribution_histogram",
     "distribution_violin",
-    "distribution_raincloud",
   ]),
   distribution: DistributionStateSchema,
   heatmap: HeatmapSettingsSchema,

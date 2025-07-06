@@ -2,10 +2,7 @@ import { z } from "zod";
 import type { DocState, SetDocState } from "./appState";
 import { type ColorString, ColorStringSchema, Colors } from "./colors";
 
-export type Visualization =
-  | "distribution_histogram"
-  | "distribution_violin"
-  | "distribution_raincloud";
+export type Visualization = "distribution_histogram" | "distribution_violin";
 type DataSet = number[];
 export type DataSets = {
   scores: DataSet;
@@ -42,27 +39,6 @@ export type DistributionState = {
     plotOrientation: "horizontal" | "vertical";
     titleFont: "Monospace" | "Sans Serif";
     barGap: number;
-  };
-  raincloud: VisualizationBase & {
-    bandwidth: number;
-    showMeanline: boolean;
-    side: "positive";
-    fillColor: ColorString;
-    jitter: number;
-    markerColor: ColorString;
-    markerSize: number;
-    pointPos: number;
-    points: "all" | "outliers" | "suspectedoutliers";
-    showAxisLines: boolean;
-    showPoints: boolean;
-    showZeroLine: boolean;
-    plotOrientation: "horizontal" | "vertical";
-    editable: boolean;
-    dticks: number;
-    title: string;
-    xtitle: string;
-    ytitle: string;
-    titleFont: "Monospace" | "Sans Serif";
   };
   violin: VisualizationBase & {
     bandwidth: number;
@@ -119,27 +95,6 @@ export const DistributionStateSchema = z.object({
     plotOrientation: z.enum(["horizontal", "vertical"]),
     titleFont: z.enum(["Monospace", "Sans Serif"]),
     barGap: z.number(),
-  }),
-  raincloud: VisualizationBaseSchema.extend({
-    bandwidth: z.number(),
-    showMeanline: z.boolean(),
-    side: z.literal("positive"),
-    fillColor: ColorStringSchema,
-    jitter: z.number(),
-    markerColor: ColorStringSchema,
-    markerSize: z.number(),
-    pointPos: z.number(),
-    points: z.enum(["all", "outliers", "suspectedoutliers"]),
-    showAxisLines: z.boolean(),
-    showPoints: z.boolean(),
-    showZeroLine: z.boolean(),
-    plotOrientation: z.enum(["horizontal", "vertical"]),
-    editable: z.boolean(),
-    dticks: z.number(),
-    title: z.string(),
-    xtitle: z.string(),
-    ytitle: z.string(),
-    titleFont: z.enum(["Monospace", "Sans Serif"]),
   }),
   violin: VisualizationBaseSchema.extend({
     bandwidth: z.number(),
@@ -198,30 +153,6 @@ export const initialDistributionState: DistributionState = {
     titleFont: "Sans Serif",
     barGap: 0.1,
   },
-  raincloud: {
-    ...visualizationDefaults,
-    bandwidth: 8,
-    jitter: 0.5,
-    markerColor: Colors.Tomato,
-    markerSize: 7,
-    plotOrientation: "horizontal",
-    pointPos: -1.5,
-    points: "all",
-    showAxisLines: true,
-    showPoints: true,
-    showZeroLine: false,
-    fillColor: Colors.LightBlue,
-    editable: false,
-    side: "positive",
-    showMeanline: true,
-    makeEditable: true,
-    dticks: 5,
-    showTitles: true,
-    title: "Raincloud Plot",
-    xtitle: "Percent Identity",
-    ytitle: "Genome",
-    titleFont: "Sans Serif",
-  },
   violin: {
     ...visualizationDefaults,
     bandwidth: 5,
@@ -266,10 +197,8 @@ export const useDistributionState = (
     }));
 
   const updateVisualization =
-    (key: "histogram" | "violin" | "raincloud") =>
-    (
-      values: Partial<DistributionState["histogram" | "violin" | "raincloud"]>,
-    ) =>
+    (key: "histogram" | "violin") =>
+    (values: Partial<DistributionState["histogram" | "violin"]>) =>
       setDocState((prev) => ({
         ...prev,
         distribution: {
@@ -285,7 +214,6 @@ export const useDistributionState = (
     distributionState: docState.distribution,
     updateDistributionState,
     updateHistogram: updateVisualization("histogram"),
-    updateRaincloud: updateVisualization("raincloud"),
     updateViolin: updateVisualization("violin"),
   };
 };

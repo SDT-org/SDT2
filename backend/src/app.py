@@ -524,13 +524,26 @@ class Api:
         # Generate identity scores from matrix for CSV imports
         # This ensures distribution plots have data to work with
         identity_scores = []
-        id_map = {id: idx for idx, id in enumerate(ids)}         
+        unaligned_count = 0
+        id_map = {id: idx for idx, id in enumerate(ids)}
+        
+        # Check if LZANI was used (from run settings if available)
+        is_lzani = False
+        if file_exists(doc_paths.run_settings):
+            run_settings = read_json_file(doc_paths.run_settings)
+            is_lzani = run_settings.get("analysis_method") == "lzani"
+        
         # The matrix contains distance values, convert to similarity for identity scores
         for i in range(len(ids)):
             for j in range(i):
                 # Convert distance to similarity (identity score)
                 identity_score = 100 - data[i, j]
-                identity_scores.append([id_map[ids[i]], id_map[ids[j]], identity_score])
+                
+                # For LZANI, filter out values below 70% threshold
+                if is_lzani and identity_score < 70:
+                    unaligned_count += 1
+                else:
+                    identity_scores.append([id_map[ids[i]], id_map[ids[j]], identity_score])
         
         # Convert matrix to triangle format for heatmap (converts distance to similarity)
         heat_data = DataFrame(data, index=ids)
@@ -549,6 +562,36 @@ class Api:
         metadata = dict(minVal=min_val, maxVal=max_val)
         if file_exists(doc_paths.run_settings):
             metadata["run"] = read_json_file(doc_paths.run_settings)
+        
+        # Add unaligned count for LZANI
+        if is_lzani:
+            metadata["unaligned_count"] = unaligned_count
+        
+        # Helper function to calculate statistics
+        def calculate_stats(values):
+            if len(values) == 0:
+                return None
+            return {
+                "mean": float(np.mean(values)),
+                "median": float(np.median(values)),
+                "std": float(np.std(values)),
+                "min": float(np.min(values)),
+                "max": float(np.max(values)),
+                "q1": float(np.percentile(values, 25)),
+                "q3": float(np.percentile(values, 75)),
+                "count": len(values)
+            }
+        
+        # Calculate statistics for scores
+        if identity_scores:
+            scores_array = np.array([score[2] for score in identity_scores])
+            metadata["distribution_stats"] = calculate_stats(scores_array)
+        
+        # Calculate statistics for GC and length if stats are available
+        if not stats_df.empty:
+            stats_array = np.array(stats_df.values)
+            metadata["gc_stats"] = calculate_stats(stats_array[:, 1])  # GC values
+            metadata["length_stats"] = calculate_stats(stats_array[:, 2])  # Length values
         
         # Return all data
         data_to_dump = dict(

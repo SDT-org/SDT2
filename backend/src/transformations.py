@@ -118,11 +118,13 @@ def lzani_tsv_to_distance_matrix(results_tsv_path, ids_tsv_path, score_column="a
 
     # Find the minimum non-zero, non-NaN value to use as floor
     valid_values = matrix_np[~np.isnan(matrix_np) & (matrix_np > 0)]
-    ## hard coding biological floor of 25%  for unaligned sequences
+    
+    # Set floor value to 0 for unreliable alignments
+    # Values below 70% are considered unreliable according to the LZANI paper
     floor_value = 0
-
-    # Replace unaligned NANs or 0s with the calculated floor
-    matrix_np = np.where(np.isnan(matrix_np) | (matrix_np == 0), floor_value, matrix_np)
+    
+    # Replace unaligned NANs, 0s, AND values below 70% with 0
+    matrix_np = np.where(np.isnan(matrix_np) | (matrix_np == 0) | (matrix_np < 70), floor_value, matrix_np)
 
     # LZANI has slightly different scores for query v. reference vs. reference v query. Make symmetric by averaging with transpose
     matrix_np = (matrix_np + matrix_np.T) / 2

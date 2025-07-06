@@ -89,6 +89,37 @@ export type GetDataResponse = {
         score_type: string;
       };
     };
+    unaligned_count?: number;
+    distribution_stats?: {
+      mean: number;
+      median: number;
+      std: number;
+      min: number;
+      max: number;
+      q1: number;
+      q3: number;
+      count: number;
+    };
+    gc_stats?: {
+      mean: number;
+      median: number;
+      std: number;
+      min: number;
+      max: number;
+      q1: number;
+      q3: number;
+      count: number;
+    };
+    length_stats?: {
+      mean: number;
+      median: number;
+      std: number;
+      min: number;
+      max: number;
+      q1: number;
+      q3: number;
+      count: number;
+    };
   };
   ids: string[];
   identity_scores: [number, number, number][];
