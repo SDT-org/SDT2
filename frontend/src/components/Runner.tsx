@@ -127,19 +127,28 @@ const ParasailSettings = ({
                 {
                   id: "blosum62",
                   name: "BLOSUM62",
-                  description: "Default scoring matrix for amino acids",
+                  recommended: isAminoAcid,
                 },
                 {
                   id: "pam250",
                   name: "PAM250",
-                  description: "TODO",
+                  recommended: !isAminoAcid,
                 },
               ]}
             >
               {(item) => (
                 <SelectItem textValue={item.name}>
                   <Text slot="label">{item.name}</Text>
-                  <Text slot="description">{item.description}</Text>
+                  {item.recommended ? (
+                    <Text slot="description">
+                      <small>
+                        <em>
+                          Recommended - amino acid {!isAminoAcid ? "not " : ""}
+                          detected in data
+                        </em>
+                      </small>
+                    </Text>
+                  ) : null}
                 </SelectItem>
               )}
             </Select>
