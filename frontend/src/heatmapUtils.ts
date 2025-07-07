@@ -54,6 +54,7 @@ export const formatHeatmapData = (
     "colorScaleKey" | "vmax" | "vmin" | "annotation_rounding"
   >,
   colorScale: ColorScaleArray,
+  metaData?: { run?: { analysis_method?: string } },
 ) => {
   const colorFn = createD3ColorScale(
     colorScale,
@@ -62,17 +63,28 @@ export const formatHeatmapData = (
     settings.vmin,
   );
 
+  const isLzani = metaData?.run?.analysis_method === "lzani";
+  const lzaniThreshold = 70;
+
   return data.flatMap((row, y) =>
     row
       .filter((datum) => datum === 0 || Number(datum))
       .map((value, x) => {
-        const roundedValue = (value as number).toFixed(
+        // For LZ-ANI, treat values below 70% as unaligned (0%)
+        const effectiveValue =
+          isLzani && (value as number) < lzaniThreshold ? 0 : value;
+
+        const roundedValue = (effectiveValue as number).toFixed(
           settings.annotation_rounding,
         );
         const displayValue =
-          value === 100 ? "100" : value === 0 ? "" : roundedValue.toString();
+          effectiveValue === 100
+            ? "100"
+            : effectiveValue === 0
+              ? ""
+              : roundedValue.toString();
         const backgroundColor =
-          displayValue === "" ? "#f5f5f5" : colorFn(Number(value));
+          displayValue === "" ? "#f5f5f5" : colorFn(Number(effectiveValue));
         const foregroundColor = tinycolor(backgroundColor).isLight()
           ? "#000"
           : "#fff";
