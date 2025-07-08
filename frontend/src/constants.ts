@@ -50,16 +50,3 @@ export const reorderMethods = {
 export const reorderMethodKeys = Object.keys(
   reorderMethods,
 ) as (keyof typeof reorderMethods)[];
-
-export const scoringMatrices = [
-  {
-    id: "blosum62",
-    name: "BLOSUM62",
-    description: "Default scoring matrix for amino acids",
-  },
-  {
-    id: "pam250",
-    name: "PAM250",
-    description: "TODO",
-  },
-] as const;
