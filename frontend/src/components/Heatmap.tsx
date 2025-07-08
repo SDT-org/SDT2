@@ -117,8 +117,8 @@ export const Heatmap = ({
   }
 
   const heatmapData = React.useMemo(
-    () => formatHeatmapData(data, settings, colorScale),
-    [data, settings, colorScale],
+    () => formatHeatmapData(data, settings, colorScale, metaData),
+    [data, settings, colorScale, metaData],
   );
 
   const { cbar_shrink, cbar_aspect, margin } = useMetrics(settings, tickText);

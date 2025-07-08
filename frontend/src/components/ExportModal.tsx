@@ -6,12 +6,8 @@ import {
   Modal,
   ModalOverlay,
 } from "react-aria-components";
-import {
-  type AppState,
-  type SaveableImageFormat,
-  type SetAppState,
-  saveableImageFormats,
-} from "../appState";
+import type { AppState, SaveableImageFormat, SetAppState } from "../appState";
+import { saveableImageFormats } from "../constants";
 import { useDocState } from "../hooks/useDocState";
 import { Select, SelectItem } from "./Select";
 import { Switch } from "./Switch";

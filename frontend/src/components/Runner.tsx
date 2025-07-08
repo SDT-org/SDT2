@@ -10,16 +10,23 @@ import {
 } from "react-aria-components";
 import { TbFile } from "react-icons/tb";
 import useAppState, {
+  type AppState,
+  type SetAppState,
   type DocState,
   type SetDocState,
   type UpdateDocState,
 } from "../appState";
+import {
+  getRecommendedMatrix,
+  scoringMatrices,
+} from "../config/scoringMatrices";
 import { reorderMethods } from "../constants";
 import { splitFilePath } from "../helpers";
 import useOpenFileDialog from "../hooks/useOpenFileDialog";
 import { useRecentFiles } from "../hooks/useRecentFiles";
 import { useStartRun } from "../hooks/useStartRun";
 import messages from "../messages";
+import { NumberInput } from "./NumberInput";
 import { RunnerPerformance } from "./RunnerPerformance";
 import { Select, SelectItem } from "./Select";
 import { Switch } from "./Switch";
@@ -27,6 +34,158 @@ import { Switch } from "./Switch";
 export type RunSettings = Pick<DocState, "compute_cores" | "analysisMethod"> & {
   doc_id: string;
   cluster_method: DocState["cluster_method"] | "None";
+};
+
+const DefaultForm = ({
+  appState,
+  setAppState,
+  docState,
+}: {
+  appState: AppState;
+  setAppState: SetAppState;
+  docState: DocState;
+}) => {
+  const openFileDialog = useOpenFileDialog(appState, setAppState);
+  const openRecentFile = useRecentFiles(appState, setAppState);
+
+  return (
+    <>
+      <div className="field file-selector">
+        <Button type="button" onPress={() => openFileDialog(docState.id)}>
+          Select FASTA or SDT Matrix file&#8230;
+        </Button>
+      </div>
+      {appState.recentFiles.some(Boolean) ? (
+        <div className="recent-files">
+          <h2>Recent Files</h2>
+          <div className="grid">
+            {appState.recentFiles.map((file) => (
+              <Button
+                className={"react-aria-Button flat compact"}
+                key={file}
+                onPress={() => openRecentFile(file, docState)}
+              >
+                <TbFile size={16} />
+                <div className="file-info">
+                  <h4>{splitFilePath(file).name}</h4>
+                  <div className="dir">
+                    {splitFilePath(file).dir.replace(
+                      appState.config?.userPath || "",
+                      "~",
+                    )}
+                  </div>
+                </div>
+              </Button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+};
+
+const ParasailSettings = ({
+  docState,
+  updateDocState,
+  setDocState,
+}: {
+  docState: DocState;
+  updateDocState: UpdateDocState;
+  setDocState: SetDocState;
+}) => {
+  const isAminoAcid = docState.result_metadata?.is_aa;
+
+  return (
+    <div className="field">
+      <Switch
+        isSelected={docState.overrideParasail}
+        onChange={(value) => {
+          updateDocState({ overrideParasail: value });
+        }}
+      >
+        Override default Parasail settings
+      </Switch>
+      {docState.overrideParasail ? (
+        <div className="setting-group form col-3">
+          <div className="field">
+            <Label htmlFor="scoring-matrix">Scoring matrix</Label>
+            <Select
+              id="scoring-matrix"
+              wide
+              data-compact
+              selectedKey={
+                docState.parasail_settings?.scoring_matrix ||
+                getRecommendedMatrix(!!isAminoAcid)
+              }
+              onSelectionChange={(value) => {
+                setDocState((previous) => ({
+                  ...previous,
+                  parasail_settings: {
+                    ...previous.parasail_settings,
+                    scoring_matrix: value as string,
+                  },
+                }));
+              }}
+              items={scoringMatrices.map((matrix) => ({
+                ...matrix,
+                recommended: matrix.id === getRecommendedMatrix(!!isAminoAcid),
+              }))}
+            >
+              {(item) => (
+                <SelectItem textValue={item.name}>
+                  <Text slot="label">{item.name}</Text>
+                  {item.recommended ? (
+                    <Text slot="description">
+                      <small>
+                        <em>
+                          Recommended - amino acid {!isAminoAcid ? "not " : ""}
+                          detected in data
+                        </em>
+                      </small>
+                    </Text>
+                  ) : null}
+                </SelectItem>
+              )}
+            </Select>
+          </div>
+          <NumberInput
+            id="open-penalty"
+            label="Open Penalty"
+            value={
+              docState.parasail_settings?.open_penalty || (isAminoAcid ? 10 : 8)
+            }
+            onChange={(value) => {
+              setDocState((previous) => ({
+                ...previous,
+                parasail_settings: {
+                  ...previous.parasail_settings,
+                  open_penalty: value,
+                },
+              }));
+            }}
+            min={1}
+            max={99}
+          />
+          <NumberInput
+            id="extend-penalty"
+            label="Extend Penalty"
+            value={docState.parasail_settings?.extend_penalty || 1}
+            onChange={(value) => {
+              setDocState((previous) => ({
+                ...previous,
+                parasail_settings: {
+                  ...previous.parasail_settings,
+                  extend_penalty: value,
+                },
+              }));
+            }}
+            min={1}
+            max={99}
+          />
+        </div>
+      ) : null}
+    </div>
+  );
 };
 
 const RunnerSettings = ({
@@ -42,13 +201,12 @@ const RunnerSettings = ({
   const startRun = useStartRun(docState);
   const [startingRun, setStartingRun] = React.useState(false);
   const initialized = React.useRef(false);
-  const openFileDialog = useOpenFileDialog(appState, setAppState);
-  const openRecentFile = useRecentFiles(appState, setAppState);
   const fileName =
     docState.filename?.length && docState.filename
       ? docState.filename.split("/").pop()
       : undefined;
   const isFastaType = docState.filetype === "text/fasta";
+  const openFileDialog = useOpenFileDialog(appState, setAppState);
 
   React.useEffect(() => {
     const handleEnter = (event: KeyboardEvent) => {
@@ -105,27 +263,53 @@ const RunnerSettings = ({
                 }}
                 value={docState.analysisMethod}
               >
-                <Label data-header>Analysis Method</Label>
+                <Label data-header>
+                  Analysis Method
+                  {docState.result_metadata?.is_aa ? (
+                    <span className="text-deemphasis is-aa-detected">
+                      Amino acid detected
+                    </span>
+                  ) : null}
+                </Label>
                 <div className="cards">
                   <Radio value="parasail">
-                    Parasail
-                    <p className="text-deemphasis">
-                      Best for small datasets. Supports amino acid calculations.
-                    </p>
+                    <div className="col-2 analysis-method-body">
+                      <div>
+                        Parasail
+                        <p className="text-deemphasis">
+                          Best for small datasets. Supports amino acid
+                          calculations.
+                        </p>
+                      </div>
+                    </div>
                   </Radio>
-                  <Radio value="lzani">
-                    LZ-ANI
-                    <div style={{}}>
-                      <p className="text-deemphasis">
-                        Best for large datasets. Only supports nucleotide ANI
-                        calculations.
-                      </p>
+                  <Radio
+                    value="lzani"
+                    isDisabled={docState.result_metadata?.is_aa || false}
+                  >
+                    <div className="col-2 analysis-method-body">
+                      <div>
+                        LZ-ANI
+                        <p className="text-deemphasis">
+                          Best for large datasets. Only supports nucleotide ANI
+                          calculations.
+                        </p>
+                      </div>
                     </div>
                   </Radio>
                 </div>
               </RadioGroup>
             </div>
-            <div className="field clustering inline-toggle">
+
+            {docState.analysisMethod === "parasail" ? (
+              <ParasailSettings
+                docState={docState}
+                updateDocState={updateDocState}
+                setDocState={setDocState}
+              />
+            ) : null}
+
+            <div className="field clustering inline-setting">
               <Switch
                 isSelected={docState.enableClustering}
                 onChange={(value) => {
@@ -134,33 +318,30 @@ const RunnerSettings = ({
               >
                 Reorder data by linkage clustering method
               </Switch>
-              {docState.enableClustering ? (
-                <div className="setting clustering-method">
-                  <Select
-                    data-flat
-                    selectedKey={docState.cluster_method}
-                    onSelectionChange={(value) => {
-                      updateDocState({
-                        cluster_method: value as typeof docState.cluster_method,
-                      });
-                    }}
-                    items={Object.entries(reorderMethods).map(
-                      ([key, value]) => ({
-                        id: key,
-                        name: value.name,
-                        description: value.description,
-                      }),
-                    )}
-                  >
-                    {(item) => (
-                      <SelectItem textValue={item.name}>
-                        <Text slot="label">{item.name}</Text>
-                        <Text slot="description">{item.description}</Text>
-                      </SelectItem>
-                    )}
-                  </Select>
-                </div>
-              ) : null}
+              <div className="setting clustering-method">
+                <Select
+                  isDisabled={!docState.enableClustering}
+                  data-flat
+                  selectedKey={docState.cluster_method}
+                  onSelectionChange={(value) => {
+                    updateDocState({
+                      cluster_method: value as typeof docState.cluster_method,
+                    });
+                  }}
+                  items={Object.entries(reorderMethods).map(([key, value]) => ({
+                    id: key,
+                    name: value.name,
+                    description: value.description,
+                  }))}
+                >
+                  {(item) => (
+                    <SelectItem textValue={item.name}>
+                      <Text slot="label">{item.name}</Text>
+                      <Text slot="description">{item.description}</Text>
+                    </SelectItem>
+                  )}
+                </Select>
+              </div>
             </div>
 
             {docState.analysisMethod === "parasail" ? (
@@ -195,38 +376,11 @@ const RunnerSettings = ({
             </div>
           </>
         ) : (
-          <>
-            <div className="field file-selector">
-              <Button type="button" onPress={() => openFileDialog(docState.id)}>
-                Select FASTA or SDT Matrix file&#8230;
-              </Button>
-            </div>
-            {appState.recentFiles.some(Boolean) ? (
-              <div className="recent-files">
-                <h2>Recent Files</h2>
-                <div className="grid">
-                  {appState.recentFiles.map((file) => (
-                    <Button
-                      className={"react-aria-Button flat compact"}
-                      key={file}
-                      onPress={() => openRecentFile(file, docState)}
-                    >
-                      <TbFile size={16} />
-                      <div className="file-info">
-                        <h4>{splitFilePath(file).name}</h4>
-                        <div className="dir">
-                          {splitFilePath(file).dir.replace(
-                            appState.config?.userPath || "",
-                            "~",
-                          )}
-                        </div>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-            ) : null}
-          </>
+          <DefaultForm
+            appState={appState}
+            setAppState={setAppState}
+            docState={docState}
+          />
         )}
         {docState.validation_error_id ? (
           <div className="validation-error">
@@ -252,7 +406,7 @@ export const Runner = ({
     <TabPanel
       id={docState.id}
       key={docState.id}
-      className="app-panel full-width"
+      className="app-panel app-panel-full-width app-panel-full-height"
     >
       <div className="app-main centered runner">
         <RunnerSettings

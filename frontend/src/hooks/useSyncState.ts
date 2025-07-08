@@ -16,23 +16,29 @@ export const useSyncState = (setAppState: SetAppState) => {
         ...event.detail.state,
         documents: event.detail.state.documents.map((beDoc) => {
           const feDoc = findDoc(beDoc.id, prev.documents);
-          return parseDocState({
-            ...beDoc,
-            dataView: feDoc?.dataView || beDoc.dataView,
-            modified: feDoc?.modified || false,
-            heatmap: {
-              ...beDoc.heatmap,
-              ...feDoc?.heatmap,
-            },
-            clustermap: {
-              ...beDoc.clustermap,
-              ...feDoc?.clustermap,
-            },
-            distribution: {
-              ...beDoc.distribution,
-              ...feDoc?.distribution,
-            },
-          });
+          return {
+            ...parseDocState({
+              ...beDoc,
+              dataView: feDoc?.dataView || beDoc.dataView,
+              modified: feDoc?.modified || false,
+              heatmap: {
+                ...beDoc.heatmap,
+                ...feDoc?.heatmap,
+              },
+              clustermap: {
+                ...beDoc.clustermap,
+                ...feDoc?.clustermap,
+              },
+              distribution: {
+                ...beDoc.distribution,
+                ...feDoc?.distribution,
+              },
+            }),
+            overrideParasail: feDoc?.overrideParasail || false,
+            parasail_settings: feDoc?.parasail_settings,
+            cluster_method: feDoc?.cluster_method || beDoc.cluster_method,
+            result_metadata: beDoc.result_metadata,
+          };
         }),
       }));
     };

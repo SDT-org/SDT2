@@ -142,20 +142,18 @@ export const HeatmapSidebar = ({
               )}
               <hr />
               <div className="field">
-                <div className="2-col">
-                  <Checkbox
-                    aria-label="Toggle invert colorscale"
-                    id="reverse"
-                    isSelected={settings.reverse}
-                    onChange={(value) => {
-                      updateSettings({
-                        reverse: value,
-                      });
-                    }}
-                  >
-                    Invert scale
-                  </Checkbox>
-                </div>
+                <Checkbox
+                  aria-label="Toggle invert colorscale"
+                  id="reverse"
+                  isSelected={settings.reverse}
+                  onChange={(value) => {
+                    updateSettings({
+                      reverse: value,
+                    });
+                  }}
+                >
+                  Invert scale
+                </Checkbox>
               </div>
               <hr />
               <div className="field" style={{ paddingTop: "0.4rem" }}>

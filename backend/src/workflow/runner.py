@@ -24,7 +24,7 @@ def run_parse(fasta_path: str) -> WorkflowResult:
         error=None,
         distance_matrix=numpy.ndarray([]),
         similarity_matrix=DataFrame(),
-        is_aa=False,
+        is_aa=None,
         min_score=0,
     )
     result = parse.run(result, fasta_path)

@@ -8,5 +8,5 @@ reorder_methods = [
     "weighted",
     "centroid",
     "median",
-    "ward"
-];
+    "ward",
+]

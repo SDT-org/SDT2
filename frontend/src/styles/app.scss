@@ -122,9 +122,13 @@ body {
   grid-template-columns: 1fr var(--app-sidebar-width);
   padding-bottom: var(--app-container-padding);
 
-  &.full-width {
+  &.app-panel-full-width {
     grid-template-areas: "app-main";
     grid-template-columns: 1fr;
+  }
+
+  &.app-panel-full-height {
+    padding-bottom: 0;
   }
 }
 
@@ -1304,7 +1308,7 @@ label.sublabel,
     0 1px 1px 0 var(--button-shadow-bottom-color),
     0 0 1px 1px var(--button-shadow-color);
   border: 0;
-  border-radius: 0.5rem;
+  border-radius: 0.4rem;
   appearance: none;
   vertical-align: middle;
   text-align: center;
@@ -1346,6 +1350,9 @@ label.sublabel,
     background-color: var(--button-primary-background-color);
     color: var(--button-primary-text-color);
     font-weight: bold;
+    box-shadow:
+      0 1px 1px 0 var(--button-primary-shadow-bottom-color),
+      0 0 1px 1px var(--button-primary-shadow-color);
 
     &[data-pressed] {
       background-color: var(--button-primary-pressed-background-color);
@@ -1379,6 +1386,10 @@ label.sublabel,
       grid-template-columns: repeat(2, 1fr);
       gap: 0.8rem;
 
+      &.cards-vertical {
+        grid-template-columns: none;
+      }
+
       p {
         font-weight: 400;
       }
@@ -1388,7 +1399,7 @@ label.sublabel,
         flex-direction: column;
         border: 0.1rem solid var(--border-color);
         border-radius: 0.4rem;
-        padding: 0.6rem 2.4rem 1.2rem 3.2rem;
+        padding: 0.6rem 0.6rem 0.6rem 3.2rem;
         align-items: flex-start;
         position: relative;
         gap: 0.2rem;
@@ -1399,7 +1410,7 @@ label.sublabel,
 
         &:before {
           position: absolute;
-          left: 0.8rem;
+          left: 1rem;
           top: 1rem;
         }
       }
@@ -1431,9 +1442,11 @@ label.sublabel,
   }
 
   &[data-selected] {
+    background: var(--highlight-background-subtle);
+
     &:before {
       border-color: var(--highlight-background);
-      border-width: 0.429rem;
+      border-width: 0.4rem;
     }
 
     &[data-pressed]:before {
@@ -1444,6 +1457,14 @@ label.sublabel,
   &[data-focus-visible]:before {
     outline: 2px solid var(--focus-ring-color);
     outline-offset: 2px;
+  }
+
+  &[data-disabled] {
+    color: var(--text-disabled-color);
+
+    .text-deemphasis {
+      color: var(--text-disabled-deemphasis-color);
+    }
   }
 }
 
@@ -1610,9 +1631,6 @@ body.blur {
     background: var(--fill-blur-color);
     border-color: var(--switch-blur-border-color);
   }
-  // .react-aria-Button {
-  //   --button-shadow-bottom-color: transparent;
-  // }
 }
 
 .debug-toast {

@@ -55,7 +55,11 @@ export const Loader = ({
   }, [docId, updateDocState, progress]);
 
   return (
-    <TabPanel id={docId} key={docId} className={"app-panel full-width"}>
+    <TabPanel
+      id={docId}
+      key={docId}
+      className={"app-panel app-panel-full-width"}
+    >
       <div className="app-main centered loader">
         <div className="loader-wrapper">
           <ProgressBar

@@ -48,6 +48,16 @@
     color: var(--fill-color);
     flex-shrink: 0;
   }
+
+  &[data-disabled] {
+    .react-aria-Button {
+      box-shadow: 0 0 0 1px var(--button-shadow-color);
+    }
+
+    .caret {
+      color: var(--button-disabled-foreground-color);
+    }
+  }
 }
 
 .react-aria-Popover[data-trigger="Select"] {

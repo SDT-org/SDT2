@@ -54,6 +54,7 @@ export const formatHeatmapData = (
     "colorScaleKey" | "vmax" | "vmin" | "annotation_rounding"
   >,
   colorScale: ColorScaleArray,
+  metaData?: { run?: { analysis_method?: string } },
 ) => {
   const colorFn = createD3ColorScale(
     colorScale,
@@ -62,23 +63,29 @@ export const formatHeatmapData = (
     settings.vmin,
   );
 
+  const isLzani = metaData?.run?.analysis_method === "lzani";
+  const lzaniThreshold = 70;
+
   return data.flatMap((row, y) =>
     row
       .filter((datum) => datum === 0 || Number(datum))
       .map((value, x) => {
-        const numValue = value as number;
-        const roundedValue = numValue.toFixed(settings.annotation_rounding);
+        // For LZ-ANI, treat values below 70% as unaligned (0%)
+        const effectiveValue =
+          isLzani && (value as number) < lzaniThreshold ? 0 : value;
 
-        // Treat 0 values as empty/unaligned (backend sets all values below 70 to 0)
+        const roundedValue = (effectiveValue as number).toFixed(
+          settings.annotation_rounding,
+        );
         const displayValue =
-          numValue === 100
+          effectiveValue === 100
             ? "100"
-            : numValue === 0
+            : effectiveValue === 0
               ? ""
               : roundedValue.toString();
 
         const backgroundColor =
-          displayValue === "" ? "#f5f5f5" : colorFn(numValue);
+          displayValue === "" ? "#f5f5f5" : colorFn(Number(effectiveValue));
         const foregroundColor = tinycolor(backgroundColor).isLight()
           ? "#000"
           : "#fff";
@@ -152,12 +159,14 @@ export const formatClustermapData = (
         }
 
         const roundedValue = (value as number).toFixed(2);
+        const displayValue =
+          value === 100 ? "100" : value === 0 ? "" : roundedValue.toString();
 
         return {
           x,
           y,
           value: value as number,
-          displayValue: value === 100 ? "100" : roundedValue.toString(),
+          displayValue,
           backgroundColor,
           foregroundColor,
         };

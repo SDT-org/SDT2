@@ -1,6 +1,6 @@
 import React, { type ErrorInfo } from "react";
 import { z } from "zod";
-import type { reorderMethods } from "./constants";
+import type { reorderMethods, saveableImageFormats } from "./constants";
 import {
   type DistributionState,
   DistributionStateSchema,
@@ -19,11 +19,6 @@ export const clusterMethodDescriptions = [
   "Rooted phylogenetic tree ideal for ultra-metric datasets",
 ];
 
-export const saveableImageFormats = {
-  svg: "SVG",
-  png: "PNG",
-  jpeg: "JPEG",
-};
 export type SaveableImageFormat = keyof typeof saveableImageFormats;
 export type SaveableImageKey = DocState["dataView"];
 export type RasterFormat = Extract<SaveableImageFormat, "png" | "jpeg">;
@@ -66,6 +61,19 @@ export type DocState = {
   cluster_method: keyof typeof reorderMethods;
   analysisMethod: "parasail" | "lzani";
   lzaniScoreType: "ani" | "gani" | "tani";
+  overrideParasail: boolean;
+  parasail_settings?:
+    | {
+        scoring_matrix?: string;
+        open_penalty?: number;
+        extend_penalty?: number;
+      }
+    | undefined;
+  result_metadata?:
+    | {
+        is_aa?: boolean;
+      }
+    | undefined;
 };
 
 export type AppState = {
@@ -151,6 +159,7 @@ export const initialDocState: DocState = {
   analysisMethod: "parasail",
   lzaniScoreType: "ani",
   cluster_method: "average",
+  overrideParasail: false,
   heatmap: {
     colorScaleKey: "Portland",
     reverse: false,

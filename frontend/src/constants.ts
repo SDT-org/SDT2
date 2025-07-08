@@ -10,6 +10,12 @@ export const plotFontSansSerif = {
 
 export const plotFont = plotFontMonospace;
 
+export const saveableImageFormats = {
+  svg: "SVG",
+  png: "PNG",
+  jpeg: "JPEG",
+};
+
 export const reorderMethods = {
   single: {
     name: "Single",
