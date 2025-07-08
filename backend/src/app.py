@@ -670,10 +670,19 @@ class Api:
         # creates a mapping of sequence ID to its cluster
         id_to_cluster = {row["id"]: row["cluster"] for _, row in seqid_clusters_df.iterrows()}
 
-        # Track seen clusters
+        # get cluster stats  clusters
         seen_clusters = {}
         next_cluster_num = 1
+        
+        total_clusters= len(seqid_clusters_df["cluster"].unique())
 
+        largest_cluster = max(seqid_clusters_df["cluster"].value_counts())
+ 
+       
+        cluster_counts = seqid_clusters_df["cluster"].value_counts()
+        singleton_clusters = cluster_counts[cluster_counts == 1]
+        singletons = len(singleton_clusters)
+        print(singletons, "singletons")
         # Go through sequences in descending order from the topmosost cluster and assign asending sequential cluster numbers
         for seq_id in reordered_tick_text:
             original_cluster = id_to_cluster.get(seq_id)
