@@ -152,7 +152,7 @@ export const Heatmap = ({
             {!renderSvg && (
               <AlignmentStats
                 metaData={metaData}
-                dataLength={(data.length * (data.length - 1)) / 2}
+                dataLength={metaData.distribution_stats?.count || 0}
                 activeDataSet="scores"
               />
             )}

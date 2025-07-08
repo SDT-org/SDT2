@@ -233,9 +233,13 @@ export const AlignmentStats = ({
                   fontSize: "13px",
                   fontWeight: "bold",
                   marginBottom: "8px",
+                  color: activeDataSet === "scores" ? "#d48b91" : "#333",
                 }}
               >
                 Distribution Statistics
+                {activeDataSet === "scores" && " (Aligned Only)"}
+                {(activeDataSet === "gc" || activeDataSet === "length") &&
+                  " (All Sequences)"}
               </div>
               <div
                 style={{ fontSize: "11px", color: "#666", lineHeight: "1.4" }}

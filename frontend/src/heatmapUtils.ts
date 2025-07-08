@@ -77,6 +77,7 @@ export const formatHeatmapData = (
         const roundedValue = (effectiveValue as number).toFixed(
           settings.annotation_rounding,
         );
+
         const displayValue =
           effectiveValue === 100
             ? "100"
