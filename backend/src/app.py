@@ -621,6 +621,72 @@ class Api:
         )
         return json.dumps(data_to_dump)
 
+    def get_clustermap_data(self, doc_id: str, threshold: float, method: str):
+        doc = get_document(doc_id)
+
+        ##i think we can just grab this in transformations
+        doc_paths = build_document_paths(doc.tempdir_path)
+        matrix_df = read_csv_matrix(doc_paths.matrix)
+        matrix_np = matrix_df.to_numpy()
+        matrix_np = np.round(matrix_np, 2)
+        sorted_ids = matrix_df.index.tolist()
+
+        # Get cluster assignments
+        seqid_clusters_df = cluster.get_clusters_dataframe(
+            matrix_np, method, threshold, sorted_ids
+        )
+        seqid_clusters_df = seqid_clusters_df.rename(
+            columns={
+                str(seqid_clusters_df.columns[0]): "id",
+                str(seqid_clusters_df.columns[1]): "cluster",
+            }
+        )
+
+        # Store original cluster numbers for color consistency
+        seqid_clusters_df["id"] = seqid_clusters_df["id"].astype(str)
+        seqid_clusters_df["original_cluster"] = seqid_clusters_df["cluster"]
+
+        # Get the linkage-based order to group sequences by cluster
+        new_order = cluster.get_linkage_method_order(matrix_np, method, sorted_ids, threshold)
+
+        # Create a mapping from old index to new index
+        reorder_indices = [sorted_ids.index(id) for id in new_order]
+
+        # Reorder the matrix
+        reordered_matrix = matrix_np[np.ix_(reorder_indices, reorder_indices)]
+
+        # Reorder the tick text
+        reordered_tick_text = [str(sorted_ids[i]) for i in reorder_indices]
+
+        # Now assign sequential cluster numbers based on visual order
+        # creates a mapping of sequence ID to its cluster
+        id_to_cluster = {row["id"]: row["cluster"] for _, row in seqid_clusters_df.iterrows()}
+
+        # Track seen clusters
+        seen_clusters = {}
+        next_cluster_num = 1
+
+        # Go through sequences in descending order from the topmosost cluster and assign asending sequential cluster numbers
+        for seq_id in reordered_tick_text:
+            original_cluster = id_to_cluster.get(seq_id)
+            if original_cluster is not None and original_cluster not in seen_clusters:
+                seen_clusters[original_cluster] = next_cluster_num
+                next_cluster_num += 1
+
+        # Update the dataframe with new sequential cluster numbers
+        for idx, row in seqid_clusters_df.iterrows():
+            original_cluster = row["cluster"]
+            if original_cluster in seen_clusters:
+                seqid_clusters_df.at[idx, "cluster"] = seen_clusters[original_cluster]
+
+        # Update the cluster data to match the new order so that the legend matches
+        cluster_data = seqid_clusters_df.to_dict(orient="records")
+
+        return {
+            "matrix": to_triangle(reordered_matrix, fill_value=None).tolist(),
+            "tickText": reordered_tick_text,
+            "clusterData": cluster_data,
+        }
 
 
     def new_doc(self):
