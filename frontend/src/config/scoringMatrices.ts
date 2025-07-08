@@ -7,6 +7,8 @@ export interface ScoringMatrix {
 export const scoringMatrices: ScoringMatrix[] = [
   { id: "simple_1_-1", name: "Simple (1/-1)", type: "universal" },
   { id: "simple_2_-1", name: "Simple (2/-1)", type: "universal" },
+  { id: "simple_3_-2", name: "Simple (3/-2)", type: "universal" },
+  { id: "simple_10_-5", name: "Simple (10/-5)", type: "universal" },
   { id: "blast_5_-4", name: "BLAST (5/-4)", type: "nucleotide" },
   { id: "megablast_2_-3", name: "MegaBLAST (2/-3)", type: "nucleotide" },
   { id: "vsearch_2_-4", name: "VSEARCH (2/-4)", type: "nucleotide" },

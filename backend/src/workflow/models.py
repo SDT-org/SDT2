@@ -16,7 +16,7 @@ class LzaniSettings(NamedTuple):
 
 class ParasailSettings(NamedTuple):
     process_count: int
-    scoring_matrix: Literal["blosum62"] | Literal["pam250"] | None = None
+    scoring_matrix: str | None = None # None for custom matrix selection
     open_penalty: int | None = None
     extend_penalty: int | None = None
 
