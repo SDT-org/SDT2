@@ -31,10 +31,29 @@ import { RunnerPerformance } from "./RunnerPerformance";
 import { Select, SelectItem } from "./Select";
 import { Switch } from "./Switch";
 
+export type ParasailRunSettings = {
+  scoring_matrix?: string;
+  open_penalty?: number;
+  extend_penalty?: number;
+};
+
+export type LzaniRunSettings = {
+  aw?: number;
+  am?: number;
+  mal?: number;
+  msl?: number;
+  mrd?: number;
+  mqd?: number;
+  reg?: number;
+  ar?: number;
+};
+
 export type RunSettings = Pick<DocState, "compute_cores" | "analysisMethod"> & {
   doc_id: string;
   cluster_method: DocState["cluster_method"] | "None";
-};
+  lzani_score_type?: string;
+} & Partial<ParasailRunSettings> &
+  Partial<LzaniRunSettings>;
 
 const DefaultForm = ({
   appState,
@@ -108,7 +127,7 @@ const ParasailSettings = ({
       {docState.overrideParasail ? (
         <div className="setting-group form col-3">
           <div className="field">
-            <Label htmlFor="scoring-matrix">Scoring matrix</Label>
+            <Label htmlFor="scoring-matrix">Scoring</Label>
             <Select
               id="scoring-matrix"
               wide
@@ -150,7 +169,7 @@ const ParasailSettings = ({
           </div>
           <NumberInput
             id="open-penalty"
-            label="Open Penalty"
+            label="Open penalty"
             value={
               docState.parasail_settings?.open_penalty || (isAminoAcid ? 10 : 8)
             }
@@ -168,7 +187,7 @@ const ParasailSettings = ({
           />
           <NumberInput
             id="extend-penalty"
-            label="Extend Penalty"
+            label="Extend penalty"
             value={docState.parasail_settings?.extend_penalty || 1}
             onChange={(value) => {
               setDocState((previous) => ({
@@ -183,6 +202,197 @@ const ParasailSettings = ({
             max={99}
           />
         </div>
+      ) : null}
+    </div>
+  );
+};
+
+const LzaniSettings = ({
+  docState,
+  updateDocState,
+  setDocState,
+}: {
+  docState: DocState;
+  updateDocState: UpdateDocState;
+  setDocState: SetDocState;
+}) => {
+  return (
+    <div className="field">
+      <Switch
+        isSelected={docState.overrideLzani}
+        onChange={(value) => {
+          updateDocState({ overrideLzani: value });
+        }}
+      >
+        Override default LZ-ANI settings
+      </Switch>
+      {docState.overrideLzani ? (
+        <>
+          <div className="setting-group form col-3">
+            <div className="field">
+              <Label htmlFor="lzani-score-type">Score Type</Label>
+              <Select
+                id="lzani-score-type"
+                wide
+                data-compact
+                selectedKey={docState.lzaniScoreType}
+                onSelectionChange={(value) => {
+                  updateDocState({
+                    lzaniScoreType: value as DocState["lzaniScoreType"],
+                  });
+                }}
+                items={[
+                  {
+                    id: "ani",
+                    name: "ANI",
+                    description: "Average Nucleotide Identity",
+                  },
+                  {
+                    id: "tani",
+                    name: "TANI",
+                    description: "Total Average Nucleotide Identity",
+                  },
+                ]}
+              >
+                {(item) => (
+                  <SelectItem textValue={item.name}>
+                    <Text slot="label">{item.name}</Text>
+                    <Text slot="description">{item.description}</Text>
+                  </SelectItem>
+                )}
+              </Select>
+            </div>
+            <NumberInput
+              id="lzani-aw"
+              label="Anchor width "
+              value={docState.lzani_settings?.aw || 3}
+              onChange={(value) => {
+                setDocState((previous) => ({
+                  ...previous,
+                  lzani_settings: {
+                    ...previous.lzani_settings,
+                    aw: value,
+                  },
+                }));
+              }}
+              min={1}
+              max={10}
+            />
+            <NumberInput
+              id="lzani-am"
+              label="Anchor mismatch"
+              value={docState.lzani_settings?.am || 0}
+              onChange={(value) => {
+                setDocState((previous) => ({
+                  ...previous,
+                  lzani_settings: {
+                    ...previous.lzani_settings,
+                    am: value,
+                  },
+                }));
+              }}
+              min={0}
+              max={5}
+            />
+            <NumberInput
+              id="lzani-mal"
+              label="Min anchor Length "
+              value={docState.lzani_settings?.mal || 4}
+              onChange={(value) => {
+                setDocState((previous) => ({
+                  ...previous,
+                  lzani_settings: {
+                    ...previous.lzani_settings,
+                    mal: value,
+                  },
+                }));
+              }}
+              min={1}
+              max={10}
+            />
+            <NumberInput
+              id="lzani-msl"
+              label="Min seed length"
+              value={docState.lzani_settings?.msl || 2}
+              onChange={(value) => {
+                setDocState((previous) => ({
+                  ...previous,
+                  lzani_settings: {
+                    ...previous.lzani_settings,
+                    msl: value,
+                  },
+                }));
+              }}
+              min={1}
+              max={10}
+            />
+            <NumberInput
+              id="lzani-mrd"
+              label="Max rel. distance"
+              value={docState.lzani_settings?.mrd || 5}
+              onChange={(value) => {
+                setDocState((previous) => ({
+                  ...previous,
+                  lzani_settings: {
+                    ...previous.lzani_settings,
+                    mrd: value,
+                  },
+                }));
+              }}
+              min={1}
+              max={20}
+            />
+            <NumberInput
+              id="lzani-mqd"
+              label="Max query distance"
+              value={docState.lzani_settings?.mqd || 5}
+              onChange={(value) => {
+                setDocState((previous) => ({
+                  ...previous,
+                  lzani_settings: {
+                    ...previous.lzani_settings,
+                    mqd: value,
+                  },
+                }));
+              }}
+              min={1}
+              max={20}
+            />
+            <NumberInput
+              id="lzani-reg"
+              label="Region"
+              value={docState.lzani_settings?.reg || 5}
+              onChange={(value) => {
+                setDocState((previous) => ({
+                  ...previous,
+                  lzani_settings: {
+                    ...previous.lzani_settings,
+                    reg: value,
+                  },
+                }));
+              }}
+              min={1}
+              max={20}
+            />
+            <NumberInput
+              id="lzani-ar"
+              label="Anchor ratio"
+              value={docState.lzani_settings?.ar || 1}
+              onChange={(value) => {
+                setDocState((previous) => ({
+                  ...previous,
+                  lzani_settings: {
+                    ...previous.lzani_settings,
+                    ar: value,
+                  },
+                }));
+              }}
+              min={0.1}
+              max={5}
+              step={0.1}
+            />
+          </div>
+        </>
       ) : null}
     </div>
   );
@@ -303,6 +513,14 @@ const RunnerSettings = ({
 
             {docState.analysisMethod === "parasail" ? (
               <ParasailSettings
+                docState={docState}
+                updateDocState={updateDocState}
+                setDocState={setDocState}
+              />
+            ) : null}
+
+            {docState.analysisMethod === "lzani" ? (
+              <LzaniSettings
                 docState={docState}
                 updateDocState={updateDocState}
                 setDocState={setDocState}

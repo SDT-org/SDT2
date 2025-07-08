@@ -13,6 +13,10 @@ export const startRun = (docState: DocState) =>
       ...(docState.analysisMethod === "parasail" && docState.overrideParasail
         ? docState.parasail_settings
         : {}),
+      ...(docState.analysisMethod === "lzani" && docState.overrideLzani
+        ? docState.lzani_settings
+        : {}),
+      lzani_score_type: docState.lzaniScoreType,
     })
     .catch((e) => {
       if (e.toString().includes("PARASAIL_TRACEBACK")) {

@@ -69,6 +69,19 @@ export type DocState = {
         extend_penalty?: number;
       }
     | undefined;
+  overrideLzani: boolean;
+  lzani_settings?:
+    | {
+        aw?: number;
+        am?: number;
+        mal?: number;
+        msl?: number;
+        mrd?: number;
+        mqd?: number;
+        reg?: number;
+        ar?: number;
+      }
+    | undefined;
   result_metadata?:
     | {
         is_aa?: boolean;
@@ -160,6 +173,7 @@ export const initialDocState: DocState = {
   lzaniScoreType: "ani",
   cluster_method: "average",
   overrideParasail: false,
+  overrideLzani: false,
   heatmap: {
     colorScaleKey: "Portland",
     reverse: false,

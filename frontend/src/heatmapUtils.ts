@@ -64,7 +64,7 @@ export const formatHeatmapData = (
   );
 
   const isLzani = metaData?.run?.analysis_method === "lzani";
-  const lzaniThreshold = 70;
+  const lzaniThreshold = 20;
 
   return data.flatMap((row, y) =>
     row

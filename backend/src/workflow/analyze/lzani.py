@@ -15,23 +15,50 @@ def run(
     set_progress: Callable[[int], None],
     canceled,
 ) -> WorkflowResult:
+    cmd = [
+        os.path.abspath(os.path.normpath(settings.lzani.exec_path)),
+        "all2all",
+        "--in-fasta",
+        settings.fasta_path,
+        "--out",
+        settings.doc_paths.lzani_results,
+        "--out-ids",
+        settings.doc_paths.lzani_results_ids,
+        "--out-format",
+        "complete",
+        "--threads",
+        "0",
+        "--verbose",
+        "2",
+    ]
+    
+    # Add optional parameters only if they are provided
+    if settings.lzani.aw is not None:
+        cmd.extend(["--aw", str(settings.lzani.aw)])
+        
+    if settings.lzani.am is not None:
+        cmd.extend(["--am", str(settings.lzani.am)])
+        
+    if settings.lzani.mal is not None:
+        cmd.extend(["--mal", str(settings.lzani.mal)])
+        
+    if settings.lzani.msl is not None:
+        cmd.extend(["--msl", str(settings.lzani.msl)])
+        
+    if settings.lzani.mrd is not None:
+        cmd.extend(["--mrd", str(settings.lzani.mrd)])
+        
+    if settings.lzani.mqd is not None:
+        cmd.extend(["--mqd", str(settings.lzani.mqd)])
+        
+    if settings.lzani.reg is not None:
+        cmd.extend(["--reg", str(settings.lzani.reg)])
+        
+    if settings.lzani.ar is not None:
+        cmd.extend(["--ar", str(settings.lzani.ar)])
+    
     process = subprocess.Popen(
-        [
-            os.path.abspath(os.path.normpath(settings.lzani.exec_path)),
-            "all2all",
-            "--in-fasta",
-            settings.fasta_path,
-            "--out",
-            settings.doc_paths.lzani_results,
-            "--out-ids",
-            settings.doc_paths.lzani_results_ids,
-            "--out-format",
-            "complete",
-            "--threads",
-            "0",  # 0 will auto-detect
-            "--verbose",
-            "2",
-        ],
+        cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,

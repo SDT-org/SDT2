@@ -368,6 +368,14 @@ class Api:
             lzani=LzaniSettings(
                 exec_path=get_lzani_exec_path(),
                 score_type=args.get("lzani_score_type", "ani"),
+                aw=args.get("aw"),
+                am=args.get("am"),
+                mal=args.get("mal"),
+                msl=args.get("msl"),
+                mrd=args.get("mrd"),
+                mqd=args.get("mqd"),
+                reg=args.get("reg"),
+                ar=args.get("ar"),
             ),
             parasail=ParasailSettings(
                 process_count=max(
@@ -546,11 +554,11 @@ class Api:
                 all_scores.append(identity_score)
                 
                 # For LZANI, filter out values below 70% threshold
-                if not (is_lzani and identity_score < 70):
+                if not (is_lzani and identity_score < 1):
                     identity_scores.append([id_map[ids[i]], id_map[ids[j]], identity_score])
         
         # Calculate unaligned count after collecting all scores
-        unaligned_count = len([s for s in all_scores if s < 70]) if is_lzani else 0
+        unaligned_count = len([s for s in all_scores if s < 3]) if is_lzani else 0
         
         # Convert matrix to triangle format for heatmap (converts distance to similarity)
         heat_data = DataFrame(data, index=ids)
@@ -568,7 +576,7 @@ class Api:
             if valid_values.size > 0:
                 min_val = max(70, int(nanmin(valid_values)))
             else:
-                min_val = 70
+                min_val = 30
         else:
             min_val = int(nanmin(heat_data_no_diag))
         

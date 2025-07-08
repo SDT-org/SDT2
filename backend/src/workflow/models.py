@@ -12,6 +12,14 @@ from document_paths import DocumentPaths
 class LzaniSettings(NamedTuple):
     exec_path: str
     score_type: Literal["ani"] | Literal["gani"] | Literal["tani"]
+    aw: int | None = None
+    am: int | None = None
+    mal: int | None = None
+    msl: int | None = None
+    mrd: int | None = None
+    mqd: int | None = None
+    reg: int | None = None
+    ar: float | None = None
 
 
 class ParasailSettings(NamedTuple):

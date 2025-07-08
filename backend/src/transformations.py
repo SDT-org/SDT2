@@ -124,7 +124,7 @@ def lzani_tsv_to_distance_matrix(results_tsv_path, ids_tsv_path, score_column="a
     floor_value = 0
     
     # Replace unaligned NANs, 0s, AND values below 70% with 0
-    matrix_np = np.where(np.isnan(matrix_np) | (matrix_np == 0) | (matrix_np < 70), floor_value, matrix_np)
+    matrix_np = np.where(np.isnan(matrix_np) | (matrix_np == 0) | (matrix_np < 20), floor_value, matrix_np)
 
     # LZANI has slightly different scores for query v. reference vs. reference v query. Make symmetric by averaging with transpose
     matrix_np = (matrix_np + matrix_np.T) / 2
