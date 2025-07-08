@@ -1,10 +1,6 @@
 import React, { type ErrorInfo } from "react";
 import { z } from "zod";
-import type {
-  reorderMethods,
-  saveableImageFormats,
-  scoringMatrices,
-} from "./constants";
+import type { reorderMethods, saveableImageFormats } from "./constants";
 import {
   type DistributionState,
   DistributionStateSchema,
@@ -26,7 +22,6 @@ export const clusterMethodDescriptions = [
 export type SaveableImageFormat = keyof typeof saveableImageFormats;
 export type SaveableImageKey = DocState["dataView"];
 export type RasterFormat = Extract<SaveableImageFormat, "png" | "jpeg">;
-export type ScoringMatrix = (typeof scoringMatrices)[number];
 
 export type DocState = {
   id: string;
@@ -70,7 +65,7 @@ export type DocState = {
   overrideParasail: boolean;
   parasail_settings?:
     | {
-        scoring_matrix?: ScoringMatrix["id"];
+        scoring_matrix?: string;
         open_penalty?: number;
         extend_penalty?: number;
       }

@@ -15,8 +15,11 @@ import useAppState, {
   type DocState,
   type SetDocState,
   type UpdateDocState,
-  type ScoringMatrix,
 } from "../appState";
+import {
+  getRecommendedMatrix,
+  scoringMatrices,
+} from "../config/scoringMatrices";
 import { reorderMethods } from "../constants";
 import { splitFilePath } from "../helpers";
 import useOpenFileDialog from "../hooks/useOpenFileDialog";
@@ -112,43 +115,36 @@ const ParasailSettings = ({
               data-compact
               selectedKey={
                 docState.parasail_settings?.scoring_matrix ||
-                (isAminoAcid ? "blosum62" : "pam250")
+                getRecommendedMatrix(!!isAminoAcid)
               }
               onSelectionChange={(value) => {
                 setDocState((previous) => ({
                   ...previous,
                   parasail_settings: {
                     ...previous.parasail_settings,
-                    scoring_matrix: value as ScoringMatrix["id"],
+                    scoring_matrix: value as string,
                   },
                 }));
               }}
-              items={[
-                {
-                  id: "blosum62",
-                  name: "BLOSUM62",
-                  recommended: isAminoAcid,
-                },
-                {
-                  id: "pam250",
-                  name: "PAM250",
-                  recommended: !isAminoAcid,
-                },
-              ]}
+              items={scoringMatrices.map((matrix) => ({
+                ...matrix,
+                recommended: matrix.id === getRecommendedMatrix(!!isAminoAcid),
+              }))}
             >
               {(item) => (
                 <SelectItem textValue={item.name}>
                   <Text slot="label">{item.name}</Text>
-                  {item.recommended ? (
-                    <Text slot="description">
-                      <small>
-                        <em>
-                          Recommended - amino acid {!isAminoAcid ? "not " : ""}
-                          detected in data
-                        </em>
-                      </small>
-                    </Text>
-                  ) : null}
+                  <Text slot="description">
+                    <small>
+                      {item.description}
+                      {item.recommended && (
+                        <>
+                          {" • "}
+                          <em>Recommended</em>
+                        </>
+                      )}
+                    </small>
+                  </Text>
                 </SelectItem>
               )}
             </Select>

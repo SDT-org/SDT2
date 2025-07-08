@@ -6,6 +6,7 @@ from itertools import combinations_with_replacement as cwr
 from numpy import zeros
 
 from workflow.models import RunSettings, WorkflowResult
+from .scoring_matrices import SIMPLE_MATRICES, ALL_MATRICES
 
 
 def run(
@@ -34,7 +35,7 @@ def run(
     print(f"\rNumber of pairs: {total_pairs}\r", flush=True)
 
     matrix_to_use = settings.parasail.scoring_matrix or (
-        "blosum62" if result.is_aa else "pam250"
+        "blosum62" if result.is_aa else "blast_5_-4"
     )
     open_penalty = settings.parasail.open_penalty or (10 if result.is_aa else 8)
     extend_penalty = settings.parasail.extend_penalty or 1
@@ -83,7 +84,29 @@ def process_pair(id_sequence_pair, matrix_id, open_penalty, extend_penalty):
     if id1 == id2:
         return id_sequence_pair[0], 0.0
 
-    scoring_matrix = parasail.blosum62 if matrix_id == "blosum62" else parasail.pam250
+    # Handle simple matrices
+    if matrix_id in SIMPLE_MATRICES:
+        matrix_info = SIMPLE_MATRICES[matrix_id]
+        scoring_matrix = parasail.matrix_create("ACGT", matrix_info["match"], matrix_info["mismatch"])
+    else:
+        # Handle built-in parasail matrices
+        matrix_map = {
+            # BLOSUM matrices
+            "blosum45": parasail.blosum45,
+            "blosum62": parasail.blosum62,
+            "blosum80": parasail.blosum80,
+            "blosum90": parasail.blosum90,
+            # PAM matrices
+            "pam30": parasail.pam30,
+            "pam70": parasail.pam70,
+            "pam120": parasail.pam120,
+            "pam250": parasail.pam250,
+            # Nucleotide matrices
+            "dnafull": parasail.dnafull,
+            "nuc44": parasail.nuc44,
+        }
+        scoring_matrix = matrix_map.get(matrix_id, parasail.blosum62)
+    
     alignment_function = (
         get_stats_score if supports_striped_32() else get_traceback_score
     )
