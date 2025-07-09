@@ -13,7 +13,7 @@ from config.paths import (
     ImageKey,
     build_document_paths,
 )
-from document_state import DocState
+from state.document_state import DocState
 
 EXPORTABLE_DATA_KEYS: List[DataKey] = [
     "stats",

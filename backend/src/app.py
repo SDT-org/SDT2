@@ -19,7 +19,8 @@ sys.path.append(os.path.join(current_file_path, "../../"))
 sys.path.append(os.path.join(current_file_path, "."))
 
 from workflow.models import WorkflowResult, WorkflowRun, RunSettings, LzaniSettings, ParasailSettings
-from app_state import create_app_state
+from state.app_state import create_app_state
+from state.workflow_state import workflow_runs, parsed_workflow_results
 from config.constants import default_window_title, matrix_filetypes
 from utils import make_doc_id, get_child_process_info, open_folder
 from api.webview_windows import get_html_path, about_window, manual_window
@@ -31,7 +32,7 @@ from config.settings_manager import (
     update_app_settings,
 )
 from file_io.file_operations import pack_document, unpack_document, read_json_file
-from document_state import save_document_settings
+from state.document_state import save_document_settings
 from config.paths import ImageKey, ImageFormat, build_document_paths
 from file_io.transformations import (
     to_triangle,
@@ -72,8 +73,6 @@ mimetypes.add_type("application/vnd.sdt", ".sdt")
 window = None
 canceled = None
 start_time = None  # TODO: move into workflow
-workflow_runs: Dict[str, WorkflowRun] = {}
-parsed_workflow_results: Dict[str, WorkflowResult] = {}
 
 
 def assert_window():

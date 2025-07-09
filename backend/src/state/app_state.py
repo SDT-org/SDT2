@@ -1,5 +1,5 @@
 from collections import namedtuple
-from document_state import DocState, create_doc_state, load_document_settings
+from .document_state import DocState, create_doc_state, load_document_settings
 
 AppState = namedtuple(
     "default_app_state",
