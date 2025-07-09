@@ -8,8 +8,8 @@ from numpy import eye, where, nan, nanmin, nanmax
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from document_paths import build_document_paths
-from transformations import read_csv_matrix, read_stats_csv, to_triangle
-from file_utils import read_json_file
+from file_io.transformations import read_csv_matrix, read_stats_csv, to_triangle
+from file_io.file_operations import read_json_file
 from workflow import cluster
 
 

@@ -12,8 +12,8 @@ sys.path.append(_os.path.join(_os.path.dirname(__file__), ".."))
 
 from app_settings import add_recent_file, remove_recent_file
 from document_paths import build_document_paths
-from transformations import read_csv_matrix, similarity_triangle_to_matrix
-from export_utils import save_cols_to_csv
+from file_io.transformations import read_csv_matrix, similarity_triangle_to_matrix
+from file_io.csv_handlers import save_cols_to_csv
 from workflow.runner import run_parse
 from constants import matrix_filetypes
 from api.workflow_api import get_compute_stats
@@ -36,7 +36,7 @@ def handle_open_file(filepath: str, doc_id: str | None, temp_dir, get_state, new
     doc_paths = build_document_paths(unique_dir)
 
     if filetype == "application/vnd.sdt":
-        from save_document import unpack_document
+        from file_io.file_operations import unpack_document
         unpack_document(filepath, unique_dir)
         if not os.path.exists(doc_paths.matrix):
             remove_recent_file(filepath)

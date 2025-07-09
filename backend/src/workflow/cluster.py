@@ -10,7 +10,7 @@ import os
 import json
 from Bio import SeqIO, Seq, SeqRecord
 from workflow.models import RunSettings, WorkflowResult
-from transformations import read_csv_matrix
+from file_io.transformations import read_csv_matrix
 
 
 def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
@@ -68,7 +68,6 @@ def calculate_linkage(distance_matrix: np.ndarray, method: str) -> np.ndarray:
         metric = "precomputed"
         end = time.perf_counter()
         print(f"Distance matrix prepared in {end - start:.2f} seconds")
-    # print(method, metric, y)
     return linkage(y, method=method, metric=metric)
 
 

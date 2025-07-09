@@ -3,7 +3,7 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-from save_document import pack_document
+from file_io.file_operations import pack_document
 from app_settings import add_recent_file
 from document_state import save_document_settings
 from utils import make_doc_id

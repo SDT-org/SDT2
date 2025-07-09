@@ -6,7 +6,7 @@ import pandas as pd
 import numpy as np
 from workflow.models import RunSettings, WorkflowResult
 from pandas import DataFrame
-from transformations import lzani_tsv_to_distance_matrix
+from file_io.transformations import lzani_tsv_to_distance_matrix
 
 
 def run(

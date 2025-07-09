@@ -6,7 +6,7 @@ import webview
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-from export import (
+from file_io.export_manager import (
     ImageFormat,
     ImageKey,
     build_source_target_pairs,

@@ -8,7 +8,7 @@ from pandas import DataFrame
 import psutil
 
 from config import app_version
-from export_utils import save_run_settings_to_json
+from file_io.export_manager import save_run_settings_to_json
 from utils import friendly_total_time
 from workflow import analyze, cluster, parse, postprocess
 from workflow.models import WorkflowResult, WorkflowRun

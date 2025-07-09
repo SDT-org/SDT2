@@ -1,12 +1,8 @@
 from typing import Dict
 from Bio.SeqUtils import gc_fraction
 from pandas.core.frame import DataFrame
-from export_utils import (
-    save_cols_to_csv,
-    save_matrix_to_csv,
-    save_stats_to_csv,
-    save_seq_dict_to_json,
-)
+from file_io.csv_handlers import save_cols_to_csv, save_matrix_to_csv, save_stats_to_csv
+from file_io.export_manager import save_seq_dict_to_json
 from workflow.models import RunSettings, WorkflowResult
 
 
