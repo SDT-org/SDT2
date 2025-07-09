@@ -7,7 +7,7 @@ import numpy
 from pandas import DataFrame
 import psutil
 
-from config import app_version
+from config.config import app_version
 from file_io.export_manager import save_run_settings_to_json
 from utils import friendly_total_time
 from workflow import analyze, cluster, parse, postprocess

@@ -8,8 +8,8 @@ from platformdirs import user_documents_dir
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-from config import app_version
-from app_settings import load_app_settings, save_app_settings
+from config.config import app_version
+from config.settings_manager import load_app_settings, save_app_settings
 from utils import get_child_process_info
 
 

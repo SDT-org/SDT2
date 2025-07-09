@@ -14,8 +14,8 @@ from workflow.models import (
     WorkflowResult,
 )
 from workflow.runner import run_process
-from document_paths import build_document_paths
-from constants import default_window_title
+from config.paths import build_document_paths
+from config.constants import default_window_title
 
 is_windows = platform.system() == "Windows"
 try:

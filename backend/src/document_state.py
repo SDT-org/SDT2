@@ -1,7 +1,7 @@
 from collections import namedtuple
 import json
 import os
-from document_paths import build_document_paths
+from config.paths import build_document_paths
 
 VERSION = 1
 

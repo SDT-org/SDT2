@@ -6,7 +6,7 @@ from datetime import datetime
 import numpy
 from pandas.core.frame import DataFrame
 
-from document_paths import DocumentPaths
+from config.paths import DocumentPaths
 
 
 class LzaniSettings(NamedTuple):

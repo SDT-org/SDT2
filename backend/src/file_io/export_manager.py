@@ -5,7 +5,7 @@ import json
 from typing import List, Dict
 from pandas.core.frame import DataFrame
 
-from document_paths import (
+from config.paths import (
     DATA_FILES,
     IMAGE_KEYS,
     DataKey,

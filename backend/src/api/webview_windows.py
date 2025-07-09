@@ -4,7 +4,7 @@ import webview
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
-from config import app_version, dev_frontend_host
+from config.config import app_version, dev_frontend_host
 
 is_compiled = "__compiled__" in globals()
 

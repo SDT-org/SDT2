@@ -7,14 +7,12 @@ import webview
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 
 from file_io.export_manager import (
-    ImageFormat,
-    ImageKey,
     build_source_target_pairs,
     do_export,
     save_image_from_api,
 )
-from document_paths import build_document_paths
-from app_settings import update_app_settings
+from config.paths import ImageFormat, ImageKey, build_document_paths
+from config.settings_manager import update_app_settings
 from utils import open_folder
 from workflow import cluster
 

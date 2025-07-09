@@ -10,12 +10,12 @@ import sys
 import os as _os
 sys.path.append(_os.path.join(_os.path.dirname(__file__), ".."))
 
-from app_settings import add_recent_file, remove_recent_file
-from document_paths import build_document_paths
+from config.settings_manager import add_recent_file, remove_recent_file
+from config.paths import build_document_paths
 from file_io.transformations import read_csv_matrix, similarity_triangle_to_matrix
 from file_io.csv_handlers import save_cols_to_csv
 from workflow.runner import run_parse
-from constants import matrix_filetypes
+from config.constants import matrix_filetypes
 from api.workflow_api import get_compute_stats
 
 
