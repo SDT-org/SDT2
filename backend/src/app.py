@@ -22,7 +22,7 @@ from workflow.models import WorkflowResult, WorkflowRun, RunSettings, LzaniSetti
 from app_state import create_app_state
 from constants import default_window_title, matrix_filetypes
 from utils import make_doc_id, get_child_process_info, open_folder
-from api.ui_windows import get_html_path, about_window, manual_window
+from api.webview_windows import get_html_path, about_window, manual_window
 from app_settings import (
     add_recent_file,
     load_app_settings,
@@ -78,54 +78,9 @@ workflow_runs: Dict[str, WorkflowRun] = {}
 parsed_workflow_results: Dict[str, WorkflowResult] = {}
 
 
-def do_cancel_run():
-    global cancel_event
-    if canceled:
-        # It's ok if the manager has already released the resource
-        try:
-            canceled.value = True
-        except:
-            pass
-    doc_id = get_state().active_run_document_id
-    if doc_id:
-        del workflow_runs[doc_id]
-        update_document(
-            doc_id,
-            view="runner",
-            doc_id=doc_id,
-            progress=0,
-            pair_progress=0,
-            pair_count=0,
-        )
-    set_state(active_run_document_id=None)
-    print("Run canceled")
-
-
 def assert_window():
     assert window is not None
     return window
-
-
-def get_compute_stats(workflow_result: WorkflowResult):
-    max_len = workflow_result.max_sequence_length
-    state = get_state()
-    # TODO: this only works for parasail for now...
-    required_memory = (
-        max_len * max_len
-    ) + 100000000  # Each process has a minimum of about 100MB
-    available_memory = psutil.virtual_memory().available
-    total_cores = state.platform["cores"]
-    min_cores = available_memory // required_memory
-    if required_memory > available_memory:
-        min_cores = 0
-    return {
-        "recommended_cores": min(
-            max(round(total_cores * 0.75), 1),
-            min_cores,
-        ),
-        "required_memory": required_memory,
-        "available_memory": available_memory,
-    }
 
 
 
@@ -155,7 +110,7 @@ class Api:
     def open_file(self, filepath: str, doc_id: str | None = None):
         return file_operations.handle_open_file(
             filepath, doc_id, temp_dir, get_state, new_document, 
-            get_compute_stats, make_doc_id, parsed_workflow_results, remove_empty_documents
+            make_doc_id, parsed_workflow_results, remove_empty_documents
         )
 
     def open_file_dialog(self, doc_id: str | None = None, filepath: str | None = None):
@@ -238,19 +193,6 @@ class Api:
         return document_api.open_doc_folder_api(doc_id, get_document)
 
 
-def file_exists(path):
-    return os.path.exists(os.path.join(os.path.dirname(__file__), path))
-
-
-def get_html_path(filename="index.html"):
-    if is_compiled:
-        if file_exists(f"./gui/{filename}"):
-            return f"./gui/{filename}"
-        raise Exception(f"{filename} not found")
-    else:
-        return f"{dev_frontend_host}/{filename}"
-
-
 def push_backend_state(window: webview.Window):
     if window is None:
         # This can happen if the state updates before the window is fully initialized
@@ -271,16 +213,9 @@ def push_backend_state(window: webview.Window):
 
 def on_closed():
     # map(lambda doc: doc.cleanup(), get_state().documents)
-    do_cancel_run()
+    global canceled
+    workflow_api.do_cancel_run(canceled, get_state, update_document, set_state, workflow_runs)
     os._exit(0)
-
-
-def about_window():
-    webview.create_window("About", get_html_path("about.html"), js_api=api)
-
-
-def manual_window():
-    webview.create_window("SDT2 Manual", get_html_path("manual.html"))
 
 
 if __name__ == "__main__":

@@ -16,10 +16,11 @@ from transformations import read_csv_matrix, similarity_triangle_to_matrix
 from export_utils import save_cols_to_csv
 from workflow.runner import run_parse
 from constants import matrix_filetypes
+from api.workflow_api import get_compute_stats
 
 
 def handle_open_file(filepath: str, doc_id: str | None, temp_dir, get_state, new_document, 
-                     get_compute_stats, make_doc_id, parsed_workflow_results, remove_empty_documents=None):
+                     make_doc_id, parsed_workflow_results, remove_empty_documents=None):
     if not os.path.exists(filepath):
         remove_recent_file(filepath)
         raise Exception(f"File not found: {filepath}")
@@ -98,7 +99,7 @@ def handle_open_file(filepath: str, doc_id: str | None, temp_dir, get_state, new
 
         parsed_workflow_results[doc_id] = result
 
-        compute_stats = get_compute_stats(result)
+        compute_stats = get_compute_stats(result, get_state)
         new_document(
             doc_id,
             view="runner",

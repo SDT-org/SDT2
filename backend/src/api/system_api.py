@@ -18,12 +18,12 @@ def close_app():
 
 
 def show_about():
-    from api.ui_windows import about_window
+    from api.webview_windows import about_window
     about_window()
 
 
 def show_manual():
-    from api.ui_windows import manual_window
+    from api.webview_windows import manual_window
     manual_window()
 
 

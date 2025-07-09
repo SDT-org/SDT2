@@ -1,6 +1,7 @@
 import os
 import sys
 import platform
+import psutil
 from multiprocessing import Manager, cpu_count as get_cpu_count
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
@@ -10,6 +11,7 @@ from workflow.models import (
     ParasailSettings,
     RunSettings,
     WorkflowRun,
+    WorkflowResult,
 )
 from workflow.runner import run_process
 from document_paths import build_document_paths
@@ -36,7 +38,50 @@ def get_lzani_exec_path():
     return lzani_executable_path
 
 
-def start_workflow_run(args: dict, get_state, get_document, update_document, 
+def get_compute_stats(workflow_result: WorkflowResult, get_state):
+    max_len = workflow_result.max_sequence_length
+    state = get_state()
+    # TODO: this only works for parasail for now...
+    required_memory = (
+        max_len * max_len
+    ) + 100000000  # Each process has a minimum of about 100MB
+    available_memory = psutil.virtual_memory().available
+    total_cores = state.platform["cores"]
+    min_cores = available_memory // required_memory
+    if required_memory > available_memory:
+        min_cores = 0
+    return {
+        "recommended_cores": min(
+            max(round(total_cores * 0.75), 1),
+            min_cores,
+        ),
+        "required_memory": required_memory,
+        "available_memory": available_memory,
+    }
+
+
+def do_cancel_run(cancel_event, get_state, update_document, set_state, workflow_runs):
+    if cancel_event:
+        try:
+            cancel_event.value = True
+        except:
+            pass
+    doc_id = get_state().active_run_document_id
+    if doc_id:
+        del workflow_runs[doc_id]
+        update_document(
+            doc_id,
+            view="runner",
+            doc_id=doc_id,
+            progress=0,
+            pair_progress=0,
+            pair_count=0,
+        )
+    set_state(active_run_document_id=None)
+    print("Run canceled")
+
+
+def start_workflow_run(args: dict, get_state, get_document, update_document,
                       set_state, parsed_workflow_results, workflow_runs):
     app_state = get_state()
     if app_state.debug:
