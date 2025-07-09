@@ -13,19 +13,19 @@ import {
   AppStateContext,
   findDoc,
   initialAppState,
-} from "../appState";
-import { useAppBlur } from "../hooks/appBlur";
-import { useCloseDocument } from "../hooks/useCloseDocument";
-import useNewDocument from "../hooks/useNewDocument";
-import { useWaitForPywebview } from "../hooks/usePywebviewReadyEvent";
-import { useShortcutKeys } from "../hooks/useShortcutKeys";
-import { useSyncState } from "../hooks/useSyncState";
+} from "../../appState";
+import { useAppBlur } from "../../hooks/appBlur";
+import { useCloseDocument } from "../../hooks/useCloseDocument";
+import useNewDocument from "../../hooks/useNewDocument";
+import { useWaitForPywebview } from "../../hooks/usePywebviewReadyEvent";
+import { useShortcutKeys } from "../../hooks/useShortcutKeys";
+import { useSyncState } from "../../hooks/useSyncState";
+import { ExportModal } from "../modals/ExportModal";
+import { Exporter } from "../modals/Exporter";
+import { Select, SelectItem } from "../ui/Select";
 import { Document } from "./Document";
 import { ErrorBoundary } from "./ErrorBoundary";
-import { ExportModal } from "./ExportModal";
-import { Exporter } from "./Exporter";
 import { MainMenu } from "./Menu";
-import { Select, SelectItem } from "./Select";
 
 export const App = () => {
   const [appState, setAppState] = React.useState<AppState>(initialAppState);

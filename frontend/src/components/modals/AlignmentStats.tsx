@@ -1,27 +1,42 @@
 import React from "react";
-import type { ClusterStats, MetaData } from "../plotTypes";
+import type { ClusterStats, MetaData } from "../../plotTypes";
 
-type ClusterStatsProps = {
+type AlignmentStatsProps = {
   metaData?: MetaData;
+  dataLength?: number;
+  activeDataSet: string;
   clusterStats?: ClusterStats;
 };
 
-export const ClusterStatsDisplay = ({
+export const AlignmentStats = ({
   metaData,
+  dataLength,
+  activeDataSet,
   clusterStats,
-}: ClusterStatsProps) => {
+}: AlignmentStatsProps) => {
   const [isExpanded, setIsExpanded] = React.useState(false);
 
   const isLzani = metaData?.run?.analysis_method === "lzani";
   const unalignedCount = metaData?.unaligned_count || 0;
-  const alignedCount = metaData?.distribution_stats?.count || 0;
+  const alignedCount = dataLength || 0;
   const totalCount = alignedCount + unalignedCount;
 
   const alignedPercent = totalCount > 0 ? (alignedCount / totalCount) * 100 : 0;
   const unalignedPercent =
     totalCount > 0 ? (unalignedCount / totalCount) * 100 : 0;
 
-  if (!clusterStats) {
+  // Get the appropriate stats based on active dataset
+  const stats =
+    activeDataSet === "scores"
+      ? metaData?.distribution_stats
+      : activeDataSet === "gc"
+        ? metaData?.gc_stats
+        : activeDataSet === "length"
+          ? metaData?.length_stats
+          : null;
+
+  // Don't show if no stats are available
+  if (!stats && !clusterStats) {
     return null;
   }
 
@@ -57,7 +72,7 @@ export const ClusterStatsDisplay = ({
           onMouseLeave={(e) => {
             e.currentTarget.style.backgroundColor = "#f8f8f8";
           }}
-          title="Show cluster statistics"
+          title="Show alignment statistics"
         >
           📊
         </button>
@@ -88,7 +103,11 @@ export const ClusterStatsDisplay = ({
             }}
           >
             <div style={{ fontSize: "14px", fontWeight: "bold", margin: 0 }}>
-              Cluster Summary
+              {activeDataSet === "scores"
+                ? "Alignment Summary"
+                : activeDataSet === "gc"
+                  ? "GC Content Summary"
+                  : "Sequence Length Summary"}
             </div>
             <button
               type="button"
@@ -108,7 +127,7 @@ export const ClusterStatsDisplay = ({
           </div>
 
           {/* Mini bar chart - only for LZANI scores */}
-          {isLzani && unalignedCount > 0 && (
+          {activeDataSet === "scores" && isLzani && unalignedCount > 0 && (
             <>
               <div style={{ marginBottom: "10px" }}>
                 <div
@@ -193,6 +212,78 @@ export const ClusterStatsDisplay = ({
                 Pairs below 70% threshold are excluded
               </div>
             </>
+          )}
+
+          {/* Distribution Statistics */}
+          {stats && (
+            <div
+              style={{
+                marginTop:
+                  activeDataSet === "scores" && isLzani && unalignedCount > 0
+                    ? "15px"
+                    : "0",
+                borderTop:
+                  activeDataSet === "scores" && isLzani && unalignedCount > 0
+                    ? "1px solid #ddd"
+                    : "none",
+                paddingTop:
+                  activeDataSet === "scores" && isLzani && unalignedCount > 0
+                    ? "10px"
+                    : "0",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "13px",
+                  fontWeight: "bold",
+                  marginBottom: "8px",
+                  color: activeDataSet === "scores" ? "#d48b91" : "#333",
+                }}
+              >
+                Distribution Statistics
+              </div>
+              <div
+                style={{ fontSize: "11px", color: "#666", lineHeight: "1.4" }}
+              >
+                {(() => {
+                  const suffix = activeDataSet === "length" ? " nt" : "%";
+                  const decimals = activeDataSet === "length" ? 0 : 2;
+
+                  return (
+                    <>
+                      <div>
+                        Mean: {stats.mean.toFixed(decimals)}
+                        {suffix}
+                      </div>
+                      <div>
+                        Median: {stats.median.toFixed(decimals)}
+                        {suffix}
+                      </div>
+                      <div>
+                        Std Dev: {stats.std.toFixed(decimals)}
+                        {activeDataSet === "length" ? " nt" : ""}
+                      </div>
+                      <div>
+                        Min: {stats.min.toFixed(decimals)}
+                        {suffix}
+                      </div>
+                      <div>
+                        Max: {stats.max.toFixed(decimals)}
+                        {suffix}
+                      </div>
+                      <div>
+                        Q1: {stats.q1.toFixed(decimals)}
+                        {suffix}
+                      </div>
+                      <div>
+                        Q3: {stats.q3.toFixed(decimals)}
+                        {suffix}
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
+            </div>
           )}
 
           {/* Cluster Statistics */}

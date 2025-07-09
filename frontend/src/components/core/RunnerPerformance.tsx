@@ -13,8 +13,8 @@ import type {
   DocState,
   SetDocState,
   UpdateDocState,
-} from "../appState";
-import { formatBytes } from "../helpers";
+} from "../../appState";
+import { formatBytes } from "../../helpers";
 
 export const RunnerPerformance = ({
   appState,

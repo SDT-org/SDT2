@@ -1,6 +1,6 @@
 import { createHideableComponent } from "@react-aria/collections";
-import useAppState from "../appState";
-import { Select, SelectItem } from "./Select";
+import useAppState from "../../appState";
+import { Select, SelectItem } from "../ui/Select";
 
 export const SelectDocumentMenu = createHideableComponent(() => {
   const { appState, setAppState } = useAppState();

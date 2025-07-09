@@ -2,16 +2,16 @@ import type { PlotData } from "plotly.js";
 import Plotly from "plotly.js-cartesian-dist-min";
 import React from "react";
 import createPlotlyComponent from "react-plotly.js/factory";
-import { plotFontMonospace, plotFontSansSerif } from "../constants";
-import type { DataSets, DistributionState } from "../distributionState";
-import { useExportPlotly } from "../hooks/useExportPlotly";
+import { plotFontMonospace, plotFontSansSerif } from "../../constants";
+import type { DataSets, DistributionState } from "../../distributionState";
+import { useExportPlotly } from "../../hooks/useExportPlotly";
 import {
   useRelayoutHideSubtitle,
   useRelayoutUpdateTitles,
-} from "../hooks/useRelayoutUpdateTitles";
-import type { DistributionData, MetaData } from "../plotTypes";
-import { AlignmentStats } from "./AlignmentStats";
-import { HistogramSidebar } from "./HistogramSidebar";
+} from "../../hooks/useRelayoutUpdateTitles";
+import type { DistributionData, MetaData } from "../../plotTypes";
+import { AlignmentStats } from "../modals/AlignmentStats";
+import { HistogramSidebar } from "../panels/sidebars/HistogramSidebar";
 
 const Plot = createPlotlyComponent(Plotly);
 

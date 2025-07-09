@@ -1,10 +1,10 @@
 import { TabPanel } from "react-aria-components";
-import type { DocState, SetDocState } from "../appState";
-import { type DataSets, useDistributionState } from "../distributionState";
-import type { DistributionData, MetaData } from "../plotTypes";
-import { Histogram } from "./Histogram";
-import { Select, SelectItem } from "./Select";
-import { Violin } from "./Violin";
+import type { DocState, SetDocState } from "../../appState";
+import { type DataSets, useDistributionState } from "../../distributionState";
+import type { DistributionData, MetaData } from "../../plotTypes";
+import { Select, SelectItem } from "../ui/Select";
+import { Histogram } from "../visualization/Histogram";
+import { Violin } from "../visualization/Violin";
 
 const VisualizationSwitcher = ({
   activeDataSet,

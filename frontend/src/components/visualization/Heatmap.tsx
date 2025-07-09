@@ -3,25 +3,28 @@ import useAppState, {
   type DocState,
   type SetDocState,
   type UpdateDocState,
-} from "../appState";
+} from "../../appState";
 import {
   type ColorScaleArray,
   colorScales as defaultColorScales,
-} from "../colorScales";
-import { plotFontMonospace, plotFontSansSerif } from "../constants";
-import { type formatClustermapData, formatHeatmapData } from "../heatmapUtils";
-import { useMetrics, useSize } from "../hooks/heatmap";
-import { useHeatmapRenderToggle } from "../hooks/useHeatmapRenderToggle";
+} from "../../colorScales";
+import { plotFontMonospace, plotFontSansSerif } from "../../constants";
+import {
+  type formatClustermapData,
+  formatHeatmapData,
+} from "../../heatmapUtils";
+import { useMetrics, useSize } from "../../hooks/heatmap";
+import { useHeatmapRenderToggle } from "../../hooks/useHeatmapRenderToggle";
 import type {
   ClusterDataItem,
   HeatmapData,
   HeatmapSettings,
   MetaData,
-} from "../plotTypes";
-import { AlignmentStats } from "./AlignmentStats";
+} from "../../plotTypes";
+import { AlignmentStats } from "../modals/AlignmentStats";
+import { HeatmapSidebar } from "../panels/sidebars/HeatmapSidebar";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3SvgHeatmap } from "./D3SvgHeatmap";
-import { HeatmapSidebar } from "./HeatmapSidebar";
 
 export type HeatmapRenderProps = {
   // TODO: just use settings

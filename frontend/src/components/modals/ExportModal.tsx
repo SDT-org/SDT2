@@ -6,11 +6,15 @@ import {
   Modal,
   ModalOverlay,
 } from "react-aria-components";
-import type { AppState, SaveableImageFormat, SetAppState } from "../appState";
-import { saveableImageFormats } from "../constants";
-import { useDocState } from "../hooks/useDocState";
-import { Select, SelectItem } from "./Select";
-import { Switch } from "./Switch";
+import type {
+  AppState,
+  SaveableImageFormat,
+  SetAppState,
+} from "../../appState";
+import { saveableImageFormats } from "../../constants";
+import { useDocState } from "../../hooks/useDocState";
+import { Select, SelectItem } from "../ui/Select";
+import { Switch } from "../ui/Switch";
 
 export const ExportModal = ({
   appState,

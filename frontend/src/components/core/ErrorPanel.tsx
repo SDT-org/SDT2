@@ -1,5 +1,5 @@
 import { TabPanel } from "react-aria-components";
-import type { DocState } from "../appState";
+import type { DocState } from "../../appState";
 
 export const ErrorPanel = ({ docState }: { docState: DocState }) => (
   <TabPanel

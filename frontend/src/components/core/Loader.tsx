@@ -1,6 +1,6 @@
 import React from "react";
 import { Button, Label, ProgressBar, TabPanel } from "react-aria-components";
-import type { DocState, SetDocState, UpdateDocState } from "../appState";
+import type { DocState, SetDocState, UpdateDocState } from "../../appState";
 import { LoadingAnimation } from "./LoadingAnimation";
 
 export const Loader = ({

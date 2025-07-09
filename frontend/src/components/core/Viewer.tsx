@@ -1,10 +1,10 @@
 import React from "react";
 import { type Key, Tab, TabList, TabPanel, Tabs } from "react-aria-components";
-import type { DocState, SetDocState, UpdateDocState } from "../appState";
-import { useGetData } from "../hooks/useGetData";
-import { Clustermap } from "./Clustermap";
-import { DistributionPanels } from "./DistributionPanels";
-import { Heatmap } from "./Heatmap";
+import type { DocState, SetDocState, UpdateDocState } from "../../appState";
+import { useGetData } from "../../hooks/useGetData";
+import { DistributionPanels } from "../modals/DistributionPanels";
+import { Clustermap } from "../visualization/Clustermap";
+import { Heatmap } from "../visualization/Heatmap";
 
 export const Viewer = ({
   docState,

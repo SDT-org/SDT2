@@ -1,8 +1,8 @@
 import React from "react";
 import { Button } from "react-aria-components";
-import type { AppState, DocState, SetAppState } from "../appState";
-import { useDocState } from "../hooks/useDocState";
-import { SuccessModal } from "./SuccessMessage";
+import type { AppState, DocState, SetAppState } from "../../appState";
+import { useDocState } from "../../hooks/useDocState";
+import { SuccessModal } from "../ui/SuccessMessage";
 
 type RenderStatus = {
   markTabAsRendered: (tabId: string) => void;

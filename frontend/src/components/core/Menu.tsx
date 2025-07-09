@@ -13,13 +13,13 @@ import {
   SubmenuTrigger,
 } from "react-aria-components";
 import { TbMenu2 } from "react-icons/tb";
-import { type AppState, findDoc, useAppState } from "../appState";
-import { isSDTFile } from "../helpers";
-import { useCloseDocument } from "../hooks/useCloseDocument";
-import useNewDocument from "../hooks/useNewDocument";
-import useOpenFileDialog from "../hooks/useOpenFileDialog";
-import { useRecentFiles } from "../hooks/useRecentFiles";
-import { useSaveActiveDocument } from "../hooks/useSaveActiveDocument";
+import { type AppState, findDoc, useAppState } from "../../appState";
+import { isSDTFile } from "../../helpers";
+import { useCloseDocument } from "../../hooks/useCloseDocument";
+import useNewDocument from "../../hooks/useNewDocument";
+import useOpenFileDialog from "../../hooks/useOpenFileDialog";
+import { useRecentFiles } from "../../hooks/useRecentFiles";
+import { useSaveActiveDocument } from "../../hooks/useSaveActiveDocument";
 
 // AppMenuButton and AppMenuItem were derived from https://react-spectrum.adobe.com/react-aria/Menu.html#reusable-wrappers
 interface MyMenuButtonProps<T>

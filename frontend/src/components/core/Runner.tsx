@@ -15,21 +15,21 @@ import useAppState, {
   type DocState,
   type SetDocState,
   type UpdateDocState,
-} from "../appState";
+} from "../../appState";
 import {
   getRecommendedMatrix,
   scoringMatrices,
-} from "../config/scoringMatrices";
-import { reorderMethods } from "../constants";
-import { splitFilePath } from "../helpers";
-import useOpenFileDialog from "../hooks/useOpenFileDialog";
-import { useRecentFiles } from "../hooks/useRecentFiles";
-import { useStartRun } from "../hooks/useStartRun";
-import messages from "../messages";
-import { NumberInput } from "./NumberInput";
+} from "../../config/scoringMatrices";
+import { reorderMethods } from "../../constants";
+import { splitFilePath } from "../../helpers";
+import useOpenFileDialog from "../../hooks/useOpenFileDialog";
+import { useRecentFiles } from "../../hooks/useRecentFiles";
+import { useStartRun } from "../../hooks/useStartRun";
+import messages from "../../messages";
+import { NumberInput } from "../ui/NumberInput";
+import { Select, SelectItem } from "../ui/Select";
+import { Switch } from "../ui/Switch";
 import { RunnerPerformance } from "./RunnerPerformance";
-import { Select, SelectItem } from "./Select";
-import { Switch } from "./Switch";
 
 export type ParasailRunSettings = {
   scoring_matrix?: string;

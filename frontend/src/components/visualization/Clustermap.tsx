@@ -1,19 +1,19 @@
 import React from "react";
-import { type DocState, type SetDocState, useAppState } from "../appState";
-import type { ColorScaleArray } from "../colorScales";
-import { plotFontMonospace, plotFontSansSerif } from "../constants";
-import { formatClustermapData } from "../heatmapUtils";
-import { useMetrics, useSize } from "../hooks/heatmap";
-import { useHeatmapRenderToggle } from "../hooks/useHeatmapRenderToggle";
+import { type DocState, type SetDocState, useAppState } from "../../appState";
+import type { ColorScaleArray } from "../../colorScales";
+import { plotFontMonospace, plotFontSansSerif } from "../../constants";
+import { formatClustermapData } from "../../heatmapUtils";
+import { useMetrics, useSize } from "../../hooks/heatmap";
+import { useHeatmapRenderToggle } from "../../hooks/useHeatmapRenderToggle";
 import type {
   ClusterDataItem,
   ClusterStats,
   GetClustermapDataResponse,
   HeatmapData,
   MetaData,
-} from "../plotTypes";
-import { ClusterStatsDisplay } from "./ClusterStats";
-import { ClustermapSidebar } from "./ClustermapSidebar";
+} from "../../plotTypes";
+import { ClusterStatsDisplay } from "../modals/ClusterStats";
+import { ClustermapSidebar } from "../panels/sidebars/ClustermapSidebar";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3SvgHeatmap } from "./D3SvgHeatmap";
 

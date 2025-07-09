@@ -1,10 +1,10 @@
 import * as d3 from "d3";
 import React from "react";
-import { distinctColor } from "../colors";
-import { plotFontMonospace } from "../constants";
-import { getCellMetrics } from "../heatmapUtils";
-import { useExportCanvas } from "../hooks/useExportCanvas";
-import type { HeatmapRenderProps } from "./Heatmap";
+import { distinctColor } from "../../colors";
+import { plotFontMonospace } from "../../constants";
+import { getCellMetrics } from "../../heatmapUtils";
+import { useExportCanvas } from "../../hooks/useExportCanvas";
+import type { HeatmapRenderProps } from "../visualization/Heatmap";
 
 export const D3CanvasHeatmap = ({
   data,

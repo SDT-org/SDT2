@@ -1,11 +1,11 @@
 import React from "react";
 import { type Key, Label, Text } from "react-aria-components";
-import type { DocState } from "../appState";
-import { reorderMethods } from "../constants";
-import { Select, SelectItem } from "./Select";
-import { Slider } from "./Slider";
-import { Switch } from "./Switch";
-import { TitleField } from "./fields/TitleField";
+import type { DocState } from "../../../appState";
+import { reorderMethods } from "../../../constants";
+import { TitleField } from "../../fields/TitleField";
+import { Select, SelectItem } from "../../ui/Select";
+import { Slider } from "../../ui/Slider";
+import { Switch } from "../../ui/Switch";
 
 export const ClustermapSidebar = ({
   settings,

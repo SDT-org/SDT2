@@ -5,8 +5,8 @@ import {
   type SetAppState,
   findDoc,
   initialAppState,
-} from "../appState";
-import { formatBytes } from "../helpers";
+} from "../../appState";
+import { formatBytes } from "../../helpers";
 
 interface Props {
   appState: AppState;

@@ -5,13 +5,13 @@ import {
   TbNumber10,
   TbTableDashed,
 } from "react-icons/tb";
-import type { ColorString } from "../colors";
-import type { DistributionState } from "../distributionState";
-import { ColorPicker } from "./ColorPicker";
-import { Slider } from "./Slider";
-import { Switch } from "./Switch";
-import { Tooltip } from "./Tooltip";
-import { TitleField } from "./fields/TitleField";
+import type { ColorString } from "../../../colors";
+import type { DistributionState } from "../../../distributionState";
+import { TitleField } from "../../fields/TitleField";
+import { ColorPicker } from "../../ui/ColorPicker";
+import { Slider } from "../../ui/Slider";
+import { Switch } from "../../ui/Switch";
+import { Tooltip } from "../../ui/Tooltip";
 
 export const HistogramSidebar = ({
   sidebarComponent,

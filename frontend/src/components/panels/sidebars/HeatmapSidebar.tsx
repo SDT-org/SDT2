@@ -1,15 +1,15 @@
 import React from "react";
 import { ToggleButton, ToggleButtonGroup } from "react-aria-components";
-import type { DocState } from "../appState";
-import type { ColorScaleArray } from "../colorScales";
-import { formatTitle } from "../helpers";
-import type { ColorScaleKey } from "../plotTypes";
-import { Checkbox } from "./Checkbox";
-import { NumberInput } from "./NumberInput";
-import { Select, SelectItem } from "./Select";
-import { Slider } from "./Slider";
-import { Switch } from "./Switch";
-import { TitleField } from "./fields/TitleField";
+import type { DocState } from "../../../appState";
+import type { ColorScaleArray } from "../../../colorScales";
+import { formatTitle } from "../../../helpers";
+import type { ColorScaleKey } from "../../../plotTypes";
+import { TitleField } from "../../fields/TitleField";
+import { Checkbox } from "../../ui/Checkbox";
+import { NumberInput } from "../../ui/NumberInput";
+import { Select, SelectItem } from "../../ui/Select";
+import { Slider } from "../../ui/Slider";
+import { Switch } from "../../ui/Switch";
 
 export const HeatmapSidebar = ({
   settings,

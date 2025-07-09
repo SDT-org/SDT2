@@ -1,6 +1,6 @@
 import React from "react";
 import useAppState, { type SaveableImageKey } from "../appState";
-import { useRenderStatus } from "../components/Exporter";
+import { useRenderStatus } from "../components/modals/Exporter";
 import { isRasterFormat } from "../helpers";
 import { useDocState } from "./useDocState";
 
