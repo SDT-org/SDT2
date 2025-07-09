@@ -182,3 +182,16 @@ export type ClusterDataItem = {
   cluster: number;
   original_cluster?: number;
 };
+
+export type ClusterStats = {
+  total_clusters: number;
+  largest_cluster: number;
+  singleton_clusters: number;
+};
+
+export type GetClustermapDataResponse = {
+  matrix: HeatmapData;
+  tickText: string[];
+  clusterData: ClusterDataItem[];
+  cluster_stats: ClusterStats;
+};

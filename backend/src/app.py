@@ -699,10 +699,17 @@ class Api:
         # Update the cluster data to match the new order so that the legend matches
         cluster_data = seqid_clusters_df.to_dict(orient="records")
 
+        cluster_stats = {
+            "total_clusters": total_clusters,
+            "largest_cluster": int(largest_cluster),
+            "singleton_clusters": singletons,
+        }
+
         return {
             "matrix": to_triangle(reordered_matrix, fill_value=None).tolist(),
             "tickText": reordered_tick_text,
             "clusterData": cluster_data,
+            "cluster_stats": cluster_stats,
         }
 
 

@@ -5,8 +5,14 @@ import { plotFontMonospace, plotFontSansSerif } from "../constants";
 import { formatClustermapData } from "../heatmapUtils";
 import { useMetrics, useSize } from "../hooks/heatmap";
 import { useHeatmapRenderToggle } from "../hooks/useHeatmapRenderToggle";
-import type { ClusterDataItem, HeatmapData, MetaData } from "../plotTypes";
-import { AlignmentStats } from "./AlignmentStats";
+import type {
+  ClusterDataItem,
+  ClusterStats,
+  GetClustermapDataResponse,
+  HeatmapData,
+  MetaData,
+} from "../plotTypes";
+import { ClusterStatsDisplay } from "./ClusterStats";
 import { ClustermapSidebar } from "./ClustermapSidebar";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3SvgHeatmap } from "./D3SvgHeatmap";
@@ -29,6 +35,9 @@ export const Clustermap = ({
   const [clusterData, setClusterData] = React.useState<
     Array<ClusterDataItem> | undefined
   >(undefined);
+  const [clusterStats, setClusterStats] = React.useState<
+    ClusterStats | undefined
+  >(undefined);
   const [orderedMatrix, setOrderedMatrix] = React.useState<HeatmapData>(data);
   const [orderedIds, setOrderedIds] = React.useState<string[]>(tickText);
 
@@ -41,10 +50,11 @@ export const Clustermap = ({
         docState.clustermap.threshold,
         docState.clustermap.method,
       )
-      .then((response) => {
+      .then((response: GetClustermapDataResponse) => {
         setClusterData(response.clusterData);
         setOrderedIds(response.tickText);
         setOrderedMatrix(response.matrix);
+        setClusterStats(response.cluster_stats);
         const end = performance.now();
         console.log(`Clustermap fetch time: ${end - start}ms`);
       });
@@ -97,11 +107,10 @@ export const Clustermap = ({
         ref={elementRef}
         style={{ position: "relative" }}
       >
-        {!renderSvg && (
-          <AlignmentStats
+        {clusterStats && (
+          <ClusterStatsDisplay
             metaData={metaData}
-            dataLength={metaData.distribution_stats?.count || 0}
-            activeDataSet="scores"
+            clusterStats={clusterStats}
           />
         )}
         <div

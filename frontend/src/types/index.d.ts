@@ -7,7 +7,13 @@ import type {
 } from "../appState";
 import type { RunSettings } from "../components/Runner";
 import { DistributionState } from "../distributionState";
-import { type GetDataResponse, HeatmapSettings } from "../plotTypes";
+import type {
+  ClusterDataItem,
+  GetClustermapDataResponse,
+  GetDataResponse,
+  HeatmapData,
+  HeatmapSettings,
+} from "../plotTypes";
 import type { AppState } from "../src/appState";
 
 declare global {
@@ -47,11 +53,7 @@ declare global {
           doc_id: string,
           threshold: number,
           method: string,
-        ) => Promise<{
-          matrix: HeatmapData;
-          tickText: string[];
-          clusterData: ClusterDataItem[];
-        }>;
+        ) => Promise<GetClustermapDataResponse>;
         export: (args: {
           doc_id: string;
           export_path: string;
