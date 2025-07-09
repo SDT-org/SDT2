@@ -34,18 +34,9 @@ from config.settings_manager import (
 from file_io.file_operations import pack_document, unpack_document, read_json_file
 from state.document_state import save_document_settings
 from config.paths import ImageKey, ImageFormat, build_document_paths
-from file_io.transformations import (
-    to_triangle,
-    similarity_triangle_to_matrix,
-    read_csv_matrix,
-    read_stats_csv,
-)
+from file_io.transformations import to_triangle, similarity_triangle_to_matrix, read_csv_matrix, read_stats_csv
 from file_io.csv_handlers import save_cols_to_csv
-from file_io.export_manager import (
-    build_source_target_pairs,
-    do_export,
-    save_image_from_api,
-)
+from file_io.export_manager import build_source_target_pairs, do_export, save_image_from_api
 from debug import open_doc_folder
 from workflow.runner import run_process, run_parse
 from workflow import cluster
