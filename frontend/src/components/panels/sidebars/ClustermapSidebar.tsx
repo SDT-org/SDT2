@@ -178,6 +178,22 @@ export const ClustermapSidebar = ({
             >
               Legend
             </Switch>
+            <div
+              className="drawer"
+              data-hidden={!settings.showLegend}
+              aria-hidden={!settings.showLegend}
+            >
+              <Switch
+                isSelected={settings.showClusterCounts}
+                onChange={(value) => {
+                  updateSettings({
+                    showClusterCounts: value,
+                  });
+                }}
+              >
+                Show Cluster Counts
+              </Switch>
+            </div>
           </div>
 
           <div className="group">

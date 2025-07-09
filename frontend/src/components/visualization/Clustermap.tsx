@@ -87,6 +87,17 @@ export const Clustermap = ({
     [orderedMatrix, orderedIds, clusterData],
   );
 
+  // Calculate cluster counts
+  const clusterCounts = React.useMemo(() => {
+    if (!clusterData || clusterData.length === 0) return {};
+
+    const counts: { [key: number]: number } = {};
+    for (const item of clusterData) {
+      counts[item.cluster] = (counts[item.cluster] || 0) + 1;
+    }
+    return counts;
+  }, [clusterData]);
+
   const forceSvgRender = useHeatmapRenderToggle();
   const renderSvg =
     forceSvgRender ||
@@ -153,6 +164,8 @@ export const Clustermap = ({
                 showscale={false}
                 margin={margin}
                 showLegend={settings.showLegend}
+                showClusterCounts={settings.showClusterCounts}
+                clusterCounts={clusterCounts}
               />
             </>
           ) : (
@@ -181,6 +194,8 @@ export const Clustermap = ({
               margin={margin}
               cellSpace={settings.cellspace}
               showLegend={settings.showLegend}
+              showClusterCounts={settings.showClusterCounts}
+              clusterCounts={clusterCounts}
               onRenderComplete={onRenderComplete}
             />
           )

@@ -213,6 +213,7 @@ export const initialDocState: DocState = {
     axlabel_yrotation: 0,
     cellspace: 1,
     showLegend: true,
+    showClusterCounts: false,
   },
   ...clientDocState,
 };

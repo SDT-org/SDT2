@@ -154,6 +154,7 @@ export interface ClustermapSettings {
   axlabel_yrotation: number;
   cellspace: number;
   showLegend: boolean;
+  showClusterCounts: boolean;
 }
 
 const reorderMethodKeys = Object.keys(
@@ -175,6 +176,7 @@ export const ClustermapSettingsSchema = z.object({
   axlabel_yrotation: z.number(),
   cellspace: z.number(),
   showLegend: z.boolean(),
+  showClusterCounts: z.boolean(),
 });
 
 export type ClusterDataItem = {
