@@ -11,7 +11,7 @@ import {
   useRelayoutUpdateTitles,
 } from "../../hooks/useRelayoutUpdateTitles";
 import type { DistributionData, MetaData } from "../../plotTypes";
-import { AlignmentStats } from "../modals/AlignmentStats";
+import { StatsPanel } from "../modals/StatsPanel";
 import { ViolinSidebar } from "../panels/sidebars/ViolinSidebar";
 
 const Plot = createPlotlyComponent(Plotly);
@@ -217,10 +217,11 @@ export const Violin = ({
     <>
       <div className="app-main" style={{ position: "relative" }}>
         {metaData && (
-          <AlignmentStats
+          <StatsPanel
             metaData={metaData}
             dataLength={dataSet.length}
             activeDataSet={dataSetKey}
+            panelType="distribution"
           />
         )}
         <Plot

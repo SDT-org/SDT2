@@ -12,7 +12,7 @@ import type {
   HeatmapData,
   MetaData,
 } from "../../plotTypes";
-import { ClusterStatsDisplay } from "../modals/ClusterStats";
+import { StatsPanel } from "../modals/StatsPanel";
 import { ClustermapSidebar } from "../panels/sidebars/ClustermapSidebar";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3SvgHeatmap } from "./D3SvgHeatmap";
@@ -108,9 +108,11 @@ export const Clustermap = ({
         style={{ position: "relative" }}
       >
         {clusterStats && (
-          <ClusterStatsDisplay
+          <StatsPanel
             metaData={metaData}
             clusterStats={clusterStats}
+            clusterData={clusterData}
+            panelType="cluster"
           />
         )}
         <div

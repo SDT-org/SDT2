@@ -21,7 +21,7 @@ import type {
   HeatmapSettings,
   MetaData,
 } from "../../plotTypes";
-import { AlignmentStats } from "../modals/AlignmentStats";
+import { StatsPanel } from "../modals/StatsPanel";
 import { HeatmapSidebar } from "../panels/sidebars/HeatmapSidebar";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3SvgHeatmap } from "./D3SvgHeatmap";
@@ -153,10 +153,11 @@ export const Heatmap = ({
             style={{ position: "relative" }}
           >
             {!renderSvg && (
-              <AlignmentStats
+              <StatsPanel
                 metaData={metaData}
                 dataLength={metaData.distribution_stats?.count || 0}
                 activeDataSet="scores"
+                panelType="alignment"
               />
             )}
             <div

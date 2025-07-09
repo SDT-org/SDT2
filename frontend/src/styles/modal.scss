@@ -17,7 +17,7 @@
   z-index: 11;
   background: white;
   border-radius: 0.4rem;
-  box-shadow: 0 .25rem 1rem rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.5);
   padding: 1.6rem;
 
   .actions {
@@ -57,7 +57,8 @@
     border-radius: 0.5rem 0.5rem 0 0;
   }
 
-  h2, .form {
+  h2,
+  .form {
     padding: 1.6rem 2.4rem;
     margin: 0;
   }
@@ -72,7 +73,8 @@
     }
   }
 
-  .group, .form .actions {
+  .group,
+  .form .actions {
     align-items: center;
     padding: 0.8rem 0;
     margin: 0;
@@ -117,5 +119,170 @@
   h2 {
     font-size: 1.8rem;
     color: var(--text-secondary-color);
+  }
+}
+
+// Stats Panel styles
+.stats-panel-button {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #666;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  z-index: 1000;
+
+  &:hover {
+    background-color: #e8e8e8;
+  }
+}
+
+.stats-panel {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  width: 250px;
+  background-color: #f8f8f8;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+
+  &-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+
+    h3 {
+      font-size: 14px;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: #666;
+      padding: 0 4px;
+    }
+  }
+
+  &-section {
+    &-title {
+      font-size: 13px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    &-content {
+      font-size: 11px;
+      color: #666;
+      line-height: 1.4;
+    }
+  }
+
+  &-stat-row {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  &-separator {
+    border-top: 1px solid #ddd;
+    margin: 15px 0;
+  }
+
+  // Alignment bar specific styles
+  &-alignment {
+    margin-bottom: 10px;
+
+    &-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 5px;
+
+      span {
+        font-size: 12px;
+        font-weight: bold;
+        color: #666;
+      }
+
+      button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 12px;
+        color: #666;
+        padding: 0 4px;
+      }
+    }
+
+    &-bar {
+      display: flex;
+      height: 30px;
+      margin-bottom: 5px;
+
+      &-aligned {
+        background-color: #4caf50;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+      }
+
+      &-unaligned {
+        background-color: #f44336;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+      }
+    }
+
+    &-legend {
+      font-size: 12px;
+      color: #666;
+
+      &-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 3px;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        &-color {
+          width: 12px;
+          height: 12px;
+          margin-right: 5px;
+
+          &.aligned {
+            background-color: #4caf50;
+          }
+
+          &.unaligned {
+            background-color: #f44336;
+          }
+        }
+      }
+    }
   }
 }
