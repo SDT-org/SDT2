@@ -1,11 +1,18 @@
 import React from "react";
-import type { ClusterStats, MetaData } from "../plotTypes";
+import type {
+  ClusterStats,
+  HeatmapData,
+  HeatmapSettings,
+  MetaData,
+} from "../plotTypes";
 
 type AlignmentStatsProps = {
   metaData?: MetaData;
   dataLength?: number;
   activeDataSet: string;
   clusterStats?: ClusterStats;
+  heatmapSettings?: HeatmapSettings;
+  rawData?: HeatmapData;
 };
 
 export const AlignmentStats = ({
@@ -13,17 +20,52 @@ export const AlignmentStats = ({
   dataLength,
   activeDataSet,
   clusterStats,
+  heatmapSettings,
+  rawData,
 }: AlignmentStatsProps) => {
   const [isExpanded, setIsExpanded] = React.useState(false);
 
   const isLzani = metaData?.run?.analysis_method === "lzani";
-  const unalignedCount = metaData?.unaligned_count || 0;
-  const alignedCount = dataLength || 0;
-  const totalCount = alignedCount + unalignedCount;
+  const isMaskingEnabled = heatmapSettings?.hideValuesBelowEnabled || false;
+  const maskThreshold = heatmapSettings?.hideValuesBelow || 0;
+
+  // Calculate masked values count if masking is enabled
+  let maskedCount = 0;
+  if (isMaskingEnabled && rawData && maskThreshold > 0) {
+    for (let i = 0; i < rawData.length; i++) {
+      for (let j = 0; j < i; j++) {
+        const value = rawData[i]?.[j];
+        if (
+          value !== null &&
+          value !== undefined &&
+          value !== 0 &&
+          value < maskThreshold
+        ) {
+          maskedCount++;
+        }
+      }
+    }
+  }
+
+  // For LZANI, unaligned count comes from backend
+  // For both LZANI and Parasail, add masked values to unaligned count
+  const baseUnalignedCount = metaData?.unaligned_count || 0;
+  const totalUnalignedCount = baseUnalignedCount + maskedCount;
+
+  // Aligned count should exclude masked values
+  const alignedCount = (dataLength || 0) - maskedCount;
+  const totalCount = alignedCount + totalUnalignedCount;
 
   const alignedPercent = totalCount > 0 ? (alignedCount / totalCount) * 100 : 0;
   const unalignedPercent =
-    totalCount > 0 ? (unalignedCount / totalCount) * 100 : 0;
+    totalCount > 0 ? (totalUnalignedCount / totalCount) * 100 : 0;
+
+  // Show stats if:
+  // 1. LZANI with unaligned values
+  // 2. Any method with masking enabled
+  const showAlignmentStats =
+    (isLzani && baseUnalignedCount > 0) ||
+    (isMaskingEnabled && maskedCount > 0);
 
   // Get the appropriate stats based on active dataset
   const stats =
@@ -126,8 +168,8 @@ export const AlignmentStats = ({
             </button>
           </div>
 
-          {/* Mini bar chart - only for LZANI scores */}
-          {activeDataSet === "scores" && isLzani && unalignedCount > 0 && (
+          {/* Mini bar chart - show for LZANI or when masking is enabled */}
+          {activeDataSet === "scores" && showAlignmentStats && (
             <>
               <div style={{ marginBottom: "10px" }}>
                 <div
@@ -199,7 +241,7 @@ export const AlignmentStats = ({
                       }}
                     />
                     <span>
-                      Unaligned: {unalignedCount.toLocaleString()} (
+                      Unaligned: {totalUnalignedCount.toLocaleString()} (
                       {unalignedPercent.toFixed(1)}%)
                     </span>
                   </div>
@@ -209,7 +251,11 @@ export const AlignmentStats = ({
               <div
                 style={{ fontSize: "11px", color: "#999", marginTop: "10px" }}
               >
-                Pairs below 70% threshold are excluded
+                {isLzani && baseUnalignedCount > 0 && maskedCount > 0
+                  ? `Pairs below 70% (LZANI) and ${maskThreshold}% (masked) are excluded`
+                  : isLzani && baseUnalignedCount > 0
+                    ? "Pairs below 70% threshold are excluded"
+                    : `Pairs below ${maskThreshold}% threshold are excluded`}
               </div>
             </>
           )}
@@ -219,15 +265,15 @@ export const AlignmentStats = ({
             <div
               style={{
                 marginTop:
-                  activeDataSet === "scores" && isLzani && unalignedCount > 0
+                  activeDataSet === "scores" && showAlignmentStats
                     ? "15px"
                     : "0",
                 borderTop:
-                  activeDataSet === "scores" && isLzani && unalignedCount > 0
+                  activeDataSet === "scores" && showAlignmentStats
                     ? "1px solid #ddd"
                     : "none",
                 paddingTop:
-                  activeDataSet === "scores" && isLzani && unalignedCount > 0
+                  activeDataSet === "scores" && showAlignmentStats
                     ? "10px"
                     : "0",
               }}

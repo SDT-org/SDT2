@@ -154,6 +154,8 @@ export const Heatmap = ({
                 metaData={metaData}
                 dataLength={metaData.distribution_stats?.count || 0}
                 activeDataSet="scores"
+                heatmapSettings={settings}
+                rawData={data}
               />
             )}
             <div
