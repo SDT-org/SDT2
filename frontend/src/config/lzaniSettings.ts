@@ -1,6 +1,6 @@
 /**
  * LZ-ANI Parameter Legend:
- * 
+ *
  * aw (Anchor Width) - Window size for approximate matching. Larger values allow more mismatches.
  * am (Anchor Mismatch) - Maximum number of mismatches allowed in the anchor window.
  * mal (Min Anchor Length) - Minimum length of exact match anchors. Shorter = more sensitive.
@@ -9,7 +9,7 @@
  * mqd (Max Query Distance) - Maximum distance between matches in query sequence.
  * reg (Region) - Minimum length of aligned regions to keep. Smaller = keeps shorter alignments.
  * ar (Anchor Ratio) - Minimum ratio of matched nucleotides in anchor extensions.
- * 
+ *
  * General principles:
  * - Smaller mal/msl = more sensitive (finds more alignments)
  * - Larger aw/am = more tolerant of mismatches

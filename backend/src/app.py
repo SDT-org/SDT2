@@ -569,14 +569,15 @@ class Api:
         diag_mask = eye(heat_data_np.shape[0], dtype=bool)
         heat_data_no_diag = where(diag_mask, nan, heat_data_np)
         
-        # For LZ-ANI, adjust minimum to 70 (or lowest value above 70)
+        # For LZ-ANI, use the lowest value above 10% (to exclude weird low values like 0.05%)
         if is_lzani:
-            # Filter out values below 70 for min calculation
-            valid_values = heat_data_no_diag[~np.isnan(heat_data_no_diag) & (heat_data_no_diag >= 70)]
+            # Filter out values below 10% for min calculation
+            valid_values = heat_data_no_diag[~np.isnan(heat_data_no_diag) & (heat_data_no_diag >= 10)]
             if valid_values.size > 0:
-                min_val = max(70, int(nanmin(valid_values)))
+                min_val = int(nanmin(valid_values))
             else:
-                min_val = 30
+                # If no values above 10%, use the absolute minimum
+                min_val = int(nanmin(heat_data_no_diag))
         else:
             min_val = int(nanmin(heat_data_no_diag))
         

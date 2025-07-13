@@ -217,7 +217,8 @@ const LzaniSettings = ({
   updateDocState: UpdateDocState;
   setDocState: SetDocState;
 }) => {
-  const [selectedPreset, setSelectedPreset] = React.useState<string>("balanced");
+  const [selectedPreset, setSelectedPreset] =
+    React.useState<string>("balanced");
   const [showAdvanced, setShowAdvanced] = React.useState<boolean>(false);
 
   React.useEffect(() => {
@@ -241,29 +242,38 @@ const LzaniSettings = ({
   return (
     <div className="field">
       <div className="header">LZ-ANI Settings</div>
-      <div className="setting-group" style={{ 
-        backgroundColor: "#f8f8f8",
-        padding: "0.75rem",
-        borderRadius: "6px",
-        border: "1px solid #e0e0e0",
-        marginTop: "0.5rem"
-      }}>
-        <div style={{ 
-          display: "flex", 
-          gap: "0.75rem", 
-          alignItems: "flex-end",
-          flexWrap: "wrap",
-          justifyContent: "space-between"
-        }}>
-          <div style={{ display: "flex", gap: "0.75rem", alignItems: "flex-end" }}>
+      <div
+        className="setting-group"
+        style={{
+          backgroundColor: "#f8f8f8",
+          padding: "0.75rem",
+          borderRadius: "6px",
+          border: "1px solid #e0e0e0",
+          marginTop: "0.5rem",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            gap: "0.75rem",
+            alignItems: "flex-end",
+            flexWrap: "wrap",
+            justifyContent: "space-between",
+          }}
+        >
+          <div
+            style={{ display: "flex", gap: "0.75rem", alignItems: "flex-end" }}
+          >
             <div style={{ flex: "0 0 auto", minWidth: "140px" }}>
-              <Label style={{ 
-                fontSize: "0.75rem", 
-                fontWeight: "500", 
-                color: "#666",
-                marginBottom: "0.25rem",
-                display: "block"
-              }}>
+              <Label
+                style={{
+                  fontSize: "0.75rem",
+                  fontWeight: "500",
+                  color: "#666",
+                  marginBottom: "0.25rem",
+                  display: "block",
+                }}
+              >
                 Settings
               </Label>
               <Select
@@ -288,14 +298,18 @@ const LzaniSettings = ({
                 )}
               </Select>
             </div>
-            <div style={{ flex: "0 0 auto", minWidth: "100px", maxWidth: "150px" }}>
-              <Label style={{ 
-                fontSize: "0.75rem", 
-                fontWeight: "500", 
-                color: "#666",
-                marginBottom: "0.25rem",
-                display: "block"
-              }}>
+            <div
+              style={{ flex: "0 0 auto", minWidth: "100px", maxWidth: "150px" }}
+            >
+              <Label
+                style={{
+                  fontSize: "0.75rem",
+                  fontWeight: "500",
+                  color: "#666",
+                  marginBottom: "0.25rem",
+                  display: "block",
+                }}
+              >
                 Score Type
               </Label>
               <Select
@@ -321,9 +335,7 @@ const LzaniSettings = ({
                 aria-label="Score Type"
               >
                 {(item) => (
-                  <SelectItem textValue={item.name}>
-                    {item.name}
-                  </SelectItem>
+                  <SelectItem textValue={item.name}>{item.name}</SelectItem>
                 )}
               </Select>
             </div>
@@ -332,7 +344,7 @@ const LzaniSettings = ({
             type="button"
             className="react-aria-Button"
             onPress={() => setShowAdvanced(!showAdvanced)}
-            style={{ 
+            style={{
               padding: "0.375rem 0.875rem",
               fontSize: "0.8125rem",
               fontWeight: "500",
@@ -342,7 +354,7 @@ const LzaniSettings = ({
               border: showAdvanced ? "1px solid #007acc" : "1px solid #d0d0d0",
               borderRadius: "4px",
               transition: "all 0.2s ease",
-              cursor: "pointer"
+              cursor: "pointer",
             }}
           >
             {showAdvanced ? "← Presets" : "Advanced →"}
@@ -367,121 +379,121 @@ const LzaniSettings = ({
             min={1}
             max={30}
           />
-            <NumberInput
-              id="lzani-am"
-              label="Anchor mismatch"
-              value={docState.lzani_settings?.am || 7}
-              onChange={(value) => {
-                setDocState((previous) => ({
-                  ...previous,
-                  lzani_settings: {
-                    ...previous.lzani_settings,
-                    am: value,
-                  },
-                }));
-              }}
-              min={0}
-              max={15}
-            />
-            <NumberInput
-              id="lzani-mal"
-              label="Min anchor length"
-              value={docState.lzani_settings?.mal || 11}
-              onChange={(value) => {
-                setDocState((previous) => ({
-                  ...previous,
-                  lzani_settings: {
-                    ...previous.lzani_settings,
-                    mal: value,
-                  },
-                }));
-              }}
-              min={1}
-              max={25}
-            />
-            <NumberInput
-              id="lzani-msl"
-              label="Min seed length"
-              value={docState.lzani_settings?.msl || 7}
-              onChange={(value) => {
-                setDocState((previous) => ({
-                  ...previous,
-                  lzani_settings: {
-                    ...previous.lzani_settings,
-                    msl: value,
-                  },
-                }));
-              }}
-              min={1}
-              max={15}
-            />
-            <NumberInput
-              id="lzani-mrd"
-              label="Max ref. distance"
-              value={docState.lzani_settings?.mrd || 40}
-              onChange={(value) => {
-                setDocState((previous) => ({
-                  ...previous,
-                  lzani_settings: {
-                    ...previous.lzani_settings,
-                    mrd: value,
-                  },
-                }));
-              }}
-              min={1}
-              max={120}
-            />
-            <NumberInput
-              id="lzani-mqd"
-              label="Max query distance"
-              value={docState.lzani_settings?.mqd || 40}
-              onChange={(value) => {
-                setDocState((previous) => ({
-                  ...previous,
-                  lzani_settings: {
-                    ...previous.lzani_settings,
-                    mqd: value,
-                  },
-                }));
-              }}
-              min={1}
-              max={120}
-            />
-            <NumberInput
-              id="lzani-reg"
-              label="Min region length"
-              value={docState.lzani_settings?.reg || 35}
-              onChange={(value) => {
-                setDocState((previous) => ({
-                  ...previous,
-                  lzani_settings: {
-                    ...previous.lzani_settings,
-                    reg: value,
-                  },
-                }));
-              }}
-              min={1}
-              max={80}
-            />
-            <NumberInput
-              id="lzani-ar"
-              label="Anchor ratio"
-              value={docState.lzani_settings?.ar || 3}
-              onChange={(value) => {
-                setDocState((previous) => ({
-                  ...previous,
-                  lzani_settings: {
-                    ...previous.lzani_settings,
-                    ar: value,
-                  },
-                }));
-              }}
-              min={0.1}
-              max={10}
-              step={0.1}
-            />
-          </div>
-        ) : null}
+          <NumberInput
+            id="lzani-am"
+            label="Anchor mismatch"
+            value={docState.lzani_settings?.am || 7}
+            onChange={(value) => {
+              setDocState((previous) => ({
+                ...previous,
+                lzani_settings: {
+                  ...previous.lzani_settings,
+                  am: value,
+                },
+              }));
+            }}
+            min={0}
+            max={15}
+          />
+          <NumberInput
+            id="lzani-mal"
+            label="Min anchor length"
+            value={docState.lzani_settings?.mal || 11}
+            onChange={(value) => {
+              setDocState((previous) => ({
+                ...previous,
+                lzani_settings: {
+                  ...previous.lzani_settings,
+                  mal: value,
+                },
+              }));
+            }}
+            min={1}
+            max={25}
+          />
+          <NumberInput
+            id="lzani-msl"
+            label="Min seed length"
+            value={docState.lzani_settings?.msl || 7}
+            onChange={(value) => {
+              setDocState((previous) => ({
+                ...previous,
+                lzani_settings: {
+                  ...previous.lzani_settings,
+                  msl: value,
+                },
+              }));
+            }}
+            min={1}
+            max={15}
+          />
+          <NumberInput
+            id="lzani-mrd"
+            label="Max ref. distance"
+            value={docState.lzani_settings?.mrd || 40}
+            onChange={(value) => {
+              setDocState((previous) => ({
+                ...previous,
+                lzani_settings: {
+                  ...previous.lzani_settings,
+                  mrd: value,
+                },
+              }));
+            }}
+            min={1}
+            max={120}
+          />
+          <NumberInput
+            id="lzani-mqd"
+            label="Max query distance"
+            value={docState.lzani_settings?.mqd || 40}
+            onChange={(value) => {
+              setDocState((previous) => ({
+                ...previous,
+                lzani_settings: {
+                  ...previous.lzani_settings,
+                  mqd: value,
+                },
+              }));
+            }}
+            min={1}
+            max={120}
+          />
+          <NumberInput
+            id="lzani-reg"
+            label="Min region length"
+            value={docState.lzani_settings?.reg || 35}
+            onChange={(value) => {
+              setDocState((previous) => ({
+                ...previous,
+                lzani_settings: {
+                  ...previous.lzani_settings,
+                  reg: value,
+                },
+              }));
+            }}
+            min={1}
+            max={80}
+          />
+          <NumberInput
+            id="lzani-ar"
+            label="Anchor ratio"
+            value={docState.lzani_settings?.ar || 3}
+            onChange={(value) => {
+              setDocState((previous) => ({
+                ...previous,
+                lzani_settings: {
+                  ...previous.lzani_settings,
+                  ar: value,
+                },
+              }));
+            }}
+            min={0.1}
+            max={10}
+            step={0.1}
+          />
+        </div>
+      ) : null}
     </div>
   );
 };

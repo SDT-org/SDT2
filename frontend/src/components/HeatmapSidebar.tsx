@@ -143,8 +143,6 @@ export const HeatmapSidebar = ({
               <hr />
               <div className="field">
                 <Checkbox
-                  aria-label="Toggle invert colorscale"
-                  id="reverse"
                   isSelected={settings.reverse}
                   onChange={(value) => {
                     updateSettings({
@@ -208,6 +206,41 @@ export const HeatmapSidebar = ({
                     <ToggleButton id={2}>2</ToggleButton>
                   </ToggleButtonGroup>
                 </label>
+              </div>
+              <hr />
+              <div className="field" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <Checkbox
+                  isSelected={settings.hideValuesBelowEnabled}
+                  onChange={(value) => {
+                    updateSettings({
+                      hideValuesBelowEnabled: value,
+                      hideValuesBelow: value ? 70 : 0,
+                    });
+                  }}
+                >
+                  Mask values
+                </Checkbox>
+                {settings.hideValuesBelowEnabled && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                    <input
+                      type="number"
+                      value={settings.hideValuesBelow}
+                      onChange={(e) => updateSettings({ hideValuesBelow: Number(e.target.value) })}
+                      min={0}
+                      max={100}
+                      step={1}
+                      style={{
+                        width: "50px",
+                        padding: "2px 4px",
+                        fontSize: "0.875rem",
+                        border: "1px solid var(--color-border)",
+                        borderRadius: "4px",
+                        backgroundColor: "white",
+                      }}
+                    />
+                    <span style={{ fontSize: "0.875rem" }}>%</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

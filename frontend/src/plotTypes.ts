@@ -27,6 +27,8 @@ export interface HeatmapSettings {
   axlabel_yrotation: number;
   cutoff_1: number;
   cutoff_2: number;
+  hideValuesBelow: number;
+  hideValuesBelowEnabled: boolean;
 }
 
 export const HeatmapSettingsSchema = z.object({
@@ -72,6 +74,8 @@ export const HeatmapSettingsSchema = z.object({
   axlabel_yrotation: z.number(),
   cutoff_1: z.number(),
   cutoff_2: z.number(),
+  hideValuesBelow: z.number(),
+  hideValuesBelowEnabled: z.boolean(),
 });
 
 export type HeatmapData = Array<Array<number | null>>;

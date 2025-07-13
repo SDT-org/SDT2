@@ -116,15 +116,9 @@ def lzani_tsv_to_distance_matrix(results_tsv_path, ids_tsv_path, score_column="a
     # Convert to numpy and scale to percentage
     matrix_np = matrix.to_numpy() * 100
 
-    # Find the minimum non-zero, non-NaN value to use as floor
-    valid_values = matrix_np[~np.isnan(matrix_np) & (matrix_np > 0)]
-    
-    # Set floor value to 0 for unreliable alignments
-    # Values below 70% are considered unreliable according to the LZANI paper
-    floor_value = 0
-    
-    # Replace unaligned NANs, 0s, AND values below 70% with 0
-    matrix_np = np.where(np.isnan(matrix_np) | (matrix_np == 0) | (matrix_np < 20), floor_value, matrix_np)
+    # Replace only NANs and exact 0s (unaligned) with 0
+    # Let the frontend handle filtering of low values
+    matrix_np = np.where(np.isnan(matrix_np) | (matrix_np == 0), 0, matrix_np)
 
     # LZANI has slightly different scores for query v. reference vs. reference v query. Make symmetric by averaging with transpose
     matrix_np = (matrix_np + matrix_np.T) / 2

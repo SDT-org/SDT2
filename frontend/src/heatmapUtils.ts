@@ -51,10 +51,14 @@ export const formatHeatmapData = (
   data: HeatmapData,
   settings: Pick<
     HeatmapSettings,
-    "colorScaleKey" | "vmax" | "vmin" | "annotation_rounding"
+    | "colorScaleKey"
+    | "vmax"
+    | "vmin"
+    | "annotation_rounding"
+    | "hideValuesBelow"
+    | "hideValuesBelowEnabled"
   >,
   colorScale: ColorScaleArray,
-  metaData?: { run?: { analysis_method?: string } },
 ) => {
   const colorFn = createD3ColorScale(
     colorScale,
@@ -63,16 +67,17 @@ export const formatHeatmapData = (
     settings.vmin,
   );
 
-  const isLzani = metaData?.run?.analysis_method === "lzani";
-  const lzaniThreshold = 20;
-
   return data.flatMap((row, y) =>
     row
       .filter((datum) => datum === 0 || Number(datum))
       .map((value, x) => {
-        // For LZ-ANI, treat values below 70% as unaligned (0%)
-        const effectiveValue =
-          isLzani && (value as number) < lzaniThreshold ? 0 : value;
+        // Check if value should be hidden based on threshold
+        const shouldHide =
+          settings.hideValuesBelowEnabled &&
+          (value as number) < settings.hideValuesBelow;
+
+        // If hiding is enabled and value is below threshold, treat as empty
+        const effectiveValue = shouldHide ? 0 : value;
 
         const roundedValue = (effectiveValue as number).toFixed(
           settings.annotation_rounding,

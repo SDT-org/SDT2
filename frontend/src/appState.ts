@@ -197,6 +197,8 @@ export const initialDocState: DocState = {
     axlabel_yrotation: 0,
     cutoff_1: 95,
     cutoff_2: 75,
+    hideValuesBelow: 0,
+    hideValuesBelowEnabled: false,
   },
   clustermap: {
     threshold: 70,
