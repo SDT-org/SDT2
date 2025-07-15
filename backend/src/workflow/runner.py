@@ -98,9 +98,9 @@ def output_summary(file_name, start_time, end_time, start_counter, end_counter, 
     total_cores, total_ram = os.cpu_count(), psutil.virtual_memory().total / (1024**3)
     total_counter = end_counter - start_counter
     
-    # Build aligner info based on analysis method
+
     if settings.analysis_method == "parasail":
-        # Determine default scoring matrix based on sequence type
+
         if settings.parasail.scoring_matrix:
             scoring_matrix = settings.parasail.scoring_matrix
         else:
@@ -113,8 +113,7 @@ def output_summary(file_name, start_time, end_time, start_counter, end_counter, 
     elif settings.analysis_method == "lzani":
         score_type = settings.lzani.score_type.upper()
         
-        # Show all parameters with their values (defaults if not set)
-        # Default values for LZani parameters
+
         aw = settings.lzani.aw if settings.lzani.aw is not None else 5
         am = settings.lzani.am if settings.lzani.am is not None else 2
         mal = settings.lzani.mal if settings.lzani.mal is not None else 50

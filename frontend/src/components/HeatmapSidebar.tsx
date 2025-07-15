@@ -208,10 +208,7 @@ export const HeatmapSidebar = ({
                 </label>
               </div>
               <hr />
-              <div
-                className="field"
-                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
-              >
+              <div className="field mask-values-field">
                 <Checkbox
                   isSelected={settings.hideValuesBelowEnabled}
                   onChange={(value) => {
@@ -224,15 +221,10 @@ export const HeatmapSidebar = ({
                   Mask values
                 </Checkbox>
                 {settings.hideValuesBelowEnabled && (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.25rem",
-                    }}
-                  >
+                  <div className="mask-values-input-group">
                     <input
                       type="number"
+                      className="mask-values-input"
                       value={settings.hideValuesBelow}
                       onChange={(e) =>
                         updateSettings({
@@ -242,16 +234,8 @@ export const HeatmapSidebar = ({
                       min={0}
                       max={100}
                       step={1}
-                      style={{
-                        width: "50px",
-                        padding: "2px 4px",
-                        fontSize: "0.875rem",
-                        border: "1px solid var(--color-border)",
-                        borderRadius: "4px",
-                        backgroundColor: "white",
-                      }}
                     />
-                    <span style={{ fontSize: "0.875rem" }}>%</span>
+                    <span className="mask-values-percent">%</span>
                   </div>
                 )}
               </div>

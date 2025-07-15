@@ -110,21 +110,6 @@ export const lzaniPresets: LzaniPreset[] = [
     },
   },
   {
-    id: "fragmented",
-    name: "Fragmented",
-    description: "Contigs/MAGs",
-    settings: {
-      aw: 15,
-      am: 8,
-      mal: 10,
-      msl: 6,
-      mrd: 50,
-      mqd: 50,
-      reg: 30,
-      ar: 2,
-    },
-  },
-  {
     id: "ultra_fast",
     name: "Ultra-Fast",
     description: "Quick screening",

@@ -116,21 +116,49 @@ const ParasailSettings = ({
   setDocState: SetDocState;
 }) => {
   const isAminoAcid = docState.result_metadata?.is_aa;
+  const [showAdvanced, setShowAdvanced] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    // Always enable override for Parasail to match LZ-ANI behavior
+    if (!docState.overrideParasail) {
+      updateDocState({ overrideParasail: true });
+    }
+  }, [docState.overrideParasail, updateDocState]);
 
   return (
     <div className="field">
-      <Switch
-        isSelected={docState.overrideParasail}
-        onChange={(value) => {
-          updateDocState({ overrideParasail: value });
+      <div className="header">Parasail Settings</div>
+      <div
+        className="setting-group"
+        style={{
+          backgroundColor: "#f8f8f8",
+          padding: "0.75rem",
+          borderRadius: "6px",
+          border: "1px solid #e0e0e0",
+          marginTop: "0.5rem",
         }}
       >
-        Override default Parasail settings
-      </Switch>
-      {docState.overrideParasail ? (
-        <div className="setting-group form col-3">
-          <div className="field">
-            <Label htmlFor="scoring-matrix">Scoring</Label>
+        <div
+          style={{
+            display: "flex",
+            gap: "0.75rem",
+            alignItems: "flex-end",
+            justifyContent: "space-between",
+          }}
+        >
+          <div style={{ flex: "0 0 auto", minWidth: "200px" }}>
+            <Label
+              htmlFor="scoring-matrix"
+              style={{
+                fontSize: "0.75rem",
+                fontWeight: "500",
+                color: "#666",
+                marginBottom: "0.25rem",
+                display: "block",
+              }}
+            >
+              Scoring Matrix
+            </Label>
             <Select
               id="scoring-matrix"
               wide
@@ -170,9 +198,32 @@ const ParasailSettings = ({
               )}
             </Select>
           </div>
+          <Button
+            type="button"
+            className="react-aria-Button"
+            onPress={() => setShowAdvanced(!showAdvanced)}
+            style={{
+              padding: "0.375rem 0.875rem",
+              fontSize: "0.8125rem",
+              fontWeight: "500",
+              minHeight: "2rem",
+              backgroundColor: showAdvanced ? "#007acc" : "#f0f0f0",
+              color: showAdvanced ? "white" : "#333",
+              border: showAdvanced ? "1px solid #007acc" : "1px solid #d0d0d0",
+              borderRadius: "4px",
+              transition: "all 0.2s ease",
+              cursor: "pointer",
+            }}
+          >
+            {showAdvanced ? "← Hide Advanced" : "Advanced →"}
+          </Button>
+        </div>
+      </div>
+      {showAdvanced ? (
+        <div className="setting-group form col-2" style={{ marginTop: "1rem" }}>
           <NumberInput
             id="open-penalty"
-            label="Open penalty"
+            label="Gap open penalty"
             value={
               docState.parasail_settings?.open_penalty || (isAminoAcid ? 10 : 8)
             }
@@ -190,7 +241,7 @@ const ParasailSettings = ({
           />
           <NumberInput
             id="extend-penalty"
-            label="Extend penalty"
+            label="Gap extend penalty"
             value={docState.parasail_settings?.extend_penalty || 1}
             onChange={(value) => {
               setDocState((previous) => ({
@@ -629,7 +680,7 @@ const RunnerSettings = ({
               />
             ) : null}
 
-            <div className="field inline-setting">
+            <div className="field">
               <Switch
                 isSelected={docState.exportAlignments}
                 onChange={(value) => {
@@ -641,7 +692,7 @@ const RunnerSettings = ({
               {docState.exportAlignments ? (
                 <div
                   className="setting input-with-button"
-                  style={{ marginTop: "0.5rem" }}
+                  style={{ marginTop: "0.75rem", width: "100%" }}
                 >
                   <Input
                     id="alignment-export-path"

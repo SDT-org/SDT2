@@ -25,7 +25,7 @@ export const scoringMatrices: ScoringMatrix[] = [
 ];
 
 export const getRecommendedMatrix = (isAminoAcid: boolean): string => {
-  return isAminoAcid ? "blosum62" : "blast_5_-4";
+  return isAminoAcid ? "blosum62" : "simple_1_-1";
 };
 
 export const getMatricesByType = (
