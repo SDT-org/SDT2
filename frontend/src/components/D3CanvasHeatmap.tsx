@@ -31,6 +31,8 @@ export const D3CanvasHeatmap = ({
   margin,
   settings,
   showLegend,
+  showClusterCounts,
+  clusterCounts,
   onRenderComplete,
 }: HeatmapRenderProps) => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
@@ -231,11 +233,11 @@ export const D3CanvasHeatmap = ({
     }
 
     if (clusterData && showLegend) {
-      const legendWidth = 80;
+      const legendWidth = showClusterCounts ? 120 : 80;
       const cellSize = 10;
       const lineGap = 20;
       const labelGap = 5;
-      const columnGap = 20;
+      const columnGap = showClusterCounts ? 30 : 20;
 
       // sticky the legend to the right side of the canvas or plot, depending on the space available
       const positionX = Math.min(
@@ -277,11 +279,34 @@ export const D3CanvasHeatmap = ({
         ctx.fillRect(textX, textY, cellSize, cellSize);
 
         ctx.fillStyle = "black";
-        ctx.fillText(
-          `Cluster ${cluster.toString()}`,
-          textX + cellSize + labelGap,
-          textY + cellSize / 2,
-        );
+        // Format cluster number with leading space for single digits
+        const clusterStr = cluster < 10 ? ` ${cluster}` : `${cluster}`;
+
+        if (showClusterCounts && clusterCounts?.[cluster]) {
+          // Add leading space before bracket for single digits
+          const countDisplay =
+            clusterCounts[cluster] < 10
+              ? ` [${clusterCounts[cluster]}]`
+              : `[${clusterCounts[cluster]}]`;
+
+          // Draw cluster label
+          ctx.textAlign = "left";
+          ctx.fillText(
+            `Cluster ${clusterStr}`,
+            textX + cellSize + labelGap,
+            textY + cellSize / 2,
+          );
+          // Draw count right-aligned
+          ctx.textAlign = "right";
+          ctx.fillText(countDisplay, textX + legendWidth, textY + cellSize / 2);
+          ctx.textAlign = "left"; // Reset alignment
+        } else {
+          ctx.fillText(
+            `Cluster ${clusterStr}`,
+            textX + cellSize + labelGap,
+            textY + cellSize / 2,
+          );
+        }
       });
     }
 
@@ -327,6 +352,8 @@ export const D3CanvasHeatmap = ({
     settings?.colorScaleKey,
     clusterData,
     showLegend,
+    showClusterCounts,
+    clusterCounts,
     onRenderComplete,
   ]);
 

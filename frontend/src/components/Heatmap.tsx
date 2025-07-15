@@ -51,6 +51,8 @@ export type HeatmapRenderProps = {
   margin: { top: number; bottom: number; left: number; right: number };
   clusterData?: ClusterDataItem[];
   showLegend?: boolean;
+  showClusterCounts?: boolean;
+  clusterCounts?: { [key: number]: number };
   onRenderComplete?: () => void;
 } & Pick<HeatmapSettings, "axis_labels">;
 

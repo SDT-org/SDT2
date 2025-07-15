@@ -29,6 +29,9 @@ export const D3SvgHeatmap = ({
   axis_labels,
   margin,
   clusterData,
+  showLegend,
+  showClusterCounts,
+  clusterCounts,
 }: HeatmapRenderProps) => {
   const svgRef = React.useRef<SVGSVGElement>(null);
   const exportSvg = useExportSvg(
@@ -235,12 +238,12 @@ export const D3SvgHeatmap = ({
           );
       }
 
-      if (clusterData) {
-        const legendWidth = 80;
+      if (clusterData && showLegend) {
+        const legendWidth = showClusterCounts ? 120 : 80;
         const cellSize = 10;
         const lineGap = 20;
         const labelGap = 5;
-        const columnGap = 20;
+        const columnGap = showClusterCounts ? 30 : 20;
         const positionX = Math.min(
           plotSize - margin.left,
           width - legendWidth * 2 - columnGap - margin.right,
@@ -273,15 +276,59 @@ export const D3SvgHeatmap = ({
           .attr("y", 0)
           .attr("fill", (d) => distinctColor(d));
 
-        legends
-          .append("text")
-          .attr("x", cellSize + labelGap)
-          .attr("y", cellSize / 2)
-          .attr("dy", ".35em")
-          .attr("font-family", "Roboto Mono")
-          .attr("font-size", "10px")
-          .text((d) => `Cluster ${d}`)
-          .attr("fill", "black");
+        if (showClusterCounts && clusterCounts) {
+          // Cluster label (left-aligned)
+          legends
+            .append("text")
+            .attr("x", cellSize + labelGap)
+            .attr("y", cellSize / 2)
+            .attr("dy", ".35em")
+            .attr("font-family", "Roboto Mono")
+            .attr("font-size", "10px")
+            .attr("text-anchor", "start")
+            .text((d) => {
+              // Format cluster number with leading space for single digits
+              const clusterStr = d < 10 ? ` ${d}` : `${d}`;
+              return `Cluster ${clusterStr}`;
+            })
+            .attr("fill", "black");
+
+          // Count (right-aligned)
+          legends
+            .append("text")
+            .attr("x", legendWidth)
+            .attr("y", cellSize / 2)
+            .attr("dy", ".35em")
+            .attr("font-family", "Roboto Mono")
+            .attr("font-size", "10px")
+            .attr("text-anchor", "end")
+            .text((d) => {
+              if (clusterCounts[d]) {
+                // Add leading space before bracket for single digits
+                const countDisplay =
+                  clusterCounts[d] < 10
+                    ? ` [${clusterCounts[d]}]`
+                    : `[${clusterCounts[d]}]`;
+                return countDisplay;
+              }
+              return "";
+            })
+            .attr("fill", "black");
+        } else {
+          legends
+            .append("text")
+            .attr("x", cellSize + labelGap)
+            .attr("y", cellSize / 2)
+            .attr("dy", ".35em")
+            .attr("font-family", "Roboto Mono")
+            .attr("font-size", "10px")
+            .text((d) => {
+              // Format cluster number with leading space for single digits
+              const clusterStr = d < 10 ? ` ${d}` : `${d}`;
+              return `Cluster ${clusterStr}`;
+            })
+            .attr("fill", "black");
+        }
       }
 
       const end = performance.now();
@@ -314,6 +361,9 @@ export const D3SvgHeatmap = ({
       axis_labels,
       margin,
       clusterData,
+      showLegend,
+      showClusterCounts,
+      clusterCounts,
     ],
   );
 
