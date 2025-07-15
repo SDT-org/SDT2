@@ -17,6 +17,8 @@ export const startRun = (docState: DocState) =>
         ? docState.lzani_settings
         : {}),
       lzani_score_type: docState.lzaniScoreType,
+      export_alignments: docState.exportAlignments,
+      alignment_export_path: docState.alignmentExportPath,
     })
     .catch((e) => {
       if (e.toString().includes("PARASAIL_TRACEBACK")) {

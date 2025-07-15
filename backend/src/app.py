@@ -385,6 +385,8 @@ class Api:
                 open_penalty=args.get("open_penalty"),
                 extend_penalty=args.get("extend_penalty"),
             ),
+            export_alignments=args.get("export_alignments", False),
+            alignment_export_path=args.get("alignment_export_path", ""),
         )
 
         workflow_run = WorkflowRun(

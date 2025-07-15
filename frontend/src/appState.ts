@@ -87,6 +87,8 @@ export type DocState = {
         is_aa?: boolean;
       }
     | undefined;
+  exportAlignments: boolean;
+  alignmentExportPath: string;
 };
 
 export type AppState = {
@@ -174,6 +176,8 @@ export const initialDocState: DocState = {
   cluster_method: "average",
   overrideParasail: false,
   overrideLzani: false,
+  exportAlignments: false,
+  alignmentExportPath: "",
   heatmap: {
     colorScaleKey: "Portland",
     reverse: false,

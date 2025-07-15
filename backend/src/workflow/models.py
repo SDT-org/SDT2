@@ -37,6 +37,8 @@ class RunSettings(NamedTuple):
     cluster_method: str  # Literal[reorder_methods]
     lzani: LzaniSettings
     parasail: ParasailSettings
+    export_alignments: bool = False
+    alignment_export_path: str = ""
 
 
 class WorkflowResult(NamedTuple):

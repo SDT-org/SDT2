@@ -31,8 +31,14 @@ def run(
         "--verbose",
         "2",
     ]
+    #Not actual alignments, but can give insights into the analysis
+    if settings.export_alignments and settings.alignment_export_path:
+        alignment_file = os.path.join(settings.alignment_export_path, "lzani_alignments.txt")
+        cmd.extend(["--out-alignment", alignment_file])
+
+        os.makedirs(settings.alignment_export_path, exist_ok=True)
     
-    # Add optional parameters only if they are provided
+    # Add user entered parameters
     if settings.lzani.aw is not None:
         cmd.extend(["--aw", str(settings.lzani.aw)])
         

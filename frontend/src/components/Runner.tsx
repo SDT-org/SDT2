@@ -53,6 +53,8 @@ export type RunSettings = Pick<DocState, "compute_cores" | "analysisMethod"> & {
   doc_id: string;
   cluster_method: DocState["cluster_method"] | "None";
   lzani_score_type?: string;
+  export_alignments: boolean;
+  alignment_export_path: string;
 } & Partial<ParasailRunSettings> &
   Partial<LzaniRunSettings>;
 
@@ -626,6 +628,45 @@ const RunnerSettings = ({
                 setDocState={setDocState}
               />
             ) : null}
+
+            <div className="field inline-setting">
+              <Switch
+                isSelected={docState.exportAlignments}
+                onChange={(value) => {
+                  updateDocState({ exportAlignments: value });
+                }}
+              >
+                Export alignment files
+              </Switch>
+              {docState.exportAlignments ? (
+                <div
+                  className="setting input-with-button"
+                  style={{ marginTop: "0.5rem" }}
+                >
+                  <Input
+                    id="alignment-export-path"
+                    type="text"
+                    readOnly
+                    value={docState.alignmentExportPath}
+                    placeholder="Select output directory..."
+                  />
+                  <Button
+                    type="button"
+                    onPress={async () => {
+                      const path =
+                        await window.pywebview.api.select_path_dialog(
+                          docState.alignmentExportPath || "",
+                        );
+                      if (path) {
+                        updateDocState({ alignmentExportPath: path });
+                      }
+                    }}
+                  >
+                    Browse...
+                  </Button>
+                </div>
+              ) : null}
+            </div>
 
             <div className="field clustering inline-setting">
               <Switch

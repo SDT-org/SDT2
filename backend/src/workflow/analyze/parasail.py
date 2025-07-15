@@ -39,12 +39,24 @@ def run(
     )
     open_penalty = settings.parasail.open_penalty or (10 if result.is_aa else 8)
     extend_penalty = settings.parasail.extend_penalty or 1
+    
+    # For alignment export, we need to use traceback regardless of SIMD support
+    use_traceback = settings.export_alignments or not supports_striped_32()
+    
     bound_process_pair = partial(
         process_pair,
         matrix_id=matrix_to_use,
         open_penalty=open_penalty,
         extend_penalty=extend_penalty,
+        use_traceback=use_traceback,
+        export_alignments=settings.export_alignments,
+        alignment_export_path=settings.alignment_export_path,
     )
+
+    # Create alignment export directory if needed
+    if settings.export_alignments and settings.alignment_export_path:
+        import os
+        os.makedirs(settings.alignment_export_path, exist_ok=True)
 
     with Pool(settings.parasail.process_count) as pool:
         results = pool.imap(bound_process_pair, id_sequence_pairs)
@@ -75,7 +87,7 @@ def supports_striped_32():
     )
 
 
-def process_pair(id_sequence_pair, matrix_id, open_penalty, extend_penalty):
+def process_pair(id_sequence_pair, matrix_id, open_penalty, extend_penalty, use_traceback=False, export_alignments=False, alignment_export_path=""):
     id1 = id_sequence_pair[0][0]
     id2 = id_sequence_pair[0][1]
     seq1 = id_sequence_pair[1][0]
@@ -107,12 +119,28 @@ def process_pair(id_sequence_pair, matrix_id, open_penalty, extend_penalty):
         }
         scoring_matrix = matrix_map.get(matrix_id, parasail.blosum62)
     
-    alignment_function = (
-        get_stats_score if supports_striped_32() else get_traceback_score
-    )
-    result = alignment_function(
-        seq1, seq2, open_penalty, extend_penalty, scoring_matrix
-    )
+    # Use traceback if requested or if SIMD not supported
+    if use_traceback:
+        result = get_traceback_score(
+            seq1, seq2, open_penalty, extend_penalty, scoring_matrix
+        )
+        
+        # Export alignment if requested
+        if export_alignments and alignment_export_path:
+            try:
+                alignment_result = parasail.nw_trace(seq1, seq2, open_penalty, extend_penalty, scoring_matrix)
+                import os
+                filename = f"{id1}_vs_{id2}.txt".replace("/", "_").replace("\\", "_")
+                filepath = os.path.join(alignment_export_path, filename)
+                with open(filepath, "w") as f:
+                    f.write(f">{id1}\n{alignment_result.traceback.query}\n")
+                    f.write(f">{id2}\n{alignment_result.traceback.ref}\n")
+            except Exception as e:
+                print(f"Failed to export alignment for {id1} vs {id2}: {e}")
+    else:
+        result = get_stats_score(
+            seq1, seq2, open_penalty, extend_penalty, scoring_matrix
+        )
 
     return id_sequence_pair[0], result
 
