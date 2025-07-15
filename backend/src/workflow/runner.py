@@ -84,7 +84,7 @@ def run_process(workflow_run: WorkflowRun, cancel_event) -> WorkflowResult:
 
     file_name = os.path.basename(settings.fasta_path)
     summary_text = output_summary(
-        file_name, start_time, end_time, start_counter, end_counter
+        file_name, start_time, end_time, start_counter, end_counter, settings, result
     )
     with open(settings.doc_paths.summary, "w") as file:
         file.write(summary_text)
@@ -93,15 +93,48 @@ def run_process(workflow_run: WorkflowRun, cancel_event) -> WorkflowResult:
     return result
 
 
-def output_summary(file_name, start_time, end_time, start_counter, end_counter):
+def output_summary(file_name, start_time, end_time, start_counter, end_counter, settings, result):
     build_type = f"{platform.system()} {platform.release()} {platform.machine()}"
     total_cores, total_ram = os.cpu_count(), psutil.virtual_memory().total / (1024**3)
     total_counter = end_counter - start_counter
+    
+    # Build aligner info based on analysis method
+    if settings.analysis_method == "parasail":
+        # Determine default scoring matrix based on sequence type
+        if settings.parasail.scoring_matrix:
+            scoring_matrix = settings.parasail.scoring_matrix
+        else:
+            scoring_matrix = "BLOSUM62" if result.is_aa else "1-1"
+        
+        open_penalty = settings.parasail.open_penalty or 10
+        extend_penalty = settings.parasail.extend_penalty or 1
+        aligner_name = "PARASAIL"
+        aligner_params = f"Needleman-Wunsch (stats) algorithm, Scoring matrix: {scoring_matrix}, Open penalty: {open_penalty}, Extend penalty: {extend_penalty}"
+    elif settings.analysis_method == "lzani":
+        score_type = settings.lzani.score_type.upper()
+        
+        # Show all parameters with their values (defaults if not set)
+        # Default values for LZani parameters
+        aw = settings.lzani.aw if settings.lzani.aw is not None else 5
+        am = settings.lzani.am if settings.lzani.am is not None else 2
+        mal = settings.lzani.mal if settings.lzani.mal is not None else 50
+        msl = settings.lzani.msl if settings.lzani.msl is not None else 50
+        mrd = settings.lzani.mrd if settings.lzani.mrd is not None else 0.1
+        mqd = settings.lzani.mqd if settings.lzani.mqd is not None else 0.01
+        reg = settings.lzani.reg if settings.lzani.reg is not None else 0
+        ar = settings.lzani.ar if settings.lzani.ar is not None else 0.95
+        
+        aligner_name = "LZ-ANI"
+        aligner_params = f"Score type: {score_type}, aw={aw}, am={am}, mal={mal}, msl={msl}, mrd={mrd}, mqd={mqd}, reg={reg}, ar={ar}"
+    else:
+        aligner_name = "UNKNOWN"
+        aligner_params = f"Unknown analysis method: {settings.analysis_method}"
+    
     return f"""
     SDT {app_version} release for {platform.system()}
     Developed by Michael Lund and Josiah Ivey; Brejnev Muhire,
     Darren Martin, Simona Kraberger, Qiyun Zhu, Pierre Lefeuvre, Jean-Michele Lett, Philippe Roumagnac, Arvind Varsani
     System info: Host: {platform.node()}, OS: {build_type}, CPU: {platform.processor()} - {total_cores} cores, Memory: {total_ram:.2f} GB RAM
     Run info for {file_name}: Start: {start_time.strftime("%b %d %Y, %I:%M %p %Z")}, End: {end_time.strftime("%b %d %Y, %I:%M %p %Z")}, Total: {friendly_total_time(total_counter)}
-    Parasail: Using Needleman-Wunsch (stats) algorithm. Nucleotide: Open={13}, Extend={1} (BLOSUM62). Amino acid: Open={10}, Extend={1} (BLOSUM62).
+    Using the {aligner_name} aligner. Run parameters: {aligner_params}
     """
