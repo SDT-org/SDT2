@@ -77,6 +77,7 @@ jobs:
           [ "$ACTUAL_COMMIT" = "$EXPECTED_COMMIT" ] || { echo "Tag commit mismatch"; exit 1; }
           sed -i '/$(call CHECK_COMPILER_VERSION)/s/^/# /' makefile
           sed -i 's/-DMI_MALLOC_OVERRIDE//g' refresh.mk
+          sed -i 's|zlib-ng/build-vs/zlib.h|zlib-ng/build-g++/zlib-ng/zlib.h|g' libs/refresh/compression/lib/file_wrapper.h
           make
           # Copy binary and required DLLs
           mkdir -p $GITHUB_WORKSPACE/backend/bin
