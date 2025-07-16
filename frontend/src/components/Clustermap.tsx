@@ -164,6 +164,7 @@ export const Clustermap = ({
                 showLegend={settings.showLegend}
                 showClusterCounts={settings.showClusterCounts}
                 clusterCounts={clusterCounts}
+                metaData={metaData}
               />
             </>
           ) : (
@@ -195,6 +196,7 @@ export const Clustermap = ({
               showClusterCounts={settings.showClusterCounts}
               clusterCounts={clusterCounts}
               onRenderComplete={onRenderComplete}
+              metaData={metaData}
             />
           )
         ) : null}

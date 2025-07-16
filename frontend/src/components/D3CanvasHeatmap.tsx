@@ -4,7 +4,28 @@ import { distinctColor } from "../colors";
 import { plotFontMonospace } from "../constants";
 import { getCellMetrics } from "../heatmapUtils";
 import { useExportCanvas } from "../hooks/useExportCanvas";
+import type { MetaData } from "../plotTypes";
 import type { HeatmapRenderProps } from "./Heatmap";
+
+const getMetricLabel = (metaData?: MetaData): string => {
+  if (!metaData?.run) {
+    return "Identity";
+  }
+
+  if (
+    metaData.run.analysis_method === "lzani" &&
+    metaData.run.lzani?.score_type
+  ) {
+    const scoreType = metaData.run.lzani.score_type.toUpperCase();
+    return scoreType === "ANI"
+      ? "ANI"
+      : scoreType === "TANI"
+        ? "TANI"
+        : "Identity";
+  }
+
+  return "Percent ID";
+};
 
 export const D3CanvasHeatmap = ({
   data,
@@ -34,6 +55,7 @@ export const D3CanvasHeatmap = ({
   showClusterCounts,
   clusterCounts,
   onRenderComplete,
+  metaData,
 }: HeatmapRenderProps) => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const exportCanvas = useExportCanvas(
@@ -467,7 +489,7 @@ export const D3CanvasHeatmap = ({
             </>
           ) : null}
           <div>
-            <dt>Percent ID:</dt>
+            <dt>{getMetricLabel(metaData)}:</dt>
             <dd>{idDisplay ? `${idDisplay}%` : "Unaligned"}</dd>
           </div>
         </dl>

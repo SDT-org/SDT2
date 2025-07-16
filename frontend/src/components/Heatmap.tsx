@@ -54,6 +54,7 @@ export type HeatmapRenderProps = {
   showClusterCounts?: boolean;
   clusterCounts?: { [key: number]: number };
   onRenderComplete?: () => void;
+  metaData?: MetaData;
 } & Pick<HeatmapSettings, "axis_labels">;
 
 export const Heatmap = ({
@@ -192,6 +193,7 @@ export const Heatmap = ({
                   axis_labels={settings.axis_labels}
                   showscale={settings.showscale}
                   margin={margin}
+                  metaData={metaData}
                 />
               </>
             ) : (
@@ -219,6 +221,7 @@ export const Heatmap = ({
                 axis_labels={settings.axis_labels}
                 margin={margin}
                 onRenderComplete={onRenderComplete}
+                metaData={metaData}
               />
             )}
           </div>

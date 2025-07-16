@@ -4,7 +4,28 @@ import { distinctColor } from "../colors";
 import { plotFontMonospace } from "../constants";
 import { getCellMetrics } from "../heatmapUtils";
 import { useExportSvg } from "../hooks/useExportSvg";
+import type { MetaData } from "../plotTypes";
 import type { HeatmapRenderProps } from "./Heatmap";
+
+const getMetricLabel = (metaData?: MetaData): string => {
+  if (!metaData?.run) {
+    return "Identity"; // For loaded matrices where we don't know the metric type
+  }
+
+  if (
+    metaData.run.analysis_method === "lzani" &&
+    metaData.run.lzani?.score_type
+  ) {
+    const scoreType = metaData.run.lzani.score_type.toUpperCase();
+    return scoreType === "ANI"
+      ? "ANI"
+      : scoreType === "TANI"
+        ? "TANI"
+        : "Identity";
+  }
+
+  return "Percent ID"; // Default for parasail or other methods
+};
 
 export const D3SvgHeatmap = ({
   data,
@@ -32,12 +53,23 @@ export const D3SvgHeatmap = ({
   showLegend,
   showClusterCounts,
   clusterCounts,
+  metaData,
 }: HeatmapRenderProps) => {
   const svgRef = React.useRef<SVGSVGElement>(null);
   const exportSvg = useExportSvg(
     clusterData ? "clustermap" : "heatmap",
     svgRef,
   );
+
+  const [tooltipData, setTooltipData] = React.useState<{
+    x: number;
+    y: number;
+    value: number | null;
+    percentId?: number | null;
+    cluster?: number | null;
+    xLabel?: string;
+    yLabel?: string;
+  } | null>(null);
 
   const gradientStops = React.useMemo(
     () => colorScale.map(([stop, color]) => ({ stop, color })),
@@ -372,15 +404,102 @@ export const D3SvgHeatmap = ({
     renderHeatmap(svgRef);
   }, [renderHeatmap, height, width]);
 
+  const handleMouseMove = (event: React.MouseEvent<SVGSVGElement>) => {
+    const svg = svgRef.current;
+    if (!svg) return;
+
+    const rect = svg.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+
+    const plotSize = Math.min(width, height) - margin.left - margin.right;
+    const cellSize = plotSize / tickText.length;
+
+    const dataX = Math.floor((x - margin.left) / cellSize);
+    const dataY = Math.floor((y - margin.top) / cellSize);
+
+    const cell = data.find((d) => d.x === dataX && d.y === dataY);
+
+    const clusterGroup =
+      clusterData &&
+      cell &&
+      clusterData.find((i) => i.id === tickText[cell.x])?.cluster ===
+        clusterData.find((i) => i.id === tickText[cell.y])?.cluster
+        ? clusterData.find((i) => i.id === tickText[cell.x])?.cluster
+        : null;
+
+    if (
+      cell &&
+      dataX >= 0 &&
+      dataX < tickText.length &&
+      dataY >= 0 &&
+      dataY < tickText.length
+    ) {
+      setTooltipData({
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top,
+        value: clusterData ? (clusterGroup ?? null) : cell.value,
+        percentId: cell.value,
+        cluster: clusterGroup ?? null,
+        xLabel: tickText[cell.x] || "",
+        yLabel: tickText[cell.y] || "",
+      });
+    } else {
+      setTooltipData(null);
+    }
+  };
+
+  const idValue =
+    tooltipData &&
+    (clusterData ? tooltipData.percentId : tooltipData.value)?.toFixed(2);
+
+  const idDisplay = Number(idValue) === 0 ? "" : idValue;
+
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      xmlnsXlink="http://www.w3.org/1999/xlink"
-      id={"heatmap-svg"}
-      style={{ overflow: "visible", background: "#fff" }}
-      ref={svgRef}
-      width={"100%"}
-      height={"100%"}
-    />
+    <div style={{ position: "relative" }}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        xmlnsXlink="http://www.w3.org/1999/xlink"
+        id={"heatmap-svg"}
+        style={{ overflow: "visible", background: "#fff" }}
+        ref={svgRef}
+        width={"100%"}
+        height={"100%"}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setTooltipData(null)}
+      />
+      {tooltipData && (
+        <dl
+          className="heatmap-tooltip"
+          style={{
+            left: tooltipData.x + 10,
+            top: tooltipData.y + 10,
+          }}
+        >
+          <div>
+            <dt>Seq X:</dt>
+            <dd>{tooltipData.xLabel}</dd>
+          </div>
+          <div>
+            <dt>Seq Y:</dt>
+            <dd>{tooltipData.yLabel}</dd>
+          </div>
+          {clusterData ? (
+            <>
+              {tooltipData.cluster !== null && (
+                <div>
+                  <dt>Cluster:</dt>
+                  <dd>{tooltipData.cluster}</dd>
+                </div>
+              )}
+            </>
+          ) : null}
+          <div>
+            <dt>{getMetricLabel(metaData)}:</dt>
+            <dd>{idDisplay ? `${idDisplay}%` : "Unaligned"}</dd>
+          </div>
+        </dl>
+      )}
+    </div>
   );
 };
