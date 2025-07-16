@@ -48,8 +48,6 @@ jobs:
       - name: Linux/macOS - Download lz-ani binaries
         if: runner.os != 'Windows'
         run: |
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm mingw-w64-x86_64-gcc
           mkdir -p backend/bin
           # Download lz-ani binaries from their releases
           if [ "$RUNNER_OS" == "macOS" ]; then
@@ -71,6 +69,8 @@ jobs:
         if: runner.os == 'Windows'
         shell: msys2 {0}
         run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm mingw-w64-x86_64-gcc
           # Clone and build lz-ani
           git clone --depth 1 --branch v1.2.3 https://github.com/refresh-bio/LZ-ANI.git /tmp/lz-ani
           cd /tmp/lz-ani
