@@ -28,19 +28,6 @@ jobs:
         if: runner.os == 'macOS'
         run: brew install autoconf automake libtool
 
-      - name: Linux/macOS - Download lz-ani binaries
-        if: runner.os != 'Windows'
-        run: |
-          mkdir -p backend/bin
-          # Download lz-ani binaries from their releases
-          # Update this URL to the actual lz-ani release URL
-          if [ "$RUNNER_OS" == "macOS" ]; then
-            curl -L https://github.com/omaralvarez/lz-ani/releases/latest/download/lz-ani-macos -o backend/bin/lz-ani
-          else
-            curl -L https://github.com/omaralvarez/lz-ani/releases/latest/download/lz-ani-linux -o backend/bin/lz-ani
-          fi
-          chmod +x backend/bin/lz-ani
-
       - name: Windows - Setup MSYS2
         if: runner.os == 'Windows'
         uses: msys2/setup-msys2@v2
@@ -54,20 +41,6 @@ jobs:
             mingw-w64-x86_64-zlib
             git
             make
-
-      - name: Windows - Build lz-ani
-        if: runner.os == 'Windows'
-        shell: msys2 {0}
-        run: |
-          # Clone and build lz-ani
-          git clone https://github.com/omaralvarez/lz-ani.git /tmp/lz-ani
-          cd /tmp/lz-ani
-          make
-          # Copy binary and required DLLs
-          mkdir -p $GITHUB_WORKSPACE/backend/bin
-          cp lz-ani.exe $GITHUB_WORKSPACE/backend/bin/
-          cp /mingw64/bin/libwinpthread-1.dll $GITHUB_WORKSPACE/backend/bin/
-          cp /mingw64/bin/zlib1.dll $GITHUB_WORKSPACE/backend/bin/
 
       - name: Run init
         run: bun run init
@@ -83,6 +56,38 @@ jobs:
         run: |
           source venv/bin/activate
           bun run build
+
+      - name: Linux/macOS - Download lz-ani binaries
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p backend/bin
+          # Download lz-ani binaries from their releases
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            curl -L https://github.com/refresh-bio/LZ-ANI/releases/download/v1.2.3/lz-ani-v1.2.3-arm64_mac.tar.gz -o backend/bin/lz-ani.tar.gz
+            echo "cb4f3a8b2a1c03fdfa5801b35059131ec40e4df7a8e7b8f0fbda7c13677d34c8  backend/bin/lz-ani.tar.gz" | shasum -a 256 -c -
+          else
+            curl -L https://github.com/refresh-bio/LZ-ANI/releases/download/v1.2.3/lz-ani-v1.2.3-x64_linux.tar.gz -o backend/bin/lz-ani.tar.gz
+            echo "291bdfe7768a50bfbbd31a78717bc72cbce3178b5e740acbdd94a22a29a36b13  backend/bin/lz-ani.tar.gz" | sha256sum -c -
+          fi
+          tar -xzf backend/bin/lz-ani.tar.gz -C backend/bin
+          chmod +x backend/bin/lz-ani
+
+      - name: Windows - Build lz-ani
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: |
+          # Clone and build lz-ani
+          git clone --depth 1 --branch v1.2.3 https://github.com/refresh-bio/LZ-ANI.git /tmp/lz-ani
+          cd /tmp/lz-ani
+          EXPECTED_COMMIT="c898e1e"
+          ACTUAL_COMMIT=$(git rev-parse HEAD)
+          [ "$ACTUAL_COMMIT" = "$EXPECTED_COMMIT" ] || { echo "Tag commit mismatch"; exit 1; }
+          make
+          # Copy binary and required DLLs
+          mkdir -p $GITHUB_WORKSPACE/backend/bin
+          cp lz-ani.exe $GITHUB_WORKSPACE/backend/bin/
+          cp /mingw64/bin/libwinpthread-1.dll $GITHUB_WORKSPACE/backend/bin/
+          cp /mingw64/bin/zlib1.dll $GITHUB_WORKSPACE/backend/bin/
 
       - name: Windows - Sign artifact
         if: runner.os == 'Windows'
