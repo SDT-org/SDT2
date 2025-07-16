@@ -76,6 +76,7 @@ jobs:
           ACTUAL_COMMIT=$(git rev-parse HEAD)
           [ "$ACTUAL_COMMIT" = "$EXPECTED_COMMIT" ] || { echo "Tag commit mismatch"; exit 1; }
           sed -i '/$(call CHECK_COMPILER_VERSION)/s/^/# /' makefile
+          sed -i 's/-DMI_MALLOC_OVERRIDE//g' refresh.mk
           make
           # Copy binary and required DLLs
           mkdir -p $GITHUB_WORKSPACE/backend/bin
