@@ -45,18 +45,6 @@ jobs:
       - name: Run init
         run: bun run init
 
-      - name: Windows - Build
-        if: runner.os == 'Windows'
-        run: |
-          venv\\Scripts\\activate && bun run build
-
-      - name: Linux/macOS - Build
-        if: runner.os != 'Windows'
-        shell: bash
-        run: |
-          source venv/bin/activate
-          bun run build
-
       - name: Linux/macOS - Download lz-ani binaries
         if: runner.os != 'Windows'
         run: |
@@ -93,6 +81,18 @@ jobs:
           cp lz-ani.exe $GITHUB_WORKSPACE/backend/bin/
           cp /mingw64/bin/libwinpthread-1.dll $GITHUB_WORKSPACE/backend/bin/
           cp /mingw64/bin/zlib1.dll $GITHUB_WORKSPACE/backend/bin/
+
+      - name: Windows - Build
+        if: runner.os == 'Windows'
+        run: |
+          venv\\Scripts\\activate && bun run build
+
+      - name: Linux/macOS - Build
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          source venv/bin/activate
+          bun run build
 
       - name: Windows - Sign artifact
         if: runner.os == 'Windows'
