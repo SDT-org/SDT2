@@ -235,11 +235,20 @@ def handle_open_file(filepath: str, doc_id: str | None):
 
 
 def get_lzani_exec_path():  # TODO: move to dynamic config? or may need to be configurable by user
-    current_script_dir = os.path.dirname(os.path.abspath(__file__))  # .../backend/src
-    backend_dir = os.path.dirname(current_script_dir)  # .../backend
-    bin_dir = os.path.join(backend_dir, "bin")  # .../backend/bin
     lzani_executable_name = "lz-ani.exe" if is_windows else "lz-ani"
-    lzani_executable_path = os.path.join(bin_dir, lzani_executable_name)
+    
+    if is_compiled:
+        # When compiled, the executable is in the same directory as the main exe
+        # but we need to go to backend/bin relative to the exe location
+        exe_dir = os.path.dirname(sys.executable)
+        lzani_executable_path = os.path.join(exe_dir, "backend", "bin", lzani_executable_name)
+    else:
+        # When running from source
+        current_script_dir = os.path.dirname(os.path.abspath(__file__))  # .../backend/src
+        backend_dir = os.path.dirname(current_script_dir)  # .../backend
+        bin_dir = os.path.join(backend_dir, "bin")  # .../backend/bin
+        lzani_executable_path = os.path.join(bin_dir, lzani_executable_name)
+    
     if not os.path.exists(lzani_executable_path):
         raise FileNotFoundError(
             f"LZ-ANI executable not found at {lzani_executable_path}"
