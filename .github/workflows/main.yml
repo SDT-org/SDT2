@@ -1,0 +1,168 @@
+name: Build SDT2
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-13, macos-latest, ubuntu-22.04]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install virtualenv
+        run: pip install virtualenv
+
+      - uses: oven-sh/setup-bun@v2
+
+      - name: macOS - Install dependencies
+        if: runner.os == 'macOS'
+        run: brew install autoconf automake libtool
+
+      - name: Linux/macOS - Download lz-ani binaries
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p backend/bin
+          # Download lz-ani binaries from their releases
+          # Update this URL to the actual lz-ani release URL
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            curl -L https://github.com/omaralvarez/lz-ani/releases/latest/download/lz-ani-macos -o backend/bin/lz-ani
+          else
+            curl -L https://github.com/omaralvarez/lz-ani/releases/latest/download/lz-ani-linux -o backend/bin/lz-ani
+          fi
+          chmod +x backend/bin/lz-ani
+
+      - name: Windows - Setup MSYS2
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-make
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-zlib
+            git
+            make
+
+      - name: Windows - Build lz-ani
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: |
+          # Clone and build lz-ani
+          git clone https://github.com/omaralvarez/lz-ani.git /tmp/lz-ani
+          cd /tmp/lz-ani
+          make
+          # Copy binary and required DLLs
+          mkdir -p $GITHUB_WORKSPACE/backend/bin
+          cp lz-ani.exe $GITHUB_WORKSPACE/backend/bin/
+          cp /mingw64/bin/libwinpthread-1.dll $GITHUB_WORKSPACE/backend/bin/
+          cp /mingw64/bin/zlib1.dll $GITHUB_WORKSPACE/backend/bin/
+
+      - name: Run init
+        run: bun run init
+
+      - name: Windows - Build
+        if: runner.os == 'Windows'
+        run: |
+          venv\\Scripts\\activate && bun run build
+
+      - name: Linux/macOS - Build
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          source venv/bin/activate
+          bun run build
+
+      - name: Windows - Sign artifact
+        if: runner.os == 'Windows'
+        uses: azure/trusted-signing-action@v0.4.0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+          certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+          files-folder: "build//app.dist"
+          files-folder-filter: exe
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
+      - name: Windows - Install NSIS
+        if: runner.os == 'Windows'
+        run: choco install nsis
+
+      - name: Windows - Create Installer
+        if: runner.os == 'Windows'
+        run: |
+          & "C:\Program Files (x86)\NSIS\makensis.exe" installer.nsis
+
+      - name: Windows - Sign Installer
+        if: runner.os == 'Windows'
+        uses: azure/trusted-signing-action@v0.4.0
+        with:
+          azure-tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          azure-client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          azure-client-secret: ${{ secrets.AZURE_CLIENT_SECRET }}
+          endpoint: ${{ secrets.AZURE_ENDPOINT }}
+          trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
+          certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
+          files-folder: "."
+          files-folder-filter: "SDT2_Installer.exe"
+          file-digest: SHA256
+          timestamp-rfc3161: http://timestamp.acs.microsoft.com
+          timestamp-digest: SHA256
+
+      - name: macOS - Sign artifact
+        if: matrix.os == 'macos-latest'
+        run: |
+          echo ${{ secrets.MACOS_CERTIFICATE }} | base64 --decode > certificate.p12
+          security create-keychain -p "${{ secrets.MACOS_CI_KEYCHAIN_PWD }}" build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "${{ secrets.MACOS_CI_KEYCHAIN_PWD }}" build.keychain
+          security import certificate.p12 -k build.keychain -P "${{ secrets.MACOS_CERTIFICATE_PWD }}" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "${{ secrets.MACOS_CI_KEYCHAIN_PWD }}" build.keychain
+          /usr/bin/codesign -f -o runtime --timestamp -s "${{ secrets.MACOS_CERTIFICATE_NAME }}" --deep ./build/SDT2.app
+          /usr/bin/codesign -vvv ./build/SDT2.app
+
+      - name: macOS - Compress app
+        if: runner.os == 'macOS'
+        run: |
+          ditto -c -k --keepParent "build/SDT2.app" "build/SDT2.app.zip"
+
+      - name: macOS - Notarize artifact
+        if: matrix.os == 'macos-latest'
+        run: |
+          xcrun notarytool store-credentials "notarytool-profile" --apple-id "${{ secrets.MACOS_NOTARIZATION_APPLE_ID }}" --team-id "${{ secrets.MACOS_NOTARIZATION_TEAM_ID }}" --password "${{ secrets.MACOS_NOTARIZATION_PWD }}" > /dev/null
+          xcrun notarytool submit "build/SDT2.app.zip" --keychain-profile "notarytool-profile" --wait
+          xcrun stapler staple "./build/SDT2.app"
+
+      - name: Ubuntu - Prepare artifact
+        if: runner.os == 'Linux'
+        run: chmod +x build/SDT2 && tar -czvf build/SDT2.tar.gz -C build SDT2
+
+      - name: Windows - Prepare standalone artifact
+        if: runner.os == 'Windows'
+        run: |
+          powershell Compress-Archive -Path build\\app.dist\\* -DestinationPath SDT2.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-build-output
+          path: |
+            ${{ runner.os == 'Windows' && 'SDT2.zip' || '' }}
+            ${{ runner.os == 'Windows' && 'SDT2_Installer.exe' || '' }}
+            ${{ runner.os == 'macOS' && 'build/SDT2.app.zip' || '' }}
+            ${{ runner.os == 'Linux' && 'build/SDT2.tar.gz' || '' }}
