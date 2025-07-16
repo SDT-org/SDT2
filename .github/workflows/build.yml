@@ -48,6 +48,8 @@ jobs:
       - name: Linux/macOS - Download lz-ani binaries
         if: runner.os != 'Windows'
         run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm mingw-w64-x86_64-gcc
           mkdir -p backend/bin
           # Download lz-ani binaries from their releases
           if [ "$RUNNER_OS" == "macOS" ]; then
