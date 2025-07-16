@@ -53,7 +53,7 @@ jobs:
           if [ "$RUNNER_OS" == "macOS" ]; then
             if [ "${{ matrix.os }}" == "macos-13" ]; then
                curl -L https://github.com/refresh-bio/LZ-ANI/releases/download/v1.2.3/lz-ani-v1.2.3-x64_mac.tar.gz -o backend/bin/lz-ani.tar.gz
-               echo "Ye21bb34956255b4c314959a634c7b6022790076b1412f81a46cf27e7625c6d3d  backend/bin/lz-ani.tar.gz" | shasum -a 256 -c -
+               echo "e21bb34956255b4c314959a634c7b6022790076b1412f81a46cf27e7625c6d3d  backend/bin/lz-ani.tar.gz" | shasum -a 256 -c -
             else
                curl -L https://github.com/refresh-bio/LZ-ANI/releases/download/v1.2.3/lz-ani-v1.2.3-arm64_mac.tar.gz -o backend/bin/lz-ani.tar.gz
                echo "cb4f3a8b2a1c03fdfa5801b35059131ec40e4df7a8e7b8f0fbda7c13677d34c8  backend/bin/lz-ani.tar.gz" | shasum -a 256 -c -
