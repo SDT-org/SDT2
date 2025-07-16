@@ -79,7 +79,7 @@ jobs:
           # Clone and build lz-ani
           git clone --depth 1 --branch v1.2.3 https://github.com/refresh-bio/LZ-ANI.git /tmp/lz-ani
           cd /tmp/lz-ani
-          EXPECTED_COMMIT="c898e1e"
+          EXPECTED_COMMIT="c898e1e6a91dd90c3926fef583feb9ee5a04bb03"
           ACTUAL_COMMIT=$(git rev-parse HEAD)
           [ "$ACTUAL_COMMIT" = "$EXPECTED_COMMIT" ] || { echo "Tag commit mismatch"; exit 1; }
           make
