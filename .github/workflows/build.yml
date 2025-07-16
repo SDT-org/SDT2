@@ -76,7 +76,7 @@ jobs:
           ACTUAL_COMMIT=$(git rev-parse HEAD)
           [ "$ACTUAL_COMMIT" = "$EXPECTED_COMMIT" ] || { echo "Tag commit mismatch"; exit 1; }
           # Skip compiler version check for Windows
-          sed -i '/$(call SET_COMPILER_VERSION_ALLOWED, GCC, Darwin_arm64, 11, 13)/a $(call SET_COMPILER_VERSION_ALLOWED, GCC, Windows_x86_64, 7, 20)' makefile
+          sed -i '/$(call SET_COMPILER_VERSION_ALLOWED, GCC, Darwin_arm64, 11, 13)/a $(call SET_COMPILER_VERSION_ALLOWED, GCC, MINGW64_NT_x86_64, 7, 20)' makefile
           make
           # Copy binary and required DLLs
           mkdir -p $GITHUB_WORKSPACE/backend/bin
