@@ -1,9 +1,9 @@
-
 name: Build SDT2
 on:
   push:
     tags:
       - "*"
+  workflow_dispatch: # Allow manual triggering
 
 jobs:
   build:
@@ -27,6 +27,47 @@ jobs:
       - name: macOS - Install dependencies
         if: runner.os == 'macOS'
         run: brew install autoconf automake libtool
+
+      - name: Linux/macOS - Download lz-ani binaries
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p backend/bin
+          # Download lz-ani binaries from their releases
+          # Update this URL to the actual lz-ani release URL
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            curl -L https://github.com/omaralvarez/lz-ani/releases/latest/download/lz-ani-macos -o backend/bin/lz-ani
+          else
+            curl -L https://github.com/omaralvarez/lz-ani/releases/latest/download/lz-ani-linux -o backend/bin/lz-ani
+          fi
+          chmod +x backend/bin/lz-ani
+
+      - name: Windows - Setup MSYS2
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-make
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-zlib
+            git
+            make
+
+      - name: Windows - Build lz-ani
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
+        run: |
+          # Clone and build lz-ani
+          git clone https://github.com/omaralvarez/lz-ani.git /tmp/lz-ani
+          cd /tmp/lz-ani
+          make
+          # Copy binary and required DLLs
+          mkdir -p $GITHUB_WORKSPACE/backend/bin
+          cp lz-ani.exe $GITHUB_WORKSPACE/backend/bin/
+          cp /mingw64/bin/libwinpthread-1.dll $GITHUB_WORKSPACE/backend/bin/
+          cp /mingw64/bin/zlib1.dll $GITHUB_WORKSPACE/backend/bin/
 
       - name: Run init
         run: bun run init
@@ -78,8 +119,8 @@ jobs:
           endpoint: ${{ secrets.AZURE_ENDPOINT }}
           trusted-signing-account-name: ${{ secrets.AZURE_CODE_SIGNING_NAME }}
           certificate-profile-name: ${{ secrets.AZURE_CERT_PROFILE_NAME }}
-          files-folder: '.'
-          files-folder-filter: 'SDT2_Installer.exe'
+          files-folder: "."
+          files-folder-filter: "SDT2_Installer.exe"
           file-digest: SHA256
           timestamp-rfc3161: http://timestamp.acs.microsoft.com
           timestamp-digest: SHA256
