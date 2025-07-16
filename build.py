@@ -63,7 +63,7 @@ def make_platform_build_command(settings):
     )
     parasail_library_name = get_parasail_library_name()
     parasail_library_path = get_parasail_library_path(parasail_library_name)
-    
+
     # Handle lz-ani binaries
     lzani_binary_name = get_lzani_binary_name()
     lzani_binary_path = os.path.join("backend", "bin", lzani_binary_name)
@@ -76,29 +76,35 @@ def make_platform_build_command(settings):
         f"--include-data-dir={bio_data_src_path}={bio_data_dest_path}",
         f"--include-data-file={parasail_library_path}={os.path.join('parasail', parasail_library_name)}",
     ]
-    
+
     # Include lz-ani executable
     if os.path.exists(lzani_binary_path):
-        command.append(f"--include-data-file={lzani_binary_path}={os.path.join('backend', 'bin', lzani_binary_name)}")
-    
+        command.append(
+            f"--include-data-file={lzani_binary_path}={os.path.join('backend', 'bin', lzani_binary_name)}"
+        )
+
     # Include Windows DLLs for lz-ani
     if sys.platform == "win32":
         for dll in ["libwinpthread-1.dll", "zlib1.dll"]:
             dll_path = os.path.join("backend", "bin", dll)
             if os.path.exists(dll_path):
-                command.append(f"--include-data-file={dll_path}={os.path.join('backend', 'bin', dll)}")
-    
-    command.extend([
-        "--include-data-dir=gui=gui",
-        "--include-data-dir=docs=docs",
-        "--include-data-dir=assets=assets",
-        "--nofollow-import-to=matplotlib",
-        "--nofollow-import-to=doctest",
-        "--output-filename=SDT2",
-        f"--output-dir={build_path}",
-        "--assume-yes-for-downloads",
-        f"--report={report_path}",
-    ])
+                command.append(
+                    f"--include-data-file={dll_path}={os.path.join('backend', 'bin', dll)}"
+                )
+
+    command.extend(
+        [
+            "--include-data-dir=gui=gui",
+            "--include-data-dir=docs=docs",
+            "--include-data-dir=assets=assets",
+            "--nofollow-import-to=matplotlib",
+            "--nofollow-import-to=doctest",
+            "--output-filename=SDT2",
+            f"--output-dir={build_path}",
+            "--assume-yes-for-downloads",
+            f"--report={report_path}",
+        ]
+    )
 
     match platform.system():
         case "Windows":
@@ -117,7 +123,7 @@ def make_platform_build_command(settings):
                 ]
             )
         case _:
-            command.extend(["--standalone", "--onefile"])
+            command.extend(["--standalone"])
 
     command.append(path)
 
