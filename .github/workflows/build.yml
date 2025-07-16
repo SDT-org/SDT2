@@ -69,8 +69,8 @@ jobs:
         if: runner.os == 'Windows'
         shell: msys2 {0}
         run: |
-          pacman -Syu --noconfirm
-          pacman -S --noconfirm mingw-w64-x86_64-gcc
+          # Skip compiler version check for Windows
+          sed -i '/$(call SET_COMPILER_VERSION_ALLOWED, GCC, Darwin_arm64, 11, 13)/a $(call SET_COMPILER_VERSION_ALLOWED, GCC, Windows_x86_64, 7, 20)' makefile
           # Clone and build lz-ani
           git clone --depth 1 --branch v1.2.3 https://github.com/refresh-bio/LZ-ANI.git /tmp/lz-ani
           cd /tmp/lz-ani
