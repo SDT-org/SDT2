@@ -69,23 +69,52 @@ jobs:
         if: runner.os == 'Windows'
         shell: msys2 {0}
         run: |
-          # Clone and build lz-ani
           git clone --depth 1 --branch v1.2.3 https://github.com/refresh-bio/LZ-ANI.git /tmp/lz-ani
           cd /tmp/lz-ani
           EXPECTED_COMMIT="c898e1e6a91dd90c3926fef583feb9ee5a04bb03"
           ACTUAL_COMMIT=$(git rev-parse HEAD)
           [ "$ACTUAL_COMMIT" = "$EXPECTED_COMMIT" ] || { echo "Tag commit mismatch"; exit 1; }
-          sed -i '/$(call CHECK_COMPILER_VERSION)/s/^/# /' makefile
-          sed -i 's/-DMI_MALLOC_OVERRIDE//g' refresh.mk
-          sed -i 's|zlib-ng/build-vs/zlib.h|zlib-ng/build-g++/zlib-ng/zlib.h|g' libs/refresh/compression/lib/file_wrapper.h
+          # use custom Makefile
+          cat > makefile <<'EOF'
+          SRC_DIR := src
+          OBJ_DIR := obj
+          BIN_DIR := bin
+          CC := gcc
+          CXX := g++
+          CFLAGS := -Wall -O2 -std=c11
+          CXXFLAGS := -Wall -O2 -std=c++20
+          LDFLAGS := -static-libgcc -static-libstdc++ -lz
+          ifeq ($(OS),Windows_NT)
+              EXE_EXT := .exe
+          else
+              EXE_EXT :=
+          endif
+          C_SOURCES := $(wildcard $(SRC_DIR)/*.c)
+          CPP_SOURCES := $(wildcard $(SRC_DIR)/*.cpp)
+          C_OBJECTS := $(C_SOURCES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+          CPP_OBJECTS := $(CPP_SOURCES:$(SRC_DIR)/%.cpp=$(OBJ_DIR)/%.o)
+          OBJECTS := $(C_OBJECTS) $(CPP_OBJECTS)
+          all: $(BIN_DIR)/lz-ani$(EXE_EXT)
+          $(BIN_DIR)/lz-ani$(EXE_EXT): $(OBJECTS) | $(BIN_DIR)
+              $(CXX) -o $@ $(OBJECTS) $(LDFLAGS)
+          $(OBJ_DIR):
+              mkdir -p $(OBJ_DIR)
+          $(BIN_DIR):
+              mkdir -p $(BIN_DIR)
+          $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
+              $(CC) $(CFLAGS) -c $< -o $@
+          $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJ_DIR)
+              $(CXX) $(CXXFLAGS) -c $< -o $@
+          clean:
+              rm -rf $(OBJ_DIR)
+              rm -rf $(BIN_DIR)
+          .PHONY: all clean
+          EOF
           make
-          # Copy binary and required DLLs
           mkdir -p $GITHUB_WORKSPACE/backend/bin
-          cp bin/lz-ani $GITHUB_WORKSPACE/backend/bin/lz-ani.exe
+          cp bin/lz-ani.exe $GITHUB_WORKSPACE/backend/bin/
           cp /mingw64/bin/libwinpthread-1.dll $GITHUB_WORKSPACE/backend/bin/
           cp /mingw64/bin/zlib1.dll $GITHUB_WORKSPACE/backend/bin/
-          cp /mingw64/bin/libgcc_s_seh-1.dll $GITHUB_WORKSPACE/backend/bin/
-          cp /mingw64/bin/libstdc++-6.dll $GITHUB_WORKSPACE/backend/bin/
 
       - name: Windows - Build
         if: runner.os == 'Windows'
