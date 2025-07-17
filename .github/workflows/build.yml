@@ -166,7 +166,7 @@ jobs:
 
       - name: Ubuntu - Prepare artifact
         if: runner.os == 'Linux'
-        run: chmod +x build/app.dist/SDT2 && tar -czvf build/SDT2.tar.gz build/app.dist
+        run: chmod +x build/SDT2 && tar -czvf build/SDT2.tar.gz -C build SDT2
 
       - name: Windows - Prepare standalone artifact
         if: runner.os == 'Windows'
