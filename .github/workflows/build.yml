@@ -69,17 +69,23 @@ jobs:
         if: runner.os == 'Windows'
         shell: msys2 {0}
         run: |
+          # Clone and build lz-ani
           git clone --depth 1 --branch v1.2.3 https://github.com/refresh-bio/LZ-ANI.git /tmp/lz-ani
           cd /tmp/lz-ani
           EXPECTED_COMMIT="c898e1e6a91dd90c3926fef583feb9ee5a04bb03"
           ACTUAL_COMMIT=$(git rev-parse HEAD)
           [ "$ACTUAL_COMMIT" = "$EXPECTED_COMMIT" ] || { echo "Tag commit mismatch"; exit 1; }
-          cp $GITHUB_WORKSPACE/lzani-makefile ./makefile
+          sed -i '/$(call CHECK_COMPILER_VERSION)/s/^/# /' makefile
+          sed -i 's/-DMI_MALLOC_OVERRIDE//g' refresh.mk
+          sed -i 's|zlib-ng/build-vs/zlib.h|zlib-ng/build-g++/zlib-ng/zlib.h|g' libs/refresh/compression/lib/file_wrapper.h
           make
+          # Copy binary and required DLLs
           mkdir -p $GITHUB_WORKSPACE/backend/bin
-          cp bin/lz-ani.exe $GITHUB_WORKSPACE/backend/bin/
+          cp bin/lz-ani $GITHUB_WORKSPACE/backend/bin/lz-ani.exe
           cp /mingw64/bin/libwinpthread-1.dll $GITHUB_WORKSPACE/backend/bin/
           cp /mingw64/bin/zlib1.dll $GITHUB_WORKSPACE/backend/bin/
+          cp /mingw64/bin/libgcc_s_seh-1.dll $GITHUB_WORKSPACE/backend/bin/
+          cp /mingw64/bin/libstdc++-6.dll $GITHUB_WORKSPACE/backend/bin/
 
       - name: Windows - Build
         if: runner.os == 'Windows'

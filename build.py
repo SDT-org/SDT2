@@ -85,7 +85,12 @@ def make_platform_build_command(settings):
 
     # Include Windows DLLs for lz-ani
     if sys.platform == "win32":
-        for dll in ["libwinpthread-1.dll", "zlib1.dll"]:
+        for dll in [
+            "libwinpthread-1.dll",
+            "zlib1.dll",
+            "libgcc_s_seh-1.dll",
+            "libstdc++-6.dll",
+        ]:
             dll_path = os.path.join("backend", "bin", dll)
             if os.path.exists(dll_path):
                 command.append(
