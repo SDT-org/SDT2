@@ -88,7 +88,7 @@ export const ColorPicker = ({
               <>
                 <ColorArea
                   xChannel="saturation"
-                  yChannel="brightness"
+                  yChannel="lightness"
                   value={value}
                 >
                   <ColorThumb />
