@@ -155,6 +155,7 @@ const ParasailSettings = ({
                 color: "#666",
                 marginBottom: "0.25rem",
                 display: "block",
+                
               }}
             >
               Scoring Matrix
@@ -162,6 +163,7 @@ const ParasailSettings = ({
             <Select
               id="scoring-matrix"
               wide
+              shouldFlip={false}
               data-compact
               selectedKey={
                 docState.parasail_settings?.scoring_matrix ||
@@ -188,8 +190,8 @@ const ParasailSettings = ({
                     <Text slot="description">
                       <small>
                         <em>
-                          Recommended - amino acid {!isAminoAcid ? "not " : ""}
-                          detected in data
+                          Recommended-
+                          {!isAminoAcid ? "NT sequences  " : "AA sequences"}
                         </em>
                       </small>
                     </Text>

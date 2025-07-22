@@ -644,7 +644,6 @@ class Api:
     def get_clustermap_data(self, doc_id: str, threshold: float, method: str):
         doc = get_document(doc_id)
 
-        ##i think we can just grab this in transformations
         doc_paths = build_document_paths(doc.tempdir_path)
         matrix_df = read_csv_matrix(doc_paths.matrix)
         matrix_np = matrix_df.to_numpy()

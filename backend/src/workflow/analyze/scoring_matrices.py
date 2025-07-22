@@ -27,20 +27,15 @@ SIMPLE_MATRICES = {
         "name": "BLAST (5/-4)", 
         "match": 5,
         "mismatch": -4,
-        "description": "NCBI BLAST default for nucleotide comparison"
+        "description": "NCBI BLAST"
     },
     "megablast_2_-3": {
         "name": "MegaBLAST (2/-3)",
         "match": 2,
         "mismatch": -3,
-        "description": "NCBI MegaBLAST for highly similar sequences"
+        "description": "NCBI MegaBLAST"
     },
-    "vsearch_2_-4": {
-        "name": "VSEARCH (2/-4)",
-        "match": 2,
-        "mismatch": -4,
-        "description": "VSEARCH default for sequence clustering"
-    }
+
 }
 
 PAM_MATRICES = {
