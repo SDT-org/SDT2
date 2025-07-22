@@ -89,7 +89,7 @@ export const Heatmap = ({
 
   const discreteColorScale: ColorScaleArray = React.useMemo(() => {
     const scales = [
-      [metaData.minVal, "#CDF0FF"],
+      [settings.vmin, "#CDF0FF"],
       [settings.cutoff_2, "#20B9FF"],
       [settings.cutoff_2, "#C3E8D3"],
       [settings.cutoff_1, "#009942"],
@@ -100,7 +100,7 @@ export const Heatmap = ({
       scales.push([100, "#FF6167"]);
     }
     return scales as ColorScaleArray;
-  }, [settings.cutoff_1, settings.cutoff_2, metaData.minVal]);
+  }, [settings.cutoff_1, settings.cutoff_2, settings.vmin]);
 
   const colorScales = React.useMemo(
     () => ({

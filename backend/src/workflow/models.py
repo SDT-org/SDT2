@@ -11,7 +11,7 @@ from document_paths import DocumentPaths
 
 class LzaniSettings(NamedTuple):
     exec_path: str
-    score_type: Literal["ani"] | Literal["gani"] | Literal["tani"]
+    score_type: Literal["ani"]  | Literal["tani"]
     aw: int | None = None
     am: int | None = None
     mal: int | None = None
@@ -74,7 +74,7 @@ class WorkflowRun:
     def set_progress(self, progress: int | None):
         old_progress = self.progress
         self.progress = progress
-        if progress and old_progress is not None and progress > old_progress:
+        if progress and old_progress is not None and progress > old_progress:   
             print(f"Progress: {progress}%")
 
     def valid(self) -> bool:
