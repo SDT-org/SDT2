@@ -1,3 +1,4 @@
+from tempfile import TemporaryDirectory
 import time
 import numpy as np
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
@@ -11,7 +12,11 @@ import json
 from Bio import SeqIO, Seq, SeqRecord
 from workflow.models import RunSettings, WorkflowResult
 from transformations import read_csv_matrix
+from joblib import Memory
 
+
+cache_dir = TemporaryDirectory()
+memory = Memory(cache_dir.name, verbose=1)
 
 def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
     distance_matrix = result.distance_matrix
@@ -48,7 +53,7 @@ def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
         distance_matrix=reordered_matrix, reordered_ids=reordered_ids
     )
 
-
+@memory.cache
 def calculate_linkage(distance_matrix: np.ndarray, method: str) -> np.ndarray:
  
     if method in ["ward", "centroid", "median"]:
@@ -71,7 +76,7 @@ def calculate_linkage(distance_matrix: np.ndarray, method: str) -> np.ndarray:
     # print(method, metric, y)
     return linkage(y, method=method, metric=metric)
 
-
+@memory.cache
 def get_mds_coords(distance_mat):
     return MDS(
         n_components=2, dissimilarity="precomputed", random_state=42
