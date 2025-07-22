@@ -188,8 +188,10 @@ const ParasailSettings = ({
                     <Text slot="description">
                       <small>
                         <em>
-                          Recommended-
-                          {!isAminoAcid ? "NT sequences  " : "AA sequences"}
+                          Recommended for
+                          {!isAminoAcid
+                            ? " Nucletide datasets"
+                            : " Amino-acid datasets"}
                         </em>
                       </small>
                     </Text>

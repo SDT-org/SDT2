@@ -35,7 +35,7 @@ def run(
     print(f"\rNumber of pairs: {total_pairs}\r", flush=True)
 
     matrix_to_use = settings.parasail.scoring_matrix or (
-        "blosum62" if result.is_aa else "blast_5_-4"
+        "blosum62" if result.is_aa else "simple_2_-1"
     )
     open_penalty = settings.parasail.open_penalty or (10 if result.is_aa else 8)
     extend_penalty = settings.parasail.extend_penalty or 1

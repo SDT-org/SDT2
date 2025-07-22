@@ -107,7 +107,12 @@ export const ExportModal = ({
 
                   <div className={`${appState.dataExportPath ? groupCss : ""}`}>
                     {appState.dataExportPath ? (
-                      <div className="filename">{appState.dataExportPath}</div>
+                      <div className="filename">
+                        {appState.dataExportPath.replace(
+                          appState.config?.userPath || "",
+                          "~",
+                        )}
+                      </div>
                     ) : null}
                     <Button
                       type="button"
