@@ -1,3 +1,4 @@
+import React from "react";
 import { TabPanel } from "react-aria-components";
 import type { DocState, SetDocState } from "../appState";
 import { type DataSets, useDistributionState } from "../distributionState";
@@ -9,10 +10,18 @@ import { Violin } from "./Violin";
 const VisualizationSwitcher = ({
   activeDataSet,
   setActiveDataSet,
+  gcData,
 }: {
   activeDataSet: keyof DataSets;
   setActiveDataSet: React.Dispatch<keyof DataSets>;
+  gcData: number[];
 }) => {
+  React.useEffect(() => {
+    if (activeDataSet === "gc" && !gcData.some((value) => value > 0)) {
+      setActiveDataSet("scores");
+    }
+  }, [gcData, activeDataSet, setActiveDataSet]);
+
   return (
     <>
       <div className="group padded">
@@ -30,7 +39,7 @@ const VisualizationSwitcher = ({
               }
               items={Object.entries({
                 scores: "Scores",
-                gc: "GC",
+                ...(gcData.some((value) => value > 0) && { gc: "GC" }),
                 length: "Length",
               }).map(([id, name]) => ({
                 id,
@@ -89,6 +98,7 @@ export const DistributionPanels = ({
         setActiveDataSet={(value: keyof DataSets) =>
           updateDistributionState({ dataSet: value })
         }
+        gcData={dataSets.gc}
       />
     </>
   );
