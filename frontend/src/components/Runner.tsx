@@ -532,7 +532,7 @@ const LzaniSettings = ({
           />
           <NumberInput
             id="lzani-ar"
-            label="Anchor ratio"
+            label="Min end length"
             value={docState.lzani_settings?.ar || 3}
             onChange={(value) => {
               setDocState((previous) => ({
