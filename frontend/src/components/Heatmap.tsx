@@ -19,7 +19,8 @@ import type {
   MetaData,
 } from "../plotTypes";
 import { AlignmentStats } from "./AlignmentStats";
-import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
+//import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
+import { D3CanvasHeatmapOptimized } from "./D3CanvasHeatmapOptimized";
 import { D3SvgHeatmap } from "./D3SvgHeatmap";
 import { HeatmapSidebar } from "./HeatmapSidebar";
 
@@ -197,7 +198,7 @@ export const Heatmap = ({
                 />
               </>
             ) : (
-              <D3CanvasHeatmap
+              <D3CanvasHeatmapOptimized
                 data={heatmapData}
                 settings={settings}
                 tickText={tickText}
