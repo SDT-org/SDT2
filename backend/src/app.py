@@ -58,6 +58,9 @@ from transformations import (
     read_stats_csv,
 )
 from document_paths import ImageKey, build_document_paths
+from mime_setup import register_mimetypes
+
+register_mimetypes()
 
 is_compiled = "__compiled__" in globals()
 is_macos = platform.system() == "Darwin"
@@ -68,12 +71,6 @@ try:
     cpu_count = get_cpu_count()
 except:
     cpu_count = 1
-mimetypes.add_type("text/fasta", ".fasta")
-mimetypes.add_type("text/fasta", ".fas")
-mimetypes.add_type("text/fasta", ".faa")
-mimetypes.add_type("text/fasta", ".fnt")
-mimetypes.add_type("text/fasta", ".fa")
-mimetypes.add_type("application/vnd.sdt", ".sdt")
 window = None
 canceled = None
 start_time = None  # TODO: move into workflow
@@ -236,19 +233,23 @@ def handle_open_file(filepath: str, doc_id: str | None):
 
 def get_lzani_exec_path():  # TODO: move to dynamic config? or may need to be configurable by user
     lzani_executable_name = "lz-ani.exe" if is_windows else "lz-ani"
-    
+
     if is_compiled:
         # When compiled, the executable is in the same directory as the main exe
         # but we need to go to backend/bin relative to the exe location
         exe_dir = os.path.dirname(sys.executable)
-        lzani_executable_path = os.path.join(exe_dir, "backend", "bin", lzani_executable_name)
+        lzani_executable_path = os.path.join(
+            exe_dir, "backend", "bin", lzani_executable_name
+        )
     else:
         # When running from source
-        current_script_dir = os.path.dirname(os.path.abspath(__file__))  # .../backend/src
+        current_script_dir = os.path.dirname(
+            os.path.abspath(__file__)
+        )  # .../backend/src
         backend_dir = os.path.dirname(current_script_dir)  # .../backend
         bin_dir = os.path.join(backend_dir, "bin")  # .../backend/bin
         lzani_executable_path = os.path.join(bin_dir, lzani_executable_name)
-    
+
     if not os.path.exists(lzani_executable_path):
         raise FileNotFoundError(
             f"LZ-ANI executable not found at {lzani_executable_path}"
@@ -550,27 +551,29 @@ class Api:
         identity_scores = []
         all_scores = []
         id_map = {id: idx for idx, id in enumerate(ids)}
-        
+
         # Check if LZANI was used (from run settings if available)
         is_lzani = False
         if file_exists(doc_paths.run_settings):
             run_settings = read_json_file(doc_paths.run_settings)
             is_lzani = run_settings.get("analysis_method") == "lzani"
-        
+
         # The matrix contains distance values, convert to similarity for identity scores
         for i in range(len(ids)):
             for j in range(i):
                 # Convert distance to similarity (identity score)
                 identity_score = 100 - data[i, j]
                 all_scores.append(identity_score)
-                
+
                 # For LZANI, filter out values below 70% threshold
                 if not (is_lzani and identity_score < 1):
-                    identity_scores.append([id_map[ids[i]], id_map[ids[j]], identity_score])
-        
+                    identity_scores.append(
+                        [id_map[ids[i]], id_map[ids[j]], identity_score]
+                    )
+
         # Calculate unaligned count after collecting all scores
         unaligned_count = len([s for s in all_scores if s < 3]) if is_lzani else 0
-        
+
         # Convert matrix to triangle format for heatmap (converts distance to similarity)
         heat_data = DataFrame(data, index=ids)
         heat_data = to_triangle(heat_data)
@@ -579,11 +582,13 @@ class Api:
         heat_data_np = heat_data.to_numpy()
         diag_mask = eye(heat_data_np.shape[0], dtype=bool)
         heat_data_no_diag = where(diag_mask, nan, heat_data_np)
-        
+
         # For LZ-ANI, use the lowest value above 10% (to exclude weird low values like 0.05%)
         if is_lzani:
             # Filter out values below 10% for min calculation
-            valid_values = heat_data_no_diag[~np.isnan(heat_data_no_diag) & (heat_data_no_diag >= 10)]
+            valid_values = heat_data_no_diag[
+                ~np.isnan(heat_data_no_diag) & (heat_data_no_diag >= 10)
+            ]
             if valid_values.size > 0:
                 min_val = int(nanmin(valid_values))
             else:
@@ -591,7 +596,7 @@ class Api:
                 min_val = int(nanmin(heat_data_no_diag))
         else:
             min_val = int(nanmin(heat_data_no_diag))
-        
+
         max_val = int(nanmax(heat_data_no_diag))
 
         parsedData = heat_data.values.tolist()
@@ -600,11 +605,11 @@ class Api:
         metadata = dict(minVal=min_val, maxVal=max_val)
         if file_exists(doc_paths.run_settings):
             metadata["run"] = read_json_file(doc_paths.run_settings)
-        
+
         # Add unaligned count for LZANI
         if is_lzani:
             metadata["unaligned_count"] = unaligned_count
-        
+
         # Helper function to calculate statistics
         def calculate_stats(values):
             if len(values) == 0:
@@ -617,19 +622,23 @@ class Api:
                 "max": float(np.max(values)),
                 "q1": float(np.percentile(values, 25)),
                 "q3": float(np.percentile(values, 75)),
-                "count": len(values)
+                "count": len(values),
             }
-        
+
         # Calculate statistics for scores
         if identity_scores:
             scores_array = np.array([score[2] for score in identity_scores])
             metadata["distribution_stats"] = calculate_stats(scores_array)
-        
+
         # Calculate statistics for GC and length if stats are available
         if not stats_df.empty:
             stats_array = np.array(stats_df.values)
-            metadata["gc_stats"] = calculate_stats(stats_array[:, 1])  # GC values for all sequences in dataset
-            metadata["length_stats"] = calculate_stats(stats_array[:, 2])  # Length values for all sequences in dataset
+            metadata["gc_stats"] = calculate_stats(
+                stats_array[:, 1]
+            )  # GC values for all sequences in dataset
+            metadata["length_stats"] = calculate_stats(
+                stats_array[:, 2]
+            )  # Length values for all sequences in dataset
 
         # Return all data
         data_to_dump = dict(
@@ -666,7 +675,9 @@ class Api:
         seqid_clusters_df["original_cluster"] = seqid_clusters_df["cluster"]
 
         # Get the linkage-based order to group sequences by cluster
-        new_order = cluster.get_linkage_method_order(matrix_np, method, sorted_ids, threshold)
+        new_order = cluster.get_linkage_method_order(
+            matrix_np, method, sorted_ids, threshold
+        )
 
         # Create a mapping from old index to new index
         reorder_indices = [sorted_ids.index(id) for id in new_order]
@@ -679,17 +690,18 @@ class Api:
 
         # Now assign sequential cluster numbers based on visual order
         # creates a mapping of sequence ID to its cluster
-        id_to_cluster = {row["id"]: row["cluster"] for _, row in seqid_clusters_df.iterrows()}
+        id_to_cluster = {
+            row["id"]: row["cluster"] for _, row in seqid_clusters_df.iterrows()
+        }
 
         # get cluster stats  clusters
         seen_clusters = {}
         next_cluster_num = 1
-        
-        total_clusters= len(seqid_clusters_df["cluster"].unique())
+
+        total_clusters = len(seqid_clusters_df["cluster"].unique())
 
         largest_cluster = max(seqid_clusters_df["cluster"].value_counts())
- 
-       
+
         cluster_counts = seqid_clusters_df["cluster"].value_counts()
         singleton_clusters = cluster_counts[cluster_counts == 1]
         singletons = len(singleton_clusters)
@@ -722,7 +734,6 @@ class Api:
             "clusterData": cluster_data,
             "cluster_stats": cluster_stats,
         }
-
 
     def new_doc(self):
         id = make_doc_id()
