@@ -24,9 +24,11 @@
     "start": "bun run check && concurrently --raw --kill-others --success first --names \"frontend,backend\" \"bun run frontend:dev\" \"bun run backend\"",
     "start:debug": "DEBUG=true bun run start",
     "start:tools": "concurrently --raw --kill-others \"bunx react-devtools\" \"REACT_DEV_TOOLS=true bun run start:debug\"",
-    "test:backend": "./venv/bin/python -m unittest backend/tests/*.py",
+    "test:backend": "./venv/bin/python -m unittest discover -s backend/tests -p '*.py'",
+    "test:backend:coverage": "./venv/bin/python -m coverage run -m unittest discover -s backend/tests -p '*.py' && ./venv/bin/python -m coverage report && ./venv/bin/python -m coverage html",
     "test:frontend": "bun test",
-    "test": "bun run test:frontend && bun run test:backend"
+    "test": "bun run test:frontend && bun run test:backend",
+    "test:coverage": "bun run test:frontend && bun run test:backend:coverage"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.1",

@@ -4,10 +4,9 @@ import unittest
 import numpy
 from unittest.mock import patch
 
-current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
-sys.path.append(os.path.join(current_file_path, "../src/"))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
 
-import cluster
+import workflow.cluster as cluster
 
 # Unwrap the original function to bypass joblib caching
 original_func = cluster.calculate_linkage.__wrapped__
@@ -16,14 +15,16 @@ original_func = cluster.calculate_linkage.__wrapped__
 class TestCluster(unittest.TestCase):
     def setUp(self):
         # Create a patcher that replaces the cached function with the unwrapped version
-        self.patcher = patch("cluster.calculate_linkage", original_func)
+        self.patcher = patch("workflow.cluster.calculate_linkage", original_func)
         self.patcher.start()
 
     def tearDown(self):
         self.patcher.stop()
 
     def test_calculate_linkage(self):
-        test_array = [[100, 90, 75], [90, 100, 90], [75, 90, 100]]
+        # Convert similarity matrix to distance matrix (diagonal should be 0)
+        similarity_array = [[100, 90, 75], [90, 100, 90], [75, 90, 100]]
+        test_array = [[100 - val for val in row] for row in similarity_array]
         expected = dict(
             single=[[0.0, 1.0, 10.0, 2.0], [2.0, 3.0, 10.0, 3.0]],
             complete=[[0.0, 1.0, 10.0, 2.0], [2.0, 3.0, 25.0, 3.0]],
