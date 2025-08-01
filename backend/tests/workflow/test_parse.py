@@ -7,9 +7,7 @@ from unittest.mock import patch
 from numpy import ndarray
 from pandas.core.frame import DataFrame
 
-sys.path.append(
-    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "src"))
-)
+# Path setup handled by PYTHONPATH in package.json
 from workflow.runner import run_parse
 from workflow.models import WorkflowResult
 from mime_setup import register_mimetypes
@@ -236,6 +234,47 @@ class TestRunParseInitialState(unittest.TestCase):
 
             self.assertEqual(result.error, "TEST_ERROR")
             self.assertEqual(result, error_result)
+    
+    def test_missing_sequence_id_error(self):
+        """Test MISSING_SEQUENCE_ID error case."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".fasta", delete=False) as tmp_file:
+            tmp_file.write(">seq1\nATCG\n>\nGCTA\n")
+            tmp_file_path = tmp_file.name
+        
+        try:
+            result = run_parse(tmp_file_path)
+            self.assertEqual(result.error, "MISSING_SEQUENCE_ID")
+        finally:
+            os.unlink(tmp_file_path)
+    
+    def test_amino_acid_detection_on_third_sequence(self):
+        """Test amino acid detection logic that runs every 3rd sequence."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".fasta", delete=False) as tmp_file:
+            tmp_file.write(">seq1\nATCG\n>seq2\nGCTA\n>seq3\nEFIL\n")
+            tmp_file_path = tmp_file.name
+        
+        try:
+            result = run_parse(tmp_file_path)
+            self.assertIsNone(result.error)
+            self.assertTrue(result.is_aa)
+        finally:
+            os.unlink(tmp_file_path)
+    
+    def test_helper_functions(self):
+        """Test unused helper functions for complete coverage."""
+        from workflow.parse import format_sequence_record, residue_check
+        from Bio.Seq import Seq
+        from Bio.SeqRecord import SeqRecord
+        
+        # Test format_sequence_record
+        record = SeqRecord(Seq("atcg-123"), id="test seq", description="desc")
+        formatted = format_sequence_record(record)
+        self.assertEqual(formatted.id, "test_seq")
+        self.assertEqual(str(formatted.seq), "ATCG")
+        
+        # Test residue_check
+        self.assertTrue(residue_check("EFIL"))
+        self.assertFalse(residue_check("ATCG"))
 
 
 if __name__ == "__main__":

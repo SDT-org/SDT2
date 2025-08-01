@@ -4,7 +4,7 @@ import unittest
 import numpy
 from unittest.mock import patch
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
+# Path setup handled by PYTHONPATH in package.json
 
 import workflow.cluster as cluster
 

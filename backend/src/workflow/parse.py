@@ -18,7 +18,10 @@ def run(result: WorkflowResult, fasta_path: str) -> WorkflowResult:
         return result._replace(error="INVALID_FILE_TYPE")
 
     try:
-        unparsed_records = SeqIO.parse(fasta_path, "fasta")
+        # unparsed_records = SeqIO.parse(fasta_path, "fasta")
+        with open(fasta_path, "r") as fasta_file:
+            unparsed_records = SeqIO.parse(fasta_file, "fasta")
+
     except Exception as exception:
         return result._replace(error=f"INVALID_FASTA_FORMAT: {exception}")
 
