@@ -6,7 +6,7 @@ from itertools import combinations_with_replacement as cwr
 from numpy import zeros
 
 from workflow.models import RunSettings, WorkflowResult
-from .scoring_matrices import SIMPLE_MATRICES, ALL_MATRICES
+from workflow.analyze.scoring_matrices import SIMPLE_MATRICES
 
 
 def run(
@@ -39,10 +39,10 @@ def run(
     )
     open_penalty = settings.parasail.open_penalty or (10 if result.is_aa else 8)
     extend_penalty = settings.parasail.extend_penalty or 1
-    
+
     # For alignment export, we need to use traceback regardless of SIMD support
     use_traceback = settings.export_alignments or not supports_striped_32()
-    
+
     bound_process_pair = partial(
         process_pair,
         matrix_id=matrix_to_use,
@@ -56,6 +56,7 @@ def run(
     # Create alignment export directory if needed
     if settings.export_alignments and settings.alignment_export_path:
         import os
+
         os.makedirs(settings.alignment_export_path, exist_ok=True)
 
     with Pool(settings.parasail.process_count) as pool:
@@ -87,7 +88,15 @@ def supports_striped_32():
     )
 
 
-def process_pair(id_sequence_pair, matrix_id, open_penalty, extend_penalty, use_traceback=False, export_alignments=False, alignment_export_path=""):
+def process_pair(
+    id_sequence_pair,
+    matrix_id,
+    open_penalty,
+    extend_penalty,
+    use_traceback=False,
+    export_alignments=False,
+    alignment_export_path="",
+):
     id1 = id_sequence_pair[0][0]
     id2 = id_sequence_pair[0][1]
     seq1 = id_sequence_pair[1][0]
@@ -99,7 +108,9 @@ def process_pair(id_sequence_pair, matrix_id, open_penalty, extend_penalty, use_
     # Handle simple matrices
     if matrix_id in SIMPLE_MATRICES:
         matrix_info = SIMPLE_MATRICES[matrix_id]
-        scoring_matrix = parasail.matrix_create("ACGT", matrix_info["match"], matrix_info["mismatch"])
+        scoring_matrix = parasail.matrix_create(
+            "ACGT", matrix_info["match"], matrix_info["mismatch"]
+        )
     else:
         # Handle built-in parasail matrices
         matrix_map = {
@@ -118,18 +129,21 @@ def process_pair(id_sequence_pair, matrix_id, open_penalty, extend_penalty, use_
             "nuc44": parasail.nuc44,
         }
         scoring_matrix = matrix_map.get(matrix_id, parasail.blosum62)
-    
+
     # Use traceback if requested or if SIMD not supported
     if use_traceback:
         result = get_traceback_score(
             seq1, seq2, open_penalty, extend_penalty, scoring_matrix
         )
-        
+
         # Export alignment if requested
         if export_alignments and alignment_export_path:
             try:
-                alignment_result = parasail.nw_trace(seq1, seq2, open_penalty, extend_penalty, scoring_matrix)
+                alignment_result = parasail.nw_trace(
+                    seq1, seq2, open_penalty, extend_penalty, scoring_matrix
+                )
                 import os
+
                 filename = f"{id1}_vs_{id2}.txt".replace("/", "_").replace("\\", "_")
                 filepath = os.path.join(alignment_export_path, filename)
                 with open(filepath, "w") as f:

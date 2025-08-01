@@ -1,5 +1,3 @@
-import os
-import sys
 import unittest
 import numpy
 from unittest.mock import patch
@@ -47,7 +45,3 @@ class TestCluster(unittest.TestCase):
         for method in expected:
             result = cluster.calculate_linkage(numpy.array(test_array), method)
             numpy.testing.assert_array_equal(result, expected[method])
-
-
-if __name__ == "__main__":
-    unittest.main()
