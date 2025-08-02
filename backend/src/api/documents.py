@@ -1,12 +1,20 @@
 import os
 from app_settings import add_recent_file
-from constants import default_window_title
+from config import default_window_title
 from debug import open_doc_folder as debug_open_doc_folder
 from document_state import save_document_settings
 from save_document import pack_document
 from utils import make_doc_id
-from app_state import get_state, reset_state as app_reset_state, new_document, get_document, update_document, remove_document
+from app_state import (
+    get_state,
+    reset_state as app_reset_state,
+    new_document,
+    get_document,
+    update_document,
+    remove_document,
+)
 from app_globals import assert_app_window
+from config import window_title_suffix
 
 
 class Documents:
@@ -56,7 +64,6 @@ class Documents:
         remove_document(doc_id)
 
     def set_window_title(self, title: str):
-        from app import window_title_suffix
         assert_app_window().title = f"{title}{window_title_suffix}"
 
     def open_doc_folder(self, doc_id: str):

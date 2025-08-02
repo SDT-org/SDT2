@@ -3,7 +3,7 @@ import mimetypes
 import urllib.parse
 
 from app_settings import update_app_settings
-from constants import matrix_filetypes
+from config import matrix_filetypes
 from document_paths import ImageKey, ImageFormat, build_document_paths
 from export import build_source_target_pairs, do_export, save_image_from_api
 from utils import open_folder
@@ -45,7 +45,9 @@ class Export:
         )
         return True
 
-    def save_raster_image(self, doc_id: str, data: str, key: ImageKey, format: ImageFormat):
+    def save_raster_image(
+        self, doc_id: str, data: str, key: ImageKey, format: ImageFormat
+    ):
         doc = get_document(doc_id)
         save_image_from_api(
             doc=doc,

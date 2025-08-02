@@ -46,7 +46,9 @@ class Data:
                 all_scores.append(identity_score)
 
                 if not (is_lzani and identity_score < 1):
-                    identity_scores.append([id_map[ids[i]], id_map[ids[j]], identity_score])
+                    identity_scores.append(
+                        [id_map[ids[i]], id_map[ids[j]], identity_score]
+                    )
 
         unaligned_count = len([s for s in all_scores if s < 3]) if is_lzani else 0
 

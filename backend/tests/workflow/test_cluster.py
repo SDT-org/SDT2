@@ -1,8 +1,6 @@
 import unittest
 import numpy as np
-import pandas as pd
 import tempfile
-import os
 import json
 import shutil
 from unittest.mock import patch, MagicMock, mock_open
@@ -138,7 +136,7 @@ class TestCluster(unittest.TestCase):
         with patch("workflow.cluster.get_mds_coords", return_value=None):
             with self.assertRaises(ValueError) as cm:
                 calculate_linkage(self.sample_distance_matrix, "ward")
-            
+
             self.assertIn("MDS failed to compute coordinates", str(cm.exception))
 
     def test_get_mds_coords(self):
@@ -311,7 +309,7 @@ class TestCluster(unittest.TestCase):
         """Test calculate_linkage with all available methods"""
         similarity_array = [[100, 90, 75], [90, 100, 90], [75, 90, 100]]
         test_array = [[100 - val for val in row] for row in similarity_array]
-        
+
         expected = dict(
             single=[[0.0, 1.0, 10.0, 2.0], [2.0, 3.0, 10.0, 3.0]],
             complete=[[0.0, 1.0, 10.0, 2.0], [2.0, 3.0, 25.0, 3.0]],
