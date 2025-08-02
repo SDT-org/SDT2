@@ -135,11 +135,9 @@ class TestCluster(unittest.TestCase):
 
     def test_calculate_linkage_ward_method_mds_failure(self):
         # Test that when get_mds_coords returns None, calculate_linkage raises ValueError
-        original_func = calculate_linkage.__wrapped__
-        
         with patch("workflow.cluster.get_mds_coords", return_value=None):
             with self.assertRaises(ValueError) as cm:
-                original_func(self.sample_distance_matrix, "ward")
+                calculate_linkage(self.sample_distance_matrix, "ward")
             
             self.assertIn("MDS failed to compute coordinates", str(cm.exception))
 
