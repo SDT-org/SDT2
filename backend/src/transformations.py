@@ -4,7 +4,7 @@ import pandas as pd
 from pandas import DataFrame
 
 
-def to_triangle(matrix, convert_to_similarity=True, fill_value=nan | None):
+def to_triangle(matrix, convert_to_similarity=True, fill_value=nan or None):
 
     is_dataframe = isinstance(matrix, DataFrame)
 

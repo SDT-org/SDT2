@@ -2,8 +2,6 @@ import unittest
 import numpy
 from unittest.mock import patch
 
-# Path setup handled by PYTHONPATH in package.json
-
 import workflow.cluster as cluster
 
 # Unwrap the original function to bypass joblib caching
