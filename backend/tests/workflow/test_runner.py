@@ -261,3 +261,7 @@ class TestOutputSummary(unittest.TestCase):
 
         self.assertIn("UNKNOWN", summary)
         self.assertIn("unknown_method", summary)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -279,3 +279,7 @@ class TestRunParseInitialState(unittest.TestCase):
         # Test residue_check
         self.assertTrue(residue_check("EFIL"))
         self.assertFalse(residue_check("ATCG"))
+
+
+if __name__ == "__main__":
+    unittest.main()
