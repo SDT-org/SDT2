@@ -4,7 +4,7 @@ import pandas as pd
 from pandas import DataFrame
 
 
-def to_triangle(matrix, convert_to_similarity=True, fill_value=nan):
+def to_triangle(matrix, convert_to_similarity=True, fill_value=nan | None):
 
     is_dataframe = isinstance(matrix, DataFrame)
 
@@ -123,10 +123,10 @@ def lzani_tsv_to_distance_matrix(results_tsv_path, ids_tsv_path, score_column="a
     # LZANI has slightly different scores for query v. reference vs. reference v query
     # Only average if both directions have valid alignments (>1% threshold)
     matrix_transposed = matrix_np.T
-    
+
     # Create a new matrix for the symmetric result
     symmetric_matrix = np.zeros_like(matrix_np)
-    
+
     for i in range(matrix_np.shape[0]):
         for j in range(matrix_np.shape[1]):
             if i == j:
@@ -134,7 +134,7 @@ def lzani_tsv_to_distance_matrix(results_tsv_path, ids_tsv_path, score_column="a
             else:
                 forward = matrix_np[i, j]
                 reverse = matrix_transposed[i, j]
-                
+
                 # If both directions have valid alignments (>1%), average them
                 if forward > 1 and reverse > 1:
                     symmetric_matrix[i, j] = (forward + reverse) / 2
@@ -147,7 +147,7 @@ def lzani_tsv_to_distance_matrix(results_tsv_path, ids_tsv_path, score_column="a
                 # If neither has valid alignment, set to 0
                 else:
                     symmetric_matrix[i, j] = 0
-    
+
     matrix_np = symmetric_matrix
 
     # Convert similarity to distance
