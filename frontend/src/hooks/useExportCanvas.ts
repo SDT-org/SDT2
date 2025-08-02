@@ -63,7 +63,7 @@ export const useExportCanvas = (
         }, 60);
       });
 
-      await window.pywebview.api.save_raster_image(
+      await window.pywebview.api.export.save_raster_image(
         docState.id,
         data,
         key,

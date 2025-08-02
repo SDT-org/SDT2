@@ -46,7 +46,7 @@ export const Document = ({
         event.key === "i"
       ) {
         event.preventDefault();
-        window.pywebview.api.open_doc_folder(id);
+        window.pywebview.api.documents.open_doc_folder(id);
       }
     };
 

@@ -100,7 +100,7 @@
     document.addEventListener("DOMContentLoaded", function () {
       function checkPywebview() {
         if (window.pywebview) {
-          window.pywebview.api.app_config().then((config) => {
+          window.pywebview.api.system.get_app_config().then((config) => {
             document.getElementById("app-version").innerText =
               `Version ${config.appVersion}`;
           });

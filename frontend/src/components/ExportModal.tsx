@@ -118,9 +118,9 @@ export const ExportModal = ({
                       type="button"
                       onPress={() => {
                         setExportState("idle");
-                        window.pywebview.api
+                        window.pywebview.api.files
                           .select_path_dialog(appState.dataExportPath)
-                          .then((result) => {
+                          .then((result: string) => {
                             if (!result) {
                               return;
                             }

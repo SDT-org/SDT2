@@ -19,16 +19,20 @@ export const saveDocument = async (
     }
   }
 
-  return window.pywebview.api
+  return window.pywebview.api.documents
     .save_doc_settings(docState)
     .then(() =>
-      window.pywebview.api.save_doc(docState.id, filename, saveAs || false),
+      window.pywebview.api.documents.save_doc(
+        docState.id,
+        filename,
+        saveAs || false,
+      ),
     );
 };
 
 export const closeDocument = (docId: string) =>
-  window.pywebview.api.close_doc(docId);
+  window.pywebview.api.documents.close_doc(docId);
 
-export const newDocument = () => window.pywebview.api.new_doc();
+export const newDocument = () => window.pywebview.api.documents.new_doc();
 export const getDocument = (docId: string) =>
-  window.pywebview.api.get_doc(docId);
+  window.pywebview.api.documents.get_doc(docId);

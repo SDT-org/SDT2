@@ -35,18 +35,20 @@ export const RunnerPerformance = ({
         return;
       }
 
-      window.pywebview.api.get_available_memory().then((available_memory) =>
-        setDocState((previous) => ({
-          ...previous,
-          compute_stats: {
-            ...(previous.compute_stats || {
-              recommended_cores: 1,
-              required_memory: 1,
-            }),
-            available_memory,
-          },
-        })),
-      );
+      window.pywebview.api.system
+        .get_available_memory()
+        .then((available_memory) =>
+          setDocState((previous) => ({
+            ...previous,
+            compute_stats: {
+              ...(previous.compute_stats || {
+                recommended_cores: 1,
+                required_memory: 1,
+              }),
+              available_memory,
+            },
+          })),
+        );
     }, 3000);
 
     return () => clearInterval(id);

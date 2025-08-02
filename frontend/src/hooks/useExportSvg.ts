@@ -32,7 +32,11 @@ export const useExportSvg = (
         return;
       }
       running.current = true;
-      await window.pywebview.api.save_svg_element(docState.id, selector, key);
+      await window.pywebview.api.export.save_svg_element(
+        docState.id,
+        selector,
+        key,
+      );
       markTabAsRendered(docState.dataView);
       running.current = false;
     };

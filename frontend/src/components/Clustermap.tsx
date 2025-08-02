@@ -44,7 +44,7 @@ export const Clustermap = ({
   React.useEffect(() => {
     const start = performance.now();
     loaderRef.current?.setAttribute("data-hidden", "false");
-    window.pywebview.api
+    window.pywebview.api.data
       .get_clustermap_data(
         docState.id,
         docState.clustermap.threshold,

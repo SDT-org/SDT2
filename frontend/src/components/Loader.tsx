@@ -39,16 +39,18 @@ export const Loader = ({
 
   React.useEffect(() => {
     const handler = () => {
-      window.pywebview.api.get_workflow_run_status(docId).then((data) => {
-        setStage(data.stage);
-        setProgress(data.progress);
+      window.pywebview.api.workflow
+        .get_workflow_run_status(docId)
+        .then((data) => {
+          setStage(data.stage);
+          setProgress(data.progress);
 
-        // TODO: start passing down an active workflow state from app tabs so this isn't needed
-        updateDocState({
-          ...(progress !== undefined && { progress: data.progress }),
-          stage: data.stage,
+          // TODO: start passing down an active workflow state from app tabs so this isn't needed
+          updateDocState({
+            ...(progress !== undefined && { progress: data.progress }),
+            stage: data.stage,
+          });
         });
-      });
     };
     const id = setInterval(handler, 120);
     return () => clearInterval(id);
@@ -107,7 +109,7 @@ export const Loader = ({
               )
             ) {
               setCanceling(true);
-              window.pywebview.api.cancel_run(docId, "preserve");
+              window.pywebview.api.workflow.cancel_run(docId, "preserve");
             }
           }}
           isDisabled={canceling}

@@ -23,7 +23,7 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
   // so we aren't parsing it out here.
   React.useEffect(() => {
     setLoading(true);
-    window.pywebview.api
+    window.pywebview.api.data
       .get_data(docState.id)
       .then(async (rawData) => {
         const parsedResponse: GetDataResponse = JSON.parse(

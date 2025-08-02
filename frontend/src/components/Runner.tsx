@@ -707,7 +707,7 @@ const RunnerSettings = ({
                     type="button"
                     onPress={async () => {
                       const path =
-                        await window.pywebview.api.select_path_dialog(
+                        await window.pywebview.api.files.select_path_dialog(
                           docState.alignmentExportPath || "",
                         );
                       if (path) {

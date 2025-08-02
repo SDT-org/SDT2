@@ -112,11 +112,11 @@ export const MainMenu = createHideableComponent(() => {
       showExportModal: true,
     }));
 
-  const onAbout = () => window.pywebview.api.show_about();
-  const onManual = () => window.pywebview.api.show_manual();
+  const onAbout = () => window.pywebview.api.windows.show_about();
+  const onManual = () => window.pywebview.api.windows.show_manual();
   const onExit = () => {
     if (confirm("Are you sure you want to exit?")) {
-      window.pywebview.api.close_app();
+      window.pywebview.api.system.close_app();
     }
   };
 

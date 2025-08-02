@@ -116,7 +116,7 @@ export const Exporter = ({
       exportStep.current = "Finalizing";
       swapDataView(initialTab.current);
 
-      const result = await window.pywebview.api.export({
+      const result = await window.pywebview.api.export.export_data({
         doc_id: docState.id,
         export_path: appState.dataExportPath,
         output_cluster: true,

@@ -56,14 +56,14 @@ export const useExportPlotly = (
       const data = await Plotly.toImage(getPlotlyElement(), config);
 
       if (format === "svg") {
-        await window.pywebview.api.save_svg_data(
+        await window.pywebview.api.export.save_svg_data(
           docState.id,
           data,
           key,
           format,
         );
       } else {
-        await window.pywebview.api.save_raster_image(
+        await window.pywebview.api.export.save_raster_image(
           docState.id,
           data,
           key,

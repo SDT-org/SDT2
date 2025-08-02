@@ -2,7 +2,7 @@ import type { DocState } from "../appState";
 import messages from "../messages";
 
 export const startRun = (docState: DocState) =>
-  window.pywebview.api
+  window.pywebview.api.workflow
     .start_workflow_run({
       doc_id: docState.id,
       cluster_method: docState.enableClustering
@@ -44,5 +44,5 @@ export const startRun = (docState: DocState) =>
 
 export const cancelRun = (
   docId: string,
-  run_settings: Parameters<typeof window.pywebview.api.cancel_run>[1],
-) => window.pywebview.api.cancel_run(docId, run_settings);
+  run_settings: Parameters<typeof window.pywebview.api.workflow.cancel_run>[1],
+) => window.pywebview.api.workflow.cancel_run(docId, run_settings);

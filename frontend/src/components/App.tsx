@@ -37,8 +37,8 @@ export const App = () => {
     }
 
     Promise.all([
-      window.pywebview.api.app_config(),
-      window.pywebview.api.app_settings(),
+      window.pywebview.api.system.get_app_config(),
+      window.pywebview.api.system.get_app_settings(),
     ]).then(
       ([
         config,
@@ -70,7 +70,7 @@ export const App = () => {
       return;
     }
     if (appState.documents.length === 0) {
-      window.pywebview.api.new_doc();
+      window.pywebview.api.documents.new_doc();
       return;
     }
 
@@ -104,7 +104,9 @@ export const App = () => {
 
       const doc = findDoc(appState.activeDocumentId, appState.documents);
       if (doc) {
-        window.pywebview.api.set_window_title(doc.basename || "Untitled");
+        window.pywebview.api.documents.set_window_title(
+          doc.basename || "Untitled",
+        );
       }
     }, 0);
 
