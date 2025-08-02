@@ -11,6 +11,7 @@ from transformations import (
     read_csv_matrix,
     read_stats_csv,
     read_columns_csv,
+    read_tsv_file,
     lzani_tsv_to_distance_matrix,
 )
 
@@ -213,14 +214,30 @@ class TestTransformations(unittest.TestCase):
         with open(tsv_path, "w") as f:
             f.write(test_data)
 
-        # read_tsv_file calls read_csv_file with sep="\t" and extract_column
-        # We need to pass the right parameters through read_csv_file
+        # Test read_tsv_file function directly - calls read_csv_file with sep='\t'
+        # Since it has no header parameter set, it will have default header=None
+        # So we need to explicitly pass header=0 through read_csv_file
         from transformations import read_csv_file
 
         result = read_csv_file(tsv_path, sep="\t", header=0, extract_column="id")
 
         expected = ["A", "B"]
         self.assertEqual(result, expected)
+
+    def test_read_tsv_file_no_extraction(self):
+        tsv_path = os.path.join(self.temp_dir, "test.tsv")
+        test_data = "id\tvalue\nA\t100\nB\t200"
+
+        with open(tsv_path, "w") as f:
+            f.write(test_data)
+
+        # Test without column extraction - should return DataFrame
+        result = read_tsv_file(tsv_path)
+
+        if not isinstance(result, DataFrame):
+            raise TypeError("Expected result to be a DataFrame")
+
+        self.assertEqual(result.shape, (3, 2))  # 3 rows (including header), 2 columns
 
     def test_lzani_tsv_to_distance_matrix_basic(self):
         # Create test files
