@@ -1,5 +1,4 @@
 from datetime import datetime
-from multiprocessing.pool import Pool
 import os
 import platform
 import time

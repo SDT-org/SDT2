@@ -27,13 +27,13 @@ def to_triangle(matrix, convert_to_similarity=True, fill_value=nan or None):
     upper_indices = triu_indices(result.shape[0], k=1)
     if fill_value is None:
         result[upper_indices] = None
-        result = np.where(np.isnan(result), None, result)
+        result = np.where(np.isnan(result), None, result)  # type: ignore[arg-type]
     else:
         result[upper_indices] = fill_value
 
     # Return in original format
     if is_dataframe:
-        return DataFrame(result, index=index, columns=columns)
+        return DataFrame(result, index=index, columns=columns)  # type: ignore[arg-type]
     else:
         return result
 

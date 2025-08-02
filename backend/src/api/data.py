@@ -21,6 +21,10 @@ class Data:
         doc_paths = build_document_paths(doc.tempdir_path)
 
         df = read_csv_matrix(doc_paths.matrix)
+        if not isinstance(df, DataFrame) or df.empty:
+            raise Exception(
+                f"Matrix file is empty or not a valid DataFrame: {doc_paths.matrix}"
+            )
         ids = df.index.tolist()
         update_document(doc_id, sequences_count=len(ids))
         data = df.to_numpy()
@@ -55,6 +59,9 @@ class Data:
         heat_data = DataFrame(data, index=ids)
         heat_data = to_triangle(heat_data)
 
+        if not isinstance(heat_data, DataFrame):
+            raise Exception("Heat data is not a valid DataFrame.")
+
         heat_data_np = heat_data.to_numpy()
         diag_mask = eye(heat_data_np.shape[0], dtype=bool)
         heat_data_no_diag = where(diag_mask, nan, heat_data_np)
@@ -71,7 +78,6 @@ class Data:
             min_val = int(nanmin(heat_data_no_diag))
 
         max_val = int(nanmax(heat_data_no_diag))
-
         parsedData = heat_data.values.tolist()
 
         metadata = dict(minVal=min_val, maxVal=max_val)

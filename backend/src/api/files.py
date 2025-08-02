@@ -1,6 +1,7 @@
 import mimetypes
 import os
 from shutil import copy
+from pandas.core.frame import DataFrame
 import webview
 from platformdirs import user_documents_dir
 from api.workflow import get_compute_stats
@@ -56,6 +57,9 @@ def handle_open_file(filepath: str, doc_id: str | None):
         copy(filepath, unique_dir)
         df = read_csv_matrix(filepath)
         # Test that the file is gonna work in get_data
+        if not isinstance(df, DataFrame) or df.empty:
+            remove_recent_file(filepath)
+            raise Exception(f"File is not a valid matrix file: {filepath}")
         df.index.tolist()
         data = df.to_numpy()
         diag_mask = eye(data.shape[0], dtype=bool)

@@ -55,7 +55,7 @@ class TestLzaniAnalyze(unittest.TestCase):
         mock_ids = ["seq1", "seq2"]
         mock_transform.return_value = (mock_matrix, mock_ids)
 
-        result = run(
+        run(
             self.mock_result,
             self.mock_settings,
             self.mock_set_progress,
@@ -79,7 +79,7 @@ class TestLzaniAnalyze(unittest.TestCase):
         mock_process.kill.return_value = None
         mock_popen.return_value = mock_process
 
-        result = run(
+        run(
             self.mock_result,
             self.mock_settings,
             self.mock_set_progress,
@@ -98,7 +98,7 @@ class TestLzaniAnalyze(unittest.TestCase):
         mock_process.returncode = 1
         mock_popen.return_value = mock_process
 
-        result = run(
+        run(
             self.mock_result,
             self.mock_settings,
             self.mock_set_progress,
@@ -124,7 +124,7 @@ class TestLzaniAnalyze(unittest.TestCase):
 
         mock_transform.return_value = ([[0, 10], [10, 0]], ["seq1", "seq2"])
 
-        result = run(
+        run(
             self.mock_result,
             self.mock_settings,
             self.mock_set_progress,
@@ -156,7 +156,7 @@ class TestLzaniAnalyze(unittest.TestCase):
 
         mock_transform.return_value = ([[0, 10], [10, 0]], ["seq1", "seq2"])
 
-        result = run(
+        run(
             self.mock_result,
             self.mock_settings,
             self.mock_set_progress,
