@@ -4,7 +4,7 @@ from config import default_window_title
 from debug import open_doc_folder as debug_open_doc_folder
 from document_state import save_document_settings
 from save_document import pack_document
-from utils import make_doc_id
+from utils import make_doc_id, open_folder
 from app_state import (
     get_state,
     reset_state as app_reset_state,
@@ -68,4 +68,5 @@ class Documents:
 
     def open_doc_folder(self, doc_id: str):
         doc = get_document(doc_id)
-        return debug_open_doc_folder(doc)
+        path = doc.tempdir_path
+        open_folder(path)
