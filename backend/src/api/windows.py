@@ -1,9 +1,14 @@
-from app import about_window, manual_window
+import webview
+
+from file_utils import get_html_path
+import app_globals
 
 
 class Windows:
-    def show_about(self):
-        about_window()
+    def about_window(self):
+        webview.create_window(
+            "About", get_html_path("about.html"), js_api=app_globals.js_api
+        )
 
-    def show_manual(self):
-        manual_window()
+    def manual_window(self):
+        webview.create_window("SDT2 Manual", get_html_path("manual.html"))

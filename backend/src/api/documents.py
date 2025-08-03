@@ -1,7 +1,6 @@
 import os
 from app_settings import add_recent_file
 from config import default_window_title
-from debug import open_doc_folder as debug_open_doc_folder
 from document_state import save_document_settings
 from save_document import pack_document
 from utils import make_doc_id, open_folder

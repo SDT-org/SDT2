@@ -5,14 +5,10 @@ from pandas import DataFrame
 from numpy import eye, where, nan, nanmin, nanmax
 
 from document_paths import build_document_paths
-from file_utils import read_json_file
+from file_utils import file_exists, read_json_file
 from transformations import to_triangle, read_csv_matrix, read_stats_csv
 from workflow import cluster
 from app_state import get_document, update_document
-
-
-def file_exists(path):
-    return os.path.exists(os.path.join(os.path.dirname(__file__), path))
 
 
 class Data:

@@ -2,15 +2,17 @@ from typing import Dict
 from workflow.models import WorkflowResult, WorkflowRun
 
 app_window = None
+js_api = None
 canceled = None
 workflow_runs: Dict[str, WorkflowRun] = {}
 parsed_workflow_results: Dict[str, WorkflowResult] = {}
 
 
-def initialize_app_globals(window):
-    global app_window, canceled, workflow_runs, parsed_workflow_results
+def initialize_app_globals(window, api):
+    global app_window, canceled, workflow_runs, parsed_workflow_results, js_api
 
     app_window = window
+    js_api = api
     canceled = None
     workflow_runs = {}
     parsed_workflow_results = {}

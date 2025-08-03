@@ -23,10 +23,9 @@ import platform
 import psutil
 import webview
 import json
-from config import dev_frontend_host, is_compiled, default_window_title, cpu_count
+from config import default_window_title, cpu_count
 from api import system, files, documents, workflow, data, export, windows
-from utils import file_exists
-
+from file_utils import get_html_path
 
 register_mimetypes()
 
@@ -67,15 +66,6 @@ class Api:
         self.windows = windows.Windows()
 
 
-def get_html_path(filename="index.html"):
-    if is_compiled:
-        if file_exists(f"./gui/{filename}"):
-            return f"./gui/{filename}"
-        raise Exception(f"{filename} not found")
-    else:
-        return f"{dev_frontend_host}/{filename}"
-
-
 def push_backend_state(window: webview.Window):
     state = get_state()
     dict_state = lambda t: {
@@ -91,14 +81,6 @@ def push_backend_state(window: webview.Window):
 def on_closed():
     do_cancel_run()
     os._exit(0)
-
-
-def about_window():
-    webview.create_window("About", get_html_path("about.html"), js_api=api)
-
-
-def manual_window():
-    webview.create_window("SDT2 Manual", get_html_path("manual.html"))
 
 
 if __name__ == "__main__":
@@ -118,7 +100,7 @@ if __name__ == "__main__":
     )
     app_window.events.closed += on_closed
 
-    initialize_app_globals(window=app_window)
+    initialize_app_globals(window=app_window, api=api)
 
     initialize_app_state(
         debug=os.getenv("DEBUG", "false").lower() == "true",
