@@ -2,8 +2,6 @@ import os
 import sys
 import json
 
-from utils import file_exists
-
 current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(current_file_path, "../../"))
 sys.path.append(os.path.join(current_file_path, "."))
@@ -27,6 +25,7 @@ import webview
 import json
 from config import dev_frontend_host, is_compiled, default_window_title, cpu_count
 from api import system, files, documents, workflow, data, export, windows
+from utils import file_exists
 
 
 register_mimetypes()
