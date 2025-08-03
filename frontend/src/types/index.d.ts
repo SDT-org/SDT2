@@ -5,7 +5,7 @@ import type {
   SyncProgressEvent,
   SyncStateEvent,
 } from "../appState";
-import type { RunSettings } from "../components/Runner";
+import type { RunSettings } from "../components/app/Runner";
 import { DistributionState } from "../distributionState";
 import type {
   ClusterDataItem,
