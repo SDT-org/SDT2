@@ -2,6 +2,8 @@ import os
 import sys
 import json
 
+from utils import file_exists
+
 current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(current_file_path, "../../"))
 sys.path.append(os.path.join(current_file_path, "."))
@@ -24,6 +26,8 @@ import psutil
 import webview
 import json
 from config import dev_frontend_host, is_compiled, default_window_title, cpu_count
+from api import system, files, documents, workflow, data, export, windows
+
 
 register_mimetypes()
 
@@ -53,9 +57,6 @@ def do_cancel_run():
     print("Run canceled")
 
 
-from api import system, files, documents, workflow, data, export, windows
-
-
 class Api:
     def __init__(self):
         self.system = system.System()
@@ -65,10 +66,6 @@ class Api:
         self.data = data.Data()
         self.export = export.Export()
         self.windows = windows.Windows()
-
-
-def file_exists(path):
-    return os.path.exists(os.path.join(os.path.dirname(__file__), path))
 
 
 def get_html_path(filename="index.html"):

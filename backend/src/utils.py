@@ -1,3 +1,4 @@
+import os
 import psutil
 from uuid import uuid4
 from hashlib import sha256
@@ -50,3 +51,7 @@ def open_folder(path: str):
 def friendly_total_time(total_time):
     m, s = divmod(total_time, 60)
     return f"{int(m)}m {s:.2f}s" if m > 0 else f"{s:.2f}s"
+
+
+def file_exists(path):
+    return os.path.exists(os.path.join(os.path.dirname(__file__), path))
