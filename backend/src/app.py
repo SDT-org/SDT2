@@ -67,12 +67,9 @@ class Api:
 
 
 def push_backend_state(window: webview.Window):
-    state = get_state()
-    dict_state = lambda t: {
-        f: [d._asdict() for d in getattr(t, f)] if f == "documents" else getattr(t, f)
-        for f in t._fields
-    }
-    js_app_state = json.dumps(dict(state=dict_state(state)))
+    state_dict = get_state()._asdict()
+    state_dict["documents"] = [d._asdict() for d in state_dict["documents"]]
+    js_app_state = json.dumps({"state": state_dict})
     window.evaluate_js(
         f"document.dispatchEvent(new CustomEvent('sync-state', {{ detail: {js_app_state} }}))"
     )

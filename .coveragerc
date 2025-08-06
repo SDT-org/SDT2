@@ -1,6 +1,6 @@
 [run]
 source = backend/src
-omit = 
+omit =
     */tests/*
     */test_*
     */__pycache__/*
@@ -8,6 +8,7 @@ omit =
 
 [report]
 exclude_lines =
+    if is_testing:
     pragma: no cover
     def __repr__
     if self.debug:

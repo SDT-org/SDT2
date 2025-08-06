@@ -23,3 +23,5 @@ __pycache__
 lib/SDT2/output
 nuitka-crash-report.xml
 .coverage
+profile.html
+profile.json

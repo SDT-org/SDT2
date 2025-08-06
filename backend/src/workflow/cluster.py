@@ -1,5 +1,6 @@
 from tempfile import TemporaryDirectory
 import time
+from typing import Callable
 import numpy as np
 from scipy.cluster.hierarchy import linkage, fcluster, dendrogram
 import pandas as pd
@@ -20,12 +21,13 @@ is_testing = "unittest" in sys.modules or any("test" in arg for arg in sys.argv)
 
 if is_testing:
     memory = Memory(location=None, verbose=0)
-else:
-    cache_dir = TemporaryDirectory()
-    memory = Memory(cache_dir.name, verbose=1)
+else:  # pragma: no cover
+    memory = Memory(TemporaryDirectory().name, verbose=1)
 
 
-def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
+def run(
+    result: WorkflowResult, settings: RunSettings, set_progress: Callable[[int], None]
+) -> WorkflowResult:
     distance_matrix = result.distance_matrix
     if distance_matrix is None:
         return result
@@ -42,14 +44,22 @@ def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
 
     Z = calculate_linkage(matrix_np, cluster_method)
 
+    set_progress(25)
+
+    # TODO: unused - remove?
     dendro = dendrogram(Z, no_plot=True)
 
     # optimally organize leave indicies for heatmap
     reordered_indices = hierarchy.leaves_list(
         hierarchy.optimal_leaf_ordering(Z, matrix_np)
     )
+
+    set_progress(50)
+
     # Reorder the matrix
     reordered_matrix = matrix_np[np.ix_(reordered_indices, reordered_indices)]
+
+    set_progress(75)
 
     if ordered_ids:
         reordered_ids = [ordered_ids[i] for i in reordered_indices]
@@ -57,6 +67,8 @@ def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
     else:
         reordered_matrix = matrix_np[np.ix_(reordered_indices, reordered_indices)]
         reordered_ids = reordered_indices
+
+    set_progress(100)
 
     return result._replace(
         distance_matrix=reordered_matrix, reordered_ids=reordered_ids

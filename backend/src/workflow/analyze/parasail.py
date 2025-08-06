@@ -1,4 +1,5 @@
 from multiprocessing.pool import Pool
+from multiprocessing.sharedctypes import Synchronized
 from typing import Callable
 import parasail
 from functools import partial
@@ -13,7 +14,7 @@ def run(
     result: WorkflowResult,
     settings: RunSettings,
     set_progress: Callable[[int], None],
-    canceled,
+    canceled: Synchronized,
 ) -> WorkflowResult:
     seq_ids = list(result.seq_dict.keys())
     seq_dict = result.seq_dict

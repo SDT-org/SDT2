@@ -39,6 +39,7 @@ class TestLzaniAnalyze(unittest.TestCase):
 
         self.mock_set_progress = Mock()
         self.mock_canceled = Mock()
+        self.mock_canceled.value = False
 
     @patch("workflow.analyze.lzani.lzani_tsv_to_distance_matrix")
     @patch("subprocess.Popen")
@@ -46,8 +47,11 @@ class TestLzaniAnalyze(unittest.TestCase):
         """Test successful lzani run."""
         # Mock subprocess
         mock_process = Mock()
-        mock_process.communicate.return_value = ("success output", "")
+        mock_stdout = Mock()
+        mock_stdout.__iter__ = Mock(return_value=iter(["success output\n"]))
+        mock_process.stdout = mock_stdout
         mock_process.returncode = 0
+        mock_process.wait.return_value = None
         mock_popen.return_value = mock_process
 
         # Mock transformation
@@ -71,11 +75,12 @@ class TestLzaniAnalyze(unittest.TestCase):
     def test_run_subprocess_timeout(self, mock_popen):
         """Test lzani timeout."""
         mock_process = Mock()
-        # First call raises timeout, second call (after kill) returns empty strings
-        mock_process.communicate.side_effect = [
-            subprocess.TimeoutExpired("lzani", 300),
-            ("", ""),
-        ]
+        mock_stdout = Mock()
+        mock_stdout.__iter__ = Mock(return_value=iter(["line1\n", "line2\n"]))
+        mock_process.stdout = mock_stdout
+
+        # First call to wait() raises timeout, second call (after kill) returns normally
+        mock_process.wait.side_effect = [subprocess.TimeoutExpired("lzani", 300), None]
         mock_process.kill.return_value = None
         mock_popen.return_value = mock_process
 
@@ -94,8 +99,13 @@ class TestLzaniAnalyze(unittest.TestCase):
     def test_run_subprocess_error(self, mock_popen):
         """Test lzani subprocess error."""
         mock_process = Mock()
-        mock_process.communicate.return_value = ("", "Error message")
+        mock_stdout = Mock()
+        mock_stdout.__iter__ = Mock(
+            return_value=iter(["Error message\n", "Another error line\n"])
+        )
+        mock_process.stdout = mock_stdout
         mock_process.returncode = 1
+        mock_process.wait.return_value = None
         mock_popen.return_value = mock_process
 
         run(
@@ -106,7 +116,7 @@ class TestLzaniAnalyze(unittest.TestCase):
         )
 
         self.mock_result._replace.assert_called_with(
-            error="Error running LZ-ANI: Error message"
+            error="Error running LZ-ANI: Error message\nAnother error line\n"
         )
 
     @patch("workflow.analyze.lzani.lzani_tsv_to_distance_matrix")
@@ -118,8 +128,11 @@ class TestLzaniAnalyze(unittest.TestCase):
         self.mock_settings.alignment_export_path = "/tmp/alignments"
 
         mock_process = Mock()
-        mock_process.communicate.return_value = ("success", "")
+        mock_stdout = Mock()
+        mock_stdout.__iter__ = Mock(return_value=iter(["success\n"]))
+        mock_process.stdout = mock_stdout
         mock_process.returncode = 0
+        mock_process.wait.return_value = None
         mock_popen.return_value = mock_process
 
         mock_transform.return_value = ([[0, 10], [10, 0]], ["seq1", "seq2"])
@@ -150,8 +163,11 @@ class TestLzaniAnalyze(unittest.TestCase):
         self.mock_settings.lzani.ar = 0.95
 
         mock_process = Mock()
-        mock_process.communicate.return_value = ("success", "")
+        mock_stdout = Mock()
+        mock_stdout.__iter__ = Mock(return_value=iter(["success\n"]))
+        mock_process.stdout = mock_stdout
         mock_process.returncode = 0
+        mock_process.wait.return_value = None
         mock_popen.return_value = mock_process
 
         mock_transform.return_value = ([[0, 10], [10, 0]], ["seq1", "seq2"])
@@ -171,6 +187,33 @@ class TestLzaniAnalyze(unittest.TestCase):
         self.assertIn("2", call_args)
         self.assertIn("--mal", call_args)
         self.assertIn("50", call_args)
+
+    @patch("subprocess.Popen")
+    def test_run_canceled(self, mock_popen):
+        """Test lzani run cancellation."""
+        mock_process = Mock()
+        mock_stdout = Mock()
+        mock_stdout.__iter__ = Mock(return_value=iter(["line1\n", "line2\n"]))
+        mock_process.stdout = mock_stdout
+        mock_process.kill.return_value = None
+        mock_process.wait.return_value = None
+        mock_popen.return_value = mock_process
+
+        # Set canceled to True
+        self.mock_canceled.value = True
+
+        run(
+            self.mock_result,
+            self.mock_settings,
+            self.mock_set_progress,
+            self.mock_canceled,
+        )
+
+        # Verify process was killed
+        mock_process.kill.assert_called_once()
+
+        # Verify result indicates cancellation
+        self.mock_result._replace.assert_called_with(error="LZ-ANI run was canceled")
 
 
 if __name__ == "__main__":

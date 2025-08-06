@@ -38,9 +38,10 @@ class TestCluster(unittest.TestCase):
 
         self.sample_ids = ["SeqA", "SeqB", "SeqC", "SeqD"]
 
-        # Create mock settings and result objects
         self.mock_settings = MagicMock(spec=RunSettings)
         self.mock_settings.cluster_method = "single"
+
+        self.mock_set_progress = MagicMock()
 
         self.mock_result = MagicMock(spec=WorkflowResult)
         self.mock_result.distance_matrix = self.sample_distance_matrix
@@ -65,7 +66,7 @@ class TestCluster(unittest.TestCase):
             is_aa=False,
         )
 
-        result = run(real_result, self.mock_settings)
+        result = run(real_result, self.mock_settings, self.mock_set_progress)
 
         # Should return a result with reordered matrix and ids
         self.assertIsNotNone(result.distance_matrix)
@@ -77,7 +78,7 @@ class TestCluster(unittest.TestCase):
     def test_run_with_none_matrix(self):
         self.mock_result.distance_matrix = None
 
-        result = run(self.mock_result, self.mock_settings)
+        result = run(self.mock_result, self.mock_settings, self.mock_set_progress)
 
         # Should return original result unchanged
         self.assertEqual(result, self.mock_result)
@@ -88,7 +89,7 @@ class TestCluster(unittest.TestCase):
         )
         self.mock_result.distance_matrix = df_matrix
 
-        result = run(self.mock_result, self.mock_settings)
+        result = run(self.mock_result, self.mock_settings, self.mock_set_progress)
 
         self.assertIsNotNone(result.distance_matrix)
         self.assertIsNotNone(result.reordered_ids)
@@ -98,7 +99,7 @@ class TestCluster(unittest.TestCase):
 
         real_result = WorkflowResult(
             seq_dict={},
-            ordered_ids=None,
+            ordered_ids=None,  # type: ignore[assignment]
             reordered_ids=[],
             min_score=0.0,
             max_sequence_length=1000,
@@ -109,7 +110,7 @@ class TestCluster(unittest.TestCase):
             is_aa=False,
         )
 
-        result = run(real_result, self.mock_settings)
+        result = run(real_result, self.mock_settings, self.mock_set_progress)
 
         self.assertIsNotNone(result.reordered_ids)
         # Should use indices instead of sequence IDs

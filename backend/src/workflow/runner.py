@@ -1,4 +1,5 @@
 from datetime import datetime
+from multiprocessing.sharedctypes import Synchronized
 import os
 import platform
 import time
@@ -29,7 +30,9 @@ def run_parse(fasta_path: str) -> WorkflowResult:
     return parse.run(result, fasta_path)
 
 
-def run_process(workflow_run: WorkflowRun, cancel_event) -> WorkflowResult:
+def run_process(
+    workflow_run: WorkflowRun, cancel_event: Synchronized
+) -> WorkflowResult:
     result = workflow_run.result
     settings = workflow_run.settings
 
@@ -54,7 +57,7 @@ def run_process(workflow_run: WorkflowRun, cancel_event) -> WorkflowResult:
         workflow_run.set_stage("Clustering")
         workflow_run.set_progress(None)
 
-        result = cluster.run(result, settings)
+        result = cluster.run(result, settings, workflow_run.set_progress)
         if result.error:
             return result
 
