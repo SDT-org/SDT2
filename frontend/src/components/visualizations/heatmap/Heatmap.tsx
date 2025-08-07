@@ -9,10 +9,6 @@ import {
   colorScales as defaultColorScales,
 } from "../../../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../../../constants";
-import {
-  type formatClustermapData,
-  formatHeatmapData,
-} from "./heatmapUtils";
 import { useMetrics, useSize } from "../../../hooks/heatmap";
 import { useHeatmapRenderToggle } from "../../../hooks/useHeatmapRenderToggle";
 import type {
@@ -25,6 +21,7 @@ import { AlignmentStats } from "../../stats/AlignmentStats";
 import { D3CanvasHeatmap } from "./D3CanvasHeatmap";
 import { D3SvgHeatmap } from "./D3SvgHeatmap";
 import { HeatmapSidebar } from "./HeatmapSidebar";
+import { type formatClustermapData, formatHeatmapData } from "./heatmapUtils";
 
 export type HeatmapRenderProps = {
   // TODO: just use settings

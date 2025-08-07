@@ -2,10 +2,10 @@ import * as d3 from "d3";
 import React from "react";
 import { distinctColor } from "../../../colors";
 import { plotFontMonospace } from "../../../constants";
-import { getCellMetrics } from "./heatmapUtils";
 import { useExportSvg } from "../../../hooks/useExportSvg";
 import type { MetaData } from "../../../plotTypes";
 import type { HeatmapRenderProps } from "./Heatmap";
+import { getCellMetrics } from "./heatmapUtils";
 
 const getMetricLabel = (metaData?: MetaData): string => {
   if (!metaData?.run) {

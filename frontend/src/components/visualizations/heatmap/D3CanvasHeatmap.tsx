@@ -2,8 +2,8 @@ import * as d3 from "d3";
 import React from "react";
 import { useExportCanvas } from "../../../hooks/useExportCanvas";
 import type { MetaData } from "../../../plotTypes";
-import { renderHeatmapCanvas } from "./canvasRenderer";
 import type { HeatmapRenderProps } from "./Heatmap";
+import { renderHeatmapCanvas } from "./canvasRenderer";
 
 const getMetricLabel = (metaData?: MetaData): string => {
   if (!metaData?.run) {
@@ -75,13 +75,6 @@ export const D3CanvasHeatmap = ({
   const plotSize = Math.min(width, height) - margin.left - margin.right;
   const cellSize = plotSize / tickText.length;
 
-  const scale = React.useMemo(
-    () => d3.scaleLinear().domain([maxVal, minVal]).range([0, cbarHeight]),
-    [minVal, maxVal, cbarHeight],
-  );
-
-  const tickValues = React.useMemo(() => scale.ticks(5), [scale]);
-
   const drawing = React.useRef(false);
 
   const drawCanvas = React.useCallback(() => {
@@ -144,9 +137,6 @@ export const D3CanvasHeatmap = ({
     exportCanvas,
     transform,
     data,
-    scale,
-    tickValues,
-    cellSize,
     cellSpace,
     showPercentIdentities,
     roundTo,
@@ -164,11 +154,10 @@ export const D3CanvasHeatmap = ({
     height,
     axis_labels,
     showscale,
-    plotSize,
     margin,
     minVal,
     maxVal,
-    settings?.colorScaleKey,
+    settings,
     clusterData,
     showLegend,
     showClusterCounts,

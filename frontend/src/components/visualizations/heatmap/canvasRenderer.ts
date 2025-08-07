@@ -1,12 +1,24 @@
 import * as d3 from "d3";
 import { distinctColor } from "../../../colors";
 import { plotFontMonospace } from "../../../constants";
-import { getCellMetrics } from "./heatmapUtils";
 import type { HeatmapRenderProps } from "./Heatmap";
+import { getCellMetrics } from "./heatmapUtils";
 
-interface CanvasRenderParams extends Omit<HeatmapRenderProps, 'onRenderComplete'> {
+interface CanvasRenderParams
+  extends Omit<
+    HeatmapRenderProps,
+    | "onRenderComplete"
+    | "showLegend"
+    | "showClusterCounts"
+    | "clusterData"
+    | "clusterCounts"
+  > {
   canvas: HTMLCanvasElement;
   transform: d3.ZoomTransform;
+  showLegend: HeatmapRenderProps["showLegend"] | undefined;
+  showClusterCounts: HeatmapRenderProps["showClusterCounts"] | undefined;
+  clusterData: HeatmapRenderProps["clusterData"] | undefined;
+  clusterCounts: HeatmapRenderProps["clusterCounts"] | undefined;
 }
 
 export const renderHeatmapCanvas = ({
@@ -59,7 +71,10 @@ export const renderHeatmapCanvas = ({
 
   const plotSize = Math.min(width, height) - margin.left - margin.right;
   const cellSize = plotSize / tickText.length;
-  const scale = d3.scaleLinear().domain([maxVal, minVal]).range([0, cbarHeight]);
+  const scale = d3
+    .scaleLinear()
+    .domain([maxVal, minVal])
+    .range([0, cbarHeight]);
   const tickValues = scale.ticks(5);
 
   // set zoom transform

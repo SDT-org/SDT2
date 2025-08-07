@@ -6,7 +6,6 @@ import {
 } from "../../../appState";
 import type { ColorScaleArray } from "../../../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../../../constants";
-import { formatClustermapData } from "../heatmap/heatmapUtils";
 import { useMetrics, useSize } from "../../../hooks/heatmap";
 import { useHeatmapRenderToggle } from "../../../hooks/useHeatmapRenderToggle";
 import type {
@@ -19,6 +18,7 @@ import type {
 import { ClusterStatsDisplay } from "../../stats/ClusterStats";
 import { D3CanvasHeatmap } from "../heatmap/D3CanvasHeatmap";
 import { D3SvgHeatmap } from "../heatmap/D3SvgHeatmap";
+import { formatClustermapData } from "../heatmap/heatmapUtils";
 import { ClustermapSidebar } from "./ClustermapSidebar";
 
 export const Clustermap = ({
