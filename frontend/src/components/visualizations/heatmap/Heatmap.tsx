@@ -112,15 +112,19 @@ export const Heatmap = ({
     }),
     [discreteColorScale],
   );
-  let colorScale = colorScales[settings.colorScaleKey];
-  if (settings.reverse) {
-    colorScale = [...colorScale]
-      .reverse()
-      .map((data, i) => [
-        (colorScale[i] ?? colorScale[0])[0],
-        data[1],
-      ]) as ColorScaleArray;
-  }
+
+  const colorScale = React.useMemo(() => {
+    let scale = colorScales[settings.colorScaleKey];
+    if (settings.reverse) {
+      scale = [...scale]
+        .reverse()
+        .map((data, i) => [
+          (scale[i] ?? scale[0])[0],
+          data[1],
+        ]) as ColorScaleArray;
+    }
+    return scale;
+  }, [colorScales, settings.colorScaleKey, settings.reverse]);
 
   const heatmapData = React.useMemo(
     () => formatHeatmapData(data, settings, colorScale),
