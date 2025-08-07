@@ -5,6 +5,7 @@ import { useGetData } from "../hooks/useGetData";
 import { Clustermap } from "./Clustermap";
 import { DistributionPanels } from "./DistributionPanels";
 import { Heatmap } from "./Heatmap";
+import { UMAP } from "./UMAP";
 
 export const Viewer = ({
   docState,
@@ -95,6 +96,30 @@ export const Viewer = ({
                 <span>Clustermap</span>
               </div>
             </Tab>
+            <Tab id="umap">
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}
+              >
+                <svg
+                  height={12}
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 30 30"
+                  aria-hidden={true}
+                  color="currentcolor"
+                >
+                  <circle cx="4" cy="4" r="2" fill="currentColor" />
+                  <circle cx="12" cy="8" r="2" fill="currentColor" />
+                  <circle cx="20" cy="6" r="2" fill="currentColor" />
+                  <circle cx="8" cy="14" r="2" fill="currentColor" />
+                  <circle cx="16" cy="18" r="2" fill="currentColor" />
+                  <circle cx="24" cy="16" r="2" fill="currentColor" />
+                  <circle cx="4" cy="22" r="2" fill="currentColor" />
+                  <circle cx="12" cy="24" r="2" fill="currentColor" />
+                  <circle cx="20" cy="26" r="2" fill="currentColor" />
+                </svg>
+                <span>UMAP</span>
+              </div>
+            </Tab>
             <Tab
               id="distribution"
               isDisabled={true}
@@ -173,6 +198,16 @@ export const Viewer = ({
               docState={docState}
               setDocState={setDocState}
               tickText={tickText}
+              leftSidebarCollapsed={leftSidebarCollapsed}
+            />
+          ) : null}
+        </TabPanel>
+        <TabPanel id="umap" className="app-panel">
+          {!loading ? (
+            <UMAP
+              docState={docState}
+              setDocState={setDocState}
+              updateDocState={updateDocState}
               leftSidebarCollapsed={leftSidebarCollapsed}
             />
           ) : null}

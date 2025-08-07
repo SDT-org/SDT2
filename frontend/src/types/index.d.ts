@@ -11,6 +11,7 @@ import type {
   ClusterDataItem,
   GetClustermapDataResponse,
   GetDataResponse,
+  GetUMAPDataResponse,
   HeatmapData,
   HeatmapSettings,
 } from "../plotTypes";
@@ -54,6 +55,15 @@ declare global {
           threshold: number,
           method: string,
         ) => Promise<GetClustermapDataResponse>;
+        get_umap_data: (
+          doc_id: string,
+          params: {
+            n_neighbors: number;
+            min_dist: number;
+            threshold: number;
+            methods: string[];
+          },
+        ) => Promise<GetUMAPDataResponse>;
         export: (args: {
           doc_id: string;
           export_path: string;

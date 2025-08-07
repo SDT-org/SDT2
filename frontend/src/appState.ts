@@ -12,6 +12,8 @@ import {
   ClustermapSettingsSchema,
   type HeatmapSettings,
   HeatmapSettingsSchema,
+  type UMAPSettings,
+  UMAPSettingsSchema,
 } from "./plotTypes";
 
 export const clusterMethodDescriptions = [
@@ -43,10 +45,12 @@ export type DocState = {
     | "heatmap"
     | "clustermap"
     | "distribution_histogram"
-    | "distribution_violin";
+    | "distribution_violin"
+    | "umap";
   distribution: DistributionState;
   heatmap: HeatmapSettings;
   clustermap: ClustermapSettings;
+  umap: UMAPSettings;
   exportPrefix: string;
   invalid?: {
     reason: string;
@@ -143,10 +147,12 @@ export const docStateSchema = z.object({
     "clustermap",
     "distribution_histogram",
     "distribution_violin",
+    "umap",
   ]),
   distribution: DistributionStateSchema,
   heatmap: HeatmapSettingsSchema,
   clustermap: ClustermapSettingsSchema,
+  umap: UMAPSettingsSchema,
 });
 
 const clientDocState = {
@@ -220,6 +226,12 @@ export const initialDocState: DocState = {
     cellspace: 1,
     showLegend: true,
     showClusterCounts: false,
+  },
+  umap: {
+    n_neighbors: 15,
+    min_dist: 0.1,
+    pointSize: 4,
+    opacity: 0.8,
   },
   ...clientDocState,
 };

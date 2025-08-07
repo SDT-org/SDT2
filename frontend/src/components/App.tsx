@@ -206,6 +206,7 @@ export const App = () => {
               "clustermap",
               "distribution_histogram",
               "distribution_violin",
+              "umap",
             ]}
           >
             <div className="app-layout">

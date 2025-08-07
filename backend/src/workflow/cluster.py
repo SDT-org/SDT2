@@ -53,9 +53,7 @@ def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
         distance_matrix=reordered_matrix, reordered_ids=reordered_ids
     )
 
-@memory.cache
 def calculate_linkage(distance_matrix: np.ndarray, method: str) -> np.ndarray:
- 
     if method in ["ward", "centroid", "median"]:
         # MDS for methods that need Euclidean distance
         start = time.perf_counter()
@@ -92,7 +90,7 @@ def get_linkage_method_order(data, method, index, threshold=None):
     
     if threshold is not None:
 
-        cutby = 100 - threshold
+        cutby = (100 - threshold) / 100.0
         clusters = fcluster(Z, t=cutby, criterion="distance")
         
         # Create a dictionary mapping cluster ID to sequence indices
@@ -189,7 +187,7 @@ def export(matrix_path, cluster_data_output_dir, seq_dict_path, threshold, metho
 #
 def get_cluster_data_dict(Z, threshold, index):
     # Set cut threshold
-    cutby = 100 - threshold
+    cutby = (100 - threshold) / 100.0
     # Identify clusters from threshold cut
     clusters = fcluster(Z, t=cutby, criterion="distance")
     # Store as dict

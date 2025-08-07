@@ -201,3 +201,45 @@ export type GetClustermapDataResponse = {
   clusterData: ClusterDataItem[];
   cluster_stats: ClusterStats;
 };
+
+export interface UMAPSettings {
+  n_neighbors: number;
+  min_dist: number;
+  pointSize: number;
+  opacity: number;
+}
+
+export const UMAPSettingsSchema = z.object({
+  n_neighbors: z.number().min(2).max(200),
+  min_dist: z.number().min(0).max(1),
+  pointSize: z.number().min(1).max(20),
+  opacity: z.number().min(0.1).max(1),
+});
+
+export type UMAPPoint = {
+  id: string;
+  x: number;
+  y: number;
+  cluster: number;
+  method?: string;
+};
+
+export type UMAPData = {
+  embedding: UMAPPoint[];
+  bounds: {
+    x: [number, number];
+    y: [number, number];
+  };
+  clusterMethods: {
+    [method: string]: number[];
+  };
+};
+
+export type GetUMAPDataResponse = {
+  data: UMAPData;
+  metadata: {
+    n_neighbors: number;
+    min_dist: number;
+    methods: string[];
+  };
+};

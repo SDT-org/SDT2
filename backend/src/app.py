@@ -169,7 +169,7 @@ def handle_open_file(filepath: str, doc_id: str | None):
         copy(filepath, unique_dir)
         df = read_csv_matrix(filepath)
         # Test that the file is gonna work in get_data
-        df.index.tolist()
+        df.index.to_list()
         data = df.to_numpy()
         diag_mask = eye(data.shape[0], dtype=bool)
         data_no_diag = where(diag_mask, nan, data)
@@ -535,7 +535,7 @@ class Api:
 
         # Load matrix
         df = read_csv_matrix(doc_paths.matrix)
-        ids = df.index.tolist()
+        ids = df.index.to_list()
         update_document(doc_id, sequences_count=len(ids))
         data = df.to_numpy()
 
@@ -594,7 +594,7 @@ class Api:
         
         max_val = int(nanmax(heat_data_no_diag))
 
-        parsedData = heat_data.values.tolist()
+        parsedData = heat_data.to_numpy().tolist()
 
         # Load run settings if available
         metadata = dict(minVal=min_val, maxVal=max_val)
@@ -607,7 +607,7 @@ class Api:
         
         # Helper function to calculate statistics
         def calculate_stats(values):
-            if len(values) == 0:
+            if not hasattr(values, '__len__') or len(values) == 0:
                 return None
             return {
                 "mean": float(np.mean(values)),
@@ -627,7 +627,7 @@ class Api:
         
         # Calculate statistics for GC and length if stats are available
         if not stats_df.empty:
-            stats_array = np.array(stats_df.values)
+            stats_array = stats_df.to_numpy()
             metadata["gc_stats"] = calculate_stats(stats_array[:, 1])  # GC values for all sequences in dataset
             metadata["length_stats"] = calculate_stats(stats_array[:, 2])  # Length values for all sequences in dataset
 
@@ -637,7 +637,7 @@ class Api:
             data=[ids] + parsedData,
             ids=ids,
             identity_scores=identity_scores,
-            full_stats=stats_df.values.tolist(),
+            full_stats=stats_df.to_numpy().tolist(),
         )
         return json.dumps(data_to_dump)
 
@@ -648,7 +648,7 @@ class Api:
         matrix_df = read_csv_matrix(doc_paths.matrix)
         matrix_np = matrix_df.to_numpy()
         matrix_np = np.round(matrix_np, 2)
-        sorted_ids = matrix_df.index.tolist()
+        sorted_ids = matrix_df.index.to_list()
 
         # Get cluster assignments
         seqid_clusters_df = cluster.get_clusters_dataframe(
@@ -685,16 +685,14 @@ class Api:
         seen_clusters = {}
         next_cluster_num = 1
         
-        total_clusters= len(seqid_clusters_df["cluster"].unique())
-
-        largest_cluster = max(seqid_clusters_df["cluster"].value_counts())
- 
-       
         cluster_counts = seqid_clusters_df["cluster"].value_counts()
+        total_clusters = len(cluster_counts)
+        largest_cluster = int(cluster_counts.max()) if not cluster_counts.empty else 0
         singleton_clusters = cluster_counts[cluster_counts == 1]
         singletons = len(singleton_clusters)
-        print(singletons, "singletons")
-        # Go through sequences in descending order from the topmosost cluster and assign asending sequential cluster numbers
+        
+        # Go through sequences in descending order from the topmosmost cluster and assign asending sequential cluster numbers
+        # Go through sequences in descending order from the topmosmost cluster and assign asending sequential cluster numbers
         for seq_id in reordered_tick_text:
             original_cluster = id_to_cluster.get(seq_id)
             if original_cluster is not None and original_cluster not in seen_clusters:
@@ -721,6 +719,63 @@ class Api:
             "tickText": reordered_tick_text,
             "clusterData": cluster_data,
             "cluster_stats": cluster_stats,
+        }
+
+    def get_umap_data(self, doc_id: str, params: dict):
+        from workflow.umap_analysis import run_umap, UMAPConfig
+        
+        doc = get_document(doc_id)
+        doc_paths = build_document_paths(doc.tempdir_path)
+        
+        # Load distance matrix
+        matrix_df = read_csv_matrix(doc_paths.matrix)
+        distance_matrix = matrix_df.to_numpy()
+        sequence_ids = matrix_df.index.to_list()
+        
+        # Run UMAP with specified parameters
+        config = UMAPConfig(
+            n_neighbors=params.get("n_neighbors", 15),
+            min_dist=params.get("min_dist", 0.1),
+            metric='precomputed'
+        )
+        
+        umap_result = run_umap(
+            distance_matrix=distance_matrix,
+            sequence_ids=sequence_ids,
+            config=config
+        )
+        
+        # Format data for frontend
+        embedding_data = []
+        for i, seq_id in enumerate(sequence_ids):
+            embedding_data.append({
+                "id": seq_id,
+                "x": float(umap_result.embedding[i, 0]),
+                "y": float(umap_result.embedding[i, 1]),
+                "cluster": 0  # Not used in simple UMAP
+            })
+        
+        # Calculate bounds with padding
+        x_coords = umap_result.embedding[:, 0]
+        y_coords = umap_result.embedding[:, 1]
+        x_range = x_coords.max() - x_coords.min()
+        y_range = y_coords.max() - y_coords.min()
+        padding = 0.1  # 10% padding
+        
+        return {
+            "data": {
+                "embedding": embedding_data,
+                "bounds": {
+                    "x": [float(x_coords.min() - x_range * padding), float(x_coords.max() + x_range * padding)],
+                    "y": [float(y_coords.min() - y_range * padding), float(y_coords.max() + y_range * padding)]
+                },
+                "clusterMethods": {}  # Empty for simple UMAP
+            },
+            "metadata": {
+                "n_neighbors": config.n_neighbors,
+                "min_dist": config.min_dist,
+                "sequences_count": len(sequence_ids)
+            }
         }
 
 
