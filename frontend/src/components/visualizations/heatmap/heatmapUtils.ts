@@ -67,45 +67,96 @@ export const formatHeatmapData = (
     settings.vmin,
   );
 
-  return data.flatMap((row, y) =>
-    row
-      .filter((datum) => datum === 0 || Number(datum))
-      .map((value, x) => {
-        // Check if value should be hidden based on threshold
-        const shouldHide =
-          settings.hideValuesBelowEnabled &&
-          (value as number) < settings.hideValuesBelow;
+  const emptyColor = "#f5f5f5";
+  const blackColor = "#000";
+  const whiteColor = "#fff";
+  const hideValuesBelowEnabled = settings.hideValuesBelowEnabled;
+  const hideValuesBelow = settings.hideValuesBelow;
 
-        // If hiding is enabled and value is below threshold, treat as empty
-        const effectiveValue = shouldHide ? 0 : value;
+  const colorCache = new Map<string, { bg: string; fg: string }>();
 
-        const roundedValue = (effectiveValue as number).toFixed(
-          settings.annotation_rounding,
-        );
+  // Pre-allocate result array to avoid multiple array resizing
+  let totalCells = 0;
+  for (let y = 0; y < data.length; y++) {
+    const row = data[y];
+    if (!row) continue;
+    for (let x = 0; x < row.length; x++) {
+      if (row[x] === 0 || Number(row[x])) {
+        totalCells++;
+      }
+    }
+  }
 
-        const displayValue =
-          effectiveValue === 100
-            ? "100"
-            : effectiveValue === 0
-              ? ""
-              : roundedValue.toString();
+  const result = new Array(totalCells);
+  let resultIndex = 0;
 
-        const backgroundColor =
-          displayValue === "" ? "#f5f5f5" : colorFn(Number(effectiveValue));
-        const foregroundColor = tinycolor(backgroundColor).isLight()
-          ? "#000"
-          : "#fff";
+  for (let y = 0; y < data.length; y++) {
+    const row = data[y];
+    if (!row) continue;
+    let actualX = 0;
 
-        return {
-          x,
-          y,
-          value: value as number,
-          displayValue,
-          backgroundColor,
-          foregroundColor,
-        };
-      }),
-  );
+    for (let x = 0; x < row.length; x++) {
+      const datum = row[x];
+
+      // can skip empty/null values early
+      if (!(datum === 0 || Number(datum))) {
+        continue;
+      }
+
+      const value = datum as number;
+
+      const shouldHide = hideValuesBelowEnabled && value < hideValuesBelow;
+      const effectiveValue = shouldHide ? 0 : value;
+
+      let displayValue: string;
+      if (effectiveValue === 100) {
+        displayValue = "100";
+      } else if (effectiveValue === 0) {
+        displayValue = "";
+      } else {
+        displayValue = effectiveValue.toFixed(settings.annotation_rounding);
+      }
+
+      let backgroundColor: string;
+      let foregroundColor: string;
+
+      if (displayValue === "") {
+        backgroundColor = emptyColor;
+        foregroundColor = blackColor;
+      } else {
+        const colorKey = effectiveValue.toString();
+        const colors = colorCache.get(colorKey);
+
+        if (!colors) {
+          backgroundColor = colorFn(effectiveValue);
+          foregroundColor = tinycolor(backgroundColor).isLight()
+            ? blackColor
+            : whiteColor;
+          colorCache.set(colorKey, {
+            bg: backgroundColor,
+            fg: foregroundColor,
+          });
+        } else {
+          backgroundColor = colors.bg;
+          foregroundColor = colors.fg;
+        }
+      }
+
+      result[resultIndex] = {
+        x: actualX,
+        y,
+        value,
+        displayValue,
+        backgroundColor,
+        foregroundColor,
+      };
+
+      resultIndex++;
+      actualX++;
+    }
+  }
+
+  return result;
 };
 
 export const formatClustermapData = (

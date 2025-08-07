@@ -123,10 +123,17 @@ export const Heatmap = ({
     return scale;
   }, [colorScales, settings.colorScaleKey, settings.reverse]);
 
-  const heatmapData = React.useMemo(
-    () => formatHeatmapData(data, settings, colorScale),
-    [data, settings, colorScale],
-  );
+  const heatmapData = React.useMemo(() => {
+    const startTime = appState.debug ? performance.now() : 0;
+    const result = formatHeatmapData(data, settings, colorScale);
+    if (appState.debug) {
+      const endTime = performance.now();
+      console.debug(
+        `[PERF] formatHeatmapData completed in ${(endTime - startTime).toFixed(2)}ms`,
+      );
+    }
+    return result;
+  }, [data, settings, colorScale, appState.debug]);
 
   const { cbar_shrink, cbar_aspect, margin } = useMetrics(settings, tickText);
 

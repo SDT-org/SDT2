@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import React from "react";
+import useAppState from "../../../appState";
 import { useExportCanvas } from "../../../hooks/useExportCanvas";
 import type { MetaData } from "../../../plotTypes";
 import type { HeatmapRenderProps } from "./Heatmap";
@@ -56,6 +57,7 @@ export const D3CanvasHeatmap = ({
   metaData,
 }: HeatmapRenderProps) => {
   const canvasRef = React.useRef<HTMLCanvasElement>(null);
+  const { appState } = useAppState();
   const exportCanvas = useExportCanvas(
     clusterData ? "clustermap" : "heatmap",
     canvasRef,
@@ -91,6 +93,8 @@ export const D3CanvasHeatmap = ({
       return;
     }
 
+    const startTime = appState.debug ? performance.now() : 0;
+
     renderHeatmapCanvas({
       canvas,
       data,
@@ -121,6 +125,13 @@ export const D3CanvasHeatmap = ({
       clusterCounts,
       transform,
     });
+
+    if (appState.debug) {
+      const endTime = performance.now();
+      console.debug(
+        `[PERF] drawCanvas completed in ${(endTime - startTime).toFixed(2)}ms`,
+      );
+    }
 
     drawing.current = false;
 
@@ -163,6 +174,7 @@ export const D3CanvasHeatmap = ({
     showClusterCounts,
     clusterCounts,
     onRenderComplete,
+    appState.debug,
   ]);
 
   React.useEffect(() => {
