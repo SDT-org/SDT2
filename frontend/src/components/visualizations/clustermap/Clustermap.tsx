@@ -6,7 +6,7 @@ import {
 } from "../../../appState";
 import type { ColorScaleArray } from "../../../colorScales";
 import { plotFontMonospace, plotFontSansSerif } from "../../../constants";
-import { formatClustermapData } from "../../../heatmapUtils";
+import { formatClustermapData } from "../heatmap/heatmapUtils";
 import { useMetrics, useSize } from "../../../hooks/heatmap";
 import { useHeatmapRenderToggle } from "../../../hooks/useHeatmapRenderToggle";
 import type {

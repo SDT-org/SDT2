@@ -5,8 +5,10 @@ import type {
   GetDataResponse,
   HeatmapData,
 } from "../plotTypes";
-import { getScaledFontSize } from "../plotUtils";
 import { getDocument } from "../services/documents";
+
+export const getScaledFontSize = (base: number, count: number) =>
+  Math.min(16, Math.max(1, base / (1 + count / 60)));
 
 export const useGetData = (docState: DocState, setDocState: SetDocState) => {
   const [loading, setLoading] = React.useState(false);

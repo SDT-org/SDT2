@@ -12,7 +12,7 @@ import { plotFontMonospace, plotFontSansSerif } from "../../../constants";
 import {
   type formatClustermapData,
   formatHeatmapData,
-} from "../../../heatmapUtils";
+} from "./heatmapUtils";
 import { useMetrics, useSize } from "../../../hooks/heatmap";
 import { useHeatmapRenderToggle } from "../../../hooks/useHeatmapRenderToggle";
 import type {

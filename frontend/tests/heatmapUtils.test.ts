@@ -4,7 +4,7 @@ import {
   formatClustermapData,
   formatHeatmapData,
   getCellMetrics,
-} from "../src/heatmapUtils";
+} from "../src/components/visualizations/heatmap/heatmapUtils";
 import type { ColorScaleKey, HeatmapSettings } from "../src/plotTypes";
 
 describe("getCellMetrics", () => {

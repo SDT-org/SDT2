@@ -1,11 +1,11 @@
 import tinycolor from "tinycolor2";
-import type { ColorScaleArray } from "./colorScales";
-import { createD3ColorScale, distinctColor } from "./colors";
+import type { ColorScaleArray } from "../../../colorScales";
+import { createD3ColorScale, distinctColor } from "../../../colors";
 import type {
   ClusterDataItem,
   HeatmapData,
   HeatmapSettings,
-} from "./plotTypes";
+} from "../../../plotTypes";
 
 export const getPlotMetrics = (width: number, height: number) => {
   // WIP
