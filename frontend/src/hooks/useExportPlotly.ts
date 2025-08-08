@@ -1,7 +1,7 @@
 import Plotly from "plotly.js-cartesian-dist-min";
 import React from "react";
 import useAppState, { type SaveableImageKey } from "../appState";
-import { useRenderStatus } from "../components/Exporter";
+import { useRenderStatus } from "../components/shared/Exporter";
 import { assertDefined } from "../helpers";
 import { useDocState } from "./useDocState";
 
@@ -56,14 +56,14 @@ export const useExportPlotly = (
       const data = await Plotly.toImage(getPlotlyElement(), config);
 
       if (format === "svg") {
-        await window.pywebview.api.save_svg_data(
+        await window.pywebview.api.export.save_svg_data(
           docState.id,
           data,
           key,
           format,
         );
       } else {
-        await window.pywebview.api.save_raster_image(
+        await window.pywebview.api.export.save_raster_image(
           docState.id,
           data,
           key,

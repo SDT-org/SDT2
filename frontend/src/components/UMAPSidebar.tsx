@@ -1,7 +1,7 @@
 import type React from "react";
 import type { UMAPSettings } from "../plotTypes";
-import { Checkbox } from "./Checkbox";
-import { Slider } from "./Slider";
+import { Checkbox } from "./primitives/Checkbox";
+import { Slider } from "./primitives/Slider";
 
 interface UMAPSidebarProps {
   settings: UMAPSettings;
@@ -37,7 +37,7 @@ export const UMAPSidebar: React.FC<UMAPSidebarProps> = ({
             <Slider
               id="n_neighbors"
               value={settings.n_neighbors}
-              onChangeEnd={(value) =>
+              onChangeEnd={(value: number) =>
                 handleParameterChange("n_neighbors", value)
               }
               minValue={2}
@@ -56,7 +56,9 @@ export const UMAPSidebar: React.FC<UMAPSidebarProps> = ({
             <Slider
               id="min_dist"
               value={settings.min_dist}
-              onChangeEnd={(value) => handleParameterChange("min_dist", value)}
+              onChangeEnd={(value: number) =>
+                handleParameterChange("min_dist", value)
+              }
               minValue={0}
               maxValue={1}
               step={0.01}
@@ -83,7 +85,7 @@ export const UMAPSidebar: React.FC<UMAPSidebarProps> = ({
             <Slider
               id="minClusterSize"
               value={settings.minClusterSize}
-              onChangeEnd={(value) =>
+              onChangeEnd={(value: number) =>
                 handleParameterChange("minClusterSize", value)
               }
               minValue={2}
@@ -102,7 +104,7 @@ export const UMAPSidebar: React.FC<UMAPSidebarProps> = ({
             <Slider
               id="clusterEpsilon"
               value={settings.clusterEpsilon}
-              onChangeEnd={(value) =>
+              onChangeEnd={(value: number) =>
                 handleParameterChange("clusterEpsilon", value)
               }
               minValue={0}
@@ -118,7 +120,7 @@ export const UMAPSidebar: React.FC<UMAPSidebarProps> = ({
             <Checkbox
               id="colorByCluster"
               isSelected={settings.colorByCluster}
-              onChange={(checked) =>
+              onChange={(checked: boolean) =>
                 handleParameterChange("colorByCluster", checked)
               }
             >
@@ -135,7 +137,9 @@ export const UMAPSidebar: React.FC<UMAPSidebarProps> = ({
             <Slider
               id="pointSize"
               value={settings.pointSize}
-              onChangeEnd={(value) => handleParameterChange("pointSize", value)}
+              onChangeEnd={(value: number) =>
+                handleParameterChange("pointSize", value)
+              }
               minValue={1}
               maxValue={20}
               step={0.5}
@@ -148,7 +152,9 @@ export const UMAPSidebar: React.FC<UMAPSidebarProps> = ({
             <Slider
               id="opacity"
               value={settings.opacity}
-              onChangeEnd={(value) => handleParameterChange("opacity", value)}
+              onChangeEnd={(value: number) =>
+                handleParameterChange("opacity", value)
+              }
               minValue={0.1}
               maxValue={1}
               step={0.05}

@@ -1,5 +1,6 @@
 biopython==1.85
 bottle==0.13.2
+coverage==7.6.9
 Cython==3.0.12
 joblib==1.4.2
 nuitka==2.6.9

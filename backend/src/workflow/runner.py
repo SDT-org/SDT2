@@ -1,5 +1,5 @@
 from datetime import datetime
-from multiprocessing.pool import Pool
+from multiprocessing.sharedctypes import Synchronized
 import os
 import platform
 import time
@@ -27,14 +27,12 @@ def run_parse(fasta_path: str) -> WorkflowResult:
         is_aa=None,
         min_score=0,
     )
-    result = parse.run(result, fasta_path)
-    if result.error:
-        return result
-
-    return result
+    return parse.run(result, fasta_path)
 
 
-def run_process(workflow_run: WorkflowRun, cancel_event) -> WorkflowResult:
+def run_process(
+    workflow_run: WorkflowRun, cancel_event: Synchronized
+) -> WorkflowResult:
     result = workflow_run.result
     settings = workflow_run.settings
 
@@ -59,7 +57,7 @@ def run_process(workflow_run: WorkflowRun, cancel_event) -> WorkflowResult:
         workflow_run.set_stage("Clustering")
         workflow_run.set_progress(None)
 
-        result = cluster.run(result, settings)
+        result = cluster.run(result, settings, workflow_run.set_progress)
         if result.error:
             return result
 
@@ -93,11 +91,12 @@ def run_process(workflow_run: WorkflowRun, cancel_event) -> WorkflowResult:
     return result
 
 
-def output_summary(file_name, start_time, end_time, start_counter, end_counter, settings, result):
+def output_summary(
+    file_name, start_time, end_time, start_counter, end_counter, settings, result
+):
     build_type = f"{platform.system()} {platform.release()} {platform.machine()}"
     total_cores, total_ram = os.cpu_count(), psutil.virtual_memory().total / (1024**3)
     total_counter = end_counter - start_counter
-    
 
     if settings.analysis_method == "parasail":
 
@@ -105,14 +104,13 @@ def output_summary(file_name, start_time, end_time, start_counter, end_counter, 
             scoring_matrix = settings.parasail.scoring_matrix
         else:
             scoring_matrix = "BLOSUM62" if result.is_aa else "1-1"
-        
+
         open_penalty = settings.parasail.open_penalty or 10
         extend_penalty = settings.parasail.extend_penalty or 1
         aligner_name = "PARASAIL"
         aligner_params = f"Needleman-Wunsch (stats) algorithm, Scoring matrix: {scoring_matrix}, Open penalty: {open_penalty}, Extend penalty: {extend_penalty}"
     elif settings.analysis_method == "lzani":
         score_type = settings.lzani.score_type.upper()
-        
 
         aw = settings.lzani.aw if settings.lzani.aw is not None else 5
         am = settings.lzani.am if settings.lzani.am is not None else 2
@@ -122,13 +120,13 @@ def output_summary(file_name, start_time, end_time, start_counter, end_counter, 
         mqd = settings.lzani.mqd if settings.lzani.mqd is not None else 0.01
         reg = settings.lzani.reg if settings.lzani.reg is not None else 0
         ar = settings.lzani.ar if settings.lzani.ar is not None else 0.95
-        
+
         aligner_name = "LZ-ANI"
         aligner_params = f"Score type: {score_type}, aw={aw}, am={am}, mal={mal}, msl={msl}, mrd={mrd}, mqd={mqd}, reg={reg}, ar={ar}"
     else:
         aligner_name = "UNKNOWN"
         aligner_params = f"Unknown analysis method: {settings.analysis_method}"
-    
+
     return f"""
     SDT {app_version} release for {platform.system()}
     Developed by Michael Lund and Josiah Ivey; Brejnev Muhire,

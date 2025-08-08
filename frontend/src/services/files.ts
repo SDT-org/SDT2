@@ -16,7 +16,7 @@ const handleOpenFileFailure = (e: unknown): [boolean, [string, string]] => {
 
 export const openFile = async (path: string, docId?: string) => {
   try {
-    const data = await window.pywebview.api.open_file(path, docId);
+    const data = await window.pywebview.api.files.open_file(path, docId);
     return [!!data, data];
   } catch (e) {
     return handleOpenFileFailure(e);
@@ -28,7 +28,7 @@ export const openFileDialog = async (
   path?: string,
 ): Promise<[boolean, [string, string]]> => {
   try {
-    const data = await window.pywebview.api.open_file_dialog(docId, path);
+    const data = await window.pywebview.api.files.open_file_dialog(docId, path);
     return [!!data, data || ["", ""]];
   } catch (e) {
     return handleOpenFileFailure(e);
@@ -39,7 +39,7 @@ export const saveFileDialog = async (
   filename: string,
 ): Promise<[boolean, string]> => {
   try {
-    const data = await window.pywebview.api.save_file_dialog(filename);
+    const data = await window.pywebview.api.files.save_file_dialog(filename);
     return [!!data, data];
   } catch (e) {
     console.error(e);

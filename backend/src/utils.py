@@ -1,6 +1,5 @@
 import psutil
 from uuid import uuid4
-from hashlib import sha256
 import shutil
 import subprocess
 import platform
