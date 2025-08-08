@@ -96,10 +96,13 @@ export const UMAPSidebar: React.FC<UMAPSidebarProps> = ({
           </div>
 
           <div className="sidebar-item">
-            <label htmlFor="clusterEpsilon">Cluster Selection Epsilon</label>
+            <label htmlFor="clusterEpsilon">
+              Cluster Selection Epsilon (%)
+            </label>
             <p className="param-description">
-              Distance threshold for extracting flat clusters. 0 uses the full
-              cluster hierarchy.
+              Minimum similarity percentage for clustering. Points must be at
+              least this similar to belong to the same cluster. 0 uses the full
+              hierarchy.
             </p>
             <Slider
               id="clusterEpsilon"
@@ -108,11 +111,11 @@ export const UMAPSidebar: React.FC<UMAPSidebarProps> = ({
                 handleParameterChange("clusterEpsilon", value)
               }
               minValue={0}
-              maxValue={1}
-              step={0.01}
+              maxValue={100}
+              step={0.5}
             />
             <span className="value-display">
-              {settings.clusterEpsilon.toFixed(2)}
+              {settings.clusterEpsilon.toFixed(1)}
             </span>
           </div>
 

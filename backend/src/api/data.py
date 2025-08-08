@@ -223,7 +223,9 @@ class Data:
         methods = params.get("methods", [])
         if methods and len(methods) > 0 and methods[0].startswith("hdbscan-"):
             try:
-                cluster_epsilon = float(methods[0].split("-")[1])
+                # Epsilon comes as similarity percentage, convert to distance
+                similarity_epsilon = float(methods[0].split("-")[1])
+                cluster_epsilon = 100 - similarity_epsilon  # Convert similarity to distance
             except:
                 pass
         
@@ -239,6 +241,8 @@ class Data:
         
         # Debug logging
         print(f"HDBSCAN clustering: min_cluster_size={min_cluster_size}, epsilon={cluster_epsilon}")
+        print(f"Distance matrix shape: {distance_matrix.shape}")
+        print(f"Distance matrix range: min={distance_matrix.min():.3f}, max={distance_matrix.max():.3f}")
         print(f"Total sequences: {cluster_stats['total_sequences']}")
         print(f"Total clusters: {cluster_stats['total_clusters']}")
         print(f"Noise points: {cluster_stats['noise_points']}")

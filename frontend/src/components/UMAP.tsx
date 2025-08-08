@@ -59,6 +59,14 @@ export const UMAP: React.FC<UMAPProps> = ({
       setError(null);
 
       try {
+        // Debug the parameters being sent
+        console.log("Sending UMAP parameters:", {
+          n_neighbors: docState.umap.n_neighbors,
+          min_dist: docState.umap.min_dist,
+          minClusterSize: docState.umap.minClusterSize,
+          clusterEpsilon: docState.umap.clusterEpsilon,
+        });
+
         const response = await window.pywebview.api.data.get_umap_data(
           docState.id,
           {
@@ -71,6 +79,10 @@ export const UMAP: React.FC<UMAPProps> = ({
 
         // Debug logging
         console.log("UMAP data received:", response.data);
+        console.log(
+          "Backend reported epsilon:",
+          response.metadata?.cluster_epsilon,
+        );
         if (response.data.embedding && response.data.embedding.length > 0) {
           console.log(
             "First 5 points cluster data:",

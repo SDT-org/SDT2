@@ -11,7 +11,7 @@ from transformations import read_csv_matrix
 # Suppress UMAP warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="umap")
 
-
+# issues with numpy integers, had ai make oop classes for
 @dataclass
 class UMAPConfig:
     n_components: int = 2
@@ -83,13 +83,15 @@ def run_umap(distance_matrix: np.ndarray,
     
     reducer = UMAP(**config.to_dict())
     embedding = reducer.fit_transform(distance_matrix, y) if y is not None else reducer.fit_transform(distance_matrix)
+
     
     return UMAPResult(
         embedding=embedding,
         sequence_ids=sequence_ids,
         config=config,
         metadata=metadata,
-        cluster_assignments=cluster_assignments
+        cluster_assignments=cluster_assignments,
+
     )
 
 

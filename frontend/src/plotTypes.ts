@@ -252,7 +252,10 @@ export type GetUMAPDataResponse = {
     n_neighbors: number;
     min_dist: number;
     sequences_count: number;
+    cluster_method?: string;
     cluster_methods?: string[];
     threshold?: number;
+    min_cluster_size?: number;
+    cluster_epsilon?: number;
   };
 };
