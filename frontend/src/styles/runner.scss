@@ -51,6 +51,19 @@
           padding-bottom: 0.3rem;
         }
       }
+
+      .settings-field {
+        flex: 0 0 auto;
+        min-width: 140px;
+
+        .react-aria-Label {
+          font-size: 1.3rem;
+          font-weight: 500;
+          margin-bottom: 0.4rem;
+          display: block;
+        }
+      }
+
     }
 
     .setting {
@@ -69,6 +82,10 @@
 
     .react-aria-Switch {
       font-weight: 500;
+    }
+
+    .react-aria-ToggleButtonGroup {
+      background: none;
     }
 
     &.inline-setting {
