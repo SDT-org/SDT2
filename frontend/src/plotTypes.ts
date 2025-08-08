@@ -207,6 +207,10 @@ export interface UMAPSettings {
   min_dist: number;
   pointSize: number;
   opacity: number;
+  minClusterSize: number;
+  clusterEpsilon: number;
+  showClusterBoundaries: boolean;
+  colorByCluster: boolean;
 }
 
 export const UMAPSettingsSchema = z.object({
@@ -214,14 +218,20 @@ export const UMAPSettingsSchema = z.object({
   min_dist: z.number().min(0).max(1),
   pointSize: z.number().min(1).max(20),
   opacity: z.number().min(0.1).max(1),
+  minClusterSize: z.number().min(2).max(50),
+  clusterEpsilon: z.number().min(0).max(1),
+  showClusterBoundaries: z.boolean(),
+  colorByCluster: z.boolean(),
 });
 
 export type UMAPPoint = {
   id: string;
   x: number;
   y: number;
-  cluster: number;
-  method?: string;
+  cluster?: number;
+  clusters?: {
+    [method: string]: number;
+  };
 };
 
 export type UMAPData = {
@@ -230,9 +240,10 @@ export type UMAPData = {
     x: [number, number];
     y: [number, number];
   };
-  clusterMethods: {
-    [method: string]: number[];
+  clusterMethods?: {
+    [method: string]: { [id: string]: number };
   };
+  threshold?: number;
 };
 
 export type GetUMAPDataResponse = {
@@ -240,6 +251,8 @@ export type GetUMAPDataResponse = {
   metadata: {
     n_neighbors: number;
     min_dist: number;
-    methods: string[];
+    sequences_count: number;
+    cluster_methods?: string[];
+    threshold?: number;
   };
 };

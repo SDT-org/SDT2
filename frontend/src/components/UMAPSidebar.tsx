@@ -1,5 +1,6 @@
 import type React from "react";
 import type { UMAPSettings } from "../plotTypes";
+import { Checkbox } from "./Checkbox";
 import { Slider } from "./Slider";
 
 interface UMAPSidebarProps {
@@ -12,7 +13,7 @@ export const UMAPSidebar: React.FC<UMAPSidebarProps> = ({
   settings,
   updateSettings,
 }) => {
-  // Auto-update for real-time parameter changes
+  // Handle parameter changes
   const handleParameterChange = (param: string, value: number | boolean) => {
     updateSettings({ [param]: value });
   };
@@ -63,6 +64,66 @@ export const UMAPSidebar: React.FC<UMAPSidebarProps> = ({
             <span className="value-display">
               {settings.min_dist.toFixed(2)}
             </span>
+          </div>
+        </div>
+
+        <div className="sidebar-section">
+          <h3>HDBSCAN Clustering</h3>
+          <p className="sidebar-description">
+            HDBSCAN finds clusters of varying densities in the data. Points not
+            belonging to any cluster are marked as noise.
+          </p>
+
+          <div className="sidebar-item">
+            <label htmlFor="minClusterSize">Min Cluster Size</label>
+            <p className="param-description">
+              Minimum number of points required to form a cluster. Smaller
+              values find more clusters.
+            </p>
+            <Slider
+              id="minClusterSize"
+              value={settings.minClusterSize}
+              onChangeEnd={(value) =>
+                handleParameterChange("minClusterSize", value)
+              }
+              minValue={2}
+              maxValue={50}
+              step={1}
+            />
+            <span className="value-display">{settings.minClusterSize}</span>
+          </div>
+
+          <div className="sidebar-item">
+            <label htmlFor="clusterEpsilon">Cluster Selection Epsilon</label>
+            <p className="param-description">
+              Distance threshold for extracting flat clusters. 0 uses the full
+              cluster hierarchy.
+            </p>
+            <Slider
+              id="clusterEpsilon"
+              value={settings.clusterEpsilon}
+              onChangeEnd={(value) =>
+                handleParameterChange("clusterEpsilon", value)
+              }
+              minValue={0}
+              maxValue={1}
+              step={0.01}
+            />
+            <span className="value-display">
+              {settings.clusterEpsilon.toFixed(2)}
+            </span>
+          </div>
+
+          <div className="sidebar-item">
+            <Checkbox
+              id="colorByCluster"
+              isSelected={settings.colorByCluster}
+              onChange={(checked) =>
+                handleParameterChange("colorByCluster", checked)
+              }
+            >
+              Color by Cluster
+            </Checkbox>
           </div>
         </div>
 

@@ -232,6 +232,10 @@ export const initialDocState: DocState = {
     min_dist: 0.1,
     pointSize: 4,
     opacity: 0.8,
+    minClusterSize: 5,
+    clusterEpsilon: 0.0,
+    showClusterBoundaries: false,
+    colorByCluster: true,
   },
   ...clientDocState,
 };

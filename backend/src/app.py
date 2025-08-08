@@ -566,7 +566,7 @@ class Api:
                 
                 # For LZANI, filter out values below 70% threshold
                 if not (is_lzani and identity_score < 1):
-                    identity_scores.append([id_map[ids[i]], id_map[ids[j]], identity_score])
+                    identity_scores.append([int(id_map[ids[i]]), int(id_map[ids[j]]), float(identity_score)])
         
         # Calculate unaligned count after collecting all scores
         unaligned_count = len([s for s in all_scores if s < 3]) if is_lzani else 0
@@ -617,7 +617,7 @@ class Api:
                 "max": float(np.max(values)),
                 "q1": float(np.percentile(values, 25)),
                 "q3": float(np.percentile(values, 75)),
-                "count": len(values)
+                "count": int(len(values))
             }
         
         # Calculate statistics for scores
@@ -686,10 +686,10 @@ class Api:
         next_cluster_num = 1
         
         cluster_counts = seqid_clusters_df["cluster"].value_counts()
-        total_clusters = len(cluster_counts)
+        total_clusters = int(len(cluster_counts))
         largest_cluster = int(cluster_counts.max()) if not cluster_counts.empty else 0
         singleton_clusters = cluster_counts[cluster_counts == 1]
-        singletons = len(singleton_clusters)
+        singletons = int(len(singleton_clusters))
         
         # Go through sequences in descending order from the topmosmost cluster and assign asending sequential cluster numbers
         # Go through sequences in descending order from the topmosmost cluster and assign asending sequential cluster numbers
@@ -722,7 +722,8 @@ class Api:
         }
 
     def get_umap_data(self, doc_id: str, params: dict):
-        from workflow.umap_analysis import run_umap, UMAPConfig
+        from workflow.umap import run_umap, UMAPConfig
+        from workflow.cluster_hdbscan import run_hdbscan_clustering, get_cluster_stats
         
         doc = get_document(doc_id)
         doc_paths = build_document_paths(doc.tempdir_path)
@@ -745,6 +746,35 @@ class Api:
             config=config
         )
         
+        # Run HDBSCAN clustering
+        # Support both old and new parameter names for backward compatibility
+        min_cluster_size = params.get("min_cluster_size", params.get("threshold", 5))
+        cluster_epsilon = params.get("cluster_epsilon", 0.0)
+        
+        # Extract epsilon from methods array if using old format
+        methods = params.get("methods", [])
+        if methods and len(methods) > 0 and methods[0].startswith("hdbscan-"):
+            try:
+                cluster_epsilon = float(methods[0].split("-")[1])
+            except:
+                pass
+        
+        cluster_assignments = run_hdbscan_clustering(
+            distance_matrix=distance_matrix,
+            sequence_ids=sequence_ids,
+            min_cluster_size=min_cluster_size,
+            cluster_selection_epsilon=cluster_epsilon
+        )
+        
+        # Get cluster statistics
+        cluster_stats = get_cluster_stats(cluster_assignments)
+        
+        # Debug logging
+        print(f"HDBSCAN clustering: min_cluster_size={min_cluster_size}, epsilon={cluster_epsilon}")
+        print(f"Total sequences: {cluster_stats['total_sequences']}")
+        print(f"Total clusters: {cluster_stats['total_clusters']}")
+        print(f"Noise points: {cluster_stats['noise_points']}")
+        
         # Format data for frontend
         embedding_data = []
         for i, seq_id in enumerate(sequence_ids):
@@ -752,7 +782,8 @@ class Api:
                 "id": seq_id,
                 "x": float(umap_result.embedding[i, 0]),
                 "y": float(umap_result.embedding[i, 1]),
-                "cluster": 0  # Not used in simple UMAP
+                "cluster": int(cluster_assignments.get(seq_id, 0)),
+                "clusters": {"hdbscan": int(cluster_assignments.get(seq_id, 0))}  # Keep compatibility
             })
         
         # Calculate bounds with padding
@@ -769,12 +800,17 @@ class Api:
                     "x": [float(x_coords.min() - x_range * padding), float(x_coords.max() + x_range * padding)],
                     "y": [float(y_coords.min() - y_range * padding), float(y_coords.max() + y_range * padding)]
                 },
-                "clusterMethods": {}  # Empty for simple UMAP
+                "clusterStats": cluster_stats,
+                "min_cluster_size": int(min_cluster_size),
+                "cluster_epsilon": float(cluster_epsilon)
             },
             "metadata": {
-                "n_neighbors": config.n_neighbors,
-                "min_dist": config.min_dist,
-                "sequences_count": len(sequence_ids)
+                "n_neighbors": int(config.n_neighbors),
+                "min_dist": float(config.min_dist),
+                "sequences_count": int(len(sequence_ids)),
+                "cluster_method": "hdbscan",
+                "min_cluster_size": int(min_cluster_size),
+                "cluster_epsilon": float(cluster_epsilon)
             }
         }
 
