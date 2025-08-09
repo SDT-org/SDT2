@@ -110,7 +110,6 @@ const DefaultForm = ({
 
 const ParasailSettings = ({
   docState,
-  updateDocState,
   setDocState,
 }: {
   docState: DocState;
@@ -121,13 +120,6 @@ const ParasailSettings = ({
   const [settingsMode, setSettingsMode] = React.useState<
     "presets" | "advanced"
   >("presets");
-
-  React.useEffect(() => {
-    // Always enable override for Parasail to match LZ-ANI behavior
-    if (!docState.overrideParasail) {
-      updateDocState({ overrideParasail: true });
-    }
-  }, [docState.overrideParasail, updateDocState]);
 
   return (
     <div className="field">
@@ -253,13 +245,6 @@ const LzaniSettings = ({
   const [settingsMode, setSettingsMode] = React.useState<
     "presets" | "advanced"
   >("presets");
-
-  React.useEffect(() => {
-    // Always enable override for LZ-ANI
-    if (!docState.overrideLzani) {
-      updateDocState({ overrideLzani: true });
-    }
-  }, [docState.overrideLzani, updateDocState]);
 
   const handlePresetChange = (presetId: string) => {
     setSelectedPreset(presetId);
