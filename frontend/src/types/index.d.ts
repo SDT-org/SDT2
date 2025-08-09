@@ -87,6 +87,30 @@ declare global {
               methods: string[];
             },
           ) => Promise<GetUMAPDataResponse>;
+          upload_metadata: (
+            doc_id: string,
+            csv_content: string,
+          ) => Promise<{
+            columns: string[];
+            column_types: Record<string, string>;
+            match_stats: {
+              total_metadata_ids: number;
+              total_sequence_ids: number;
+              exact_matches: number;
+              version_matches: number;
+              unmatched: number;
+              match_percentage: number;
+            };
+            total_rows: number;
+          }>;
+          get_metadata_for_umap: (
+            doc_id: string,
+            column_name: string,
+          ) => Promise<{
+            column_name: string;
+            value_map: Record<string, string | number>;
+            column_type: "numeric" | "categorical";
+          }>;
         };
         export: {
           export_data: (args: {

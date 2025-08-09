@@ -2,6 +2,10 @@ import * as d3 from "d3";
 import React, { useEffect, useRef, useState } from "react";
 import type { DocState, SetDocState, UpdateDocState } from "../appState";
 import { distinctColor } from "../colors";
+import {
+  getMetadataTooltip,
+  useMetadataColors,
+} from "../hooks/useMetadataColors";
 import type { UMAPData, UMAPPoint } from "../plotTypes";
 import { UMAPSidebar } from "./UMAPSidebar";
 
@@ -23,6 +27,7 @@ interface ExtendedUMAPData extends UMAPData {
     largest_cluster_size: number;
     smallest_cluster_size: number;
   };
+  metadata?: Record<string, string | number>;
 }
 
 export const UMAP: React.FC<UMAPProps> = ({
@@ -36,6 +41,13 @@ export const UMAP: React.FC<UMAPProps> = ({
   const [loading, setLoading] = useState(false);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [error, setError] = useState<string | null>(null);
+
+  // Use the reusable metadata colors hook
+  const metadataColors = useMetadataColors({
+    docId: docState.id,
+    columnName: docState.umap.selectedMetadataColumn,
+    enabled: docState.umap.colorBy === "metadata",
+  });
 
   // Update settings
   const updateSettings = React.useCallback(
@@ -220,6 +232,11 @@ export const UMAP: React.FC<UMAPProps> = ({
 
     // Get color function based on settings
     const getPointColor = (d: UMAPPoint): string => {
+      if (docState.umap.colorBy === "metadata") {
+        return metadataColors.getColor(d.id);
+      }
+
+      // Default cluster coloring
       if (!docState.umap.colorByCluster || !d.cluster) {
         return "#1f77b4"; // Default blue
       }
@@ -242,6 +259,14 @@ export const UMAP: React.FC<UMAPProps> = ({
       .attr("stroke-width", 0.5)
       .on("mouseover", (_event, d) => {
         let tooltipContent = `<strong>ID:</strong> ${d.id}`;
+        if (docState.umap.colorBy === "metadata" && metadataColors.values) {
+          const value = metadataColors.values[d.id];
+          tooltipContent += getMetadataTooltip(
+            d.id,
+            docState.umap.selectedMetadataColumn,
+            value,
+          );
+        }
         if (d.cluster !== undefined) {
           const clusterLabel = d.cluster === 0 ? "Noise" : d.cluster;
           tooltipContent += `<br><strong>Cluster:</strong> ${clusterLabel}`;
@@ -350,7 +375,7 @@ export const UMAP: React.FC<UMAPProps> = ({
     return () => {
       tooltip.remove();
     };
-  }, [umapData, dimensions, docState.umap, loading, error]);
+  }, [umapData, dimensions, docState.umap, loading, error, metadataColors]);
 
   return (
     <>

@@ -62,7 +62,7 @@ export function Select<T extends object>({
       {description && <Text slot="description">{description}</Text>}
       <FieldError>{errorMessage}</FieldError>
       <Popover shouldFlip={false}>
-        {items ? <ListBox items={items}>{children}</ListBox> : null}
+        <ListBox {...(items ? { items } : {})}>{children}</ListBox>
       </Popover>
     </RACSelect>
   );

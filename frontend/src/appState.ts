@@ -236,6 +236,7 @@ export const initialDocState: DocState = {
     clusterEpsilon: 0.0,
     showClusterBoundaries: false,
     colorByCluster: true,
+    colorBy: "cluster",
   },
   ...clientDocState,
 };

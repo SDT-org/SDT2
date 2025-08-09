@@ -1,0 +1,74 @@
+.umap-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.umap-sidebar {
+  .metadata-stats {
+    margin-top: 12px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+    font-size: 12px;
+
+    h4 {
+      margin: 0 0 8px 0;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 4px 0;
+      line-height: 1.4;
+    }
+
+    .match-details {
+      margin-left: 12px;
+      color: #666;
+      font-size: 11px;
+    }
+  }
+
+  input[type="file"] {
+    padding: 8px;
+    border: 1px dashed #ccc;
+    border-radius: 4px;
+    background: #f9f9f9;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      border-color: #999;
+      background: #fff;
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .upload-status {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #666;
+    font-style: italic;
+  }
+
+  .upload-error {
+    margin-top: 4px;
+    font-size: 11px;
+    color: #d9534f;
+  }
+}
+
+.umap-tooltip {
+  max-width: 300px;
+  word-wrap: break-word;
+  line-height: 1.4;
+}

@@ -1,6 +1,9 @@
 import type React from "react";
+import { useRef, useState } from "react";
+import { useAppState } from "../appState";
+import { useDocState } from "../hooks/useDocState";
 import type { UMAPSettings } from "../plotTypes";
-import { Checkbox } from "./primitives/Checkbox";
+import { Select, SelectItem } from "./primitives/Select";
 import { Slider } from "./primitives/Slider";
 
 interface UMAPSidebarProps {
@@ -13,9 +16,75 @@ export const UMAPSidebar: React.FC<UMAPSidebarProps> = ({
   settings,
   updateSettings,
 }) => {
-  // Handle parameter changes
+  const { appState, setAppState } = useAppState();
+  const { docState } = useDocState(
+    appState.activeDocumentId,
+    appState,
+    setAppState,
+  );
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const handleParameterChange = (param: string, value: number | boolean) => {
     updateSettings({ [param]: value });
+  };
+
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setUploadError(null);
+
+    try {
+      const content = await file.text();
+      const response = await window.pywebview.api.data.upload_metadata(
+        docState.id,
+        content,
+      );
+
+      updateSettings({
+        uploadedMetadata: {
+          columns: response.columns,
+          columnTypes: response.column_types,
+          matchStats: {
+            totalMetadataIds: response.match_stats.total_metadata_ids,
+            totalSequenceIds: response.match_stats.total_sequence_ids,
+            exactMatches: response.match_stats.exact_matches,
+            versionMatches: response.match_stats.version_matches,
+            unmatched: response.match_stats.unmatched,
+            matchPercentage: response.match_stats.match_percentage,
+          },
+        },
+        colorBy: "metadata",
+        ...(response.columns.length > 0 && {
+          selectedMetadataColumn: response.columns[0],
+        }),
+      });
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Upload failed");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
+  // Handle color by selection change
+  const handleColorByChange = (value: string) => {
+    updateSettings({
+      colorBy: value as "cluster" | "metadata",
+      colorByCluster: value === "cluster", // Keep backward compatibility
+    });
+  };
+
+  // Handle metadata column selection
+  const handleMetadataColumnChange = (value: string) => {
+    updateSettings({ selectedMetadataColumn: value });
   };
 
   return (
@@ -120,16 +189,83 @@ export const UMAPSidebar: React.FC<UMAPSidebarProps> = ({
           </div>
 
           <div className="sidebar-item">
-            <Checkbox
-              id="colorByCluster"
-              isSelected={settings.colorByCluster}
-              onChange={(checked: boolean) =>
-                handleParameterChange("colorByCluster", checked)
-              }
+            <Select
+              id="colorBy"
+              label="Color Points By"
+              selectedKey={settings.colorBy}
+              onSelectionChange={(key) => handleColorByChange(key as string)}
             >
-              Color by Cluster
-            </Checkbox>
+              <SelectItem id="cluster">Cluster</SelectItem>
+              <SelectItem id="metadata">Metadata</SelectItem>
+            </Select>
           </div>
+
+          {settings.colorBy === "metadata" && (
+            <>
+              <div className="sidebar-item">
+                <label htmlFor="metadata-upload">Upload Metadata CSV</label>
+                <input
+                  id="metadata-upload"
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileUpload}
+                  disabled={uploading}
+                  style={{ width: "100%" }}
+                />
+                {uploading && <p className="upload-status">Uploading...</p>}
+                {uploadError && <p className="upload-error">{uploadError}</p>}
+              </div>
+
+              {settings.uploadedMetadata && (
+                <>
+                  <div className="sidebar-item">
+                    <Select
+                      id="metadataColumn"
+                      label="Metadata Column"
+                      selectedKey={
+                        settings.selectedMetadataColumn ||
+                        settings.uploadedMetadata.columns[0] ||
+                        null
+                      }
+                      onSelectionChange={(key) =>
+                        key && handleMetadataColumnChange(key as string)
+                      }
+                    >
+                      {settings.uploadedMetadata.columns.map((col) => (
+                        <SelectItem key={col} id={col}>
+                          {col} ({settings.uploadedMetadata?.columnTypes[col]})
+                        </SelectItem>
+                      ))}
+                    </Select>
+                  </div>
+
+                  <div className="metadata-stats">
+                    <h4>Match Statistics</h4>
+                    <p>
+                      Matched:{" "}
+                      {settings.uploadedMetadata.matchStats.exactMatches +
+                        settings.uploadedMetadata.matchStats
+                          .versionMatches}{" "}
+                      / {settings.uploadedMetadata.matchStats.totalSequenceIds}{" "}
+                      ( {settings.uploadedMetadata.matchStats.matchPercentage}%)
+                    </p>
+                    <p className="match-details">
+                      Exact: {settings.uploadedMetadata.matchStats.exactMatches}
+                    </p>
+                    <p className="match-details">
+                      Version:{" "}
+                      {settings.uploadedMetadata.matchStats.versionMatches}
+                    </p>
+                    <p className="match-details">
+                      Unmatched:{" "}
+                      {settings.uploadedMetadata.matchStats.unmatched}
+                    </p>
+                  </div>
+                </>
+              )}
+            </>
+          )}
         </div>
 
         <div className="sidebar-section">

@@ -11,6 +11,7 @@
 
 @import "runner.scss";
 @import "heatmap.scss";
+@import "umap.scss";
 
 html,
 body {
@@ -24,9 +25,9 @@ body {
   grid-template-rows: auto 1fr;
 
   grid-template-rows: auto 1fr;
-    grid-template-areas:
-      "header"
-      "body";
+  grid-template-areas:
+    "header"
+    "body";
 }
 
 .app-header {
@@ -288,7 +289,7 @@ body {
     width: 3rem;
     padding: 0;
     position: fixed;
-    top: .8rem;
+    top: 0.8rem;
     left: 0;
     margin-left: 0.2rem;
   }
@@ -307,7 +308,8 @@ body {
     flex-grow: 1;
     flex-shrink: 1;
     flex-basis: 12rem;
-    transition: max-width 0.2s ease-out, flex-basis 0.2s ease-out, background 60ms ease-in-out;
+    transition: max-width 0.2s ease-out, flex-basis 0.2s ease-out,
+      background 60ms ease-in-out;
     min-width: 8.2rem;
     max-width: 16rem;
     transition: background 60ms ease-in-out;
@@ -317,7 +319,8 @@ body {
       transition: none;
     }
 
-    *, .close-button {
+    *,
+    .close-button {
       opacity: 0;
       animation: reveal 120ms ease-in 0s forwards;
     }
@@ -568,10 +571,12 @@ small {
     }
   }
 
-  label, .react-aria-Label {
+  label,
+  .react-aria-Label {
     font-weight: 500;
 
-    &.header, &[data-header] {
+    &.header,
+    &[data-header] {
       display: block;
       font-size: 1.4rem;
       font-weight: 600;
@@ -728,7 +733,10 @@ small {
     }
   }
 
-  .group > .drawer > .field:first-child > .react-aria-ToggleButtonGroup:first-child {
+  .group
+    > .drawer
+    > .field:first-child
+    > .react-aria-ToggleButtonGroup:first-child {
     margin-top: 0;
   }
 
@@ -808,7 +816,7 @@ small {
   margin-top: 5rem;
   text-align: center;
   -webkit-font-smoothing: subpixel-antialiased;
-  -webkit-transform: translateZ(0) scale(1.0, 1.0);
+  -webkit-transform: translateZ(0) scale(1, 1);
   color: #3498db;
 }
 
@@ -1304,8 +1312,7 @@ label.sublabel,
 
 .react-aria-Button {
   background: var(--button-background-color);
-  box-shadow:
-    0 1px 1px 0 var(--button-shadow-bottom-color),
+  box-shadow: 0 1px 1px 0 var(--button-shadow-bottom-color),
     0 0 1px 1px var(--button-shadow-color);
   border: 0;
   border-radius: 0.4rem;
@@ -1350,8 +1357,7 @@ label.sublabel,
     background-color: var(--button-primary-background-color);
     color: var(--button-primary-text-color);
     font-weight: bold;
-    box-shadow:
-      0 1px 1px 0 var(--button-primary-shadow-bottom-color),
+    box-shadow: 0 1px 1px 0 var(--button-primary-shadow-bottom-color),
       0 0 1px 1px var(--button-primary-shadow-color);
 
     &[data-pressed] {

@@ -31,6 +31,14 @@ export const parseDocState = (state: DocState) => {
         ...initialDocState.clustermap,
         ...validData.clustermap,
       },
+      umap: Object.assign(
+        {},
+        initialDocState.umap,
+        validData.umap,
+        validData.umap?.selectedMetadataColumn !== undefined
+          ? { selectedMetadataColumn: validData.umap.selectedMetadataColumn }
+          : {},
+      ),
       parsed: true,
     };
 

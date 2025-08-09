@@ -1,6 +1,7 @@
 import json
 import os
 import numpy as np
+import pandas as pd
 from pandas import DataFrame
 from numpy import eye, where, nan, nanmin, nanmax
 
@@ -284,4 +285,153 @@ class Data:
                 "min_cluster_size": int(min_cluster_size),
                 "cluster_epsilon": float(cluster_epsilon)
             }
+        }
+
+    def upload_metadata(self, doc_id: str, csv_content: str):
+        """
+        Upload and process metadata CSV for UMAP visualization.
+        Returns available columns and match statistics.
+        """
+        doc = get_document(doc_id)
+        doc_paths = build_document_paths(doc.tempdir_path)
+        
+        # Parse CSV
+        try:
+            import io
+            metadata_df = pd.read_csv(io.StringIO(csv_content))
+        except Exception as e:
+            raise Exception(f"Invalid CSV format: {str(e)}")
+        
+        if len(metadata_df.columns) < 2:
+            raise Exception("CSV must have at least 2 columns (ID column + metadata)")
+        
+        # First column is assumed to be sequence IDs
+        id_column = metadata_df.columns[0]
+        metadata_ids = metadata_df[id_column].astype(str).tolist()
+        
+        # Load sequence IDs from the matrix
+        matrix_df = read_csv_matrix(doc_paths.matrix)
+        sequence_ids = matrix_df.index.tolist()
+        
+        # Perform ID matching
+        matches, match_stats = self._match_sequence_ids(metadata_ids, sequence_ids)
+        
+        # Save metadata to temp directory
+        metadata_path = os.path.join(doc.tempdir_path, "metadata.csv")
+        metadata_df.to_csv(metadata_path, index=False)
+        
+        # Save matching information
+        match_info_path = os.path.join(doc.tempdir_path, "metadata_matches.json")
+        with open(match_info_path, 'w') as f:
+            json.dump({
+                "matches": matches,
+                "stats": match_stats,
+                "id_column": id_column,
+                "columns": metadata_df.columns.tolist()[1:]  # Exclude ID column
+            }, f)
+        
+        # Detect column types
+        column_info = {}
+        for col in metadata_df.columns[1:]:  # Skip ID column
+            # Simple type detection
+            try:
+                pd.to_numeric(metadata_df[col])
+                column_info[col] = "numeric"
+            except:
+                column_info[col] = "categorical"
+        
+        return {
+            "columns": metadata_df.columns.tolist()[1:],
+            "column_types": column_info,
+            "match_stats": match_stats,
+            "total_rows": len(metadata_df)
+        }
+    
+    def _match_sequence_ids(self, metadata_ids, sequence_ids):
+        """
+        Match metadata IDs to sequence IDs with GenBank version handling.
+        Returns: (matches dict, stats dict)
+        """
+        matches = {}
+        exact_matches = 0
+        version_matches = 0
+        unmatched = 0
+        
+        # Create lookup sets for faster matching
+        sequence_id_set = set(sequence_ids)
+        sequence_base_ids = {}
+        
+        # Build base ID map (without version numbers)
+        for seq_id in sequence_ids:
+            if '.' in seq_id:
+                base_id = seq_id.split('.')[0]
+                sequence_base_ids[base_id] = seq_id
+        
+        # Match metadata IDs
+        for meta_id in metadata_ids:
+            if meta_id in sequence_id_set:
+                # Exact match
+                matches[meta_id] = meta_id
+                exact_matches += 1
+            elif '.' in meta_id:
+                # Try matching without version
+                base_id = meta_id.split('.')[0]
+                if base_id in sequence_base_ids:
+                    matches[meta_id] = sequence_base_ids[base_id]
+                    version_matches += 1
+                else:
+                    unmatched += 1
+            else:
+                # Try to find versioned match
+                if meta_id in sequence_base_ids:
+                    matches[meta_id] = sequence_base_ids[meta_id]
+                    version_matches += 1
+                else:
+                    unmatched += 1
+        
+        stats = {
+            "total_metadata_ids": len(metadata_ids),
+            "total_sequence_ids": len(sequence_ids),
+            "exact_matches": exact_matches,
+            "version_matches": version_matches,
+            "unmatched": unmatched,
+            "match_percentage": round((exact_matches + version_matches) / len(sequence_ids) * 100, 1)
+        }
+        
+        return matches, stats
+    
+    def get_metadata_for_umap(self, doc_id: str, column_name: str):
+        """
+        Get metadata values for a specific column to use in UMAP visualization.
+        """
+        doc = get_document(doc_id)
+        
+        # Load metadata and matching info
+        metadata_path = os.path.join(doc.tempdir_path, "metadata.csv")
+        match_info_path = os.path.join(doc.tempdir_path, "metadata_matches.json")
+        
+        if not os.path.exists(metadata_path) or not os.path.exists(match_info_path):
+            raise Exception("No metadata uploaded")
+        
+        metadata_df = pd.read_csv(metadata_path)
+        with open(match_info_path, 'r') as f:
+            match_info = json.load(f)
+        
+        # Get the requested column
+        id_column = match_info["id_column"]
+        if column_name not in metadata_df.columns:
+            raise Exception(f"Column '{column_name}' not found in metadata")
+        
+        # Create value map using the matching information
+        value_map = {}
+        for _, row in metadata_df.iterrows():
+            meta_id = str(row[id_column])
+            if meta_id in match_info["matches"]:
+                seq_id = match_info["matches"][meta_id]
+                value_map[seq_id] = row[column_name]
+        
+        return {
+            "column_name": column_name,
+            "value_map": value_map,
+            "column_type": "numeric" if pd.api.types.is_numeric_dtype(metadata_df[column_name]) else "categorical"
         }

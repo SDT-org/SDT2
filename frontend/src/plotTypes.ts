@@ -211,6 +211,20 @@ export interface UMAPSettings {
   clusterEpsilon: number;
   showClusterBoundaries: boolean;
   colorByCluster: boolean;
+  colorBy: "cluster" | "metadata";
+  selectedMetadataColumn?: string;
+  uploadedMetadata?: {
+    columns: string[];
+    columnTypes: Record<string, string>;
+    matchStats: {
+      totalMetadataIds: number;
+      totalSequenceIds: number;
+      exactMatches: number;
+      versionMatches: number;
+      unmatched: number;
+      matchPercentage: number;
+    };
+  };
 }
 
 export const UMAPSettingsSchema = z.object({
@@ -219,9 +233,25 @@ export const UMAPSettingsSchema = z.object({
   pointSize: z.number().min(1).max(20),
   opacity: z.number().min(0.1).max(1),
   minClusterSize: z.number().min(2).max(50),
-  clusterEpsilon: z.number().min(0).max(1),
+  clusterEpsilon: z.number().min(0).max(50),
   showClusterBoundaries: z.boolean(),
   colorByCluster: z.boolean(),
+  colorBy: z.enum(["cluster", "metadata"]),
+  selectedMetadataColumn: z.string().optional(),
+  uploadedMetadata: z
+    .object({
+      columns: z.array(z.string()),
+      columnTypes: z.record(z.string()),
+      matchStats: z.object({
+        totalMetadataIds: z.number(),
+        totalSequenceIds: z.number(),
+        exactMatches: z.number(),
+        versionMatches: z.number(),
+        unmatched: z.number(),
+        matchPercentage: z.number(),
+      }),
+    })
+    .optional(),
 });
 
 export type UMAPPoint = {
