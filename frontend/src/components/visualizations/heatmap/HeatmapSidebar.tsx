@@ -4,12 +4,12 @@ import type { DocState } from "../../../appState";
 import type { ColorScaleArray } from "../../../colorScales";
 import { formatTitle } from "../../../helpers";
 import type { ColorScaleKey } from "../../../plotTypes";
-import { TitleField } from "../../forms/fields/TitleField";
 import { Checkbox } from "../../primitives/Checkbox";
 import { NumberInput } from "../../primitives/NumberInput";
 import { Select, SelectItem } from "../../primitives/Select";
 import { Slider } from "../../primitives/Slider";
 import { Switch } from "../../primitives/Switch";
+import { TitleField } from "../TitleField";
 
 export const HeatmapSidebar = ({
   settings,

@@ -9,12 +9,12 @@ import {
 } from "react-icons/tb";
 import type { ColorString } from "../../../colors";
 import type { DistributionState } from "../../../distributionState";
-import { TitleField } from "../../forms/fields/TitleField";
 import { ColorPicker } from "../../primitives/ColorPicker";
 import { Select, SelectItem } from "../../primitives/Select";
 import { Slider } from "../../primitives/Slider";
 import { Switch } from "../../primitives/Switch";
 import { Tooltip } from "../../primitives/Tooltip";
+import { TitleField } from "../TitleField";
 
 export const ViolinSidebar = ({
   sidebarComponent,
