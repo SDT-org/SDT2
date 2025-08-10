@@ -99,10 +99,26 @@ def run(
     if process.returncode != 0:
         return result._replace(error=f"Error running LZ-ANI: {''.join(output_lines)}")
 
-    matrix, ids = lzani_tsv_to_distance_matrix(
-        settings.doc_paths.lzani_results,
-        settings.doc_paths.lzani_results_ids,
-        settings.lzani.score_type,
-    )
-
-    return result._replace(distance_matrix=matrix, ordered_ids=ids)
+    # Check sequence count from IDs file
+    import pandas as pd
+    ids_df = pd.read_csv(settings.doc_paths.lzani_results_ids, sep="\t")
+    sequence_count = len(ids_df)
+    
+    if sequence_count > 2500:
+        # For large datasets, skip matrix building to save memory
+        # UMAP will read TSV directly, other views are disabled
+        print(f"Skipping matrix construction for large dataset ({sequence_count} sequences > 2500)")
+        # Return minimal matrix to satisfy postprocessing
+        import numpy as np
+        ids = ids_df["id"].tolist()
+        # Create a dummy 1x1 matrix to avoid errors in postprocessing
+        dummy_matrix = np.zeros((1, 1))
+        return result._replace(distance_matrix=dummy_matrix, ordered_ids=ids)
+    else:
+        # For smaller datasets, build the full matrix as usual
+        matrix, ids = lzani_tsv_to_distance_matrix(
+            settings.doc_paths.lzani_results,
+            settings.doc_paths.lzani_results_ids,
+            settings.lzani.score_type,
+        )
+        return result._replace(distance_matrix=matrix, ordered_ids=ids)

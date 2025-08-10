@@ -41,6 +41,7 @@ export const UMAP: React.FC<UMAPProps> = ({
   const [loading, setLoading] = useState(false);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [error, setError] = useState<string | null>(null);
+  const loadingRef = useRef(false); // Prevent concurrent API calls
 
   // Use the reusable metadata colors hook
   const metadataColors = useMetadataColors({
@@ -62,11 +63,19 @@ export const UMAP: React.FC<UMAPProps> = ({
     [setDocState],
   );
 
-  // Fetch UMAP data when parameters change
+  // Fetch UMAP data when parameters change (with debounce)
   useEffect(() => {
     if (!docState.id) return;
 
-    const fetchData = async () => {
+    // Add debounce to prevent multiple rapid API calls
+    const timeoutId = setTimeout(async () => {
+      // Skip if already loading
+      if (loadingRef.current) {
+        console.log("Skipping UMAP fetch - already loading");
+        return;
+      }
+
+      loadingRef.current = true;
       setLoading(true);
       setError(null);
 
@@ -116,10 +125,14 @@ export const UMAP: React.FC<UMAPProps> = ({
         setError(errorMessage);
       } finally {
         setLoading(false);
+        loadingRef.current = false;
       }
-    };
+    }, 500); // 500ms debounce to prevent multiple calls during initialization
 
-    fetchData();
+    // Cleanup function to cancel pending requests
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [
     docState.id,
     docState.umap.n_neighbors,

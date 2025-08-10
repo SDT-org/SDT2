@@ -55,50 +55,66 @@ export const Viewer = ({
             >
               Pairwise
             </Tab>
-            <Tab id="heatmap">
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}
-              >
-                <svg
-                  height={12}
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 30 30"
-                  aria-hidden={true}
-                  color="currentcolor"
-                >
-                  <rect id="one" x="0" y="0" width={8} height={8} />
-                  <rect x="0" y="10" width={8} height={8} />
-                  <rect x="10" y="10" width={8} height={8} />
-                  <rect x="0" y="20" width={8} height={8} />
-                  <rect x="10" y="20" width={8} height={8} />
-                  <rect x="20" y="20" width={8} height={8} />
-                </svg>
-                <span>Heatmap</span>
-              </div>
-            </Tab>
-            <Tab id="clustermap">
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}
-              >
-                <svg
-                  height={12}
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 30 30"
-                  aria-hidden={true}
-                  color="currentcolor"
-                >
-                  <circle cx="6" cy="6" r="5" />
-                  <circle cx="25" cy="6" r="5" />
-                  <circle cx="6" cy="24" r="5" />
-                  <circle cx="25" cy="24" r="5" />
-                  <circle cx="16" cy="15" r="4" />
-                </svg>
-                <span>Clustermap</span>
-              </div>
-            </Tab>
+            {docState.sequences_count <= 2500 && (
+              <>
+                <Tab id="heatmap">
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.8rem",
+                    }}
+                  >
+                    <svg
+                      height={12}
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 30 30"
+                      aria-hidden={true}
+                      color="currentcolor"
+                    >
+                      <rect id="one" x="0" y="0" width={8} height={8} />
+                      <rect x="0" y="10" width={8} height={8} />
+                      <rect x="10" y="10" width={8} height={8} />
+                      <rect x="0" y="20" width={8} height={8} />
+                      <rect x="10" y="20" width={8} height={8} />
+                      <rect x="20" y="20" width={8} height={8} />
+                    </svg>
+                    <span>Heatmap</span>
+                  </div>
+                </Tab>
+                <Tab id="clustermap">
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.8rem",
+                    }}
+                  >
+                    <svg
+                      height={12}
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 30 30"
+                      aria-hidden={true}
+                      color="currentcolor"
+                    >
+                      <circle cx="6" cy="6" r="5" />
+                      <circle cx="25" cy="6" r="5" />
+                      <circle cx="6" cy="24" r="5" />
+                      <circle cx="25" cy="24" r="5" />
+                      <circle cx="16" cy="15" r="4" />
+                    </svg>
+                    <span>Clustermap</span>
+                  </div>
+                </Tab>
+              </>
+            )}
             <Tab id="umap">
               <div
-                style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.8rem",
+                }}
               >
                 <svg
                   height={12}

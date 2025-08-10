@@ -18,10 +18,29 @@ def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
     distance_matrix = result.distance_matrix
 
     seq_stats = get_seq_stats(result.seq_dict, result.is_aa)
-    df = DataFrame(distance_matrix, index=ids_to_use, columns=ids_to_use)
-    save_cols_to_csv(df, doc_paths.columns)
-    save_stats_to_csv(seq_stats, doc_paths.stats)
-    save_matrix_to_csv(df, doc_paths.matrix, doc_paths.triangle)
+    
+    # Check if this is a large dataset with dummy matrix (1x1)
+    sequence_count = len(ids_to_use)
+    if sequence_count > 2500 and distance_matrix.shape == (1, 1):
+        print(f"Skipping matrix save for large dataset ({sequence_count} sequences > 2500)")
+        # Create minimal files for compatibility
+        # Save empty columns file
+        with open(doc_paths.columns, 'w') as f:
+            f.write("")
+        # Save stats as usual
+        save_stats_to_csv(seq_stats, doc_paths.stats)
+        # Save dummy matrix files to avoid errors
+        with open(doc_paths.matrix, 'w') as f:
+            f.write("")
+        with open(doc_paths.triangle, 'w') as f:
+            f.write("")
+    else:
+        # Normal processing for smaller datasets
+        df = DataFrame(distance_matrix, index=ids_to_use, columns=ids_to_use)
+        save_cols_to_csv(df, doc_paths.columns)
+        save_stats_to_csv(seq_stats, doc_paths.stats)
+        save_matrix_to_csv(df, doc_paths.matrix, doc_paths.triangle)
+    
     save_seq_dict_to_json(result.seq_dict, doc_paths.seq_dict)
 
     return result

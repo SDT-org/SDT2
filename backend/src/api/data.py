@@ -13,18 +13,50 @@ from app_state import get_document, update_document
 
 
 class Data:
+    def __init__(self):
+        # Cache for UMAP distance matrices to avoid reloading on parameter changes
+        self._umap_cache = {}
+    
     def get_data(self, doc_id: str):
         doc = get_document(doc_id)
         doc_paths = build_document_paths(doc.tempdir_path)
 
-        df = read_csv_matrix(doc_paths.matrix)
-        if not isinstance(df, DataFrame) or df.empty:
-            raise Exception(
-                f"Matrix file is empty or not a valid DataFrame: {doc_paths.matrix}"
-            )
-        ids = df.index.tolist()
-        update_document(doc_id, sequences_count=len(ids))
-        data = df.to_numpy()
+        # Check if this is a large dataset that skipped matrix building
+        is_large_dataset = False
+        ids = []
+        data = np.zeros((1, 1))  # Default to dummy matrix
+        
+        if file_exists(doc_paths.lzani_results_ids):
+            # Check sequence count from lzani IDs file
+            ids_df = pd.read_csv(doc_paths.lzani_results_ids, sep="\t")
+            sequence_count = len(ids_df)
+            if sequence_count > 2500:
+                is_large_dataset = True
+                ids = ids_df["id"].tolist()
+                update_document(doc_id, sequences_count=sequence_count)
+                # For large datasets, keep dummy matrix for UI compatibility
+                # Real data will be loaded on-demand for UMAP
+        
+        if not is_large_dataset:
+            try:
+                df = read_csv_matrix(doc_paths.matrix)
+                if not isinstance(df, DataFrame) or df.empty:
+                    raise Exception(
+                        f"Matrix file is empty or not a valid DataFrame: {doc_paths.matrix}"
+                    )
+                ids = df.index.tolist()
+                update_document(doc_id, sequences_count=len(ids))
+                data = df.to_numpy()
+            except Exception as e:
+                # If matrix reading fails, return minimal response
+                print(f"Warning: Could not read matrix file: {e}")
+                return json.dumps({
+                    "metadata": {"minVal": 0, "maxVal": 100},
+                    "data": [[], [[]]],  # Minimal valid data
+                    "ids": [],
+                    "identity_scores": [],
+                    "full_stats": [],
+                })
 
         if os.path.exists(doc_paths.stats):
             stats_df = read_stats_csv(doc_paths.stats)
@@ -41,41 +73,51 @@ class Data:
             if run_settings:
                 is_lzani = run_settings.get("analysis_method") == "lzani"
 
-        for i in range(len(ids)):
-            for j in range(i):
-                identity_score = 100 - data[i, j]
-                all_scores.append(identity_score)
-
-                if not (is_lzani and identity_score < 1):
-                    identity_scores.append(
-                        [id_map[ids[i]], id_map[ids[j]], identity_score]
-                    )
-
-        unaligned_count = len([s for s in all_scores if s < 3]) if is_lzani else 0
-
-        heat_data = DataFrame(data, index=ids)
-        heat_data = to_triangle(heat_data)
-
-        if not isinstance(heat_data, DataFrame):
-            raise Exception("Heat data is not a valid DataFrame.")
-
-        heat_data_np = heat_data.to_numpy()
-        diag_mask = eye(heat_data_np.shape[0], dtype=bool)
-        heat_data_no_diag = where(diag_mask, nan, heat_data_np)
-
-        if is_lzani:
-            valid_values = heat_data_no_diag[
-                ~np.isnan(heat_data_no_diag) & (heat_data_no_diag >= 10)
-            ]
-            if valid_values.size > 0:
-                min_val = int(nanmin(valid_values))
-            else:
-                min_val = int(nanmin(heat_data_no_diag))
+        # For large datasets, skip expensive matrix operations
+        if is_large_dataset:
+            # Return minimal data for UI compatibility
+            min_val = 0
+            max_val = 100
+            parsedData = [[]]
+            unaligned_count = 0
         else:
-            min_val = int(nanmin(heat_data_no_diag))
+            # Normal processing for smaller datasets
+            for i in range(len(ids)):
+                for j in range(i):
+                    if i < data.shape[0] and j < data.shape[1]:
+                        identity_score = 100 - data[i, j]
+                        all_scores.append(identity_score)
 
-        max_val = int(nanmax(heat_data_no_diag))
-        parsedData = heat_data.values.tolist()
+                        if not (is_lzani and identity_score < 1):
+                            identity_scores.append(
+                                [id_map[ids[i]], id_map[ids[j]], identity_score]
+                            )
+
+            unaligned_count = len([s for s in all_scores if s < 3]) if is_lzani else 0
+
+            heat_data = DataFrame(data, index=ids if ids else ["dummy"])
+            heat_data = to_triangle(heat_data)
+
+            if not isinstance(heat_data, DataFrame):
+                raise Exception("Heat data is not a valid DataFrame.")
+
+            heat_data_np = heat_data.to_numpy()
+            diag_mask = eye(heat_data_np.shape[0], dtype=bool)
+            heat_data_no_diag = where(diag_mask, nan, heat_data_np)
+
+            if is_lzani:
+                valid_values = heat_data_no_diag[
+                    ~np.isnan(heat_data_no_diag) & (heat_data_no_diag >= 10)
+                ]
+                if valid_values.size > 0:
+                    min_val = int(nanmin(valid_values))
+                else:
+                    min_val = int(nanmin(heat_data_no_diag)) if heat_data_no_diag.size > 0 else 0
+            else:
+                min_val = int(nanmin(heat_data_no_diag)) if heat_data_no_diag.size > 0 else 0
+
+            max_val = int(nanmax(heat_data_no_diag)) if heat_data_no_diag.size > 0 else 100
+            parsedData = heat_data.values.tolist()
 
         metadata = dict(minVal=min_val, maxVal=max_val)
         if file_exists(doc_paths.run_settings):
@@ -197,10 +239,36 @@ class Data:
         doc = get_document(doc_id)
         doc_paths = build_document_paths(doc.tempdir_path)
         
-        # Load distance matrix
-        matrix_df = read_csv_matrix(doc_paths.matrix)
-        distance_matrix = matrix_df.to_numpy()
-        sequence_ids = matrix_df.index.to_list()
+        # Check if we have cached distance matrix for this document
+        if doc_id in self._umap_cache:
+            print(f"Using cached distance matrix for doc {doc_id}")
+            distance_matrix, sequence_ids = self._umap_cache[doc_id]
+        else:
+            print(f"Loading distance matrix for doc {doc_id}")
+            # Check if this is lzani data and load directly from TSV for better performance
+            if file_exists(doc_paths.run_settings):
+                run_settings = read_json_file(doc_paths.run_settings)
+                if run_settings and run_settings.get("analysis_method") == "lzani" and file_exists(doc_paths.lzani_results):
+                    # Load lzani TSV directly without building full matrix
+                    distance_matrix, sequence_ids = self._load_lzani_tsv_for_umap(
+                        doc_paths.lzani_results,
+                        doc_paths.lzani_results_ids,
+                        run_settings.get("lzani", {}).get("score_type", "ani")
+                    )
+                else:
+                    # Load from pre-computed matrix (parasail or existing lzani matrix)
+                    matrix_df = read_csv_matrix(doc_paths.matrix)
+                    distance_matrix = matrix_df.to_numpy()
+                    sequence_ids = matrix_df.index.to_list()
+            else:
+                # Default: Load from matrix
+                matrix_df = read_csv_matrix(doc_paths.matrix)
+                distance_matrix = matrix_df.to_numpy()
+                sequence_ids = matrix_df.index.to_list()
+            
+            # Cache the distance matrix for future use
+            self._umap_cache[doc_id] = (distance_matrix, sequence_ids)
+            print(f"Cached distance matrix for doc {doc_id} ({len(sequence_ids)} sequences)")
         
         # Run UMAP with specified parameters
         config = UMAPConfig(
@@ -309,9 +377,15 @@ class Data:
         id_column = metadata_df.columns[0]
         metadata_ids = metadata_df[id_column].astype(str).tolist()
         
-        # Load sequence IDs from the matrix
-        matrix_df = read_csv_matrix(doc_paths.matrix)
-        sequence_ids = matrix_df.index.tolist()
+        # Load sequence IDs - for large datasets, get from lzani IDs file
+        if file_exists(doc_paths.lzani_results_ids):
+            # Large dataset - get IDs from lzani results
+            ids_df = pd.read_csv(doc_paths.lzani_results_ids, sep="\t")
+            sequence_ids = ids_df["id"].tolist()
+        else:
+            # Regular dataset - get from matrix
+            matrix_df = read_csv_matrix(doc_paths.matrix)
+            sequence_ids = matrix_df.index.tolist()
         
         # Perform ID matching
         matches, match_stats = self._match_sequence_ids(metadata_ids, sequence_ids)
@@ -395,15 +469,13 @@ class Data:
             "exact_matches": exact_matches,
             "version_matches": version_matches,
             "unmatched": unmatched,
-            "match_percentage": round((exact_matches + version_matches) / len(sequence_ids) * 100, 1)
+            "match_percentage": round((exact_matches + version_matches) / len(sequence_ids) * 100, 1) if len(sequence_ids) > 0 else 0
         }
         
         return matches, stats
     
     def get_metadata_for_umap(self, doc_id: str, column_name: str):
-        """
-        Get metadata values for a specific column to use in UMAP visualization.
-        """
+
         doc = get_document(doc_id)
         
         # Load metadata and matching info
@@ -435,3 +507,37 @@ class Data:
             "value_map": value_map,
             "column_type": "numeric" if pd.api.types.is_numeric_dtype(metadata_df[column_name]) else "categorical"
         }
+    
+    def _load_lzani_tsv_for_umap(self, results_tsv_path: str, ids_tsv_path: str, score_column: str = "ani"):
+
+        ids_df = pd.read_csv(ids_tsv_path, sep="\t")
+        all_ids = ids_df["id"].tolist()
+        n_sequences = len(all_ids)
+        
+        results_df = pd.read_csv(results_tsv_path, sep="\t")
+        
+        # Create pivot table with similarity scores
+        if results_df.empty:
+            matrix = pd.DataFrame(index=all_ids, columns=all_ids, data=100.0)
+        else:
+            matrix = results_df.pivot_table(
+                index="query", columns="reference", values=score_column, aggfunc="first"
+            )
+            # Reindex to ensure all IDs are present
+            matrix = matrix.reindex(index=all_ids, columns=all_ids)
+        
+        # Convert to numpy and scale to percentage
+        matrix_np = matrix.to_numpy() * 100
+        
+        # Handle NaN values and convert similarity to distance
+        matrix_np = np.where(np.isnan(matrix_np), 100, 100 - matrix_np)
+        
+        # Make symmetric (average forward and reverse scores)
+        matrix_np = (matrix_np + matrix_np.T) / 2
+        
+        # Set diagonal to 0 (self-distance)
+        np.fill_diagonal(matrix_np, 0)
+        
+        print(f"Loaded lzani TSV directly: {n_sequences} sequences")
+        
+        return matrix_np, all_ids

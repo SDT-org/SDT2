@@ -51,7 +51,16 @@ def read_csv_file(
     # Special handling for matrix files with variable columns
     if header is None and index_col == 0 and sep == ",":
         with open(filepath, "r") as temp_f:
-            col_count = [len(l.split(sep)) for l in temp_f.readlines()]
+            lines = temp_f.readlines()
+            # Handle empty files
+            if not lines:
+                # Return empty DataFrame with proper structure
+                return pd.DataFrame()
+            # Filter out empty lines and get column counts
+            col_count = [len(l.split(sep)) for l in lines if l.strip()]
+            # Handle files with no columns or only empty lines
+            if not col_count:
+                return pd.DataFrame()
             column_names = [i for i in range(0, max(col_count))]
         df = pd.read_csv(
             filepath,

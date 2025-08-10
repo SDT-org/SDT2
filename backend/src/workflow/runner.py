@@ -53,13 +53,17 @@ def run_process(
     if result.error:
         return result
 
-    if settings.cluster_method and settings.cluster_method != "None":
+    # Skip clustering for large datasets (>2500 sequences) to avoid expensive matrix operations
+    sequence_count = len(result.ordered_ids)
+    if settings.cluster_method and settings.cluster_method != "None" and sequence_count <= 2500:
         workflow_run.set_stage("Clustering")
         workflow_run.set_progress(None)
 
         result = cluster.run(result, settings, workflow_run.set_progress)
         if result.error:
             return result
+    elif sequence_count > 2500:
+        print(f"Skipping clustering for large dataset ({sequence_count} sequences > 2500)")
 
     workflow_run.set_stage("Finalizing")
     workflow_run.set_progress(100)
