@@ -2,6 +2,7 @@ import React from "react";
 import { type Key, Tab, TabList, TabPanel, Tabs } from "react-aria-components";
 import type { DocState, SetDocState, UpdateDocState } from "../../appState";
 import { useGetData } from "../../hooks/useGetData";
+import { NetworkView } from "../NetworkView";
 import { UMAP } from "../UMAP";
 import { DistributionPanels } from "../visualizations/DistributionPanels";
 import { Clustermap } from "../visualizations/clustermap/Clustermap";
@@ -35,6 +36,16 @@ export const Viewer = ({
     },
     [updateDocState],
   );
+
+  // If large dataset and currently on heatmap/clustermap, switch to UMAP
+  React.useEffect(() => {
+    if (
+      docState.sequences_count > 2500 &&
+      (docState.dataView === "heatmap" || docState.dataView === "clustermap")
+    ) {
+      updateDocState({ dataView: "umap" }, false);
+    }
+  }, [docState.sequences_count, docState.dataView, updateDocState]);
 
   return (
     <TabPanel id={docState.id} key={docState.id}>
@@ -136,6 +147,62 @@ export const Viewer = ({
                 <span>UMAP</span>
               </div>
             </Tab>
+            <Tab id="network">
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.8rem",
+                }}
+              >
+                <svg
+                  height={12}
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 30 30"
+                  aria-hidden={true}
+                  color="currentcolor"
+                >
+                  <circle cx="5" cy="5" r="3" fill="currentColor" />
+                  <circle cx="25" cy="5" r="3" fill="currentColor" />
+                  <circle cx="5" cy="25" r="3" fill="currentColor" />
+                  <circle cx="25" cy="25" r="3" fill="currentColor" />
+                  <circle cx="15" cy="15" r="3" fill="currentColor" />
+                  <line
+                    x1="5"
+                    y1="5"
+                    x2="15"
+                    y2="15"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                  />
+                  <line
+                    x1="25"
+                    y1="5"
+                    x2="15"
+                    y2="15"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                  />
+                  <line
+                    x1="5"
+                    y1="25"
+                    x2="15"
+                    y2="15"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                  />
+                  <line
+                    x1="25"
+                    y1="25"
+                    x2="15"
+                    y2="15"
+                    stroke="currentColor"
+                    strokeWidth="1"
+                  />
+                </svg>
+                <span>Network</span>
+              </div>
+            </Tab>
             <Tab
               id="distribution"
               isDisabled={true}
@@ -224,6 +291,15 @@ export const Viewer = ({
               docState={docState}
               setDocState={setDocState}
               updateDocState={updateDocState}
+              leftSidebarCollapsed={leftSidebarCollapsed}
+            />
+          ) : null}
+        </TabPanel>
+        <TabPanel id="network" className="app-panel">
+          {!loading ? (
+            <NetworkView
+              docState={docState}
+              setDocState={setDocState}
               leftSidebarCollapsed={leftSidebarCollapsed}
             />
           ) : null}

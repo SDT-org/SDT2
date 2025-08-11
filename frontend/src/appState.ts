@@ -12,6 +12,8 @@ import {
   ClustermapSettingsSchema,
   type HeatmapSettings,
   HeatmapSettingsSchema,
+  type NetworkSettings,
+  NetworkSettingsSchema,
   type UMAPSettings,
   UMAPSettingsSchema,
 } from "./plotTypes";
@@ -46,11 +48,13 @@ export type DocState = {
     | "clustermap"
     | "distribution_histogram"
     | "distribution_violin"
-    | "umap";
+    | "umap"
+    | "network";
   distribution: DistributionState;
   heatmap: HeatmapSettings;
   clustermap: ClustermapSettings;
   umap: UMAPSettings;
+  network: NetworkSettings;
   exportPrefix: string;
   invalid?: {
     reason: string;
@@ -148,11 +152,13 @@ export const docStateSchema = z.object({
     "distribution_histogram",
     "distribution_violin",
     "umap",
+    "network",
   ]),
   distribution: DistributionStateSchema,
   heatmap: HeatmapSettingsSchema,
   clustermap: ClustermapSettingsSchema,
   umap: UMAPSettingsSchema,
+  network: NetworkSettingsSchema,
 });
 
 const clientDocState = {
@@ -237,6 +243,13 @@ export const initialDocState: DocState = {
     showClusterBoundaries: false,
     colorByCluster: true,
     colorBy: "cluster",
+  },
+  network: {
+    similarityThreshold: 95,
+    resolution: 1.0,
+    layoutMethod: "spring",
+    showLabels: true,
+    showStats: true,
   },
   ...clientDocState,
 };

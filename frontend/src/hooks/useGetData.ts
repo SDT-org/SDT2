@@ -28,17 +28,23 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
     window.pywebview.api.data
       .get_data(docState.id)
       .then(async (rawData) => {
-        const parsedResponse: GetDataResponse = JSON.parse(
-          rawData.replace(/\bNaN\b/g, "null"),
-        );
+        const parsedResponse = JSON.parse(rawData.replace(/\bNaN\b/g, "null"));
 
+        // Check if this is an error response for large datasets
+        if (parsedResponse.error) {
+          console.log(parsedResponse.message);
+          setLoading(false);
+          return;
+        }
+
+        const typedResponse = parsedResponse as GetDataResponse;
         const {
           data,
           metadata,
           ids: responseIds,
           identity_scores,
           full_stats,
-        } = parsedResponse;
+        } = typedResponse;
         const [idsData, ...parsedData] = data;
 
         setMetaData(metadata);

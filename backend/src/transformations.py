@@ -130,34 +130,11 @@ def lzani_tsv_to_distance_matrix(results_tsv_path, ids_tsv_path, score_column="a
     matrix_np = np.where(np.isnan(matrix_np) | (matrix_np == 0), 0, matrix_np)
 
     # LZANI has slightly different scores for query v. reference vs. reference v query
-    # Only average if both directions have valid alignments (>1% threshold)
-    matrix_transposed = matrix_np.T
-
-    # Create a new matrix for the symmetric result
-    symmetric_matrix = np.zeros_like(matrix_np)
-
-    for i in range(matrix_np.shape[0]):
-        for j in range(matrix_np.shape[1]):
-            if i == j:
-                symmetric_matrix[i, j] = 100.0  # Self-comparison
-            else:
-                forward = matrix_np[i, j]
-                reverse = matrix_transposed[i, j]
-
-                # If both directions have valid alignments (>1%), average them
-                if forward > 1 and reverse > 1:
-                    symmetric_matrix[i, j] = (forward + reverse) / 2
-                # If only forward has valid alignment, use it
-                elif forward > 1:
-                    symmetric_matrix[i, j] = forward
-                # If only reverse has valid alignment, use it
-                elif reverse > 1:
-                    symmetric_matrix[i, j] = reverse
-                # If neither has valid alignment, set to 0
-                else:
-                    symmetric_matrix[i, j] = 0
-
-    matrix_np = symmetric_matrix
+    # Take the maximum of forward and reverse scores
+    matrix_np = np.maximum(matrix_np, matrix_np.T)
+    
+    # Ensure diagonal is 100 (self-comparison)
+    np.fill_diagonal(matrix_np, 100.0)
 
     # Convert similarity to distance
     distance_matrix = 100 - matrix_np
