@@ -37,7 +37,7 @@ class Data:
                 return json.dumps({
                     "error": "Dataset too large for heatmap visualization",
                     "sequences_count": sequence_count,
-                    "message": "Please use UMAP or Network visualization for datasets with more than 2500 sequences"
+                    "message": "Please use UMAP visualization for datasets with more than 2500 sequences"
                 })
         
         if not is_large_dataset:
@@ -233,36 +233,11 @@ class Data:
         }
 
     def get_umap_data(self, doc_id: str, params: dict):
-        from workflow.umap import run_umap, UMAPConfig
+        from workflow.umap import run_umap, run_umap_from_lzani_tsv, UMAPConfig
         from workflow.cluster_hdbscan import run_hdbscan_clustering, get_cluster_stats
         
         doc = get_document(doc_id)
         doc_paths = build_document_paths(doc.tempdir_path)
-        
-        if doc_id in self._umap_cache:
-            print(f"Using cached distance matrix for doc {doc_id}")
-            distance_matrix, sequence_ids = self._umap_cache[doc_id]
-        else:
-            print(f"Loading distance matrix for doc {doc_id}")
-            if file_exists(doc_paths.run_settings):
-                run_settings = read_json_file(doc_paths.run_settings)
-                if run_settings and run_settings.get("analysis_method") == "lzani" and file_exists(doc_paths.lzani_results):
-                    distance_matrix, sequence_ids = self._load_lzani_tsv_for_umap(
-                        doc_paths.lzani_results,
-                        doc_paths.lzani_results_ids,
-                        run_settings.get("lzani", {}).get("score_type", "ani")
-                    )
-                else:
-                    matrix_df = read_csv_matrix(doc_paths.matrix)
-                    distance_matrix = matrix_df.to_numpy()
-                    sequence_ids = matrix_df.index.to_list()
-            else:
-                matrix_df = read_csv_matrix(doc_paths.matrix)
-                distance_matrix = matrix_df.to_numpy()
-                sequence_ids = matrix_df.index.to_list()
-            
-            self._umap_cache[doc_id] = (distance_matrix, sequence_ids)
-            print(f"Cached distance matrix for doc {doc_id} ({len(sequence_ids)} sequences)")
         
         config = UMAPConfig(
             n_neighbors=params.get("n_neighbors", 15),
@@ -270,12 +245,55 @@ class Data:
             metric='precomputed'
         )
         
-        umap_result = run_umap(
-            distance_matrix=distance_matrix,
-            sequence_ids=sequence_ids,
-            config=config
-        )
+        # Check if this is LZ-ANI data
+        is_lzani = False
+        if file_exists(doc_paths.run_settings):
+            run_settings = read_json_file(doc_paths.run_settings)
+            is_lzani = run_settings and run_settings.get("analysis_method") == "lzani" and file_exists(doc_paths.lzani_results)
         
+        # LZ-ANI always streams TSV directly
+        if is_lzani:
+            score_type = run_settings.get("lzani", {}).get("score_type", "ani")
+            print(f"Streaming LZ-ANI TSV directly to UMAP")
+            
+            umap_result = run_umap_from_lzani_tsv(
+                results_tsv_path=doc_paths.lzani_results,
+                ids_tsv_path=doc_paths.lzani_results_ids,
+                config=config,
+                score_type=score_type
+            )
+            
+            sequence_ids = umap_result.sequence_ids
+            
+            # For HDBSCAN, we need the distance matrix
+            if doc_id not in self._umap_cache:
+                print(f"Building distance matrix for HDBSCAN clustering")
+                distance_matrix, _ = self._load_lzani_tsv_for_umap(
+                    doc_paths.lzani_results,
+                    doc_paths.lzani_results_ids,
+                    score_type
+                )
+                self._umap_cache[doc_id] = (distance_matrix, sequence_ids)
+            else:
+                distance_matrix, _ = self._umap_cache[doc_id]
+        else:
+            # Non-LZ-ANI uses regular matrix
+            if doc_id in self._umap_cache:
+                print(f"Using cached distance matrix for doc {doc_id}")
+                distance_matrix, sequence_ids = self._umap_cache[doc_id]
+            else:
+                matrix_df = read_csv_matrix(doc_paths.matrix)
+                distance_matrix = matrix_df.to_numpy()
+                sequence_ids = matrix_df.index.to_list()
+                self._umap_cache[doc_id] = (distance_matrix, sequence_ids)
+            
+            umap_result = run_umap(
+                distance_matrix=distance_matrix,
+                sequence_ids=sequence_ids,
+                config=config
+            )
+        
+        # HDBSCAN clustering
         min_cluster_size = params.get("min_cluster_size", params.get("threshold", 5))
         cluster_epsilon = params.get("cluster_epsilon", 0.0)
         
@@ -287,6 +305,9 @@ class Data:
             except:
                 pass
         
+        if doc_id in self._umap_cache:
+            distance_matrix, _ = self._umap_cache[doc_id]
+        
         cluster_assignments = run_hdbscan_clustering(
             distance_matrix=distance_matrix,
             sequence_ids=sequence_ids,
@@ -297,8 +318,6 @@ class Data:
         cluster_stats = get_cluster_stats(cluster_assignments)
         
         print(f"HDBSCAN clustering: min_cluster_size={min_cluster_size}, epsilon={cluster_epsilon}")
-        print(f"Distance matrix shape: {distance_matrix.shape}")
-        print(f"Distance matrix range: min={distance_matrix.min():.3f}, max={distance_matrix.max():.3f}")
         print(f"Total sequences: {cluster_stats['total_sequences']}")
         print(f"Total clusters: {cluster_stats['total_clusters']}")
         print(f"Noise points: {cluster_stats['noise_points']}")
@@ -398,31 +417,86 @@ class Data:
         version_matches = 0
         unmatched = 0
         
+        # Convert all IDs to strings for consistent matching
+        sequence_ids = [str(sid) for sid in sequence_ids]
+        metadata_ids = [str(mid) for mid in metadata_ids]
+        
+        # Create sets and mappings for efficient lookup
         sequence_id_set = set(sequence_ids)
         sequence_base_ids = {}
+        sequence_lower_to_original = {sid.lower(): sid for sid in sequence_ids}
         
+        # Build mapping of base IDs (without version) to full IDs
         for seq_id in sequence_ids:
-            if '.' in seq_id:
-                base_id = seq_id.split('.')[0]
-                sequence_base_ids[base_id] = seq_id
+            # Try multiple version separators
+            for separator in ['.', '_v', '-v', '_V', '-V']:
+                if separator in seq_id:
+                    base_id = seq_id.split(separator)[0]
+                    sequence_base_ids[base_id] = seq_id
+                    sequence_base_ids[base_id.lower()] = seq_id
+                    break
+        
+        # Create reverse mapping: from sequence ID to metadata ID
+        sequence_to_meta = {}
         
         for meta_id in metadata_ids:
+            matched = False
+            meta_id_lower = meta_id.lower()
+            
+            # 1. Try exact match (case-sensitive)
             if meta_id in sequence_id_set:
                 matches[meta_id] = meta_id
+                sequence_to_meta[meta_id] = meta_id
                 exact_matches += 1
-            elif '.' in meta_id:
-                base_id = meta_id.split('.')[0]
-                if base_id in sequence_base_ids:
-                    matches[meta_id] = sequence_base_ids[base_id]
-                    version_matches += 1
-                else:
-                    unmatched += 1
-            else:
-                if meta_id in sequence_base_ids:
-                    matches[meta_id] = sequence_base_ids[meta_id]
-                    version_matches += 1
-                else:
-                    unmatched += 1
+                matched = True
+            
+            # 2. Try case-insensitive match
+            elif meta_id_lower in sequence_lower_to_original:
+                seq_id = sequence_lower_to_original[meta_id_lower]
+                matches[meta_id] = seq_id
+                sequence_to_meta[seq_id] = meta_id
+                version_matches += 1
+                matched = True
+            
+            # 3. Try version stripping
+            elif not matched:
+                for separator in ['.', '_v', '-v', '_V', '-V']:
+                    if separator in meta_id:
+                        base_id = meta_id.split(separator)[0]
+                        if base_id in sequence_base_ids:
+                            seq_id = sequence_base_ids[base_id]
+                            matches[meta_id] = seq_id
+                            sequence_to_meta[seq_id] = meta_id
+                            version_matches += 1
+                            matched = True
+                            break
+                        elif base_id.lower() in sequence_base_ids:
+                            seq_id = sequence_base_ids[base_id.lower()]
+                            matches[meta_id] = seq_id
+                            sequence_to_meta[seq_id] = meta_id
+                            version_matches += 1
+                            matched = True
+                            break
+            
+            # 4. Try if metadata ID is a base ID matching sequence with version
+            if not matched and meta_id in sequence_base_ids:
+                seq_id = sequence_base_ids[meta_id]
+                matches[meta_id] = seq_id
+                sequence_to_meta[seq_id] = meta_id
+                version_matches += 1
+                matched = True
+            elif not matched and meta_id_lower in sequence_base_ids:
+                seq_id = sequence_base_ids[meta_id_lower]
+                matches[meta_id] = seq_id
+                sequence_to_meta[seq_id] = meta_id
+                version_matches += 1
+                matched = True
+            
+            if not matched:
+                unmatched += 1
+        
+        # Store the reverse mapping for later use
+        self._sequence_to_meta_mapping = sequence_to_meta
         
         stats = {
             "total_metadata_ids": len(metadata_ids),
@@ -435,43 +509,6 @@ class Data:
         
         return matches, stats
     
-    def get_network_data(self, doc_id: str, params: dict):
-        from workflow.cluster_network import get_network_data
-        
-        doc = get_document(doc_id)
-        doc_paths = build_document_paths(doc.tempdir_path)
-        
-        if file_exists(doc_paths.lzani_results_ids):
-            run_settings = read_json_file(doc_paths.run_settings) if file_exists(doc_paths.run_settings) else {}
-            score_type = run_settings.get("lzani", {}).get("score_type", "ani") if run_settings else "ani"
-            distance_matrix, sequence_ids = self._load_lzani_tsv_for_umap(
-                doc_paths.lzani_results,
-                doc_paths.lzani_results_ids,
-                score_type
-            )
-        else:
-            matrix_df = read_csv_matrix(doc_paths.matrix)
-            distance_matrix = matrix_df.to_numpy()
-            sequence_ids = matrix_df.index.to_list()
-        
-        network_result = get_network_data(
-            distance_matrix=distance_matrix,
-            sequence_ids=sequence_ids,
-            similarity_threshold=params.get("similarity_threshold", 95.0),
-            clustering_method=params.get("clustering_method", "louvain"),
-            layout_method=params.get("layout_method", "spring"),
-            resolution=params.get("resolution", 1.0),
-            min_similarity_filter=params.get("min_similarity_filter", 50.0)
-        )
-        
-        return {
-            "data": network_result,
-            "metadata": {
-                "similarity_threshold": params.get("similarity_threshold", 95.0),
-                "clustering_method": params.get("clustering_method", "louvain"),
-                "sequences_count": len(sequence_ids)
-            }
-        }
     
     def get_metadata_for_umap(self, doc_id: str, column_name: str):
 
@@ -483,6 +520,7 @@ class Data:
         if not os.path.exists(metadata_path) or not os.path.exists(match_info_path):
             raise Exception("No metadata uploaded")
         
+        # Read metadata with proper type inference
         metadata_df = pd.read_csv(metadata_path)
         with open(match_info_path, 'r') as f:
             match_info = json.load(f)
@@ -491,17 +529,60 @@ class Data:
         if column_name not in metadata_df.columns:
             raise Exception(f"Column '{column_name}' not found in metadata")
         
+        # Determine column type more robustly
+        column_data = metadata_df[column_name]
+        
+        # Try to convert to numeric if possible
+        try:
+            # Handle missing values
+            column_data = column_data.replace(['', 'NA', 'N/A', 'na', 'n/a', 'nan', 'NaN'], pd.NA)
+            numeric_data = pd.to_numeric(column_data, errors='coerce')
+            
+            # If more than 50% of non-null values are numeric, treat as numeric
+            non_null_count = column_data.notna().sum()
+            numeric_count = numeric_data.notna().sum()
+            
+            if non_null_count > 0 and numeric_count / non_null_count > 0.5:
+                column_type = "numeric"
+                # Use the numeric conversion
+                metadata_df[column_name] = numeric_data
+            else:
+                column_type = "categorical"
+        except:
+            column_type = "categorical"
+        
+        # Build value map, ensuring values are properly typed
         value_map = {}
         for _, row in metadata_df.iterrows():
             meta_id = str(row[id_column])
             if meta_id in match_info["matches"]:
                 seq_id = match_info["matches"][meta_id]
-                value_map[seq_id] = row[column_name]
+                value = row[column_name]
+                
+                # Handle missing values
+                if pd.isna(value):
+                    continue
+                
+                # Convert value based on column type
+                if column_type == "numeric":
+                    try:
+                        value_map[seq_id] = float(value)
+                    except:
+                        # Skip non-numeric values in numeric columns
+                        continue
+                else:
+                    # For categorical, ensure it's a string
+                    value_map[seq_id] = str(value)
+        
+        # Debug logging
+        print(f"Metadata column '{column_name}' - Type: {column_type}")
+        print(f"Sample values: {list(value_map.values())[:5]}")
+        print(f"Total matched values: {len(value_map)}")
         
         return {
             "column_name": column_name,
             "value_map": value_map,
-            "column_type": "numeric" if pd.api.types.is_numeric_dtype(metadata_df[column_name]) else "categorical"
+            "column_type": column_type
         }
     
     def _load_lzani_tsv_for_umap(self, results_tsv_path: str, ids_tsv_path: str, score_column: str = "ani"):

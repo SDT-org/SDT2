@@ -111,51 +111,6 @@ declare global {
             value_map: Record<string, string | number>;
             column_type: "numeric" | "categorical";
           }>;
-          get_network_data: (
-            doc_id: string,
-            params: {
-              similarity_threshold: number;
-              clustering_method: string;
-              layout_method: string;
-              resolution: number;
-              min_similarity_filter?: number;
-            },
-          ) => Promise<{
-            data: {
-              nodes: Array<{
-                id: string;
-                x: number;
-                y: number;
-                cluster: number;
-                degree: number;
-              }>;
-              edges: Array<{
-                source: string;
-                target: string;
-                weight: number;
-              }>;
-              stats: {
-                total_nodes: number;
-                total_edges: number;
-                total_clusters: number;
-                noise_points: number;
-                largest_cluster_size: number;
-                smallest_cluster_size: number;
-                average_degree: number;
-                density: number;
-                cluster_sizes: Record<number, number>;
-              };
-              bounds: {
-                x: [number, number];
-                y: [number, number];
-              };
-            };
-            metadata: {
-              similarity_threshold: number;
-              clustering_method: string;
-              sequences_count: number;
-            };
-          }>;
         };
         export: {
           export_data: (args: {

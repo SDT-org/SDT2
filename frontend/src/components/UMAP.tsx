@@ -246,7 +246,14 @@ export const UMAP: React.FC<UMAPProps> = ({
     // Get color function based on settings
     const getPointColor = (d: UMAPPoint): string => {
       if (docState.umap.colorBy === "metadata") {
-        return metadataColors.getColor(d.id);
+        const color = metadataColors.getColor(d.id);
+        // Debug first few points
+        if (umapData.embedding.indexOf(d) < 5) {
+          console.log(
+            `Point ${d.id} - metadata color: ${color}, value: ${metadataColors.values?.[d.id]}`,
+          );
+        }
+        return color;
       }
 
       // Default cluster coloring
@@ -388,7 +395,16 @@ export const UMAP: React.FC<UMAPProps> = ({
     return () => {
       tooltip.remove();
     };
-  }, [umapData, dimensions, docState.umap, loading, error, metadataColors]);
+  }, [
+    umapData,
+    dimensions,
+    docState.umap,
+    loading,
+    error,
+    metadataColors,
+    metadataColors.values,
+    metadataColors.columnType,
+  ]);
 
   return (
     <>

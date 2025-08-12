@@ -7,6 +7,7 @@ import warnings
 from typing import Dict, List, Optional, Tuple, Union
 from dataclasses import dataclass, asdict
 from transformations import read_csv_matrix
+from scipy.sparse import coo_matrix
 
 # Suppress UMAP warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="umap")
@@ -267,3 +268,53 @@ def compare_clustering_methods(distance_matrix_path: str,
         json.dump(comparison_data, f, indent=2)
     
     return comparison_data
+
+
+def run_umap_from_lzani_tsv(
+    results_tsv_path: str,
+    ids_tsv_path: str,
+    config: Optional[UMAPConfig] = None,
+    score_type: str = "ani"
+) -> UMAPResult:
+    config = config or UMAPConfig()
+    
+    ids_df = pd.read_csv(ids_tsv_path, sep="\t")
+    sequence_ids = ids_df["id"].tolist()
+    n_sequences = len(sequence_ids)
+    
+    id_to_idx = {seq_id: idx for idx, seq_id in enumerate(sequence_ids)}
+    
+    # Read TSV and build sparse matrix
+    results_df = pd.read_csv(results_tsv_path, sep="\t")
+    
+    if results_df.empty:
+        # No results = all sequences 100% different
+        sparse_matrix = coo_matrix((n_sequences, n_sequences))
+    else:
+        # Convert ANI to distance
+        results_df['distance'] = (100 - results_df[score_type] * 100)
+        
+        # Map IDs to indices
+        results_df['i'] = results_df['query'].map(id_to_idx)
+        results_df['j'] = results_df['reference'].map(id_to_idx)
+        
+        # Remove self-comparisons
+        results_df = results_df[results_df['i'] != results_df['j']]
+        
+        # Create symmetric sparse matrix
+        row = np.concatenate([results_df['i'].values, results_df['j'].values])
+        col = np.concatenate([results_df['j'].values, results_df['i'].values])
+        data = np.concatenate([results_df['distance'].values, results_df['distance'].values])
+        
+        sparse_matrix = coo_matrix((data, (row, col)), shape=(n_sequences, n_sequences))
+    
+    # UMAP can handle sparse matrices directly
+    config.metric = 'precomputed'
+    reducer = UMAP(**config.to_dict())
+    embedding = reducer.fit_transform(sparse_matrix)
+    
+    return UMAPResult(
+        embedding=embedding,
+        sequence_ids=sequence_ids,
+        config=config
+    )

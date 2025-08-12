@@ -289,19 +289,3 @@ export type GetUMAPDataResponse = {
     cluster_epsilon?: number;
   };
 };
-
-export interface NetworkSettings {
-  similarityThreshold: number;
-  resolution: number;
-  layoutMethod: "spring" | "forceatlas2" | "kamada_kawai";
-  showLabels: boolean;
-  showStats: boolean;
-}
-
-export const NetworkSettingsSchema = z.object({
-  similarityThreshold: z.number().min(70).max(100),
-  resolution: z.number().min(0.1).max(2),
-  layoutMethod: z.enum(["spring", "forceatlas2", "kamada_kawai"]),
-  showLabels: z.boolean(),
-  showStats: z.boolean(),
-});
