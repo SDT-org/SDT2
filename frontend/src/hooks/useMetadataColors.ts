@@ -39,11 +39,6 @@ export function useMetadataColors({
   // Fetch metadata when column changes
   useEffect(() => {
     if (!enabled || !columnName || !docId) {
-      console.log("Metadata fetch disabled or missing params:", {
-        enabled,
-        columnName,
-        docId,
-      });
       setValues(null);
       setColumnType(null);
       return;
@@ -54,18 +49,10 @@ export function useMetadataColors({
       setError(null);
 
       try {
-        console.log(`Fetching metadata for column: ${columnName}`);
         const response = await window.pywebview.api.data.get_metadata_for_umap(
           docId,
           columnName,
         );
-
-        console.log("Metadata response:", {
-          columnName: response.column_name,
-          columnType: response.column_type,
-          valueCount: Object.keys(response.value_map).length,
-          sampleValues: Object.entries(response.value_map).slice(0, 5),
-        });
 
         setValues(response.value_map);
         setColumnType(response.column_type);

@@ -4,7 +4,7 @@ import { useRenderStatus } from "../components/shared/Exporter";
 import { useDocState } from "./useDocState";
 
 export const useExportSvg = (
-  key: Extract<SaveableImageKey, "clustermap" | "heatmap">,
+  key: Extract<SaveableImageKey, "clustermap" | "heatmap" | "umap">,
   ref: React.RefObject<SVGSVGElement>,
 ) => {
   const running = React.useRef(false);

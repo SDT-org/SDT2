@@ -2,11 +2,12 @@ import * as d3 from "d3";
 import React, { useEffect, useRef, useState } from "react";
 import type { DocState, SetDocState, UpdateDocState } from "../appState";
 import { distinctColor } from "../colors";
+import { useExportSvg } from "../hooks/useExportSvg";
 import {
   getMetadataTooltip,
   useMetadataColors,
 } from "../hooks/useMetadataColors";
-import type { UMAPData, UMAPPoint } from "../plotTypes";
+import type { UMAPPoint } from "../plotTypes";
 import { UMAPSidebar } from "./UMAPSidebar";
 
 interface UMAPProps {
@@ -16,20 +17,6 @@ interface UMAPProps {
   leftSidebarCollapsed: boolean;
 }
 
-interface ExtendedUMAPData extends UMAPData {
-  params?: {
-    n_neighbors: number;
-    min_dist: number;
-  };
-  clusterStats?: {
-    total_clusters: number;
-    noise_points: number;
-    largest_cluster_size: number;
-    smallest_cluster_size: number;
-  };
-  metadata?: Record<string, string | number>;
-}
-
 export const UMAP: React.FC<UMAPProps> = ({
   docState,
   setDocState,
@@ -37,11 +24,16 @@ export const UMAP: React.FC<UMAPProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
-  const [umapData, setUmapData] = useState<ExtendedUMAPData | null>(null);
+  const umapData = docState.umap.data;
+  const exportSVG = useExportSvg("umap", svgRef);
   const [loading, setLoading] = useState(false);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [error, setError] = useState<string | null>(null);
   const loadingRef = useRef(false); // Prevent concurrent API calls
+
+  useEffect(() => {
+    exportSVG();
+  }, [exportSVG]);
 
   // Use the reusable metadata colors hook
   const metadataColors = useMetadataColors({
@@ -67,6 +59,28 @@ export const UMAP: React.FC<UMAPProps> = ({
   useEffect(() => {
     if (!docState.id) return;
 
+    const {
+      n_neighbors,
+      min_dist,
+      minClusterSize,
+      clusterEpsilon,
+      params,
+      data,
+    } = docState.umap;
+
+    // Check if parameters have changed
+    const hasChanged =
+      !params ||
+      params.n_neighbors !== n_neighbors ||
+      params.min_dist !== min_dist ||
+      params.minClusterSize !== minClusterSize ||
+      params.clusterEpsilon !== clusterEpsilon;
+
+    // If data exists and parameters haven't changed, do nothing
+    if (data && !hasChanged) {
+      return;
+    }
+
     // Add debounce to prevent multiple rapid API calls
     const timeoutId = setTimeout(async () => {
       // Skip if already loading
@@ -80,44 +94,31 @@ export const UMAP: React.FC<UMAPProps> = ({
       setError(null);
 
       try {
-        // Debug the parameters being sent
-        console.log("Sending UMAP parameters:", {
-          n_neighbors: docState.umap.n_neighbors,
-          min_dist: docState.umap.min_dist,
-          minClusterSize: docState.umap.minClusterSize,
-          clusterEpsilon: docState.umap.clusterEpsilon,
-        });
+        const currentParams = {
+          n_neighbors,
+          min_dist,
+          minClusterSize,
+          clusterEpsilon,
+        };
 
         const response = await window.pywebview.api.data.get_umap_data(
           docState.id,
           {
-            n_neighbors: docState.umap.n_neighbors,
-            min_dist: docState.umap.min_dist,
-            threshold: docState.umap.minClusterSize, // Backend interprets this as min_cluster_size
-            methods: [`hdbscan-${docState.umap.clusterEpsilon}`], // Backend extracts epsilon from method string
+            n_neighbors,
+            min_dist,
+            threshold: minClusterSize,
+            methods: [`hdbscan-${clusterEpsilon}`],
           },
         );
 
-        // Debug logging
-        console.log("UMAP data received:", response.data);
-        console.log(
-          "Backend reported epsilon:",
-          response.metadata?.cluster_epsilon,
-        );
-        if (response.data.embedding && response.data.embedding.length > 0) {
-          console.log(
-            "First 5 points cluster data:",
-            response.data.embedding.slice(0, 5),
-          );
-        }
-
-        setUmapData({
-          ...response.data,
-          params: {
-            n_neighbors: docState.umap.n_neighbors,
-            min_dist: docState.umap.min_dist,
+        setDocState((prev) => ({
+          ...prev,
+          umap: {
+            ...prev.umap,
+            data: response.data,
+            params: currentParams,
           },
-        });
+        }));
       } catch (err) {
         console.error("Error fetching UMAP data:", err);
         const errorMessage =
@@ -127,19 +128,13 @@ export const UMAP: React.FC<UMAPProps> = ({
         setLoading(false);
         loadingRef.current = false;
       }
-    }, 500); // 500ms debounce to prevent multiple calls during initialization
+    }, 500); // 500ms debounce
 
     // Cleanup function to cancel pending requests
     return () => {
       clearTimeout(timeoutId);
     };
-  }, [
-    docState.id,
-    docState.umap.n_neighbors,
-    docState.umap.min_dist,
-    docState.umap.minClusterSize,
-    docState.umap.clusterEpsilon,
-  ]);
+  }, [docState.id, docState.umap, setDocState]);
 
   // Handle resize
   useEffect(() => {
@@ -155,7 +150,7 @@ export const UMAP: React.FC<UMAPProps> = ({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Main render effect
+  // Main render effect - only renders the base visualization
   useEffect(() => {
     if (!umapData || loading || !svgRef.current || error) return;
 
@@ -243,55 +238,35 @@ export const UMAP: React.FC<UMAPProps> = ({
       .style("pointer-events", "none")
       .style("z-index", "1000");
 
-    // Get color function based on settings
-    const getPointColor = (d: UMAPPoint): string => {
-      if (docState.umap.colorBy === "metadata") {
-        const color = metadataColors.getColor(d.id);
-        // Debug first few points
-        if (umapData.embedding.indexOf(d) < 5) {
-          console.log(
-            `Point ${d.id} - metadata color: ${color}, value: ${metadataColors.values?.[d.id]}`,
-          );
-        }
-        return color;
-      }
-
-      // Default cluster coloring
-      if (!docState.umap.colorByCluster || !d.cluster) {
-        return "#1f77b4"; // Default blue
-      }
-      const clusterId = d.cluster ?? 0;
-      return clusterId === 0 ? "#cccccc" : distinctColor(clusterId); // Gray for noise points
-    };
-
     // Render points with initial positions
-    const points = plotArea
+    plotArea
       .selectAll("circle")
       .data(umapData.embedding)
       .enter()
       .append("circle")
       .attr("cx", (d) => xScale(d.x))
       .attr("cy", (d) => yScale(d.y))
-      .attr("r", docState.umap.pointSize)
-      .attr("fill", getPointColor)
-      .attr("opacity", docState.umap.opacity)
+      .attr("r", 3) // Default size
+      .attr("fill", "#1f77b4") // Default color
+      .attr("opacity", 0.7) // Default opacity
       .attr("stroke", "white")
       .attr("stroke-width", 0.5)
-      .on("mouseover", (_event, d) => {
-        let tooltipContent = `<strong>ID:</strong> ${d.id}`;
+      .attr("class", "umap-point") // Add class for easy selection
+      .on("mouseover", (event, d) => {
+        tooltip.style("visibility", "visible");
+        let content = `<strong>ID:</strong> ${d.id}`;
+        if (d.cluster) {
+          content += `<br><strong>Cluster:</strong> ${d.cluster}`;
+        }
         if (docState.umap.colorBy === "metadata" && metadataColors.values) {
-          const value = metadataColors.values[d.id];
-          tooltipContent += getMetadataTooltip(
+          const metadataValue = metadataColors.values[d.id];
+          content += getMetadataTooltip(
             d.id,
             docState.umap.selectedMetadataColumn,
-            value,
+            metadataValue,
           );
         }
-        if (d.cluster !== undefined) {
-          const clusterLabel = d.cluster === 0 ? "Noise" : d.cluster;
-          tooltipContent += `<br><strong>Cluster:</strong> ${clusterLabel}`;
-        }
-        tooltip.style("visibility", "visible").html(tooltipContent);
+        tooltip.html(content);
       })
       .on("mousemove", (event) => {
         tooltip
@@ -322,7 +297,8 @@ export const UMAP: React.FC<UMAPProps> = ({
         yAxisGroup.call(yAxis.scale(currentYScale));
 
         // Update points positions
-        points
+        svg
+          .selectAll<SVGCircleElement, UMAPPoint>(".umap-point")
           .attr("cx", (d) => currentXScale(d.x))
           .attr("cy", (d) => currentYScale(d.y));
       });
@@ -360,10 +336,38 @@ export const UMAP: React.FC<UMAPProps> = ({
       .style("text-anchor", "middle")
       .text("UMAP 1");
 
+    // Cleanup on unmount
+    return () => {
+      tooltip.remove();
+    };
+  }, [
+    umapData,
+    dimensions,
+    loading,
+    error,
+    docState.umap.colorBy,
+    docState.umap.selectedMetadataColumn,
+    metadataColors.values,
+  ]);
+
+  // Update cluster stats panel separately
+  useEffect(() => {
+    if (!svgRef.current || !umapData) return;
+
+    const svg = d3.select(svgRef.current);
+    const mainGroup = svg.select("g");
+
+    // Remove existing stats group
+    mainGroup.select(".cluster-stats").remove();
+
+    const clusterStats = umapData.clusterStats;
+    const width = dimensions.width - 90; // margin.left + margin.right
+
     // Add cluster stats panel
     if (clusterStats && docState.umap.colorByCluster) {
       const statsGroup = mainGroup
         .append("g")
+        .attr("class", "cluster-stats")
         .attr("transform", `translate(${width - 200}, 0)`);
 
       statsGroup
@@ -390,20 +394,45 @@ export const UMAP: React.FC<UMAPProps> = ({
           .text(stat);
       });
     }
+  }, [umapData, dimensions, docState.umap.colorByCluster]);
 
-    // Cleanup on unmount
-    return () => {
-      tooltip.remove();
+  // Separate effect to update colors only
+  useEffect(() => {
+    if (!svgRef.current || !umapData) return;
+
+    const svg = d3.select(svgRef.current);
+    const points = svg.selectAll<SVGCircleElement, UMAPPoint>(".umap-point");
+
+    if (points.empty()) return;
+
+    // Get color function based on settings
+    const getPointColor = (d: UMAPPoint): string => {
+      if (docState.umap.colorBy === "metadata") {
+        return metadataColors.getColor(d.id);
+      }
+
+      // Default cluster coloring
+      if (!docState.umap.colorByCluster || !d.cluster) {
+        return "#1f77b4"; // Default blue
+      }
+      const clusterId = d.cluster ?? 0;
+      return clusterId === 0 ? "#cccccc" : distinctColor(clusterId); // Gray for noise points
     };
+
+    // Update colors with a smooth transition
+    points.transition().duration(300).attr("fill", getPointColor);
+
+    // Update point size and opacity without transition
+    points
+      .attr("r", docState.umap.pointSize)
+      .attr("opacity", docState.umap.opacity);
   }, [
+    docState.umap.colorBy,
+    docState.umap.colorByCluster,
+    docState.umap.pointSize,
+    docState.umap.opacity,
+    metadataColors.getColor, // Use specific property instead of whole object
     umapData,
-    dimensions,
-    docState.umap,
-    loading,
-    error,
-    metadataColors,
-    metadataColors.values,
-    metadataColors.columnType,
   ]);
 
   return (
@@ -427,6 +456,7 @@ export const UMAP: React.FC<UMAPProps> = ({
         )}
         <svg
           ref={svgRef}
+          id="umap-svg"
           width={dimensions.width}
           height={dimensions.height}
           style={{ maxWidth: "100%", maxHeight: "100%" }}

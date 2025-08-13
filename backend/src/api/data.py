@@ -70,6 +70,7 @@ class Data:
         id_map = {id: idx for idx, id in enumerate(ids)}
 
         is_lzani = False
+        run_settings = None
         if file_exists(doc_paths.run_settings):
             run_settings = read_json_file(doc_paths.run_settings)
             if run_settings:
@@ -113,14 +114,14 @@ class Data:
             max_val = int(nanmax(heat_data_no_diag)) if heat_data_no_diag.size > 0 else 100
             parsedData = heat_data.values.tolist()
 
-        metadata = dict(minVal=min_val, maxVal=max_val)
-        if file_exists(doc_paths.run_settings):
-            metadata["run"] = read_json_file(doc_paths.run_settings)
+        metadata = {"minVal": min_val, "maxVal": max_val}
+        if run_settings:
+            metadata["run"] = run_settings
 
         if is_lzani:
             metadata["unaligned_count"] = unaligned_count
 
-        def calculate_stats(values):
+        def calculate_stats(values) -> dict | None:
             if len(values) == 0:
                 return None
             return {
@@ -247,12 +248,13 @@ class Data:
         
         # Check if this is LZ-ANI data
         is_lzani = False
+        run_settings = None
         if file_exists(doc_paths.run_settings):
             run_settings = read_json_file(doc_paths.run_settings)
             is_lzani = run_settings and run_settings.get("analysis_method") == "lzani" and file_exists(doc_paths.lzani_results)
         
         # LZ-ANI always streams TSV directly
-        if is_lzani:
+        if is_lzani and run_settings:
             score_type = run_settings.get("lzani", {}).get("score_type", "ani")
             print(f"Streaming LZ-ANI TSV directly to UMAP")
             
@@ -372,7 +374,14 @@ class Data:
         if len(metadata_df.columns) < 2:
             raise Exception("CSV must have at least 2 columns (ID column + metadata)")
         
-        id_column = metadata_df.columns[0]
+        # Use 'accession' column if it exists, otherwise default to the first column
+        if 'accession' in metadata_df.columns:
+            id_column = 'accession'
+        else:
+            id_column = metadata_df.columns[0]
+        
+        print(f"Using '{id_column}' as the metadata ID column.")
+        
         metadata_ids = metadata_df[id_column].astype(str).tolist()
         
         if file_exists(doc_paths.lzani_results_ids):

@@ -213,6 +213,13 @@ export interface UMAPSettings {
   colorByCluster: boolean;
   colorBy: "cluster" | "metadata";
   selectedMetadataColumn?: string;
+  data?: UMAPData;
+  params?: {
+    n_neighbors: number;
+    min_dist: number;
+    minClusterSize: number;
+    clusterEpsilon: number;
+  };
   uploadedMetadata?: {
     columns: string[];
     columnTypes: Record<string, string>;
@@ -238,6 +245,15 @@ export const UMAPSettingsSchema = z.object({
   colorByCluster: z.boolean(),
   colorBy: z.enum(["cluster", "metadata"]),
   selectedMetadataColumn: z.string().optional(),
+  data: z.any().optional(),
+  params: z
+    .object({
+      n_neighbors: z.number(),
+      min_dist: z.number(),
+      minClusterSize: z.number(),
+      clusterEpsilon: z.number(),
+    })
+    .optional(),
   uploadedMetadata: z
     .object({
       columns: z.array(z.string()),
@@ -274,6 +290,12 @@ export type UMAPData = {
     [method: string]: { [id: string]: number };
   };
   threshold?: number;
+  clusterStats?: {
+    total_clusters: number;
+    noise_points: number;
+    largest_cluster_size: number;
+    smallest_cluster_size: number;
+  };
 };
 
 export type GetUMAPDataResponse = {
