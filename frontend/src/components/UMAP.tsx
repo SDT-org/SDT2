@@ -252,7 +252,7 @@ export const UMAP: React.FC<UMAPProps> = ({
       .attr("stroke", "white")
       .attr("stroke-width", 0.5)
       .attr("class", "umap-point") // Add class for easy selection
-      .on("mouseover", (event, d) => {
+      .on("mouseover", (_event, d) => {
         tooltip.style("visibility", "visible");
         let content = `<strong>ID:</strong> ${d.id}`;
         if (d.cluster) {
