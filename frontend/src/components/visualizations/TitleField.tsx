@@ -5,7 +5,7 @@ import {
   ToggleButton,
   ToggleButtonGroup,
 } from "react-aria-components";
-import type { DocState } from "../../../appState";
+import type { DocState } from "../../appState";
 
 export const TitleField = ({
   textId,
