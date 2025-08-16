@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import argparse
-from multiprocessing import Manager
 import os
 import sys
 import tempfile

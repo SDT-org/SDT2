@@ -8,22 +8,33 @@ from export_utils import (
     save_seq_dict_to_json,
 )
 from workflow.models import RunSettings, WorkflowResult
+import os
 
 
 def run(result: WorkflowResult, settings: RunSettings) -> WorkflowResult:
+    print("Starting post-processing and export...")
     doc_paths = settings.doc_paths
 
     # Use reordered_ids if clustering was performed, otherwise use ordered_ids
     ids_to_use = result.reordered_ids if result.reordered_ids else result.ordered_ids
-    distance_matrix = result.distance_matrix
+    print(f"Processing {len(ids_to_use)} sequences for export")
 
+    print("Computing sequence statistics...")
     seq_stats = get_seq_stats(result.seq_dict, result.is_aa)
-    df = DataFrame(distance_matrix, index=ids_to_use, columns=ids_to_use)
+    
+    print("Creating distance matrix DataFrame...")
+    df = DataFrame(result.distance_matrix, index=ids_to_use, columns=ids_to_use)
+    print(
+        f"Output directory {os.path.dirname(doc_paths.columns)} exists: {os.path.exists(os.path.dirname(doc_paths.columns))}"
+    )
+    
+    print("Exporting files...")
     save_cols_to_csv(df, doc_paths.columns)
     save_stats_to_csv(seq_stats, doc_paths.stats)
     save_matrix_to_csv(df, doc_paths.matrix, doc_paths.triangle)
     save_seq_dict_to_json(result.seq_dict, doc_paths.seq_dict)
 
+    print("Post-processing completed successfully")
     return result
 
 
