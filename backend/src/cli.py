@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
 import argparse
-from multiprocessing import Manager
 import os
 import sys
-import tempfile
+from tempfile import TemporaryDirectory
+import time
+
+from utils import friendly_total_time
 
 current_file_path = os.path.abspath(os.path.join(os.path.dirname(__file__)))
 sys.path.append(os.path.join(current_file_path, "../../"))
@@ -19,6 +21,8 @@ from app_state import initialize_app_state
 import platform
 import psutil
 from config import cpu_count
+
+temp_dir = TemporaryDirectory()
 
 
 def parse_arguments():
@@ -119,104 +123,100 @@ def run_cli_workflow(args):
         on_update=lambda _: None,
     )
 
-    with tempfile.TemporaryDirectory() as temp_dir:
-        print(f"Processing in temporary directory: {temp_dir}")
+    temp_path = temp_dir.name
+    print(f"Processing in temporary directory: {temp_path}")
 
-        print("Step 1: Parsing FASTA file...")
-        parsed_result = run_parse(args.input)
+    print("Step 1: Parsing FASTA file...")
+    parsed_result = run_parse(args.input)
 
-        if parsed_result.error:
-            raise Exception(f"FASTA parsing failed: {parsed_result.error}")
+    if parsed_result.error:
+        raise Exception(f"FASTA parsing failed: {parsed_result.error}")
 
-        print(f"Successfully parsed {len(parsed_result.seq_dict)} sequences")
+    print(f"Successfully parsed {len(parsed_result.seq_dict)} sequences")
 
-        doc_paths = build_document_paths(temp_dir)
+    doc_paths = build_document_paths(temp_path)
 
-        lzani_settings = LzaniSettings(
-            exec_path=get_lzani_exec_path() if args.analysis_method == "lzani" else "",
-            score_type=args.lzani_score_type,
-            aw=args.aw,
-            am=args.am,
-            mal=args.mal,
-            msl=args.msl,
-            mrd=args.mrd,
-            mqd=args.mqd,
-            reg=args.reg,
-            ar=args.ar,
-        )
+    lzani_settings = LzaniSettings(
+        exec_path=get_lzani_exec_path() if args.analysis_method == "lzani" else "",
+        score_type=args.lzani_score_type,
+        aw=args.aw,
+        am=args.am,
+        mal=args.mal,
+        msl=args.msl,
+        mrd=args.mrd,
+        mqd=args.mqd,
+        reg=args.reg,
+        ar=args.ar,
+    )
 
-        parasail_settings = ParasailSettings(
-            process_count=args.compute_cores,
-            scoring_matrix=args.scoring_matrix,
-            open_penalty=args.open_penalty,
-            extend_penalty=args.extend_penalty,
-        )
+    parasail_settings = ParasailSettings(
+        process_count=args.compute_cores,
+        scoring_matrix=args.scoring_matrix,
+        open_penalty=args.open_penalty,
+        extend_penalty=args.extend_penalty,
+    )
 
-        run_settings = RunSettings(
-            fasta_path=args.input,
-            doc_paths=doc_paths,
-            output_path=temp_dir,
-            cluster_method=args.cluster_method,
-            analysis_method=args.analysis_method,
-            lzani=lzani_settings,
-            parasail=parasail_settings,
-            export_alignments=args.export_alignments,
-            alignment_export_path="",
-        )
+    run_settings = RunSettings(
+        fasta_path=args.input,
+        doc_paths=doc_paths,
+        output_path=temp_path,
+        cluster_method=args.cluster_method,
+        analysis_method=args.analysis_method,
+        lzani=lzani_settings,
+        parasail=parasail_settings,
+        export_alignments=args.export_alignments,
+        alignment_export_path="",
+    )
 
-        workflow_run = WorkflowRun(
-            result=parsed_result,
-            settings=run_settings,
-            progress=0,
-        )
+    workflow_run = WorkflowRun(
+        result=parsed_result,
+        settings=run_settings,
+        progress=0,
+    )
 
-        print(f"Step 2: Running {args.analysis_method} analysis...")
+    print(f"Step 2: Running {args.analysis_method} analysis...")
 
-        class SimpleCanceled:
-            value = False
+    class SimpleCanceled:
+        value = False
 
-        canceled = SimpleCanceled()
+    canceled = SimpleCanceled()
+    start_time = time.perf_counter()
+    final_result = run_process(workflow_run, canceled)  # type: ignore
 
-        final_result = run_process(workflow_run, canceled)  # type: ignore
+    if final_result.error:
+        raise Exception(f"Workflow processing failed: {final_result.error}")
 
-        if final_result.error:
-            raise Exception(f"Workflow processing failed: {final_result.error}")
+    print("Step 3: Exporting results...")
 
-        print("Step 3: Exporting results...")
+    source_target_pairs = build_source_target_pairs(
+        temp_path,
+        args.output,
+        args.prefix,
+        "svg",
+        matrix_only=False,
+    )
 
-        source_target_pairs = build_source_target_pairs(
-            temp_dir,
-            args.output,
-            args.prefix,
-            "svg",
-            matrix_only=False,
-        )
+    existing_pairs = [
+        (source, target)
+        for source, target in source_target_pairs
+        if os.path.exists(source)
+    ]
 
-        existing_pairs = [
-            (source, target)
-            for source, target in source_target_pairs
-            if os.path.exists(source)
-        ]
+    do_export(existing_pairs)
 
-        do_export(existing_pairs)
+    print(f"Workflow completed successfully, results saved to: {args.output}")
 
-        print(f"Workflow completed successfully, results saved to: {args.output}")
+    print("\nExported files:")
+    for _, target in existing_pairs:
+        print(f"  - {os.path.basename(target)}")
 
-        print("\nExported files:")
-        for _, target in existing_pairs:
-            print(f"  - {os.path.basename(target)}")
+    total_time = friendly_total_time(time.perf_counter() - start_time)
+    print(f"Total processing time: {total_time}")
 
 
 def main():
-    try:
-        args = parse_arguments()
-        run_cli_workflow(args)
-    except KeyboardInterrupt:
-        print("\nWorkflow interrupted by user")
-        sys.exit(1)
-    except Exception as e:
-        print(f"Error: {e}")
-        sys.exit(1)
+    args = parse_arguments()
+    run_cli_workflow(args)
 
 
 if __name__ == "__main__":
