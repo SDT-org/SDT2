@@ -30,7 +30,13 @@
     "test:backend": "PYTHONPATH=backend/src:. ./venv/bin/python -m unittest discover -s backend/tests -p '*.py' -t .",
     "test:backend:coverage": "PYTHONPATH=backend/src:. ./venv/bin/python -m coverage run -m unittest discover -s backend/tests -p '*.py' -t . && ./venv/bin/python -m coverage report && ./venv/bin/python -m coverage html",
     "test:frontend": "bun test",
-    "profile": "DEBUG=true PROFILE=true bun run start"
+    "profile": "DEBUG=true PROFILE=true bun run start",
+    "cli": "run-script-os --",
+    "cli:default": "PYTHONPATH=backend/src:. ./venv/bin/python backend/src/cli.py",
+    "cli:windows": "set PYTHONPATH=backend\\src;. && .\\venv\\Scripts\\python backend\\src\\cli.py",
+    "cli:profile": "run-script-os --",
+    "cli:profile:default": "PYTHONPATH=backend/src:. ./venv/bin/scalene --no-browser --reduced-profile --cpu-percent-threshold=5 backend/src/cli.py",
+    "cli:profile:windows": "set PYTHONPATH=backend\\src;. && .\\venv\\Scripts\\scalene --no-browser --reduced-profile --cpu-percent-threshold=1 backend\\src\\cli.py"
   },
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.1",
