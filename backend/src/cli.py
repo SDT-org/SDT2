@@ -211,7 +211,7 @@ def run_cli_workflow(args):
         print(f"  - {os.path.basename(target)}")
 
     total_time = friendly_total_time(time.perf_counter() - start_time)
-    print(f"Total processing time: {total_time}")
+    print(f"\nTotal processing time: {total_time}")
 
 
 def main():
