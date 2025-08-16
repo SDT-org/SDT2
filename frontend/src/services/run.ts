@@ -1,14 +1,24 @@
-import type { AppState } from "../appState";
+import type { DocState } from "../appState";
+import messages from "../messages";
 
-export const startRun = (docId: string, appState: AppState) =>
-  window.pywebview.api
-    .start_run({
-      doc_id: docId,
-      cluster_method: appState.enableClustering
-        ? appState.cluster_method
+export const startRun = (docState: DocState) =>
+  window.pywebview.api.workflow
+    .start_workflow_run({
+      doc_id: docState.id,
+      cluster_method: docState.enableClustering
+        ? docState.cluster_method
         : "None",
-      compute_cores: appState.compute_cores,
-      export_alignments: appState.enableOutputAlignments ? "True" : "False",
+      compute_cores: docState.compute_cores || 1,
+      analysisMethod: docState.analysisMethod,
+      ...(docState.analysisMethod === "parasail" && docState.overrideParasail
+        ? docState.parasail_settings
+        : {}),
+      ...(docState.analysisMethod === "lzani" && docState.overrideLzani
+        ? docState.lzani_settings
+        : {}),
+      lzani_score_type: docState.lzaniScoreType,
+      export_alignments: docState.exportAlignments,
+      alignment_export_path: docState.alignmentExportPath,
     })
     .catch((e) => {
       if (e.toString().includes("PARASAIL_TRACEBACK")) {
@@ -17,7 +27,16 @@ export const startRun = (docId: string, appState: AppState) =>
             "Please ensure you have adequate swap/page size and system memory.\n\n" +
             "Error ID: PARASAIL_TRACEBACK",
         );
-        cancelRun(docId, "preserve");
+        cancelRun(docState.id, "preserve");
+      } else if (
+        e &&
+        typeof e === "object" &&
+        "message" in e &&
+        typeof e.message === "string" &&
+        Object.keys(messages).includes(e.message)
+      ) {
+        alert(`Error: ${messages[e.message as keyof typeof messages]}`);
+        cancelRun(docState.id, "preserve");
       } else {
         throw e;
       }
@@ -25,5 +44,5 @@ export const startRun = (docId: string, appState: AppState) =>
 
 export const cancelRun = (
   docId: string,
-  run_settings: Parameters<typeof window.pywebview.api.cancel_run>[1],
-) => window.pywebview.api.cancel_run(docId, run_settings);
+  run_settings: Parameters<typeof window.pywebview.api.workflow.cancel_run>[1],
+) => window.pywebview.api.workflow.cancel_run(docId, run_settings);

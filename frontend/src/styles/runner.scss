@@ -20,11 +20,50 @@
       border-bottom: 0;
     }
 
-
     button {
       &[data-primary] {
         min-width: 24rem;
       }
+    }
+
+    .setting-group {
+      margin: 0.8rem 0 0;
+      padding: 0.8rem 1.2rem 1.2rem;
+      background: var(--drawer-color);
+      border: 0.1rem solid var(--secondary-border-color);
+      border-radius: 0.4rem;
+      gap: 1.6rem;
+
+      .field {
+        border: none;
+        padding: 0;
+
+        .react-aria-Label {
+          display: block;
+          margin-bottom: 0.2rem;
+        }
+      }
+
+      &.col-2,
+      &.col-3 {
+        .react-aria-Select[data-compact] .react-aria-Button {
+          padding-top: 0.2rem;
+          padding-bottom: 0.3rem;
+        }
+      }
+
+      .settings-field {
+        flex: 0 0 auto;
+        min-width: 140px;
+
+        .react-aria-Label {
+          font-size: 1.3rem;
+          font-weight: 500;
+          margin-bottom: 0.4rem;
+          display: block;
+        }
+      }
+
     }
 
     .setting {
@@ -37,12 +76,6 @@
 
         .react-aria-Label {
           font-weight: 450;
-        }y
-
-        .react-aria-Button {
-          display: flex;
-          padding: 0.4rem 10px;
-          width: 100%;
         }
       }
     }
@@ -51,18 +84,26 @@
       font-weight: 500;
     }
 
-    &.inline-toggle {
+    .react-aria-ToggleButtonGroup {
+      background: none;
+    }
+
+    &.inline-setting {
       display: flex;
       flex-direction: row;
       justify-content: space-between;
       min-height: 5.4rem;
 
-      .react-aria-Switch {
-        flex-shrink: 0;
-      }
-
       .setting {
         margin: 0;
+
+        .react-aria-Switch {
+          flex-shrink: 0;
+        }
+        .react-aria-Button {
+          padding-top: 0.4rem;
+          padding-bottom: 0.4rem;
+        }
       }
     }
 
@@ -103,9 +144,10 @@
 
     &.performance {
       .performance-settings {
-        gap: 1.6rem;
+        gap: 1.2rem;
         display: grid;
         grid-template-rows: 1fr;
+        margin: 0.8rem 0;
 
         .inline {
           display: grid;
@@ -116,7 +158,7 @@
 
         .cores-used {
           .react-aria-Slider {
-            grid-template-areas: "track" "label output";
+            grid-template-areas: 'track' 'label output';
           }
 
           .react-aria-Label {
@@ -148,13 +190,13 @@
           color: var(--impact-medium-color);
         }
 
-        &[data-impact="extreme"] svg {
+        &[data-impact='extreme'] svg {
           color: var(--impact-extreme-color);
         }
-        &[data-impact="high"] svg {
+        &[data-impact='high'] svg {
           color: var(--impact-high-color);
         }
-        &[data-impact="medium"] svg {
+        &[data-impact='medium'] svg {
           color: var(--impact-medium-color);
         }
 
@@ -234,5 +276,25 @@
         color: #666;
       }
     }
+  }
+
+  .analysis-method-body {
+    grid-template-columns: 3fr auto;
+    justify-content: space-between;
+    & > :last-child {
+    }
+
+    .react-aria-Button {
+      padding: 0.4rem 0.8rem;
+    }
+  }
+
+  .warning {
+    background: var(--button-warning-background-color);
+  }
+
+  .is-aa-detected {
+    color: var(--fill-color);
+    padding: 0 0.2rem;
   }
 }

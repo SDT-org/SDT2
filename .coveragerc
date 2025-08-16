@@ -1,0 +1,24 @@
+[run]
+source = backend/src
+omit =
+    */tests/*
+    */test_*
+    */__pycache__/*
+    */venv/*
+
+[report]
+exclude_lines =
+    if is_testing:
+    pragma: no cover
+    def __repr__
+    if self.debug:
+    if settings.DEBUG
+    raise AssertionError
+    raise NotImplementedError
+    if 0:
+    if __name__ == .__main__.:
+    class .*\bProtocol\):
+    @(abc\.)?abstractmethod
+
+[html]
+directory = htmlcov

@@ -1,0 +1,228 @@
+import React from "react";
+import { type Key, Label, Text } from "react-aria-components";
+import type { DocState } from "../../../appState";
+import { reorderMethods } from "../../../constants";
+import { Select, SelectItem } from "../../primitives/Select";
+import { Slider } from "../../primitives/Slider";
+import { Switch } from "../../primitives/Switch";
+import { TitleField } from "../TitleField";
+
+export const ClustermapSidebar = ({
+  settings,
+  updateSettings,
+  sequences_count,
+}: {
+  settings: DocState["clustermap"];
+  updateSettings: (values: Partial<DocState["clustermap"]>) => void;
+  sequences_count: number;
+}) => {
+  const maybeWarnPerformance = React.useCallback(
+    (enabled: boolean, fn: () => void) => {
+      if (
+        enabled &&
+        sequences_count > 99 &&
+        !confirm(
+          "Warning: Enabling this setting may significantly impact render performance.",
+        )
+      ) {
+        return;
+      }
+      fn();
+    },
+    [sequences_count],
+  );
+
+  const [tempThreshold, setTempThreshold] = React.useState(settings.threshold);
+
+  return (
+    <div className="app-sidebar app-sidebar-right heatmap-sidebar">
+      <div className="app-sidebar-toolbar">
+        <div className="form">
+          <div className="group">
+            <label className="setting-header" htmlFor="colorscale">
+              Clusters
+            </label>
+            <div className="drawer">
+              <div className="field">
+                <div className="row">
+                  <Label htmlFor="method">Linkage Method</Label>
+                  <div className="subfield">
+                    <Select
+                      id="method"
+                      wide
+                      selectedKey={settings.method}
+                      onSelectionChange={(value: Key | null) =>
+                        value &&
+                        updateSettings({
+                          ...settings,
+                          method: value as typeof settings.method,
+                        })
+                      }
+                      items={Object.entries(reorderMethods).map(
+                        ([key, value]) => ({
+                          id: key,
+                          name: value.name,
+                          description: value.description,
+                        }),
+                      )}
+                    >
+                      {(item) => (
+                        <SelectItem textValue={item.name}>
+                          <Text slot="label">{item.name}</Text>
+                          <Text slot="description">{item.description}</Text>
+                        </SelectItem>
+                      )}
+                    </Select>
+                  </div>
+                </div>
+              </div>
+              <hr className="compact" />
+
+              <Slider
+                label="Threshold"
+                id="threshold"
+                onChange={setTempThreshold}
+                onChangeEnd={(value) => updateSettings({ threshold: value })}
+                minValue={0}
+                maxValue={100}
+                step={1}
+                value={tempThreshold}
+              />
+
+              <Slider
+                label="Cell Spacing"
+                id="cellspace"
+                onChange={(value) => updateSettings({ cellspace: value })}
+                minValue={0}
+                maxValue={20}
+                value={settings.cellspace}
+              />
+            </div>
+          </div>
+
+          <div className="group">
+            <Switch
+              isSelected={settings.annotation}
+              onChange={(value) =>
+                maybeWarnPerformance(value, () =>
+                  updateSettings({
+                    annotation: value,
+                  }),
+                )
+              }
+            >
+              Percent Identities
+            </Switch>
+          </div>
+          <div className="group">
+            <Switch
+              isSelected={settings.axis_labels}
+              onChange={(value) =>
+                maybeWarnPerformance(value, () =>
+                  updateSettings({
+                    axis_labels: value,
+                  }),
+                )
+              }
+            >
+              Axis Labels
+            </Switch>
+            <div
+              className="drawer"
+              data-hidden={!settings.axis_labels}
+              aria-hidden={!settings.axis_labels}
+            >
+              <Slider
+                label="Font Size"
+                labelClassName="sublabel"
+                onChange={(value) =>
+                  updateSettings({ axlabel_fontsize: value })
+                }
+                value={settings.axlabel_fontsize}
+                minValue={1}
+                maxValue={20}
+                step={1}
+              />
+              <Slider
+                label="X Rotation"
+                labelClassName="sublabel"
+                onChange={(value) =>
+                  updateSettings({ axlabel_xrotation: value })
+                }
+                value={settings.axlabel_xrotation}
+                minValue={-90}
+                maxValue={90}
+                step={10}
+              />
+              <Slider
+                label="Y Rotation"
+                labelClassName="sublabel"
+                onChange={(value) =>
+                  updateSettings({ axlabel_yrotation: value })
+                }
+                value={settings.axlabel_yrotation}
+                minValue={-90}
+                maxValue={90}
+                step={10}
+              />
+            </div>
+          </div>
+          <div className="group">
+            <Switch
+              isSelected={settings.showLegend}
+              onChange={(value) => {
+                updateSettings({
+                  showLegend: value,
+                });
+              }}
+            >
+              Legend
+            </Switch>
+            <div
+              className="drawer"
+              data-hidden={!settings.showLegend}
+              aria-hidden={!settings.showLegend}
+            >
+              <Switch
+                isSelected={settings.showClusterCounts}
+                onChange={(value) => {
+                  updateSettings({
+                    showClusterCounts: value,
+                  });
+                }}
+              >
+                Show Cluster Counts
+              </Switch>
+            </div>
+          </div>
+
+          <div className="group">
+            <Switch
+              isSelected={settings.showTitles}
+              onChange={(value) => {
+                updateSettings({
+                  showTitles: value,
+                });
+              }}
+            >
+              Title
+            </Switch>
+            <div
+              className="drawer"
+              data-hidden={!settings.showTitles}
+              aria-hidden={!settings.showTitles}
+            >
+              <TitleField
+                textId="title"
+                textValue={settings.title}
+                onTextChange={(value) => updateSettings({ title: value })}
+                fontValue={settings.titleFont}
+                onFontChange={(value) => updateSettings({ titleFont: value })}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

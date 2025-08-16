@@ -77,7 +77,7 @@
   border-radius: 0.4rem;
   padding: 0.8rem;
   pointer-events: none;
-  background-color: rgba(255,255,255,0.9);
+  background-color: rgba(255, 255, 255, 0.9);
   box-shadow: 0 0 0.3rem #444;
   backdrop-filter: blur(0.3rem);
   > * {
@@ -91,5 +91,34 @@
 
   dd {
     font-variant-numeric: tabular-nums;
+  }
+}
+
+.mask-values-field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  .mask-values-input-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: auto;
+
+    .mask-values-input {
+      width: 60px;
+      padding: 0.375rem 0.5rem;
+      font-size: 1rem;
+      line-height: 1.5;
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      background-color: white;
+      text-align: center;
+    }
+
+    .mask-values-percent {
+      font-size: 1rem;
+      font-weight: 500;
+    }
   }
 }

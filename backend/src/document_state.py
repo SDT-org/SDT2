@@ -2,6 +2,7 @@ from collections import namedtuple
 import json
 import os
 from document_paths import build_document_paths
+
 VERSION = 1
 
 DocState = namedtuple(
@@ -25,9 +26,11 @@ DocState = namedtuple(
         "estimated_time",
         "validation_error_id",
         "compute_stats",
+        "cluster_method",
         "heatmap",
         "clustermap",
-        "distribution"
+        "distribution",
+        "result_metadata",
     ],
 )
 
@@ -37,8 +40,8 @@ default_heatmap_state = dict(
     vmax=100,
     vmin=65,
     cellspace=1,
-    annotation=False,
-    annotation_rounding=0,
+    annotation=True,
+    annotation_rounding=2,
     showscale=True,
     titleFont="Sans Serif",
     showTitles=False,
@@ -49,25 +52,22 @@ default_heatmap_state = dict(
     cbar_shrink=5,
     cbar_aspect=2.5,
     cbar_pad=10,
-    axis_labels=False,
+    axis_labels=True,
     axlabel_xrotation=0,
     axlabel_fontsize=12,
     axlabel_yrotation=0,
     cutoff_1=95,
-    cutoff_2=75
+    cutoff_2=75,
 )
 
 default_clustermap_state = dict(
     threshold=70,
     method="average",
-    annotation=False,
+    annotation=True,
     titleFont="Sans Serif",
     showTitles=False,
     title="",
-    subtitle="",
-    xtitle="",
-    ytitle="",
-    axis_labels=False,
+    axis_labels=True,
     axlabel_xrotation=0,
     axlabel_fontsize=12,
     axlabel_yrotation=0,
@@ -75,70 +75,70 @@ default_clustermap_state = dict(
 )
 
 visualization_defaults = dict(
-  plotTitle="Distribution of Percent Identities",
-  lineColor="hsl(9, 100%, 64%)",
-  lineWidth=3,
-  showAxisLabels=True,
-  showGrid=True,
-  showTickLabels=True,
-  showTitles=True,
-  titleFont="Sans Serif",
+    plotTitle="Distribution of Percent Identities",
+    lineColor="hsl(9, 100%, 64%)",
+    lineWidth=3,
+    showAxisLabels=True,
+    showGrid=True,
+    showTickLabels=True,
+    showTitles=True,
+    titleFont="Sans Serif",
 )
 
 default_distribution_state = dict(
-  visualization="distribution_histogram",
-  dataSet="scores",
-  histogram=dict(
-    **visualization_defaults,
-    binColor="hsl(195, 53%, 79%)",
-    binSize=1,
-    histOutlineWidth=0,
-    histlineColor="hsl(0, 0%, 0%)",
-    histnorm="probability",
-    showHistogram=True,
-    showLine=True,
-    makeEditable=True,
-    showAxisLines=True,
-    showMeanline=True,
-    dtickx=5,
-    dticky=1,
-    subtitle="Histogram",
-    title="Histogram",
-    xtitle="Percent Identity",
-    ytitle="Frequency",
-    plotOrientation="vertical",
-    barGap = 0.1,
-  ),
-
-  violin=dict(
-    **visualization_defaults,
-    bandwidth=5,
-    boxWidth=0.05,
-    boxfillColor="hsl(195, 53%, 79%)",
-    boxlineColor="hsl(9, 100%, 64%)",
-    boxlineWidth=3,
-    fillColor="hsl(195, 53%, 79%)",
-    jitter=0.5,
-    markerColor="hsl(9, 100%, 64%)",
-    markerSize=3,
-    plotOrientation="vertical",
-    pointOrientation="Violin",
-    pointPos=0,
-    points="all",
-    showAxisLines=True,
-    showBox=True,
-    showMeanline=True,
-    makeEditable=True,
-    showPoints=True,
-    showViolin=True,
-    showZeroLine=False,
-    whiskerWidth=0.2,
-    title="Violin Plot",
-    subtitle="Violin Plot",
-    xtitle="",
-    ytitle="",
-  ),
+    visualization="distribution_histogram",
+    dataSet="scores",
+    histogram=dict(
+        **visualization_defaults,
+        binColor="hsl(195, 53%, 79%)",
+        binSize=1,
+        histOutlineWidth=0,
+        histlineColor="hsl(0, 0%, 0%)",
+        histnorm="probability",
+        showHistogram=True,
+        showLine=True,
+        makeEditable=True,
+        showAxisLines=True,
+        showMeanline=True,
+        dtickx=5,
+        dticky=1,
+        subtitle="Histogram",
+        title="Histogram",
+        xtitle="Percent Identity",
+        ytitle="Frequency",
+        plotOrientation="vertical",
+        barGap=0.1,
+    ),
+    violin=dict(
+        **visualization_defaults,
+        bandwidth=5,
+        boxWidth=0.05,
+        boxfillColor="hsl(195, 53%, 79%)",
+        boxlineColor="hsl(9, 100%, 64%)",
+        boxlineWidth=3,
+        fillColor="hsl(195, 53%, 79%)",
+        jitter=0.5,
+        markerColor="hsl(9, 100%, 64%)",
+        markerSize=3,
+        plotOrientation="vertical",
+        pointOrientation="Violin",
+        pointPos=0,
+        points="all",
+        showAxisLines=True,
+        showBox=True,
+        showMeanline=True,
+        makeEditable=True,
+        showPoints=True,
+        showViolin=True,
+        showZeroLine=False,
+        whiskerWidth=0.2,
+        title="Violin Plot",
+        subtitle="Violin Plot",
+        xtitle="",
+        ytitle="",
+    ),
 )
+
 
 def create_doc_state(
     id,
@@ -158,9 +158,11 @@ def create_doc_state(
     estimated_time=None,
     validation_error_id=None,
     compute_stats=None,
+    cluster_method="average",
     heatmap=default_heatmap_state,
     clustermap=default_clustermap_state,
-    distribution=default_distribution_state
+    distribution=default_distribution_state,
+    result_metadata=None,
 ):
     if filetype == "application/vnd.sdt" and tempdir_path:
         settings = load_document_settings(tempdir_path)
@@ -188,10 +190,13 @@ def create_doc_state(
         estimated_time=estimated_time,
         validation_error_id=validation_error_id,
         compute_stats=compute_stats,
+        cluster_method=cluster_method,
         heatmap=heatmap,
         clustermap=clustermap,
-        distribution=distribution
+        distribution=distribution,
+        result_metadata=result_metadata,
     )
+
 
 def load_document_settings(dir_path: str):
     doc_settings_path = build_document_paths(dir_path).settings
@@ -199,6 +204,7 @@ def load_document_settings(dir_path: str):
         with open(doc_settings_path) as f:
             return json.load(f)
     return None
+
 
 def save_document_settings(doc_state: DocState):
     path = build_document_paths(doc_state.tempdir_path).settings
@@ -208,6 +214,6 @@ def save_document_settings(doc_state: DocState):
             "dataView": doc_state.dataView,
             "heatmap": doc_state.heatmap,
             "clustermap": doc_state.clustermap,
-            "distribution": doc_state.distribution
+            "distribution": doc_state.distribution,
         }
         json.dump(settings, f, indent=2)

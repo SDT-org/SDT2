@@ -5,13 +5,14 @@ import type {
   GetDataResponse,
   HeatmapData,
 } from "../plotTypes";
-import { getScaledFontSize } from "../plotUtils";
-import { services } from "../services";
 import { getDocument } from "../services/documents";
+
+export const getScaledFontSize = (base: number, count: number) =>
+  Math.min(16, Math.max(1, base / (1 + count / 60)));
 
 export const useGetData = (docState: DocState, setDocState: SetDocState) => {
   const [loading, setLoading] = React.useState(false);
-  const [tickText, setTickText] = React.useState<string[]>([""]);
+  const [ids, setIds] = React.useState<string[]>([""]);
   const [heatmapData, setHeatmapData] = React.useState<HeatmapData>();
   const [distributionData, setDistributionData] =
     React.useState<DistributionData>();
@@ -24,26 +25,31 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
   // so we aren't parsing it out here.
   React.useEffect(() => {
     setLoading(true);
-    services
-      .getData(docState.id)
+    window.pywebview.api.data
+      .get_data(docState.id)
       .then(async (rawData) => {
         const parsedResponse: GetDataResponse = JSON.parse(
           rawData.replace(/\bNaN\b/g, "null"),
         );
 
-        const { data, metadata, ids, identity_scores, full_stats } =
-          parsedResponse;
-        const [tickText, ...parsedData] = data;
+        const {
+          data,
+          metadata,
+          ids: responseIds,
+          identity_scores,
+          full_stats,
+        } = parsedResponse;
+        const [idsData, ...parsedData] = data;
 
         setMetaData(metadata);
-        setTickText(tickText as string[]);
+        setIds(idsData?.map((t) => String(t ?? "")) as string[]);
         setHeatmapData(parsedData);
         setDistributionData({
           full_stats,
           gc_stats: full_stats.map((row) => row[1]),
           length_stats: full_stats.map((row) => row[2]),
-          raw_mat: identity_scores.map((i) => i[2]),
-          ids,
+          raw_mat: identity_scores.map((i) => i[2]).filter(Number),
+          ids: responseIds,
           identity_combos: identity_scores.map((i) => [i[0], i[1]]),
         });
 
@@ -53,6 +59,21 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
           parsedData.map(Boolean).length,
         );
 
+        const highSequenceCountSettings = {
+          annotation: false,
+          axis_labels: false,
+          cellspace: 0,
+        };
+
+        const heatmapSettings = {
+          ...(docState.filetype === "application/vnd.sdt"
+            ? null
+            : {
+                axlabel_fontsize: scaledAxisLabelFontSize,
+                axlabel_yfontsize: scaledAxisLabelFontSize,
+              }),
+        };
+
         setDocState(
           (prev) => ({
             ...prev,
@@ -61,29 +82,18 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
               ...prev.heatmap,
               ...state.heatmap,
               vmin: metadata.minVal,
+              ...heatmapSettings,
               ...(docState.sequences_count > 99
-                ? {
-                    annotation: false,
-                    axis_labels: false,
-                    cellspace: 0,
-                  }
+                ? highSequenceCountSettings
                 : null),
-              ...(docState.filetype === "application/vnd.sdt"
-                ? null
-                : {
-                    axlabel_fontsize: scaledAxisLabelFontSize,
-                    axlabel_yfontsize: scaledAxisLabelFontSize,
-                  }),
             },
             clustermap: {
               ...prev.clustermap,
               ...state.clustermap,
-              ...(docState.filetype === "application/vnd.sdt"
-                ? null
-                : {
-                    axlabel_fontsize: scaledAxisLabelFontSize,
-                    axlabel_yfontsize: scaledAxisLabelFontSize,
-                  }),
+              ...heatmapSettings,
+              ...(docState.sequences_count > 99
+                ? highSequenceCountSettings
+                : null),
             },
             ...(docState.sequences_count > 99
               ? {
@@ -102,6 +112,15 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
           false,
         );
       })
+      .catch(async (e) => {
+        console.error(e);
+        setDocState((prev) => ({
+          ...prev,
+          invalid: {
+            reason: String(e),
+          },
+        }));
+      })
       .finally(() => {
         setLoading(false);
       });
@@ -109,7 +128,7 @@ export const useGetData = (docState: DocState, setDocState: SetDocState) => {
 
   return {
     loading,
-    tickText,
+    tickText: ids,
     heatmapData,
     distributionData,
     metaData,

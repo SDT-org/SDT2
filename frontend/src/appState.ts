@@ -1,6 +1,6 @@
 import React, { type ErrorInfo } from "react";
 import { z } from "zod";
-import type { reorderMethods } from "./constants";
+import type { reorderMethods, saveableImageFormats } from "./constants";
 import {
   type DistributionState,
   DistributionStateSchema,
@@ -19,11 +19,6 @@ export const clusterMethodDescriptions = [
   "Rooted phylogenetic tree ideal for ultra-metric datasets",
 ];
 
-export const saveableImageFormats = {
-  svg: "SVG",
-  png: "PNG",
-  jpeg: "JPEG",
-};
 export type SaveableImageFormat = keyof typeof saveableImageFormats;
 export type SaveableImageKey = DocState["dataView"];
 export type RasterFormat = Extract<SaveableImageFormat, "png" | "jpeg">;
@@ -44,21 +39,56 @@ export type DocState = {
   pair_count: number;
   estimated_time?: number;
   validation_error_id?: keyof typeof messages;
+  dataView:
+    | "heatmap"
+    | "clustermap"
+    | "distribution_histogram"
+    | "distribution_violin";
+  distribution: DistributionState;
+  heatmap: HeatmapSettings;
+  clustermap: ClustermapSettings;
+  exportPrefix: string;
+  invalid?: {
+    reason: string;
+  };
   compute_stats?: {
     recommended_cores: number;
     required_memory: number;
     available_memory: number;
   };
-  dataView:
-    | "heatmap"
-    | "clustermap"
-    | "distribution_histogram"
-    | "distribution_violin"
-    | "distribution_raincloud";
-  distribution: DistributionState;
-  heatmap: HeatmapSettings;
-  clustermap: ClustermapSettings;
-  exportPrefix: string;
+  enableClustering: boolean;
+  compute_cores?: number;
+  cluster_method: keyof typeof reorderMethods;
+  analysisMethod: "parasail" | "lzani";
+  lzaniScoreType: "ani" | "gani" | "tani";
+  overrideParasail: boolean;
+  parasail_settings?:
+    | {
+        scoring_matrix?: string;
+        open_penalty?: number;
+        extend_penalty?: number;
+      }
+    | undefined;
+  overrideLzani: boolean;
+  lzani_settings?:
+    | {
+        aw?: number;
+        am?: number;
+        mal?: number;
+        msl?: number;
+        mrd?: number;
+        mqd?: number;
+        reg?: number;
+        ar?: number;
+      }
+    | undefined;
+  result_metadata?:
+    | {
+        is_aa?: boolean;
+      }
+    | undefined;
+  exportAlignments: boolean;
+  alignmentExportPath: string;
 };
 
 export type AppState = {
@@ -76,13 +106,8 @@ export type AppState = {
     userPath: string;
   };
   debug: boolean;
-  enableClustering: boolean;
-  enableOutputAlignments: boolean;
-  cluster_method: keyof typeof reorderMethods;
-  compute_cores: number;
   showExportModal: boolean;
   saveFormat: SaveableImageFormat;
-  alignmentExportPath: string;
   dataExportPath: string;
   lastDataFilePath: string;
   error?: Error | null;
@@ -118,7 +143,6 @@ export const docStateSchema = z.object({
     "clustermap",
     "distribution_histogram",
     "distribution_violin",
-    "distribution_raincloud",
   ]),
   distribution: DistributionStateSchema,
   heatmap: HeatmapSettingsSchema,
@@ -146,6 +170,14 @@ export const initialDocState: DocState = {
   pair_count: 0,
   dataView: "heatmap",
   distribution: initialDistributionState,
+  enableClustering: true,
+  analysisMethod: "parasail",
+  lzaniScoreType: "ani",
+  cluster_method: "average",
+  overrideParasail: false,
+  overrideLzani: false,
+  exportAlignments: false,
+  alignmentExportPath: "",
   heatmap: {
     colorScaleKey: "Portland",
     reverse: false,
@@ -169,13 +201,15 @@ export const initialDocState: DocState = {
     axlabel_yrotation: 0,
     cutoff_1: 95,
     cutoff_2: 75,
+    hideValuesBelow: 0,
+    hideValuesBelowEnabled: false,
   },
   clustermap: {
     threshold: 70,
     method: "average",
-    annotation: false,
+    annotation: true,
     titleFont: "Sans Serif",
-    showTitles: false,
+    showTitles: true,
     title: "",
     xtitle: "",
     ytitle: "",
@@ -185,6 +219,7 @@ export const initialDocState: DocState = {
     axlabel_yrotation: 0,
     cellspace: 1,
     showLegend: true,
+    showClusterCounts: false,
   },
   ...clientDocState,
 };
@@ -193,14 +228,9 @@ export const initialAppState: AppState = {
   activeDocumentId: "",
   debug: false,
   dataExportPath: "",
-  alignmentExportPath: "",
   lastDataFilePath: "",
-  enableClustering: true,
-  enableOutputAlignments: false,
-  cluster_method: "average",
   saveFormat: "svg",
   showExportModal: false,
-  compute_cores: 1,
   documents: [],
   platform: {
     cores: 1,

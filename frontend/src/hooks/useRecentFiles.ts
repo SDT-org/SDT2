@@ -7,7 +7,7 @@ export const useRecentFiles = (
   setAppState: SetAppState,
 ) => {
   const fetchRecentFiles = React.useCallback(() => {
-    window.pywebview.api.app_settings().then((data) => {
+    window.pywebview.api.system.get_app_settings().then((data) => {
       setAppState((prev) => ({ ...prev, recentFiles: data.recent_files }));
     });
   }, [setAppState]);

@@ -1,6 +1,6 @@
 import React from "react";
 import useAppState, { type SaveableImageKey } from "../appState";
-import { useRenderStatus } from "../components/Exporter";
+import { useRenderStatus } from "../components/shared/Exporter";
 import { useDocState } from "./useDocState";
 
 export const useExportSvg = (
@@ -32,7 +32,11 @@ export const useExportSvg = (
         return;
       }
       running.current = true;
-      await window.pywebview.api.save_svg_element(docState.id, selector, key);
+      await window.pywebview.api.export.save_svg_element(
+        docState.id,
+        selector,
+        key,
+      );
       markTabAsRendered(docState.dataView);
       running.current = false;
     };

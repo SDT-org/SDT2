@@ -27,6 +27,8 @@ export interface HeatmapSettings {
   axlabel_yrotation: number;
   cutoff_1: number;
   cutoff_2: number;
+  hideValuesBelow: number;
+  hideValuesBelowEnabled: boolean;
 }
 
 export const HeatmapSettingsSchema = z.object({
@@ -72,6 +74,8 @@ export const HeatmapSettingsSchema = z.object({
   axlabel_yrotation: z.number(),
   cutoff_1: z.number(),
   cutoff_2: z.number(),
+  hideValuesBelow: z.number(),
+  hideValuesBelowEnabled: z.boolean(),
 });
 
 export type HeatmapData = Array<Array<number | null>>;
@@ -82,6 +86,44 @@ export type GetDataResponse = {
   metadata: {
     minVal: number;
     maxVal: number;
+    run?: {
+      analysis_method: "parasail" | "lzani";
+      cluster_method: (typeof reorderMethodKeys)[number];
+      lzani: {
+        score_type: string;
+      };
+    };
+    unaligned_count?: number;
+    distribution_stats?: {
+      mean: number;
+      median: number;
+      std: number;
+      min: number;
+      max: number;
+      q1: number;
+      q3: number;
+      count: number;
+    };
+    gc_stats?: {
+      mean: number;
+      median: number;
+      std: number;
+      min: number;
+      max: number;
+      q1: number;
+      q3: number;
+      count: number;
+    };
+    length_stats?: {
+      mean: number;
+      median: number;
+      std: number;
+      min: number;
+      max: number;
+      q1: number;
+      q3: number;
+      count: number;
+    };
   };
   ids: string[];
   identity_scores: [number, number, number][];
@@ -116,6 +158,7 @@ export interface ClustermapSettings {
   axlabel_yrotation: number;
   cellspace: number;
   showLegend: boolean;
+  showClusterCounts: boolean;
 }
 
 const reorderMethodKeys = Object.keys(
@@ -137,9 +180,24 @@ export const ClustermapSettingsSchema = z.object({
   axlabel_yrotation: z.number(),
   cellspace: z.number(),
   showLegend: z.boolean(),
+  showClusterCounts: z.boolean(),
 });
 
 export type ClusterDataItem = {
   id: string;
   cluster: number;
+  original_cluster?: number;
+};
+
+export type ClusterStats = {
+  total_clusters: number;
+  largest_cluster: number;
+  singleton_clusters: number;
+};
+
+export type GetClustermapDataResponse = {
+  matrix: HeatmapData;
+  tickText: string[];
+  clusterData: ClusterDataItem[];
+  cluster_stats: ClusterStats;
 };

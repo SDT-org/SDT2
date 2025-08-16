@@ -1,6 +1,6 @@
 import React from "react";
 import useAppState, { type SaveableImageKey } from "../appState";
-import { useRenderStatus } from "../components/Exporter";
+import { useRenderStatus } from "../components/shared/Exporter";
 import { isRasterFormat } from "../helpers";
 import { useDocState } from "./useDocState";
 
@@ -63,7 +63,7 @@ export const useExportCanvas = (
         }, 60);
       });
 
-      await window.pywebview.api.save_raster_image(
+      await window.pywebview.api.export.save_raster_image(
         docState.id,
         data,
         key,

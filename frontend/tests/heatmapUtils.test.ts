@@ -4,7 +4,7 @@ import {
   formatClustermapData,
   formatHeatmapData,
   getCellMetrics,
-} from "../src/heatmapUtils";
+} from "../src/components/visualizations/heatmap/heatmapUtils";
 import type { ColorScaleKey, HeatmapSettings } from "../src/plotTypes";
 
 describe("getCellMetrics", () => {
@@ -37,12 +37,19 @@ describe("formatHeatmapData", () => {
 
   const settings: Pick<
     HeatmapSettings,
-    "colorScaleKey" | "vmax" | "vmin" | "annotation_rounding"
+    | "colorScaleKey"
+    | "vmax"
+    | "vmin"
+    | "annotation_rounding"
+    | "hideValuesBelow"
+    | "hideValuesBelowEnabled"
   > = {
     colorScaleKey: "Test" as ColorScaleKey,
     vmax: 100,
     vmin: 8.2,
     annotation_rounding: 2,
+    hideValuesBelow: 0,
+    hideValuesBelowEnabled: false,
   };
 
   const colorScale: ColorScaleArray = [

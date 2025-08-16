@@ -3,10 +3,24 @@ from collections import namedtuple
 from typing import Literal, Dict, List
 
 DataKey = Literal[
-    "stats", "matrix", "triangle", "columns", "summary", "settings", "cluster"
+    "stats",
+    "matrix",
+    "triangle",
+    "columns",
+    "summary",
+    "settings",
+    "cluster",
+    "sequences",
+    "cluster_dir",
+    "lzani_results",
+    "lzani_results_ids",
+    "seq_dict",
+    "run_settings",
 ]
 
-ImageKey = Literal["heatmap", "clustermap", "distribution_histogram", "distribution_violin"]
+ImageKey = Literal[
+    "heatmap", "clustermap", "distribution_histogram", "distribution_violin"
+]
 ImageFormat = Literal["png", "jpeg", "svg"]
 
 DATA_FILES: Dict[DataKey, str] = {
@@ -16,10 +30,20 @@ DATA_FILES: Dict[DataKey, str] = {
     "columns": "columns.csv",
     "summary": "summary.txt",
     "settings": "settings.json",
-    "cluster": "cluster.csv",
+    "cluster": "cluster_data/cluster.csv",
+    "cluster_dir": "cluster_data",  # TODO: make a data directory list?
+    "lzani_results": "lzani_results.tsv",
+    "lzani_results_ids": "lzani_results_ids.tsv",
+    "seq_dict": "seq_dict.json",
+    "run_settings": "run_settings.json",
 }
 
-IMAGE_KEYS: List[ImageKey] = ["heatmap", "clustermap", "distribution_histogram", "distribution_violin"]
+IMAGE_KEYS: List[ImageKey] = [
+    "heatmap",
+    "clustermap",
+    "distribution_histogram",
+    "distribution_violin",
+]
 IMAGE_FORMATS: List[ImageFormat] = ["png", "jpeg", "svg"]
 
 ImageFormatPaths = namedtuple("ImageFormatPaths", IMAGE_FORMATS)

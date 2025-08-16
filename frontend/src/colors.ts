@@ -39,7 +39,7 @@ export function createD3ColorScale(
 //https://stackoverflow.com/questions/10014271/generate-random-color-distinguishable-to-humans
 export const distinctColor = (index: number) => {
   if (!index) {
-    return "hsl(0, 0%, 96%)"; // Light grey for index 0
+    return "hsl(0, 0%, 96%)"; // Light grey for index 0-unaligned
   }
 
   const hue = (index * 137.5) % 360; // Golden angle approximation for hue

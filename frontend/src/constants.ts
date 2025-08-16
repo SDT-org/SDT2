@@ -10,34 +10,40 @@ export const plotFontSansSerif = {
 
 export const plotFont = plotFontMonospace;
 
+export const saveableImageFormats = {
+  svg: "SVG",
+  png: "PNG",
+  jpeg: "JPEG",
+};
+
 export const reorderMethods = {
   single: {
-    name: "Nearest Neighbor",
-    description: "Single Linkage method",
+    name: "Single",
+    description: "Nearest Neighbor",
   },
   complete: {
-    name: "Farthest Neighbor",
-    description: "Complete Linkage method",
+    name: "Complete",
+    description: "Farthest Neighbor",
   },
   average: {
-    name: "UPGMA",
-    description: "Average Linkage method",
+    name: "Average",
+    description: "UPGMA",
   },
   weighted: {
-    name: "WPGMA",
-    description: "Weighted Linkage method",
+    name: "Weighted",
+    description: "WPGMA",
   },
   centroid: {
-    name: "UPGMC",
-    description: "Centroid Linkage method",
+    name: "Centroid",
+    description: "UPGMC",
   },
   median: {
-    name: "WPGMC",
-    description: "Median Linkage method",
+    name: "Median",
+    description: "WPGMC",
   },
   ward: {
-    name: "Minimum Variance",
-    description: "Ward's Linkage method",
+    name: "Ward",
+    description: "Minimum Variance",
   },
 };
 

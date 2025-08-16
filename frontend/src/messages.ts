@@ -8,4 +8,9 @@ export default {
     "This file contains duplicate sequence names. Sequence names must be unique.",
   ZERO_LENGTH_SEQUENCE:
     "This file contains a zero length sequence. Sequences cannot be empty.",
+  AMINO_ACID_NOT_SUPPORTED_LZANI:
+    "LZ-ANI only supports nucleotide ANI calculations at this time.",
+  PARASAIL_PERFORMANCE_WARNING:
+    "Using Parasail for high sequence count datasets (>500 sequences) or datasets with long sequences (>30,000 nt) may cause performance issues. The LZ-ANI aligner is better suited for these cases.",
+  INVALID_FASTA_FORMAT: "The file is not a valid FASTA format.",
 };

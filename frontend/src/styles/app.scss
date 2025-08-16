@@ -38,6 +38,7 @@ body {
   z-index: 10;
   font-size: 1.3rem;
   height: var(--app-header-height);
+  border-top: 0.1rem solid var(--app-header-border-color);
 
   @media (max-width: 55rem) {
     grid-template-columns: auto 1fr auto;
@@ -121,9 +122,13 @@ body {
   grid-template-columns: 1fr var(--app-sidebar-width);
   padding-bottom: var(--app-container-padding);
 
-  &.full-width {
+  &.app-panel-full-width {
     grid-template-areas: "app-main";
     grid-template-columns: 1fr;
+  }
+
+  &.app-panel-full-height {
+    padding-bottom: 0;
   }
 }
 
@@ -243,6 +248,12 @@ body {
     background: #fff;
     position: relative;
   }
+
+  &.error {
+    details {
+      margin-top: 1.6rem;
+    }
+  }
 }
 
 .app-footer {
@@ -341,15 +352,6 @@ body {
       font-size: 1.1rem;
       margin-left: 0.8rem;
       margin-right: -0.8rem;
-    }
-
-    .app-loader {
-      position: absolute;
-      height: 1rem;
-      width: 1rem;
-      top: calc(50% - 0.5rem);
-      right: 0;
-      border-width: 0.2rem;
     }
 
     > svg {
@@ -566,10 +568,10 @@ small {
     }
   }
 
-  label {
+  label, .react-aria-Label {
     font-weight: 500;
 
-    &.header {
+    &.header, &[data-header] {
       display: block;
       font-size: 1.4rem;
       font-weight: 600;
@@ -692,7 +694,7 @@ small {
     }
   }
 
-  .react-aria-Switch,
+  .group > .react-aria-Switch,
   .drawer,
   .setting-header {
     padding: var(--app-container-padding);
@@ -709,7 +711,7 @@ small {
     margin-right: 0.4rem;
   }
 
-  label.react-aria-Switch,
+  .group > label.react-aria-Switch,
   .setting-header {
     font-weight: 600;
   }
@@ -724,6 +726,10 @@ small {
     button {
       width: 100%;
     }
+  }
+
+  .group > .drawer > .field:first-child > .react-aria-ToggleButtonGroup:first-child {
+    margin-top: 0;
   }
 
   .color-picker {
@@ -952,6 +958,12 @@ small {
   }
 }
 
+.field {
+  .react-aria-Label + .react-aria-TextField {
+    margin-top: 0.8rem;
+  }
+}
+
 label.sublabel,
 .form .field label.sublabel {
   font-weight: 500;
@@ -1037,6 +1049,18 @@ label.sublabel,
 
     &[data-animation="true"] {
       transition: width 0.25s;
+    }
+
+    &[data-indeterminate="true"] {
+      @keyframes move {
+        from {
+          transform: translateX(-100%);
+        }
+        to {
+          transform: translateX(calc(100% + 4.2rem));
+        }
+      }
+      animation: move 2s cubic-bezier(0.4, 0, 0, 1) infinite;
     }
   }
 }
@@ -1284,7 +1308,7 @@ label.sublabel,
     0 1px 1px 0 var(--button-shadow-bottom-color),
     0 0 1px 1px var(--button-shadow-color);
   border: 0;
-  border-radius: 0.5rem;
+  border-radius: 0.4rem;
   appearance: none;
   vertical-align: middle;
   text-align: center;
@@ -1326,6 +1350,9 @@ label.sublabel,
     background-color: var(--button-primary-background-color);
     color: var(--button-primary-text-color);
     font-weight: bold;
+    box-shadow:
+      0 1px 1px 0 var(--button-primary-shadow-bottom-color),
+      0 0 1px 1px var(--button-primary-shadow-color);
 
     &[data-pressed] {
       background-color: var(--button-primary-pressed-background-color);
@@ -1353,8 +1380,41 @@ label.sublabel,
   flex-direction: column;
   gap: 8px;
 
-  .react-aria-Label {
-    font-weight: 600;
+  &[data-card] {
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+
+      &.cards-vertical {
+        grid-template-columns: none;
+      }
+
+      p {
+        font-weight: 400;
+      }
+
+      .react-aria-Radio {
+        display: flex;
+        flex-direction: column;
+        border: 0.1rem solid var(--border-color);
+        border-radius: 0.4rem;
+        padding: 0.6rem 0.6rem 0.6rem 3.2rem;
+        align-items: flex-start;
+        position: relative;
+        gap: 0.2rem;
+
+        &[data-selected] {
+          border-color: var(--highlight-background);
+        }
+
+        &:before {
+          position: absolute;
+          left: 1rem;
+          top: 1rem;
+        }
+      }
+    }
   }
 }
 
@@ -1368,8 +1428,8 @@ label.sublabel,
   &:before {
     content: "";
     display: block;
-    width: 1rem;
-    height: 1rem;
+    width: 1.4rem;
+    height: 1.4rem;
     box-sizing: border-box;
     border: 0.2rem solid var(--border-color);
     background: var(--field-background);
@@ -1382,9 +1442,11 @@ label.sublabel,
   }
 
   &[data-selected] {
+    background: var(--highlight-background-subtle);
+
     &:before {
       border-color: var(--highlight-background);
-      border-width: 0.429rem;
+      border-width: 0.4rem;
     }
 
     &[data-pressed]:before {
@@ -1395,6 +1457,84 @@ label.sublabel,
   &[data-focus-visible]:before {
     outline: 2px solid var(--focus-ring-color);
     outline-offset: 2px;
+  }
+
+  &[data-disabled] {
+    color: var(--text-disabled-color);
+
+    .text-deemphasis {
+      color: var(--text-disabled-deemphasis-color);
+    }
+  }
+}
+
+// https://react-spectrum.adobe.com/react-aria/Checkbox.html
+.react-aria-Checkbox {
+  --selected-color: var(--highlight-background);
+  --selected-color-pressed: var(--highlight-background-pressed);
+  --checkmark-color: var(--highlight-foreground);
+
+  display: flex;
+  /* This is needed so the HiddenInput is positioned correctly */
+  position: relative;
+  align-items: center;
+  gap: 0.571rem;
+  font-size: 1.143rem;
+  color: var(--text-color);
+  forced-color-adjust: none;
+
+  .checkbox {
+    width: 1.6rem;
+    height: 1.6rem;
+    border: 2px solid var(--border-color);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  svg {
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: var(--checkmark-color);
+    stroke-width: 3px;
+    stroke-dasharray: 22px;
+    stroke-dashoffset: 66;
+  }
+
+  &[data-pressed] .checkbox {
+    border-color: var(--border-color-pressed);
+  }
+
+  &[data-focus-visible] .checkbox {
+    outline: 2px solid var(--focus-ring-color);
+    outline-offset: 2px;
+  }
+
+  &[data-selected],
+  &[data-indeterminate] {
+    .checkbox {
+      border-color: var(--selected-color);
+      background: var(--selected-color);
+    }
+
+    &[data-pressed] .checkbox {
+      border-color: var(--selected-color-pressed);
+      background: var(--selected-color-pressed);
+    }
+
+    svg {
+      stroke-dashoffset: 44;
+    }
+  }
+
+  &[data-indeterminate] {
+    & svg {
+      stroke: none;
+      fill: var(--checkmark-color);
+    }
   }
 }
 
@@ -1491,9 +1631,6 @@ body.blur {
     background: var(--fill-blur-color);
     border-color: var(--switch-blur-border-color);
   }
-  // .react-aria-Button {
-  //   --button-shadow-bottom-color: transparent;
-  // }
 }
 
 .debug-toast {

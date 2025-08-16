@@ -2,12 +2,7 @@
   "venvPath": "./",
   "venv": "venv",
   "pythonVersion": "3.11",
-  "extraPaths": [
-    "./backend/src"
-  ],
-  "exclude": [
-    "**/node_modules",
-    "**/__pycache__"
-  ],
+  "extraPaths": ["./backend/src", "./backend/analysis"],
+  "exclude": ["**/node_modules", "**/__pycache__"],
   "reportMissingImports": true
 }
