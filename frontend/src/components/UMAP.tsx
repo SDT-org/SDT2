@@ -77,62 +77,72 @@ export const UMAP: React.FC<UMAPProps> = ({
       params.clusterEpsilon !== clusterEpsilon;
 
     // If data exists and parameters haven't changed, do nothing
+    // This ensures data persists when switching tabs
     if (data && !hasChanged) {
       return;
     }
 
-    // Add debounce to prevent multiple rapid API calls
-    const timeoutId = setTimeout(async () => {
-      // Skip if already loading
-      if (loadingRef.current) {
-        console.log("Skipping UMAP fetch - already loading");
-        return;
-      }
+    // Only fetch if we don't have data or parameters changed
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-      loadingRef.current = true;
-      setLoading(true);
-      setError(null);
+    if (!data || hasChanged) {
+      // Add debounce to prevent multiple rapid API calls
+      timeoutId = setTimeout(async () => {
+        // Skip if already loading
+        if (loadingRef.current) {
+          console.log("Skipping UMAP fetch - already loading");
+          return;
+        }
 
-      try {
-        const currentParams = {
-          n_neighbors,
-          min_dist,
-          minClusterSize,
-          clusterEpsilon,
-        };
+        loadingRef.current = true;
+        setLoading(true);
+        setError(null);
 
-        const response = await window.pywebview.api.data.get_umap_data(
-          docState.id,
-          {
+        try {
+          const currentParams = {
             n_neighbors,
             min_dist,
-            threshold: minClusterSize,
-            methods: [`hdbscan-${clusterEpsilon}`],
-          },
-        );
+            minClusterSize,
+            clusterEpsilon,
+          };
 
-        setDocState((prev) => ({
-          ...prev,
-          umap: {
-            ...prev.umap,
-            data: response.data,
-            params: currentParams,
-          },
-        }));
-      } catch (err) {
-        console.error("Error fetching UMAP data:", err);
-        const errorMessage =
-          err instanceof Error ? err.message : "Failed to load UMAP data";
-        setError(errorMessage);
-      } finally {
-        setLoading(false);
-        loadingRef.current = false;
-      }
-    }, 500); // 500ms debounce
+          console.log("Fetching UMAP data with params:", currentParams);
 
-    // Cleanup function to cancel pending requests
+          const response = await window.pywebview.api.data.get_umap_data(
+            docState.id,
+            {
+              n_neighbors,
+              min_dist,
+              threshold: minClusterSize,
+              methods: [`hdbscan-${clusterEpsilon}`],
+            },
+          );
+
+          setDocState((prev) => ({
+            ...prev,
+            umap: {
+              ...prev.umap,
+              data: response.data,
+              params: currentParams,
+            },
+          }));
+        } catch (err) {
+          console.error("Error fetching UMAP data:", err);
+          const errorMessage =
+            err instanceof Error ? err.message : "Failed to load UMAP data";
+          setError(errorMessage);
+        } finally {
+          setLoading(false);
+          loadingRef.current = false;
+        }
+      }, 500); // 500ms debounce
+    }
+
+    // Always return a cleanup function
     return () => {
-      clearTimeout(timeoutId);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
     };
   }, [docState.id, docState.umap, setDocState]);
 
@@ -169,9 +179,10 @@ export const UMAP: React.FC<UMAPProps> = ({
 
     // Title with cluster stats
     const clusterStats = umapData.clusterStats;
-    const title = clusterStats
-      ? `UMAP Projection - HDBSCAN (${clusterStats.total_clusters} clusters, ${clusterStats.noise_points} noise points)`
-      : "UMAP Projection";
+    const title =
+      clusterStats && clusterStats.total_clusters > 1
+        ? `UMAP Projection - HDBSCAN (${clusterStats.total_clusters} clusters, ${clusterStats.noise_points} noise points)`
+        : "UMAP Projection";
 
     mainGroup
       .append("text")

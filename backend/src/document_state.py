@@ -31,6 +31,8 @@ DocState = namedtuple(
         "clustermap",
         "distribution",
         "result_metadata",
+        "distance_matrix",
+        "ordered_ids",
     ],
 )
 
@@ -163,6 +165,8 @@ def create_doc_state(
     clustermap=default_clustermap_state,
     distribution=default_distribution_state,
     result_metadata=None,
+    distance_matrix=None,
+    ordered_ids=None,
 ):
     if filetype == "application/vnd.sdt" and tempdir_path:
         settings = load_document_settings(tempdir_path)
@@ -195,6 +199,8 @@ def create_doc_state(
         clustermap=clustermap,
         distribution=distribution,
         result_metadata=result_metadata,
+        distance_matrix=distance_matrix,
+        ordered_ids=ordered_ids,
     )
 
 

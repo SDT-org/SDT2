@@ -8,6 +8,7 @@ from document_paths import build_document_paths
 from workflow.models import (
     LzaniSettings,
     ParasailSettings,
+    VclustSettings,
     RunSettings,
     WorkflowResult,
     WorkflowRun,
@@ -90,6 +91,16 @@ class Workflow:
         if parsed_result.error:
             raise Exception("Workflow has an error that must be resolved.")
 
+        # Create vclust settings if it's a vclust run
+        vclust_settings = None
+        if args.get("analysisMethod") == "vclust":
+            vclust_settings = VclustSettings(
+                kmer_min_similarity=args.get("kmer_min_similarity", 0.30),
+                kmer_min_kmers=args.get("kmer_min_kmers", 2),
+                kmer_fraction=args.get("kmer_fraction", 0.5),
+                cdhit_threshold=args.get("cdhit_threshold", 0.70),
+            )
+
         settings = RunSettings(
             fasta_path=doc.filename,
             doc_paths=build_document_paths(doc.tempdir_path),
@@ -116,6 +127,7 @@ class Workflow:
                 open_penalty=args.get("open_penalty"),
                 extend_penalty=args.get("extend_penalty"),
             ),
+            vclust=vclust_settings,
             export_alignments=args.get("export_alignments", False),
             alignment_export_path=args.get("alignment_export_path", ""),
         )

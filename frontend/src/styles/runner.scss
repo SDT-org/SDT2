@@ -63,7 +63,6 @@
           display: block;
         }
       }
-
     }
 
     .setting {
@@ -158,7 +157,7 @@
 
         .cores-used {
           .react-aria-Slider {
-            grid-template-areas: 'track' 'label output';
+            grid-template-areas: "track" "label output";
           }
 
           .react-aria-Label {
@@ -190,13 +189,13 @@
           color: var(--impact-medium-color);
         }
 
-        &[data-impact='extreme'] svg {
+        &[data-impact="extreme"] svg {
           color: var(--impact-extreme-color);
         }
-        &[data-impact='high'] svg {
+        &[data-impact="high"] svg {
           color: var(--impact-high-color);
         }
-        &[data-impact='medium'] svg {
+        &[data-impact="medium"] svg {
           color: var(--impact-medium-color);
         }
 
@@ -296,5 +295,59 @@
   .is-aa-detected {
     color: var(--fill-color);
     padding: 0 0.2rem;
+  }
+
+  // Improved visual separation for settings sections
+  .field {
+    // Section headers with faint light blue background
+    .header {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-color);
+      background: rgba(59, 130, 246, 0.08);
+      padding: 0.8rem 1.2rem;
+      margin: -0.8rem -1.2rem 1.2rem;
+      border-bottom: 0.1rem solid rgba(59, 130, 246, 0.15);
+      border-radius: 0.4rem 0.4rem 0 0;
+    }
+
+    // Better alignment for header rows
+    .col-2.align-items-center {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+  }
+
+  // Add visual distinction between setting groups
+  .setting-group {
+    // Section headers inside setting groups
+    h4 {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--text-color);
+      background: rgba(59, 130, 246, 0.06);
+      padding: 0.6rem 1rem;
+      margin: -0.8rem -1.2rem 1.2rem;
+      border-left: 3px solid rgba(59, 130, 246, 0.4);
+    }
+
+    // Settings sections separation
+    .settings-section {
+      &:not(:last-child) {
+        margin-bottom: 2rem;
+        padding-bottom: 1.6rem;
+        border-bottom: 0.1rem dashed var(--secondary-border-color);
+      }
+    }
+  }
+
+  // 3-column cards layout for analysis methods
+  .cards.cards-3col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
   }
 }

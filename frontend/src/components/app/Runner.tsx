@@ -259,7 +259,22 @@ const LzaniSettings = ({
     if (!docState.overrideLzani) {
       updateDocState({ overrideLzani: true });
     }
-  }, [docState.overrideLzani, updateDocState]);
+    // Initialize lzani_settings if not present
+    if (!docState.lzani_settings) {
+      const defaultPreset = lzaniPresets.find((p) => p.id === "balanced");
+      if (defaultPreset) {
+        setDocState((previous) => ({
+          ...previous,
+          lzani_settings: defaultPreset.settings,
+        }));
+      }
+    }
+  }, [
+    docState.overrideLzani,
+    docState.lzani_settings,
+    updateDocState,
+    setDocState,
+  ]);
 
   const handlePresetChange = (presetId: string) => {
     setSelectedPreset(presetId);
@@ -433,6 +448,7 @@ const LzaniSettings = ({
               }}
               min={1}
               max={120}
+              step={0.1}
             />
             <NumberInput
               id="lzani-mqd"
@@ -449,6 +465,7 @@ const LzaniSettings = ({
               }}
               min={1}
               max={120}
+              step={0.1}
             />
             <NumberInput
               id="lzani-reg"
@@ -484,6 +501,233 @@ const LzaniSettings = ({
               step={0.1}
             />
           </div>
+        ) : null}
+      </div>
+    </div>
+  );
+};
+
+const VclustSettings = ({
+  docState,
+  updateDocState,
+  setDocState,
+}: {
+  docState: DocState;
+  updateDocState: UpdateDocState;
+  setDocState: SetDocState;
+}) => {
+  const [selectedPreset, setSelectedPreset] =
+    React.useState<string>("balanced");
+  const [settingsMode, setSettingsMode] = React.useState<
+    "presets" | "advanced"
+  >("presets");
+
+  React.useEffect(() => {
+    // Always enable override for Vclust
+    if (!docState.overrideVclust) {
+      updateDocState({ overrideVclust: true });
+    }
+    // Initialize vclust_settings if not present
+    if (!docState.vclust_settings) {
+      const defaultPreset = vclustPresets.find((p) => p.id === "balanced");
+      if (defaultPreset) {
+        setDocState((previous) => ({
+          ...previous,
+          vclust_settings: defaultPreset.settings,
+        }));
+      }
+    }
+  }, [
+    docState.overrideVclust,
+    docState.vclust_settings,
+    updateDocState,
+    setDocState,
+  ]);
+
+  const vclustPresets = [
+    {
+      id: "fast",
+      name: "Fast",
+      description: "Quick analysis with minimal filtering",
+      settings: {
+        kmer_min_similarity: 0.2,
+        kmer_min_kmers: 2,
+        kmer_fraction: 0.3,
+        cdhit_threshold: 0.6,
+      },
+    },
+    {
+      id: "balanced",
+      name: "Balanced",
+      description: "Optimal balance between speed and accuracy",
+      settings: {
+        kmer_min_similarity: 0.3,
+        kmer_min_kmers: 2,
+        kmer_fraction: 0.5,
+        cdhit_threshold: 0.7,
+      },
+    },
+    {
+      id: "accurate",
+      name: "Accurate",
+      description: "High accuracy with more comprehensive filtering",
+      settings: {
+        kmer_min_similarity: 0.4,
+        kmer_min_kmers: 3,
+        kmer_fraction: 0.7,
+        cdhit_threshold: 0.8,
+      },
+    },
+  ];
+
+  const handlePresetChange = (presetId: string) => {
+    setSelectedPreset(presetId);
+    const preset = vclustPresets.find((p) => p.id === presetId);
+    if (preset) {
+      setDocState((previous) => ({
+        ...previous,
+        vclust_settings: preset.settings,
+      }));
+    }
+  };
+
+  return (
+    <div className="field">
+      <div className="col-2 align-items-center">
+        <div className="header">Vclust Settings</div>
+        <div style={{ justifySelf: "end" }}>
+          <ToggleButtonGroup
+            data-compact
+            selectionMode="single"
+            disallowEmptySelection={true}
+            selectedKeys={[settingsMode]}
+            onSelectionChange={(selection) =>
+              setSettingsMode(
+                selection.values().next().value as "presets" | "advanced",
+              )
+            }
+          >
+            <ToggleButton id="presets">Presets</ToggleButton>
+            <ToggleButton id="advanced">Advanced</ToggleButton>
+          </ToggleButtonGroup>
+        </div>
+      </div>
+      <div
+        className={`setting-group ${settingsMode === "advanced" ? "form" : ""}`}
+      >
+        {settingsMode === "presets" ? (
+          <div className="settings-field">
+            <Label>Settings</Label>
+            <Select
+              id="vclust-preset"
+              wide
+              data-compact
+              selectedKey={selectedPreset}
+              onSelectionChange={(value) => {
+                handlePresetChange(value as string);
+              }}
+              items={vclustPresets}
+              aria-label="Vclust Preset"
+            >
+              {(item) => (
+                <SelectItem textValue={`${item.name} - ${item.description}`}>
+                  <Text slot="label">{item.name}</Text>
+                  <Text slot="description">
+                    <small>{item.description}</small>
+                  </Text>
+                </SelectItem>
+              )}
+            </Select>
+          </div>
+        ) : null}
+        {settingsMode === "advanced" ? (
+          <>
+            <div className="settings-section">
+              <h4>KmerDB Settings</h4>
+              <div className="col-3">
+                <NumberInput
+                  id="vclust-kmer-min-similarity"
+                  label="K-mer similarity threshold"
+                  value={docState.vclust_settings?.kmer_min_similarity || 0.3}
+                  onChange={(value) => {
+                    setDocState((previous) => ({
+                      ...previous,
+                      vclust_settings: {
+                        ...previous.vclust_settings,
+                        kmer_min_similarity: value,
+                      },
+                    }));
+                  }}
+                  min={0.01}
+                  max={1.0}
+                  step={0.01}
+                />
+                <NumberInput
+                  id="vclust-kmer-min-kmers"
+                  label="Min k-mer matches"
+                  value={docState.vclust_settings?.kmer_min_kmers || 2}
+                  onChange={(value) => {
+                    setDocState((previous) => ({
+                      ...previous,
+                      vclust_settings: {
+                        ...previous.vclust_settings,
+                        kmer_min_kmers: value,
+                      },
+                    }));
+                  }}
+                  min={1}
+                  max={10}
+                  step={1}
+                />
+                <NumberInput
+                  id="vclust-kmer-fraction"
+                  label="K-mer fraction"
+                  value={docState.vclust_settings?.kmer_fraction || 0.5}
+                  onChange={(value) => {
+                    setDocState((previous) => ({
+                      ...previous,
+                      vclust_settings: {
+                        ...previous.vclust_settings,
+                        kmer_fraction: value,
+                      },
+                    }));
+                  }}
+                  min={0.01}
+                  max={1.0}
+                  step={0.01}
+                />
+              </div>
+            </div>
+            <div className="settings-section">
+              <h4>CD-HIT Deduplication</h4>
+              <div className="col-1">
+                <NumberInput
+                  id="vclust-cdhit-threshold"
+                  label="Sequence identity threshold"
+                  value={docState.vclust_settings?.cdhit_threshold || 0.7}
+                  onChange={(value) => {
+                    setDocState((previous) => ({
+                      ...previous,
+                      vclust_settings: {
+                        ...previous.vclust_settings,
+                        cdhit_threshold: value,
+                      },
+                    }));
+                  }}
+                  min={0.5}
+                  max={1.0}
+                  step={0.05}
+                />
+              </div>
+            </div>
+            <div className="settings-section">
+              <LzaniSettings
+                docState={docState}
+                updateDocState={updateDocState}
+                setDocState={setDocState}
+              />
+            </div>
+          </>
         ) : null}
       </div>
     </div>
@@ -573,9 +817,9 @@ const RunnerSettings = ({
                     </span>
                   ) : null}
                 </Label>
-                <div className="cards">
+                <div className="cards cards-3col">
                   <Radio value="parasail">
-                    <div className="col-2 analysis-method-body">
+                    <div className="analysis-method-body">
                       <div>
                         Parasail
                         <p className="text-deemphasis">
@@ -589,12 +833,26 @@ const RunnerSettings = ({
                     value="lzani"
                     isDisabled={docState.result_metadata?.is_aa || false}
                   >
-                    <div className="col-2 analysis-method-body">
+                    <div className="analysis-method-body">
                       <div>
                         LZ-ANI
                         <p className="text-deemphasis">
                           Best for large datasets. Only supports nucleotide ANI
                           calculations.
+                        </p>
+                      </div>
+                    </div>
+                  </Radio>
+                  <Radio
+                    value="vclust"
+                    isDisabled={docState.result_metadata?.is_aa || false}
+                  >
+                    <div className="analysis-method-body">
+                      <div>
+                        Vclust (Scalable)
+                        <p className="text-deemphasis">
+                          For very large datasets (>10k sequences). Uses
+                          k-mer prefiltering for ultra-fast analysis.
                         </p>
                       </div>
                     </div>
@@ -613,6 +871,14 @@ const RunnerSettings = ({
 
             {docState.analysisMethod === "lzani" ? (
               <LzaniSettings
+                docState={docState}
+                updateDocState={updateDocState}
+                setDocState={setDocState}
+              />
+            ) : null}
+
+            {docState.analysisMethod === "vclust" ? (
+              <VclustSettings
                 docState={docState}
                 updateDocState={updateDocState}
                 setDocState={setDocState}

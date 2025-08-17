@@ -63,7 +63,7 @@ export type DocState = {
   enableClustering: boolean;
   compute_cores?: number;
   cluster_method: keyof typeof reorderMethods;
-  analysisMethod: "parasail" | "lzani";
+  analysisMethod: "parasail" | "lzani" | "vclust";
   lzaniScoreType: "ani" | "gani" | "tani";
   overrideParasail: boolean;
   parasail_settings?:
@@ -84,6 +84,15 @@ export type DocState = {
         mqd?: number;
         reg?: number;
         ar?: number;
+      }
+    | undefined;
+  overrideVclust: boolean;
+  vclust_settings?:
+    | {
+        kmer_min_similarity?: number;
+        kmer_min_kmers?: number;
+        kmer_fraction?: number;
+        cdhit_threshold?: number;
       }
     | undefined;
   result_metadata?:
@@ -182,6 +191,7 @@ export const initialDocState: DocState = {
   cluster_method: "average",
   overrideParasail: false,
   overrideLzani: false,
+  overrideVclust: false,
   exportAlignments: false,
   alignmentExportPath: "",
   heatmap: {

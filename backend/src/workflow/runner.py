@@ -53,17 +53,84 @@ def run_process(
     if result.error:
         return result
 
-    # Skip clustering for large datasets (>2500 sequences) to avoid expensive matrix operations
+    # Skip clustering and post-processing for large datasets in lzani and vclust workflows
     sequence_count = len(result.ordered_ids)
-    if settings.cluster_method and settings.cluster_method != "None" and sequence_count <= 2500:
+    if settings.analysis_method in ["lzani", "vclust"] and sequence_count > 1000:
+        print(f"Skipping clustering and post-processing for large dataset ({sequence_count} sequences > 1000)")
+        
+        # For large datasets, the only valid view is UMAP.
+        # We must update the document state to switch the view automatically.
+        from app_state import update_document
+        # Extract doc_id from the document path (it's the parent directory name)
+        doc_id = os.path.basename(os.path.dirname(settings.doc_paths.matrix))
+        update_document(doc_id, dataView='umap')
+        
+        # We must also skip the finalization step for large datasets
+        workflow_run.set_stage("Finalizing")
+        workflow_run.set_progress(100)
+        
+        end_time, end_counter = datetime.now(), time.perf_counter()
+
+        # Build comprehensive LZ-ANI settings
+        lzani_settings = {
+            "score_type": settings.lzani.score_type,
+        }
+        if settings.lzani.aw is not None:
+            lzani_settings["aw"] = settings.lzani.aw
+        if settings.lzani.am is not None:
+            lzani_settings["am"] = settings.lzani.am
+        if settings.lzani.mal is not None:
+            lzani_settings["mal"] = settings.lzani.mal
+        if settings.lzani.msl is not None:
+            lzani_settings["msl"] = settings.lzani.msl
+        if settings.lzani.mrd is not None:
+            lzani_settings["mrd"] = str(settings.lzani.mrd)
+        if settings.lzani.mqd is not None:
+            lzani_settings["mqd"] = str(settings.lzani.mqd)
+        if settings.lzani.reg is not None:
+            lzani_settings["reg"] = settings.lzani.reg
+        if settings.lzani.ar is not None:
+            lzani_settings["ar"] = settings.lzani.ar
+
+        run_settings = {
+            "analysis_method": settings.analysis_method,
+            "cluster_method": settings.cluster_method,
+            "lzani": lzani_settings,
+        }
+        
+        # Add vclust settings if applicable
+        if settings.analysis_method == "vclust" and settings.vclust:
+            run_settings["vclust"] = {
+                "kmer_min_similarity": settings.vclust.kmer_min_similarity,
+                "kmer_min_kmers": settings.vclust.kmer_min_kmers,
+                "kmer_fraction": settings.vclust.kmer_fraction,
+                "cdhit_threshold": settings.vclust.cdhit_threshold,
+            }
+
+        save_run_settings_to_json(run_settings, settings.doc_paths.run_settings)
+
+        file_name = os.path.basename(settings.fasta_path)
+        summary_text = output_summary(
+            file_name, start_time, end_time, start_counter, end_counter, settings, result
+        )
+        with open(settings.doc_paths.summary, "w") as file:
+            file.write(summary_text)
+        print(f"Elapsed time: {friendly_total_time(end_counter - start_counter)}")
+        
+        # For vclust, store the sparse matrix in cache to avoid JSON serialization
+        if settings.analysis_method == "vclust" and result.distance_matrix is not None:
+            from workflow.vclust_cache import store_vclust_matrix
+            store_vclust_matrix(doc_id, result.distance_matrix, result.ordered_ids)
+        
+        return result
+
+    elif settings.cluster_method and settings.cluster_method != "None":
         workflow_run.set_stage("Clustering")
         workflow_run.set_progress(None)
 
         result = cluster.run(result, settings, workflow_run.set_progress)
         if result.error:
             return result
-    elif sequence_count > 2500:
-        print(f"Skipping clustering for large dataset ({sequence_count} sequences > 2500)")
 
     workflow_run.set_stage("Finalizing")
     workflow_run.set_progress(100)
@@ -74,13 +141,41 @@ def run_process(
 
     end_time, end_counter = datetime.now(), time.perf_counter()
 
+    # Build comprehensive LZ-ANI settings
+    lzani_settings = {
+        "score_type": settings.lzani.score_type,
+    }
+    if settings.lzani.aw is not None:
+        lzani_settings["aw"] = settings.lzani.aw
+    if settings.lzani.am is not None:
+        lzani_settings["am"] = settings.lzani.am
+    if settings.lzani.mal is not None:
+        lzani_settings["mal"] = settings.lzani.mal
+    if settings.lzani.msl is not None:
+        lzani_settings["msl"] = settings.lzani.msl
+    if settings.lzani.mrd is not None:
+        lzani_settings["mrd"] = str(settings.lzani.mrd)
+    if settings.lzani.mqd is not None:
+        lzani_settings["mqd"] = str(settings.lzani.mqd)
+    if settings.lzani.reg is not None:
+        lzani_settings["reg"] = settings.lzani.reg
+    if settings.lzani.ar is not None:
+        lzani_settings["ar"] = settings.lzani.ar
+
     run_settings = {
         "analysis_method": settings.analysis_method,
         "cluster_method": settings.cluster_method,
-        "lzani": {
-            "score_type": settings.lzani.score_type,
-        },
+        "lzani": lzani_settings,
     }
+    
+    # Add vclust settings if applicable
+    if settings.analysis_method == "vclust" and settings.vclust:
+        run_settings["vclust"] = {
+            "kmer_min_similarity": settings.vclust.kmer_min_similarity,
+            "kmer_min_kmers": settings.vclust.kmer_min_kmers,
+            "kmer_fraction": settings.vclust.kmer_fraction,
+            "cdhit_threshold": settings.vclust.cdhit_threshold,
+        }
 
     save_run_settings_to_json(run_settings, settings.doc_paths.run_settings)
 
@@ -127,6 +222,28 @@ def output_summary(
 
         aligner_name = "LZ-ANI"
         aligner_params = f"Score type: {score_type}, aw={aw}, am={am}, mal={mal}, msl={msl}, mrd={mrd}, mqd={mqd}, reg={reg}, ar={ar}"
+    elif settings.analysis_method == "vclust":
+        aligner_name = "VCLUST"
+        vclust_params = []
+        if settings.vclust:
+            vclust_params.append(f"K-mer min similarity: {settings.vclust.kmer_min_similarity}")
+            vclust_params.append(f"K-mer min kmers: {settings.vclust.kmer_min_kmers}")
+            vclust_params.append(f"K-mer fraction: {settings.vclust.kmer_fraction}")
+            vclust_params.append(f"CD-HIT threshold: {settings.vclust.cdhit_threshold}")
+        
+        # Also include LZ-ANI parameters used in vclust
+        score_type = settings.lzani.score_type.upper()
+        aw = settings.lzani.aw if settings.lzani.aw is not None else 5
+        am = settings.lzani.am if settings.lzani.am is not None else 2
+        mal = settings.lzani.mal if settings.lzani.mal is not None else 50
+        msl = settings.lzani.msl if settings.lzani.msl is not None else 50
+        mrd = settings.lzani.mrd if settings.lzani.mrd is not None else 0.1
+        mqd = settings.lzani.mqd if settings.lzani.mqd is not None else 0.01
+        reg = settings.lzani.reg if settings.lzani.reg is not None else 0
+        ar = settings.lzani.ar if settings.lzani.ar is not None else 0.95
+        
+        vclust_params.append(f"LZ-ANI score type: {score_type}, aw={aw}, am={am}, mal={mal}, msl={msl}, mrd={mrd}, mqd={mqd}, reg={reg}, ar={ar}")
+        aligner_params = ", ".join(vclust_params)
     else:
         aligner_name = "UNKNOWN"
         aligner_params = f"Unknown analysis method: {settings.analysis_method}"

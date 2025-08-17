@@ -16,8 +16,8 @@ class LzaniSettings(NamedTuple):
     am: int | None = None
     mal: int | None = None
     msl: int | None = None
-    mrd: int | None = None
-    mqd: int | None = None
+    mrd: float | None = None
+    mqd: float | None = None
     reg: int | None = None
     ar: float | None = None
 
@@ -29,14 +29,22 @@ class ParasailSettings(NamedTuple):
     extend_penalty: int | None = None
 
 
+class VclustSettings(NamedTuple):
+    kmer_min_similarity: float = 0.30
+    kmer_min_kmers: int = 2
+    kmer_fraction: float = 0.5
+    cdhit_threshold: float = 0.70
+
+
 class RunSettings(NamedTuple):
     doc_paths: DocumentPaths
-    analysis_method: Literal["parasail"] | Literal["lzani"]
+    analysis_method: Literal["parasail"] | Literal["lzani"] | Literal["vclust"]
     fasta_path: str
     output_path: str
     cluster_method: str  # Literal[reorder_methods]
     lzani: LzaniSettings
     parasail: ParasailSettings
+    vclust: VclustSettings | None = None
     export_alignments: bool = False
     alignment_export_path: str = ""
 

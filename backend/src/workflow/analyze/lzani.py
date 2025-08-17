@@ -22,13 +22,21 @@ def run(
         settings.doc_paths.lzani_results,
         "--out-ids",
         settings.doc_paths.lzani_results_ids,
-        "--out-format",
-        "complete",
+        "--out-type", "tsv",
+        "--out-format", "qidx,ridx,query,reference,tani,gani,ani,qcov,rcov,num_alns,len_ratio",
         "--threads",
         "0",
         "--verbose",
         "2",
     ]
+    
+    # Check for prefiltered pairs from kmer-db
+    doc_dir = os.path.dirname(settings.doc_paths.matrix)
+    filter_file = os.path.join(doc_dir, "kmerdb_filter.txt")
+    if os.path.exists(filter_file):
+        # Use --flt-kmerdb with a threshold of 0.0 to include all pairs in the file
+        cmd.extend(["--flt-kmerdb", filter_file, "0.0"])
+        print(f"Using kmer-db prefilter from: {filter_file}")
     # Not actual alignments, but can give insights into the analysis
     if settings.export_alignments and settings.alignment_export_path:
         alignment_file = os.path.join(
@@ -98,6 +106,7 @@ def run(
 
     if process.returncode != 0:
         return result._replace(error=f"Error running LZ-ANI: {''.join(output_lines)}")
+
 
     # Check sequence count from IDs file
     import pandas as pd

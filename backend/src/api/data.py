@@ -20,6 +20,24 @@ class Data:
         doc = get_document(doc_id)
         doc_paths = build_document_paths(doc.tempdir_path)
 
+        run_settings = None
+        if file_exists(doc_paths.run_settings):
+            run_settings = read_json_file(doc_paths.run_settings)
+        
+        analysis_method = run_settings.get("analysis_method") if run_settings else None
+
+        if analysis_method == "vclust":
+            sequence_count = 0
+            if file_exists(doc_paths.lzani_results_ids):
+                ids_df = pd.read_csv(doc_paths.lzani_results_ids, sep="\t")
+                sequence_count = len(ids_df)
+            update_document(doc_id, sequences_count=sequence_count)
+            return json.dumps({
+                "error": "Vclust workflow does not produce a heatmap.",
+                "sequences_count": sequence_count,
+                "message": "Please use the UMAP visualization for vclust results."
+            })
+
         is_large_dataset = False
         ids = []
         data = np.zeros((1, 1))
@@ -205,7 +223,6 @@ class Data:
         cluster_counts = seqid_clusters_df["cluster"].value_counts()
         singleton_clusters = cluster_counts[cluster_counts == 1]
         singletons = len(singleton_clusters)
-        print(singletons, "singletons")
 
         for seq_id in reordered_tick_text:
             original_cluster = id_to_cluster.get(seq_id)
@@ -246,17 +263,70 @@ class Data:
             metric='precomputed'
         )
         
-        # Check if this is LZ-ANI data
         is_lzani = False
         run_settings = None
+        sequence_count = 0
         if file_exists(doc_paths.run_settings):
             run_settings = read_json_file(doc_paths.run_settings)
             is_lzani = run_settings and run_settings.get("analysis_method") == "lzani" and file_exists(doc_paths.lzani_results)
         
-        # LZ-ANI always streams TSV directly
-        if is_lzani and run_settings:
+        if is_lzani and file_exists(doc_paths.lzani_results_ids):
+            ids_df = pd.read_csv(doc_paths.lzani_results_ids, sep="\t")
+            sequence_count = len(ids_df)
+        
+        HDBSCAN_SIZE_LIMIT = 0
+        use_hdbscan = sequence_count < HDBSCAN_SIZE_LIMIT
+        
+        distance_matrix = None
+        sequence_ids = []
+        umap_result = None
+
+        # Check for vclust cached matrix first
+        from workflow.vclust_cache import get_vclust_matrix
+        vclust_data = get_vclust_matrix(doc_id)
+        
+        if vclust_data is not None:
+            print(f"Using cached vclust sparse matrix for doc {doc_id}")
+            distance_matrix, sequence_ids = vclust_data
+            sequence_count = len(sequence_ids)
+            use_hdbscan = sequence_count < HDBSCAN_SIZE_LIMIT
+            
+            # For sparse matrices, check connectivity and adjust n_neighbors if needed
+            if hasattr(distance_matrix, 'nnz'):  # Check if it's a sparse matrix
+                # Calculate minimum connectivity (non-zero entries per row)
+                from scipy.sparse import csr_matrix
+                csr = csr_matrix(distance_matrix)
+                nnz_per_row = csr.getnnz(axis=1)
+                min_connections = min(nnz_per_row) if len(nnz_per_row) > 0 else 0
+                
+                # Ensure we have at least some connections
+                if min_connections == 0:
+                    print(f"ERROR: Some sequences have NO connections in the sparse matrix!")
+                    # Add self-connections as a fallback with zero distance
+                    import numpy as np
+                    distance_matrix = distance_matrix.tocoo()
+                    # Add zero self-distances to ensure connectivity
+                    for i in range(len(sequence_ids)):
+                        distance_matrix.data = np.append(distance_matrix.data, 0.0)
+                        distance_matrix.row = np.append(distance_matrix.row, i)
+                        distance_matrix.col = np.append(distance_matrix.col, i)
+                    distance_matrix = csr_matrix(distance_matrix)
+                    min_connections = 1
+                
+                # Adjust n_neighbors to be safe
+                safe_n_neighbors = min(max(2, min_connections - 1), len(sequence_ids) - 1)
+                if safe_n_neighbors < config.n_neighbors:
+                    print(f"Warning: Adjusting n_neighbors from {config.n_neighbors} to {safe_n_neighbors} (min connections: {min_connections})")
+                    config.n_neighbors = safe_n_neighbors
+            
+            umap_result = run_umap(
+                distance_matrix=distance_matrix,
+                sequence_ids=sequence_ids,
+                config=config
+            )
+        elif is_lzani and run_settings:
             score_type = run_settings.get("lzani", {}).get("score_type", "ani")
-            print(f"Streaming LZ-ANI TSV directly to UMAP")
+            print(f"Streaming LZ-ANI TSV directly to UMAP for {sequence_count} sequences")
             
             umap_result = run_umap_from_lzani_tsv(
                 results_tsv_path=doc_paths.lzani_results,
@@ -264,22 +334,20 @@ class Data:
                 config=config,
                 score_type=score_type
             )
-            
             sequence_ids = umap_result.sequence_ids
             
-            # For HDBSCAN, we need the distance matrix
-            if doc_id not in self._umap_cache:
-                print(f"Building distance matrix for HDBSCAN clustering")
-                distance_matrix, _ = self._load_lzani_tsv_for_umap(
-                    doc_paths.lzani_results,
-                    doc_paths.lzani_results_ids,
-                    score_type
-                )
-                self._umap_cache[doc_id] = (distance_matrix, sequence_ids)
-            else:
-                distance_matrix, _ = self._umap_cache[doc_id]
+            if use_hdbscan:
+                if doc_id not in self._umap_cache:
+                    print(f"Building distance matrix for HDBSCAN clustering")
+                    distance_matrix, _ = self._load_lzani_tsv_for_umap(
+                        doc_paths.lzani_results,
+                        doc_paths.lzani_results_ids,
+                        score_type
+                    )
+                    self._umap_cache[doc_id] = (distance_matrix, sequence_ids)
+                else:
+                    distance_matrix, _ = self._umap_cache[doc_id]
         else:
-            # Non-LZ-ANI uses regular matrix
             if doc_id in self._umap_cache:
                 print(f"Using cached distance matrix for doc {doc_id}")
                 distance_matrix, sequence_ids = self._umap_cache[doc_id]
@@ -287,6 +355,8 @@ class Data:
                 matrix_df = read_csv_matrix(doc_paths.matrix)
                 distance_matrix = matrix_df.to_numpy()
                 sequence_ids = matrix_df.index.to_list()
+                sequence_count = len(sequence_ids)
+                use_hdbscan = sequence_count < HDBSCAN_SIZE_LIMIT
                 self._umap_cache[doc_id] = (distance_matrix, sequence_ids)
             
             umap_result = run_umap(
@@ -295,34 +365,32 @@ class Data:
                 config=config
             )
         
-        # HDBSCAN clustering
-        min_cluster_size = params.get("min_cluster_size", params.get("threshold", 5))
-        cluster_epsilon = params.get("cluster_epsilon", 0.0)
-        
-        methods = params.get("methods", [])
-        if methods and len(methods) > 0 and methods[0].startswith("hdbscan-"):
-            try:
-                similarity_epsilon = float(methods[0].split("-")[1])
-                cluster_epsilon = 100 - similarity_epsilon
-            except:
-                pass
-        
-        if doc_id in self._umap_cache:
-            distance_matrix, _ = self._umap_cache[doc_id]
-        
-        cluster_assignments = run_hdbscan_clustering(
-            distance_matrix=distance_matrix,
-            sequence_ids=sequence_ids,
-            min_cluster_size=min_cluster_size,
-            cluster_selection_epsilon=cluster_epsilon
-        )
-        
-        cluster_stats = get_cluster_stats(cluster_assignments)
-        
-        print(f"HDBSCAN clustering: min_cluster_size={min_cluster_size}, epsilon={cluster_epsilon}")
-        print(f"Total sequences: {cluster_stats['total_sequences']}")
-        print(f"Total clusters: {cluster_stats['total_clusters']}")
-        print(f"Noise points: {cluster_stats['noise_points']}")
+        if use_hdbscan:
+            min_cluster_size = params.get("min_cluster_size", params.get("threshold", 5))
+            cluster_epsilon = params.get("cluster_epsilon", 0.0)
+            
+            if doc_id in self._umap_cache:
+                distance_matrix, _ = self._umap_cache[doc_id]
+            
+            cluster_assignments = run_hdbscan_clustering(
+                distance_matrix=distance_matrix,
+                sequence_ids=sequence_ids,
+                min_cluster_size=min_cluster_size,
+                cluster_selection_epsilon=cluster_epsilon
+            )
+            
+            cluster_stats = get_cluster_stats(cluster_assignments)
+        else:
+            print(f"Dataset too large ({sequence_count} sequences), skipping HDBSCAN clustering")
+            cluster_assignments = {seq_id: 0 for seq_id in sequence_ids}
+            cluster_stats = {
+                "total_sequences": sequence_count,
+                "total_clusters": 1,
+                "noise_points": 0,
+                "largest_cluster_size": sequence_count,
+                "smallest_cluster_size": sequence_count,
+                "clusters": {0: sequence_count}
+            }
         
         embedding_data = []
         for i, seq_id in enumerate(sequence_ids):
@@ -348,16 +416,16 @@ class Data:
                     "y": [float(y_coords.min() - y_range * padding), float(y_coords.max() + y_range * padding)]
                 },
                 "clusterStats": cluster_stats,
-                "min_cluster_size": int(min_cluster_size),
-                "cluster_epsilon": float(cluster_epsilon)
+                "min_cluster_size": params.get("min_cluster_size", 5),
+                "cluster_epsilon": params.get("cluster_epsilon", 0.0)
             },
             "metadata": {
                 "n_neighbors": int(config.n_neighbors),
                 "min_dist": float(config.min_dist),
                 "sequences_count": int(len(sequence_ids)),
                 "cluster_method": "hdbscan",
-                "min_cluster_size": int(min_cluster_size),
-                "cluster_epsilon": float(cluster_epsilon)
+                "min_cluster_size": params.get("min_cluster_size", 5),
+                "cluster_epsilon": params.get("cluster_epsilon", 0.0)
             }
         }
 
@@ -374,7 +442,6 @@ class Data:
         if len(metadata_df.columns) < 2:
             raise Exception("CSV must have at least 2 columns (ID column + metadata)")
         
-        # Use 'accession' column if it exists, otherwise default to the first column
         if 'accession' in metadata_df.columns:
             id_column = 'accession'
         else:
@@ -426,18 +493,14 @@ class Data:
         version_matches = 0
         unmatched = 0
         
-        # Convert all IDs to strings for consistent matching
         sequence_ids = [str(sid) for sid in sequence_ids]
         metadata_ids = [str(mid) for mid in metadata_ids]
         
-        # Create sets and mappings for efficient lookup
         sequence_id_set = set(sequence_ids)
         sequence_base_ids = {}
         sequence_lower_to_original = {sid.lower(): sid for sid in sequence_ids}
         
-        # Build mapping of base IDs (without version) to full IDs
         for seq_id in sequence_ids:
-            # Try multiple version separators
             for separator in ['.', '_v', '-v', '_V', '-V']:
                 if separator in seq_id:
                     base_id = seq_id.split(separator)[0]
@@ -445,21 +508,18 @@ class Data:
                     sequence_base_ids[base_id.lower()] = seq_id
                     break
         
-        # Create reverse mapping: from sequence ID to metadata ID
         sequence_to_meta = {}
         
         for meta_id in metadata_ids:
             matched = False
             meta_id_lower = meta_id.lower()
             
-            # 1. Try exact match (case-sensitive)
             if meta_id in sequence_id_set:
                 matches[meta_id] = meta_id
                 sequence_to_meta[meta_id] = meta_id
                 exact_matches += 1
                 matched = True
             
-            # 2. Try case-insensitive match
             elif meta_id_lower in sequence_lower_to_original:
                 seq_id = sequence_lower_to_original[meta_id_lower]
                 matches[meta_id] = seq_id
@@ -467,7 +527,6 @@ class Data:
                 version_matches += 1
                 matched = True
             
-            # 3. Try version stripping
             elif not matched:
                 for separator in ['.', '_v', '-v', '_V', '-V']:
                     if separator in meta_id:
@@ -487,7 +546,6 @@ class Data:
                             matched = True
                             break
             
-            # 4. Try if metadata ID is a base ID matching sequence with version
             if not matched and meta_id in sequence_base_ids:
                 seq_id = sequence_base_ids[meta_id]
                 matches[meta_id] = seq_id
@@ -504,7 +562,6 @@ class Data:
             if not matched:
                 unmatched += 1
         
-        # Store the reverse mapping for later use
         self._sequence_to_meta_mapping = sequence_to_meta
         
         stats = {
@@ -529,7 +586,6 @@ class Data:
         if not os.path.exists(metadata_path) or not os.path.exists(match_info_path):
             raise Exception("No metadata uploaded")
         
-        # Read metadata with proper type inference
         metadata_df = pd.read_csv(metadata_path)
         with open(match_info_path, 'r') as f:
             match_info = json.load(f)
@@ -538,29 +594,23 @@ class Data:
         if column_name not in metadata_df.columns:
             raise Exception(f"Column '{column_name}' not found in metadata")
         
-        # Determine column type more robustly
         column_data = metadata_df[column_name]
         
-        # Try to convert to numeric if possible
         try:
-            # Handle missing values
             column_data = column_data.replace(['', 'NA', 'N/A', 'na', 'n/a', 'nan', 'NaN'], pd.NA)
             numeric_data = pd.to_numeric(column_data, errors='coerce')
             
-            # If more than 50% of non-null values are numeric, treat as numeric
             non_null_count = column_data.notna().sum()
             numeric_count = numeric_data.notna().sum()
             
             if non_null_count > 0 and numeric_count / non_null_count > 0.5:
                 column_type = "numeric"
-                # Use the numeric conversion
                 metadata_df[column_name] = numeric_data
             else:
                 column_type = "categorical"
         except:
             column_type = "categorical"
         
-        # Build value map, ensuring values are properly typed
         value_map = {}
         for _, row in metadata_df.iterrows():
             meta_id = str(row[id_column])
@@ -568,22 +618,17 @@ class Data:
                 seq_id = match_info["matches"][meta_id]
                 value = row[column_name]
                 
-                # Handle missing values
                 if pd.isna(value):
                     continue
                 
-                # Convert value based on column type
                 if column_type == "numeric":
                     try:
                         value_map[seq_id] = float(value)
                     except:
-                        # Skip non-numeric values in numeric columns
                         continue
                 else:
-                    # For categorical, ensure it's a string
                     value_map[seq_id] = str(value)
         
-        # Debug logging
         print(f"Metadata column '{column_name}' - Type: {column_type}")
         print(f"Sample values: {list(value_map.values())[:5]}")
         print(f"Total matched values: {len(value_map)}")
@@ -614,7 +659,6 @@ class Data:
         
         matrix_np = np.where(np.isnan(matrix_np), 100, 100 - matrix_np)
         
-        # Take the maximum of forward and reverse scores
         matrix_np = np.maximum(matrix_np, matrix_np.T)
         
         np.fill_diagonal(matrix_np, 0)

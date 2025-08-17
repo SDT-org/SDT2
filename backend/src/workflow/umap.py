@@ -7,7 +7,7 @@ import warnings
 from typing import Dict, List, Optional, Tuple, Union
 from dataclasses import dataclass, asdict
 from transformations import read_csv_matrix
-from scipy.sparse import coo_matrix
+from scipy.sparse import coo_matrix, csr_matrix, issparse
 
 # Suppress UMAP warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="umap")
@@ -58,7 +58,7 @@ class UMAPResult:
         return df
 
 
-def run_umap(distance_matrix: np.ndarray,
+def run_umap(distance_matrix: Union[np.ndarray, coo_matrix, csr_matrix],
              sequence_ids: List[str],
              config: Optional[UMAPConfig] = None,
              cluster_assignments: Optional[Dict[str, int]] = None,
@@ -71,7 +71,10 @@ def run_umap(distance_matrix: np.ndarray,
         raise ValueError("Number of sequence IDs must match matrix dimensions")
     
     config = config or UMAPConfig()
-    distance_matrix = (distance_matrix + distance_matrix.T) / 2
+    
+    # Only symmetrize if it's a dense matrix
+    if isinstance(distance_matrix, np.ndarray):
+        distance_matrix = (distance_matrix + distance_matrix.T) / 2
     
     y = None
     if supervised and cluster_assignments:
@@ -274,7 +277,8 @@ def run_umap_from_lzani_tsv(
     results_tsv_path: str,
     ids_tsv_path: str,
     config: Optional[UMAPConfig] = None,
-    score_type: str = "ani"
+    score_type: str = "ani",
+    chunk_size: int = 100000  # Process TSV in chunks for large files
 ) -> UMAPResult:
     config = config or UMAPConfig()
     
@@ -282,36 +286,78 @@ def run_umap_from_lzani_tsv(
     sequence_ids = ids_df["id"].tolist()
     n_sequences = len(sequence_ids)
     
+    print(f"Processing UMAP for {n_sequences} sequences")
+    
     id_to_idx = {seq_id: idx for idx, seq_id in enumerate(sequence_ids)}
     
-    # Read TSV and build sparse matrix
-    results_df = pd.read_csv(results_tsv_path, sep="\t")
+    # Build sparse matrix by reading TSV in chunks to avoid memory issues
+    row_indices = []
+    col_indices = []
+    distances = []
     
-    if results_df.empty:
-        # No results = all sequences 100% different
+    # Check if file is empty first
+    import os
+    if os.path.getsize(results_tsv_path) == 0:
+        print("Warning: Results file is empty, creating empty sparse matrix")
         sparse_matrix = coo_matrix((n_sequences, n_sequences))
     else:
-        # Convert ANI to distance
-        results_df['distance'] = (100 - results_df[score_type] * 100)
-        
-        # Map IDs to indices
-        results_df['i'] = results_df['query'].map(id_to_idx)
-        results_df['j'] = results_df['reference'].map(id_to_idx)
-        
-        # Remove self-comparisons
-        results_df = results_df[results_df['i'] != results_df['j']]
-        
-        # Create symmetric sparse matrix
-        row = np.concatenate([results_df['i'].values, results_df['j'].values])
-        col = np.concatenate([results_df['j'].values, results_df['i'].values])
-        data = np.concatenate([results_df['distance'].values, results_df['distance'].values])
-        
-        sparse_matrix = coo_matrix((data, (row, col)), shape=(n_sequences, n_sequences))
+        # Read header to check if file has content
+        with open(results_tsv_path, 'r') as f:
+            header = f.readline().strip()
+            if not f.readline():  # Check if there's any data after header
+                print("Warning: Results file has no data rows, creating empty sparse matrix")
+                sparse_matrix = coo_matrix((n_sequences, n_sequences))
+            else:
+                # Process file in chunks
+                print(f"Reading results in chunks of {chunk_size} rows")
+                chunk_count = 0
+                
+                for chunk_df in pd.read_csv(results_tsv_path, sep="\t", chunksize=chunk_size):
+                    chunk_count += 1
+                    if chunk_count % 10 == 0:
+                        print(f"Processing chunk {chunk_count}, total edges so far: {len(row_indices)}")
+                    
+                    # Convert ANI to distance
+                    chunk_df['distance'] = (100 - chunk_df[score_type] * 100)
+                    
+                    # Map IDs to indices
+                    chunk_df['i'] = chunk_df['query'].map(id_to_idx)
+                    chunk_df['j'] = chunk_df['reference'].map(id_to_idx)
+                    
+                    # Remove any rows with unmapped IDs and self-comparisons
+                    valid_mask = chunk_df['i'].notna() & chunk_df['j'].notna() & (chunk_df['i'] != chunk_df['j'])
+                    chunk_df = chunk_df[valid_mask]
+                    
+                    if len(chunk_df) > 0:
+                        # Append to lists
+                        row_indices.extend(chunk_df['i'].astype(int).tolist())
+                        col_indices.extend(chunk_df['j'].astype(int).tolist())
+                        distances.extend(chunk_df['distance'].tolist())
+                        
+                        # Also add symmetric entries
+                        row_indices.extend(chunk_df['j'].astype(int).tolist())
+                        col_indices.extend(chunk_df['i'].astype(int).tolist())
+                        distances.extend(chunk_df['distance'].tolist())
+                
+                print(f"Total edges loaded: {len(row_indices) // 2}")
+                
+                # Create sparse matrix
+                if len(row_indices) > 0:
+                    sparse_matrix = coo_matrix(
+                        (distances, (row_indices, col_indices)), 
+                        shape=(n_sequences, n_sequences)
+                    )
+                else:
+                    print("Warning: No valid comparisons found, creating empty sparse matrix")
+                    sparse_matrix = coo_matrix((n_sequences, n_sequences))
     
     # UMAP can handle sparse matrices directly
+    print(f"Running UMAP with n_neighbors={config.n_neighbors}, min_dist={config.min_dist}")
     config.metric = 'precomputed'
     reducer = UMAP(**config.to_dict())
     embedding = reducer.fit_transform(sparse_matrix)
+    
+    print("UMAP embedding complete")
     
     return UMAPResult(
         embedding=embedding,
