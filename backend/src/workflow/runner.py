@@ -104,7 +104,7 @@ def run_process(
                 "kmer_min_similarity": settings.vclust.kmer_min_similarity,
                 "kmer_min_kmers": settings.vclust.kmer_min_kmers,
                 "kmer_fraction": settings.vclust.kmer_fraction,
-                "cdhit_threshold": settings.vclust.cdhit_threshold,
+                "cluster_threshold": settings.vclust.cluster_threshold,
             }
 
         save_run_settings_to_json(run_settings, settings.doc_paths.run_settings)
@@ -174,7 +174,7 @@ def run_process(
             "kmer_min_similarity": settings.vclust.kmer_min_similarity,
             "kmer_min_kmers": settings.vclust.kmer_min_kmers,
             "kmer_fraction": settings.vclust.kmer_fraction,
-            "cdhit_threshold": settings.vclust.cdhit_threshold,
+            "cluster_threshold": settings.vclust.cluster_threshold,
         }
 
     save_run_settings_to_json(run_settings, settings.doc_paths.run_settings)
@@ -229,7 +229,7 @@ def output_summary(
             vclust_params.append(f"K-mer min similarity: {settings.vclust.kmer_min_similarity}")
             vclust_params.append(f"K-mer min kmers: {settings.vclust.kmer_min_kmers}")
             vclust_params.append(f"K-mer fraction: {settings.vclust.kmer_fraction}")
-            vclust_params.append(f"CD-HIT threshold: {settings.vclust.cdhit_threshold}")
+            vclust_params.append(f"CD-HIT threshold: {settings.vclust.cluster_threshold}")
         
         # Also include LZ-ANI parameters used in vclust
         score_type = settings.lzani.score_type.upper()

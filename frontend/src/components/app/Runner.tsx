@@ -550,9 +550,9 @@ const VclustSettings = ({
       name: "Fast",
       description: "Quick analysis with minimal filtering",
       settings: {
-        kmer_min_similarity: 0.2,
-        kmer_min_kmers: 2,
-        kmer_fraction: 0.3,
+        kmer_min_similarity: 0.5,
+        kmer_min_kmers: 10,
+        kmer_fraction: 0.5,
         cdhit_threshold: 0.6,
       },
     },
@@ -561,9 +561,9 @@ const VclustSettings = ({
       name: "Balanced",
       description: "Optimal balance between speed and accuracy",
       settings: {
-        kmer_min_similarity: 0.3,
-        kmer_min_kmers: 2,
-        kmer_fraction: 0.5,
+        kmer_min_similarity: 0.7,
+        kmer_min_kmers: 20,
+        kmer_fraction: 1.0,
         cdhit_threshold: 0.7,
       },
     },
@@ -572,9 +572,9 @@ const VclustSettings = ({
       name: "Accurate",
       description: "High accuracy with more comprehensive filtering",
       settings: {
-        kmer_min_similarity: 0.4,
-        kmer_min_kmers: 3,
-        kmer_fraction: 0.7,
+        kmer_min_similarity: 0.8,
+        kmer_min_kmers: 30,
+        kmer_fraction: 1.0,
         cdhit_threshold: 0.8,
       },
     },
@@ -647,8 +647,8 @@ const VclustSettings = ({
               <div className="col-3">
                 <NumberInput
                   id="vclust-kmer-min-similarity"
-                  label="K-mer similarity threshold"
-                  value={docState.vclust_settings?.kmer_min_similarity || 0.3}
+                  label="K-mer similarity threshold (0-1)"
+                  value={docState.vclust_settings?.kmer_min_similarity || 0.7}
                   onChange={(value) => {
                     setDocState((previous) => ({
                       ...previous,
@@ -658,14 +658,15 @@ const VclustSettings = ({
                       },
                     }));
                   }}
-                  min={0.01}
-                  max={1.0}
-                  step={0.01}
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  type="float"
                 />
                 <NumberInput
                   id="vclust-kmer-min-kmers"
                   label="Min k-mer matches"
-                  value={docState.vclust_settings?.kmer_min_kmers || 2}
+                  value={docState.vclust_settings?.kmer_min_kmers || 20}
                   onChange={(value) => {
                     setDocState((previous) => ({
                       ...previous,
@@ -676,13 +677,13 @@ const VclustSettings = ({
                     }));
                   }}
                   min={1}
-                  max={10}
+                  max={100}
                   step={1}
                 />
                 <NumberInput
                   id="vclust-kmer-fraction"
-                  label="K-mer fraction"
-                  value={docState.vclust_settings?.kmer_fraction || 0.5}
+                  label="K-mer fraction (0-1)"
+                  value={docState.vclust_settings?.kmer_fraction || 1.0}
                   onChange={(value) => {
                     setDocState((previous) => ({
                       ...previous,
@@ -692,9 +693,10 @@ const VclustSettings = ({
                       },
                     }));
                   }}
-                  min={0.01}
-                  max={1.0}
-                  step={0.01}
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  type="float"
                 />
               </div>
             </div>
@@ -703,7 +705,7 @@ const VclustSettings = ({
               <div className="col-1">
                 <NumberInput
                   id="vclust-cdhit-threshold"
-                  label="Sequence identity threshold"
+                  label="Sequence identity threshold (0-1)"
                   value={docState.vclust_settings?.cdhit_threshold || 0.7}
                   onChange={(value) => {
                     setDocState((previous) => ({
@@ -714,9 +716,10 @@ const VclustSettings = ({
                       },
                     }));
                   }}
-                  min={0.5}
-                  max={1.0}
-                  step={0.05}
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  type="float"
                 />
               </div>
             </div>
@@ -823,8 +826,8 @@ const RunnerSettings = ({
                       <div>
                         Parasail
                         <p className="text-deemphasis">
-                          Best for small datasets. Supports amino acid
-                          calculations.
+                          For very large datasets ({">"}10k sequences). Uses
+                          k-mer prefiltering for ultra-fast analysis.
                         </p>
                       </div>
                     </div>
@@ -851,7 +854,7 @@ const RunnerSettings = ({
                       <div>
                         Vclust (Scalable)
                         <p className="text-deemphasis">
-                          For very large datasets (>10k sequences). Uses
+                          For very large datasets ({">"}10k sequences). Uses
                           k-mer prefiltering for ultra-fast analysis.
                         </p>
                       </div>

@@ -98,7 +98,7 @@ class Workflow:
                 kmer_min_similarity=args.get("kmer_min_similarity", 0.30),
                 kmer_min_kmers=args.get("kmer_min_kmers", 2),
                 kmer_fraction=args.get("kmer_fraction", 0.5),
-                cdhit_threshold=args.get("cdhit_threshold", 0.70),
+                cluster_threshold=args.get("cdhit_threshold", 0.70),  # Frontend uses cdhit_threshold but model uses cluster_threshold
             )
 
         settings = RunSettings(
