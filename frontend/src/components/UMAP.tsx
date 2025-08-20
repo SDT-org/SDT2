@@ -712,82 +712,195 @@ export const UMAP: React.FC<UMAPProps> = ({
               <strong>Points selected:</strong> {selectedPoints.length}
             </p>
 
-            {clusterDistribution && (
-              <div>
-                <h4 style={{ margin: "10px 0 5px 0", fontSize: "14px" }}>
-                  Cluster Distribution:
-                </h4>
-                <ul style={{ margin: "0", paddingLeft: "20px" }}>
-                  {Object.entries(clusterDistribution).map(
-                    ([cluster, count]) => (
-                      <li key={cluster} style={{ margin: "2px 0" }}>
-                        <span
+            <div style={{ marginBottom: "15px" }}>
+              <select
+                style={{
+                  width: "100%",
+                  padding: "5px",
+                  marginBottom: "10px",
+                  borderRadius: "4px",
+                  border: "1px solid #ccc",
+                }}
+                value={docState.umap.colorBy === "metadata" ? docState.umap.selectedMetadataColumn || "" : "cluster"}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (value === "cluster") {
+                    updateSettings({
+                      colorBy: "cluster",
+                      colorByCluster: true,
+                    });
+                  } else {
+                    updateSettings({
+                      colorBy: "metadata",
+                      colorByCluster: false,
+                      selectedMetadataColumn: value,
+                    });
+                  }
+                }}
+              >
+                <option value="cluster">Cluster</option>
+                {docState.umap.uploadedMetadata?.columns.map((col) => (
+                  <option key={col} value={col}>
+                    {col} ({docState.umap.uploadedMetadata?.columnTypes[col]})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Distribution visualization for current coloring method */}
+            <div>
+              <h4 style={{ margin: "10px 0 5px 0", fontSize: "14px" }}>
+                Distribution:
+              </h4>
+              <div style={{ margin: "10px 0" }}>
+                {docState.umap.colorBy === "cluster" && clusterDistribution && 
+                  Object.entries(clusterDistribution).map(([cluster, count]) => {
+                    const percentage = Math.round((count / selectedPoints.length) * 100);
+                    const barWidth = `${percentage}%`;
+                    return (
+                      <div
+                        key={cluster}
+                        style={{
+                          margin: "6px 0",
+                          display: "flex",
+                          alignItems: "center",
+                        }}
+                      >
+                        <div
                           style={{
-                            display: "inline-block",
-                            width: "12px",
-                            height: "12px",
-                            backgroundColor:
+                            width: "20px",
+                            marginRight: "8px",
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <span
+                            style={{
+                              display: "inline-block",
+                              width: "12px",
+                              height: "12px",
+                              backgroundColor:
+                                cluster === "0"
+                                  ? "#cccccc"
+                                  : distinctColor(Number.parseInt(cluster)),
+                              marginRight: "5px",
+                            }}
+                          />
+                        </div>
+                        <div style={{ minWidth: "70px" }}>
+                          Cluster {cluster === "0" ? "Noise" : cluster}:
+                        </div>
+                        <div
+                          style={{
+                            flex: 1,
+                            display: "flex",
+                            alignItems: "center",
+                            height: "16px",
+                          }}
+                        >
+                        <div
+                          style={{
+                            height: "100%",
+                            width: barWidth,
+                            backgroundColor: 
                               cluster === "0"
                                 ? "#cccccc"
                                 : distinctColor(Number.parseInt(cluster)),
-                            marginRight: "5px",
-                            verticalAlign: "middle",
+                            opacity: 0.7,
+                            borderRadius: "2px",
                           }}
                         />
-                        Cluster {cluster === "0" ? "Noise" : cluster}: {count}{" "}
-                        points
-                      </li>
-                    ),
-                  )}
-                </ul>
-              </div>
-            )}
-
-            {selectionSummary && docState.umap.selectedMetadataColumn && (
-              <div>
-                <h4 style={{ margin: "10px 0 5px 0", fontSize: "14px" }}>
-                  {docState.umap.selectedMetadataColumn} Summary:
-                </h4>
-                {selectionSummary.column_type === "numeric" ? (
-                  <div>
-                    <p style={{ margin: "2px 0" }}>
-                      <strong>Mean:</strong>{" "}
-                      {(
-                        selectionSummary.summary as NumericSummary
-                      ).mean?.toFixed(2)}
-                    </p>
-                    <p style={{ margin: "2px 0" }}>
-                      <strong>Median:</strong>{" "}
-                      {(
-                        selectionSummary.summary as NumericSummary
-                      ).median?.toFixed(2)}
-                    </p>
-                    <p style={{ margin: "2px 0" }}>
-                      <strong>Min:</strong>{" "}
-                      {(
-                        selectionSummary.summary as NumericSummary
-                      ).min?.toFixed(2)}
-                    </p>
-                    <p style={{ margin: "2px 0" }}>
-                      <strong>Max:</strong>{" "}
-                      {(
-                        selectionSummary.summary as NumericSummary
-                      ).max?.toFixed(2)}
-                    </p>
-                  </div>
-                ) : (
-                  <ul style={{ margin: "0", paddingLeft: "20px" }}>
-                    {Object.entries(selectionSummary.summary).map(
-                      ([value, count]) => (
-                        <li key={value} style={{ margin: "2px 0" }}>
-                          {value}: {count} points
-                        </li>
-                      ),
-                    )}
-                  </ul>
+                          <div
+                            style={{
+                              marginLeft: "8px",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {count} ({percentage}%)
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                }
+                
+                {docState.umap.colorBy === "metadata" && selectionSummary && (
+                  selectionSummary.column_type === "categorical" ? (
+                    Object.entries(selectionSummary.summary).map(([value, count]) => {
+                      const percentage = Math.round((count as number / selectedPoints.length) * 100);
+                      const barWidth = `${percentage}%`;
+                      return (
+                        <div
+                          key={value}
+                          style={{
+                            margin: "6px 0",
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <div style={{ minWidth: "100px", overflow: "hidden", textOverflow: "ellipsis" }}>
+                            {value}:
+                          </div>
+                          <div
+                            style={{
+                              flex: 1,
+                              display: "flex",
+                              alignItems: "center",
+                              height: "16px",
+                            }}
+                          >
+                          <div
+                            style={{
+                              height: "100%",
+                              width: barWidth,
+                              backgroundColor: "#1f77b4",
+                              opacity: 0.7,
+                              borderRadius: "2px",
+                            }}
+                          />
+                            <div
+                              style={{
+                                marginLeft: "8px",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {count} ({percentage}%)
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div>
+                      <p style={{ margin: "2px 0" }}>
+                        <strong>Mean:</strong>{" "}
+                        {(
+                          selectionSummary.summary as NumericSummary
+                        ).mean?.toFixed(2)}
+                      </p>
+                      <p style={{ margin: "2px 0" }}>
+                        <strong>Median:</strong>{" "}
+                        {(
+                          selectionSummary.summary as NumericSummary
+                        ).median?.toFixed(2)}
+                      </p>
+                      <p style={{ margin: "2px 0" }}>
+                        <strong>Min:</strong>{" "}
+                        {(
+                          selectionSummary.summary as NumericSummary
+                        ).min?.toFixed(2)}
+                      </p>
+                      <p style={{ margin: "2px 0" }}>
+                        <strong>Max:</strong>{" "}
+                        {(
+                          selectionSummary.summary as NumericSummary
+                        ).max?.toFixed(2)}
+                      </p>
+                    </div>
+                  )
                 )}
               </div>
-            )}
+            </div>
 
             <button
               type="button"
