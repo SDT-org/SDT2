@@ -10,8 +10,16 @@ import {
 import type { UMAPPoint } from "../plotTypes";
 import { UMAPSidebar } from "./UMAPSidebar";
 
+interface NumericSummary {
+  mean: number;
+  median: number;
+  min: number;
+  max: number;
+  [key: string]: number;
+}
+
 interface SelectionSummary {
-  summary: Record<string, number>;
+  summary: Record<string, number> | NumericSummary;
   column_type: "numeric" | "categorical";
   total_selected: number;
 }
@@ -418,7 +426,7 @@ export const UMAP: React.FC<UMAPProps> = ({
           .merge(firstPoint)
           .attr("cx", (d) => (d ? d[0] : null))
           .attr("cy", (d) => (d ? d[1] : null))
-          .on("click", () => {
+          .on("click", async () => {
             const pointsInPolygon = umapData.embedding.filter((d) => {
               const point = [currentXScale(d.x), currentYScale(d.y)] as [
                 number,
@@ -427,8 +435,38 @@ export const UMAP: React.FC<UMAPProps> = ({
               return d3.polygonContains(polygon, point);
             });
             const selectedIds = pointsInPolygon.map((d) => d.id);
-            setSelectedPoints(selectedIds);
-            setSelectionActive(true);
+
+            if (selectedIds.length > 0) {
+              setSelectedPoints(selectedIds);
+              setSelectionActive(true);
+
+              // Get cluster summary
+              const clusterCounts: Record<string, number> = {};
+              for (const point of pointsInPolygon) {
+                const cluster = point.cluster ?? 0;
+                clusterCounts[cluster] = (clusterCounts[cluster] || 0) + 1;
+              }
+
+              // For metadata if available
+              if (docState.umap.selectedMetadataColumn) {
+                try {
+                  const summary =
+                    await window.pywebview.api.data.get_metadata_summary_for_selection(
+                      docState.id,
+                      selectedIds,
+                      docState.umap.selectedMetadataColumn,
+                    );
+                  setSelectionSummary(summary);
+                  console.log("Metadata summary for selection:", summary);
+                } catch (err) {
+                  console.error("Error fetching selection summary:", err);
+                }
+              }
+
+              console.log(`Selected ${selectedIds.length} points`);
+              console.log("Cluster distribution:", clusterCounts);
+            }
+
             setPolygon([]);
           });
       }
@@ -614,6 +652,24 @@ export const UMAP: React.FC<UMAPProps> = ({
     }
   }, [selectionSummary, selectedPoints]);
 
+  // Generate cluster distribution stats from selected points
+  const getClusterDistribution = () => {
+    if (!selectionActive || !selectedPoints.length || !umapData) return null;
+
+    const clusterCounts: Record<string, number> = {};
+    const filteredPoints = umapData.embedding.filter((point) =>
+      selectedPoints.includes(point.id),
+    );
+    for (const point of filteredPoints) {
+      const cluster = point.cluster ?? 0;
+      clusterCounts[cluster] = (clusterCounts[cluster] || 0) + 1;
+    }
+
+    return clusterCounts;
+  };
+
+  const clusterDistribution = getClusterDistribution();
+
   return (
     <>
       <div className="app-main umap-container" ref={containerRef}>
@@ -631,6 +687,132 @@ export const UMAP: React.FC<UMAPProps> = ({
             style={{ padding: "20px", color: "red" }}
           >
             {error}
+          </div>
+        )}
+        {selectionActive && selectedPoints.length > 0 && (
+          <div
+            className="selection-info-panel"
+            style={{
+              position: "absolute",
+              top: 10,
+              right: 10,
+              background: "rgba(255, 255, 255, 0.9)",
+              padding: "10px",
+              borderRadius: "4px",
+              boxShadow:
+                "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)",
+              zIndex: 100,
+              maxWidth: "300px",
+            }}
+          >
+            <h3 style={{ margin: "0 0 10px 0", fontSize: "16px" }}>
+              Selection Summary
+            </h3>
+            <p style={{ margin: "5px 0" }}>
+              <strong>Points selected:</strong> {selectedPoints.length}
+            </p>
+
+            {clusterDistribution && (
+              <div>
+                <h4 style={{ margin: "10px 0 5px 0", fontSize: "14px" }}>
+                  Cluster Distribution:
+                </h4>
+                <ul style={{ margin: "0", paddingLeft: "20px" }}>
+                  {Object.entries(clusterDistribution).map(
+                    ([cluster, count]) => (
+                      <li key={cluster} style={{ margin: "2px 0" }}>
+                        <span
+                          style={{
+                            display: "inline-block",
+                            width: "12px",
+                            height: "12px",
+                            backgroundColor:
+                              cluster === "0"
+                                ? "#cccccc"
+                                : distinctColor(Number.parseInt(cluster)),
+                            marginRight: "5px",
+                            verticalAlign: "middle",
+                          }}
+                        />
+                        Cluster {cluster === "0" ? "Noise" : cluster}: {count}{" "}
+                        points
+                      </li>
+                    ),
+                  )}
+                </ul>
+              </div>
+            )}
+
+            {selectionSummary && docState.umap.selectedMetadataColumn && (
+              <div>
+                <h4 style={{ margin: "10px 0 5px 0", fontSize: "14px" }}>
+                  {docState.umap.selectedMetadataColumn} Summary:
+                </h4>
+                {selectionSummary.column_type === "numeric" ? (
+                  <div>
+                    <p style={{ margin: "2px 0" }}>
+                      <strong>Mean:</strong>{" "}
+                      {(
+                        selectionSummary.summary as NumericSummary
+                      ).mean?.toFixed(2)}
+                    </p>
+                    <p style={{ margin: "2px 0" }}>
+                      <strong>Median:</strong>{" "}
+                      {(
+                        selectionSummary.summary as NumericSummary
+                      ).median?.toFixed(2)}
+                    </p>
+                    <p style={{ margin: "2px 0" }}>
+                      <strong>Min:</strong>{" "}
+                      {(
+                        selectionSummary.summary as NumericSummary
+                      ).min?.toFixed(2)}
+                    </p>
+                    <p style={{ margin: "2px 0" }}>
+                      <strong>Max:</strong>{" "}
+                      {(
+                        selectionSummary.summary as NumericSummary
+                      ).max?.toFixed(2)}
+                    </p>
+                  </div>
+                ) : (
+                  <ul style={{ margin: "0", paddingLeft: "20px" }}>
+                    {Object.entries(selectionSummary.summary).map(
+                      ([value, count]) => (
+                        <li key={value} style={{ margin: "2px 0" }}>
+                          {value}: {count} points
+                        </li>
+                      ),
+                    )}
+                  </ul>
+                )}
+              </div>
+            )}
+
+            <button
+              type="button"
+              style={{
+                marginTop: "10px",
+                padding: "5px 10px",
+                background: "#f44336",
+                color: "white",
+                border: "none",
+                borderRadius: "4px",
+                cursor: "pointer",
+              }}
+              onClick={() => {
+                setSelectedPoints([]);
+                setSelectionActive(false);
+                setSelectionSummary(null);
+                if (svgRef.current) {
+                  d3.select(svgRef.current)
+                    .selectAll(".umap-point")
+                    .classed("selected", false);
+                }
+              }}
+            >
+              Clear Selection
+            </button>
           </div>
         )}
         <svg
