@@ -5,6 +5,80 @@
   display: flex;
   align-items: center;
   justify-content: center;
+
+  // Selection-related styles
+  .selection-polygon {
+    pointer-events: none;
+  }
+
+  .polygon-start-point {
+    cursor: pointer;
+  }
+
+  .umap-point {
+    transition: r 0.2s ease, opacity 0.2s ease;
+
+    &.selected {
+      stroke: #ff5722;
+      stroke-width: 2px;
+      r: 5px;
+    }
+  }
+
+  // Tooltip container and content
+  .tooltip-container {
+    position: relative;
+    display: inline-block;
+
+    &:hover .tooltip-content {
+      visibility: visible;
+      opacity: 1;
+    }
+  }
+
+  .tooltip-content {
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    bottom: 125%;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 6px;
+    width: 280px;
+    z-index: 1000;
+    transition: opacity 0.3s;
+
+    &:after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      right: 10px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: rgba(0, 0, 0, 0.8) transparent transparent transparent;
+    }
+
+    p {
+      margin: 5px 0;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+  }
+
+  // Selection controls
+  .umap-controls {
+    label {
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+
+      input {
+        margin-right: 5px;
+      }
+    }
+  }
 }
 
 .umap-sidebar {
@@ -71,4 +145,29 @@
   max-width: 300px;
   word-wrap: break-word;
   line-height: 1.4;
+}
+
+// Selection info panel styles
+.selection-info-panel {
+  h3,
+  h4 {
+    font-weight: 600;
+  }
+
+  select {
+    font-size: 13px;
+
+    &:focus {
+      outline: none;
+      border-color: #2196f3;
+    }
+  }
+
+  button {
+    transition: background 0.2s ease;
+
+    &:hover {
+      background: #d32f2f;
+    }
+  }
 }

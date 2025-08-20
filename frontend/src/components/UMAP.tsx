@@ -372,15 +372,16 @@ export const UMAP: React.FC<UMAPProps> = ({
         tooltip.style("visibility", "hidden");
       });
 
-    // Add brush
+    // Add brush - properly initialized with explicit handlers
     const brush = d3
       .brush()
       .extent([
         [0, 0],
         [width, height],
       ])
-      .filter((event) => event.ctrlKey && !event.button) // Only brush with Ctrl + Left-click
-      .on("start brush", handleBrush)
+      .filter((event) => event.button === 2) // Only brush with right-click
+      .on("start", handleBrush)
+      .on("brush", handleBrush)
       .on("end", handleBrushEnd);
 
     mainGroup
@@ -394,14 +395,31 @@ export const UMAP: React.FC<UMAPProps> = ({
 
     if (docState.umap.selectionMode === "polygon") {
       mainGroup.select(".brush").style("display", "none");
-      svg.on("click", (event) => {
-        const [mx, my] = d3.pointer(event);
-        const newPolygon = [
-          ...polygon,
-          [mx - margin.left, my - margin.top],
-        ] as [number, number][];
-        setPolygon(newPolygon);
+      svg.on("mousedown", (event) => {
+        // Only add points with Ctrl+right-click
+        if (event.ctrlKey && event.button === 2) {
+          // Prevent default to avoid triggering other handlers
+          event.preventDefault();
+
+          const [mx, my] = d3.pointer(event);
+          const newPolygon = [
+            ...polygon,
+            [mx - margin.left, my - margin.top],
+          ] as [number, number][];
+          setPolygon(newPolygon);
+        }
       });
+
+      // Add help text for polygon selection
+      mainGroup
+        .append("text")
+        .attr("x", 10)
+        .attr("y", -10)
+        .style("font-size", "12px")
+        .style("fill", "#666")
+        .text(
+          "Hold Ctrl + Right-click to draw polygon. Ctrl + Right-click on red start point to complete selection.",
+        );
 
       mainGroup
         .append("path")
@@ -426,48 +444,54 @@ export const UMAP: React.FC<UMAPProps> = ({
           .merge(firstPoint)
           .attr("cx", (d) => (d ? d[0] : null))
           .attr("cy", (d) => (d ? d[1] : null))
-          .on("click", async () => {
-            const pointsInPolygon = umapData.embedding.filter((d) => {
-              const point = [currentXScale(d.x), currentYScale(d.y)] as [
-                number,
-                number,
-              ];
-              return d3.polygonContains(polygon, point);
-            });
-            const selectedIds = pointsInPolygon.map((d) => d.id);
+          .on("mousedown", async (event) => {
+            // Only close polygon with Ctrl+right-click (consistent with adding points)
+            if (event.ctrlKey && event.button === 2) {
+              // Prevent default to avoid unexpected behavior
+              event.preventDefault();
 
-            if (selectedIds.length > 0) {
-              setSelectedPoints(selectedIds);
-              setSelectionActive(true);
+              const pointsInPolygon = umapData.embedding.filter((d) => {
+                const point = [currentXScale(d.x), currentYScale(d.y)] as [
+                  number,
+                  number,
+                ];
+                return d3.polygonContains(polygon, point);
+              });
+              const selectedIds = pointsInPolygon.map((d) => d.id);
 
-              // Get cluster summary
-              const clusterCounts: Record<string, number> = {};
-              for (const point of pointsInPolygon) {
-                const cluster = point.cluster ?? 0;
-                clusterCounts[cluster] = (clusterCounts[cluster] || 0) + 1;
-              }
+              if (selectedIds.length > 0) {
+                setSelectedPoints(selectedIds);
+                setSelectionActive(true);
 
-              // For metadata if available
-              if (docState.umap.selectedMetadataColumn) {
-                try {
-                  const summary =
-                    await window.pywebview.api.data.get_metadata_summary_for_selection(
-                      docState.id,
-                      selectedIds,
-                      docState.umap.selectedMetadataColumn,
-                    );
-                  setSelectionSummary(summary);
-                  console.log("Metadata summary for selection:", summary);
-                } catch (err) {
-                  console.error("Error fetching selection summary:", err);
+                // Get cluster summary
+                const clusterCounts: Record<string, number> = {};
+                for (const point of pointsInPolygon) {
+                  const cluster = point.cluster ?? 0;
+                  clusterCounts[cluster] = (clusterCounts[cluster] || 0) + 1;
                 }
+
+                // For metadata if available - always fetch summary regardless of current coloring mode
+                if (docState.umap.selectedMetadataColumn) {
+                  try {
+                    const summary =
+                      await window.pywebview.api.data.get_metadata_summary_for_selection(
+                        docState.id,
+                        selectedIds,
+                        docState.umap.selectedMetadataColumn,
+                      );
+                    setSelectionSummary(summary);
+                    console.log("Metadata summary for selection:", summary);
+                  } catch (err) {
+                    console.error("Error fetching selection summary:", err);
+                  }
+                }
+
+                console.log(`Selected ${selectedIds.length} points`);
+                console.log("Cluster distribution:", clusterCounts);
               }
 
-              console.log(`Selected ${selectedIds.length} points`);
-              console.log("Cluster distribution:", clusterCounts);
+              setPolygon([]);
             }
-
-            setPolygon([]);
           });
       }
     } else {
@@ -721,7 +745,11 @@ export const UMAP: React.FC<UMAPProps> = ({
                   borderRadius: "4px",
                   border: "1px solid #ccc",
                 }}
-                value={docState.umap.colorBy === "metadata" ? docState.umap.selectedMetadataColumn || "" : "cluster"}
+                value={
+                  docState.umap.colorBy === "metadata"
+                    ? docState.umap.selectedMetadataColumn || ""
+                    : "cluster"
+                }
                 onChange={(e) => {
                   const value = e.target.value;
                   if (value === "cluster") {
@@ -753,93 +781,46 @@ export const UMAP: React.FC<UMAPProps> = ({
                 Distribution:
               </h4>
               <div style={{ margin: "10px 0" }}>
-                {docState.umap.colorBy === "cluster" && clusterDistribution && 
-                  Object.entries(clusterDistribution).map(([cluster, count]) => {
-                    const percentage = Math.round((count / selectedPoints.length) * 100);
-                    const barWidth = `${percentage}%`;
-                    return (
-                      <div
-                        key={cluster}
-                        style={{
-                          margin: "6px 0",
-                          display: "flex",
-                          alignItems: "center",
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: "20px",
-                            marginRight: "8px",
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          <span
-                            style={{
-                              display: "inline-block",
-                              width: "12px",
-                              height: "12px",
-                              backgroundColor:
-                                cluster === "0"
-                                  ? "#cccccc"
-                                  : distinctColor(Number.parseInt(cluster)),
-                              marginRight: "5px",
-                            }}
-                          />
-                        </div>
-                        <div style={{ minWidth: "70px" }}>
-                          Cluster {cluster === "0" ? "Noise" : cluster}:
-                        </div>
-                        <div
-                          style={{
-                            flex: 1,
-                            display: "flex",
-                            alignItems: "center",
-                            height: "16px",
-                          }}
-                        >
-                        <div
-                          style={{
-                            height: "100%",
-                            width: barWidth,
-                            backgroundColor: 
-                              cluster === "0"
-                                ? "#cccccc"
-                                : distinctColor(Number.parseInt(cluster)),
-                            opacity: 0.7,
-                            borderRadius: "2px",
-                          }}
-                        />
-                          <div
-                            style={{
-                              marginLeft: "8px",
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {count} ({percentage}%)
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })
-                }
-                
-                {docState.umap.colorBy === "metadata" && selectionSummary && (
-                  selectionSummary.column_type === "categorical" ? (
-                    Object.entries(selectionSummary.summary).map(([value, count]) => {
-                      const percentage = Math.round((count as number / selectedPoints.length) * 100);
+                {docState.umap.colorBy === "cluster" &&
+                  clusterDistribution &&
+                  Object.entries(clusterDistribution).map(
+                    ([cluster, count]) => {
+                      const percentage = Math.round(
+                        (count / selectedPoints.length) * 100,
+                      );
                       const barWidth = `${percentage}%`;
                       return (
                         <div
-                          key={value}
+                          key={cluster}
                           style={{
                             margin: "6px 0",
                             display: "flex",
                             alignItems: "center",
                           }}
                         >
-                          <div style={{ minWidth: "100px", overflow: "hidden", textOverflow: "ellipsis" }}>
-                            {value}:
+                          <div
+                            style={{
+                              width: "20px",
+                              marginRight: "8px",
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            <span
+                              style={{
+                                display: "inline-block",
+                                width: "12px",
+                                height: "12px",
+                                backgroundColor:
+                                  cluster === "0"
+                                    ? "#cccccc"
+                                    : distinctColor(Number.parseInt(cluster)),
+                                marginRight: "5px",
+                              }}
+                            />
+                          </div>
+                          <div style={{ minWidth: "70px" }}>
+                            Cluster {cluster === "0" ? "Noise" : cluster}:
                           </div>
                           <div
                             style={{
@@ -849,15 +830,18 @@ export const UMAP: React.FC<UMAPProps> = ({
                               height: "16px",
                             }}
                           >
-                          <div
-                            style={{
-                              height: "100%",
-                              width: barWidth,
-                              backgroundColor: "#1f77b4",
-                              opacity: 0.7,
-                              borderRadius: "2px",
-                            }}
-                          />
+                            <div
+                              style={{
+                                height: "100%",
+                                width: barWidth,
+                                backgroundColor:
+                                  cluster === "0"
+                                    ? "#cccccc"
+                                    : distinctColor(Number.parseInt(cluster)),
+                                opacity: 0.7,
+                                borderRadius: "2px",
+                              }}
+                            />
                             <div
                               style={{
                                 marginLeft: "8px",
@@ -869,59 +853,119 @@ export const UMAP: React.FC<UMAPProps> = ({
                           </div>
                         </div>
                       );
-                    })
+                    },
+                  )}
+
+                {docState.umap.colorBy === "metadata" &&
+                  selectionSummary &&
+                  (selectionSummary.column_type === "categorical" ? (
+                    Object.entries(selectionSummary.summary).map(
+                      ([value, count]) => {
+                        const percentage = Math.round(
+                          ((count as number) / selectedPoints.length) * 100,
+                        );
+                        const barWidth = `${percentage}%`;
+                        return (
+                          <div
+                            key={value}
+                            style={{
+                              margin: "6px 0",
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            <div
+                              style={{
+                                minWidth: "100px",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {value}:
+                            </div>
+                            <div
+                              style={{
+                                flex: 1,
+                                display: "flex",
+                                alignItems: "center",
+                                height: "16px",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  height: "100%",
+                                  width: barWidth,
+                                  backgroundColor:
+                                    metadataColors.getColor(value),
+                                  opacity: 0.7,
+                                  borderRadius: "2px",
+                                }}
+                              />
+                              <div
+                                style={{
+                                  marginLeft: "8px",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {count as number} ({percentage}%)
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      },
+                    )
                   ) : (
                     <div>
-                      <p style={{ margin: "2px 0" }}>
-                        <strong>Mean:</strong>{" "}
-                        {(
-                          selectionSummary.summary as NumericSummary
-                        ).mean?.toFixed(2)}
-                      </p>
-                      <p style={{ margin: "2px 0" }}>
-                        <strong>Median:</strong>{" "}
-                        {(
-                          selectionSummary.summary as NumericSummary
-                        ).median?.toFixed(2)}
-                      </p>
-                      <p style={{ margin: "2px 0" }}>
-                        <strong>Min:</strong>{" "}
-                        {(
-                          selectionSummary.summary as NumericSummary
-                        ).min?.toFixed(2)}
-                      </p>
-                      <p style={{ margin: "2px 0" }}>
-                        <strong>Max:</strong>{" "}
-                        {(
-                          selectionSummary.summary as NumericSummary
-                        ).max?.toFixed(2)}
-                      </p>
+                      <p>Numeric data summary:</p>
+                      <ul style={{ paddingLeft: "20px", margin: "5px 0" }}>
+                        <li>
+                          Mean:{" "}
+                          {(
+                            selectionSummary.summary as NumericSummary
+                          ).mean.toFixed(2)}
+                        </li>
+                        <li>
+                          Median:{" "}
+                          {(
+                            selectionSummary.summary as NumericSummary
+                          ).median.toFixed(2)}
+                        </li>
+                        <li>
+                          Min:{" "}
+                          {(
+                            selectionSummary.summary as NumericSummary
+                          ).min.toFixed(2)}
+                        </li>
+                        <li>
+                          Max:{" "}
+                          {(
+                            selectionSummary.summary as NumericSummary
+                          ).max.toFixed(2)}
+                        </li>
+                      </ul>
                     </div>
-                  )
-                )}
+                  ))}
               </div>
             </div>
-
             <button
               type="button"
+              onClick={() => {
+                setSelectionActive(false);
+                setSelectionSummary(null);
+                setSelectedPoints([]);
+                d3.select(svgRef.current)
+                  .selectAll(".umap-point")
+                  .classed("selected", false);
+              }}
               style={{
-                marginTop: "10px",
                 padding: "5px 10px",
                 background: "#f44336",
                 color: "white",
                 border: "none",
                 borderRadius: "4px",
                 cursor: "pointer",
-              }}
-              onClick={() => {
-                setSelectedPoints([]);
-                setSelectionActive(false);
-                setSelectionSummary(null);
-                if (svgRef.current) {
-                  d3.select(svgRef.current)
-                    .selectAll(".umap-point")
-                    .classed("selected", false);
-                }
+                marginTop: "10px",
               }}
             >
               Clear Selection
@@ -930,11 +974,65 @@ export const UMAP: React.FC<UMAPProps> = ({
         )}
         <svg
           ref={svgRef}
-          id="umap-svg"
           width={dimensions.width}
           height={dimensions.height}
-          style={{ maxWidth: "100%", maxHeight: "100%" }}
+          style={{ display: loading ? "none" : "block" }}
         />
+        <div className="umap-controls" style={{ marginTop: "10px" }}>
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <div>
+              <label>
+                <input
+                  type="radio"
+                  name="selectionMode"
+                  checked={docState.umap.selectionMode === "brush"}
+                  onChange={() => updateSettings({ selectionMode: "brush" })}
+                />
+                Brush Selection (Right-click)
+              </label>
+            </div>
+            <div>
+              <label>
+                <input
+                  type="radio"
+                  name="selectionMode"
+                  checked={docState.umap.selectionMode === "polygon"}
+                  onChange={() => updateSettings({ selectionMode: "polygon" })}
+                />
+                Polygon Selection (Ctrl+Right-click)
+              </label>
+            </div>
+            <div style={{ marginLeft: "auto" }}>
+              <button
+                type="button"
+                className="tooltip-container"
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "#666",
+                }}
+              >
+                <span style={{ fontSize: "16px" }}>ⓘ</span>
+                <div className="tooltip-content">
+                  <p>
+                    <strong>Navigation:</strong> Left-click drag to pan, scroll
+                    to zoom
+                  </p>
+                  <p>
+                    <strong>Brush Selection:</strong> Right-click drag to select
+                    points with a rectangular brush
+                  </p>
+                  <p>
+                    <strong>Polygon Selection:</strong> Hold Ctrl + right-click
+                    to place polygon vertices, then click on the red starting
+                    point to complete
+                  </p>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
       <UMAPSidebar
         settings={docState.umap}
