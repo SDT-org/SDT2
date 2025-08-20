@@ -212,6 +212,7 @@ export interface UMAPSettings {
   showClusterBoundaries: boolean;
   colorByCluster: boolean;
   colorBy: "cluster" | "metadata";
+  selectionMode: "brush" | "polygon";
   selectedMetadataColumn?: string;
   data?: UMAPData;
   params?: {
@@ -244,6 +245,7 @@ export const UMAPSettingsSchema = z.object({
   showClusterBoundaries: z.boolean(),
   colorByCluster: z.boolean(),
   colorBy: z.enum(["cluster", "metadata"]),
+  selectionMode: z.enum(["brush", "polygon"]),
   selectedMetadataColumn: z.string().optional(),
   data: z.any().optional(),
   params: z

@@ -111,6 +111,15 @@ declare global {
             value_map: Record<string, string | number>;
             column_type: "numeric" | "categorical";
           }>;
+          get_metadata_summary_for_selection: (
+            doc_id: string,
+            selected_ids: string[],
+            column_name: string,
+          ) => Promise<{
+            summary: Record<string, number>;
+            column_type: "numeric" | "categorical";
+            total_selected: number;
+          }>;
         };
         export: {
           export_data: (args: {

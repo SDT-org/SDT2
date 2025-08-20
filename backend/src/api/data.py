@@ -593,6 +593,60 @@ class Data:
             "value_map": value_map,
             "column_type": column_type
         }
+
+    def get_metadata_summary_for_selection(self, doc_id: str, selected_ids: list[str], column_name: str):
+        doc = get_document(doc_id)
+        
+        metadata_path = os.path.join(doc.tempdir_path, "metadata.csv")
+        match_info_path = os.path.join(doc.tempdir_path, "metadata_matches.json")
+        
+        if not os.path.exists(metadata_path) or not os.path.exists(match_info_path):
+            raise Exception("No metadata uploaded")
+            
+        metadata_df = pd.read_csv(metadata_path)
+        with open(match_info_path, 'r') as f:
+            match_info = json.load(f)
+            
+        id_column = match_info["id_column"]
+        
+        # Create a reverse mapping from sequence ID to metadata ID
+        seq_to_meta_map = {v: k for k, v in match_info["matches"].items()}
+        
+        selected_meta_ids = [seq_to_meta_map.get(sid) for sid in selected_ids if seq_to_meta_map.get(sid)]
+        
+        selection_df = metadata_df[metadata_df[id_column].astype(str).isin(selected_meta_ids)]
+        
+        if column_name not in selection_df.columns:
+            raise Exception(f"Column '{column_name}' not found in metadata")
+            
+        column_data = selection_df[column_name]
+        
+        try:
+            numeric_data = pd.to_numeric(column_data, errors='coerce')
+            non_null_count = column_data.notna().sum()
+            numeric_count = numeric_data.notna().sum()
+            
+            if non_null_count > 0 and numeric_count / non_null_count > 0.5:
+                column_type = "numeric"
+                summary = {
+                    "mean": float(numeric_data.mean()),
+                    "median": float(numeric_data.median()),
+                    "std": float(numeric_data.std()),
+                    "min": float(numeric_data.min()),
+                    "max": float(numeric_data.max()),
+                }
+            else:
+                column_type = "categorical"
+                summary = column_data.value_counts().to_dict()
+        except:
+            column_type = "categorical"
+            summary = column_data.value_counts().to_dict()
+            
+        return {
+            "summary": summary,
+            "column_type": column_type,
+            "total_selected": len(selected_ids)
+        }
     
     def _load_lzani_tsv_for_umap(self, results_tsv_path: str, ids_tsv_path: str, score_column: str = "ani"):
 

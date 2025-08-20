@@ -237,6 +237,7 @@ export const initialDocState: DocState = {
     showClusterBoundaries: false,
     colorByCluster: true,
     colorBy: "cluster",
+    selectionMode: "brush",
   },
   ...clientDocState,
 };

@@ -272,6 +272,20 @@ export const UMAPSidebar: React.FC<UMAPSidebarProps> = ({
           <h3>Visual Settings</h3>
 
           <div className="sidebar-item">
+            <Select
+              id="selectionMode"
+              label="Selection Mode"
+              selectedKey={settings.selectionMode}
+              onSelectionChange={(key) =>
+                updateSettings({ selectionMode: key as "brush" | "polygon" })
+              }
+            >
+              <SelectItem id="brush">Brush</SelectItem>
+              <SelectItem id="polygon">Polygon</SelectItem>
+            </Select>
+          </div>
+
+          <div className="sidebar-item">
             <label htmlFor="pointSize">Point Size</label>
             <Slider
               id="pointSize"

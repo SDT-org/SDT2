@@ -10,6 +10,12 @@ import {
 import type { UMAPPoint } from "../plotTypes";
 import { UMAPSidebar } from "./UMAPSidebar";
 
+interface SelectionSummary {
+  summary: Record<string, number>;
+  column_type: "numeric" | "categorical";
+  total_selected: number;
+}
+
 interface UMAPProps {
   docState: DocState;
   setDocState: SetDocState;
@@ -29,6 +35,11 @@ export const UMAP: React.FC<UMAPProps> = ({
   const [loading, setLoading] = useState(false);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [error, setError] = useState<string | null>(null);
+  const [selectionSummary, setSelectionSummary] =
+    useState<SelectionSummary | null>(null);
+  const [selectedPoints, setSelectedPoints] = useState<string[]>([]);
+  const [selectionActive, setSelectionActive] = useState(false);
+  const [polygon, setPolygon] = useState<[number, number][]>([]);
   const loadingRef = useRef(false); // Prevent concurrent API calls
 
   useEffect(() => {
@@ -238,6 +249,82 @@ export const UMAP: React.FC<UMAPProps> = ({
       .style("pointer-events", "none")
       .style("z-index", "1000");
 
+    // Handle brush selection for metadata summary
+    const handleBrush = (event: d3.D3BrushEvent<unknown>) => {
+      const { selection } = event;
+      const allPoints = mainGroup.selectAll(".umap-point");
+
+      if (!selection) {
+        if (!selectionActive) {
+          allPoints.classed("selected", false);
+        }
+        return;
+      }
+
+      const [[x0, y0], [x1, y1]] = selection as [
+        [number, number],
+        [number, number],
+      ];
+
+      // Cast the datum to UMAPPoint but use proper typing for D3
+      allPoints.classed("selected", (d) => {
+        const point = d as unknown as UMAPPoint;
+        const px = currentXScale(point.x);
+        const py = currentYScale(point.y);
+        return x0 <= px && px <= x1 && y0 <= py && py <= y1;
+      });
+    };
+
+    const handleBrushEnd = async (event: d3.D3BrushEvent<unknown>) => {
+      const { selection } = event;
+      if (!selection) {
+        // Only clear if user clicked outside without dragging
+        if (!selectionActive) {
+          setSelectionSummary(null);
+          setSelectedPoints([]);
+          setSelectionActive(false);
+          mainGroup.selectAll(".umap-point").classed("selected", false);
+        }
+        return;
+      }
+
+      const [[x0, y0], [x1, y1]] = selection as [
+        [number, number],
+        [number, number],
+      ];
+
+      const pointsInSelection = umapData.embedding.filter((d) => {
+        const px = currentXScale(d.x);
+        const py = currentYScale(d.y);
+        return x0 <= px && px <= x1 && y0 <= py && py <= y1;
+      });
+
+      const selectedIds = pointsInSelection.map((d) => d.id);
+
+      if (selectedIds.length > 0) {
+        setSelectedPoints(selectedIds);
+        setSelectionActive(true);
+
+        if (docState.umap.selectedMetadataColumn) {
+          try {
+            const summary =
+              await window.pywebview.api.data.get_metadata_summary_for_selection(
+                docState.id,
+                selectedIds,
+                docState.umap.selectedMetadataColumn,
+              );
+            setSelectionSummary(summary);
+            console.log("Metadata summary for selection:", summary);
+          } catch (err) {
+            console.error("Error fetching selection summary:", err);
+          }
+        }
+      }
+
+      // Clear the brush selection but maintain the visual highlight
+      brush.move(mainGroup.select(".brush"), null);
+    };
+
     // Render points with initial positions
     plotArea
       .selectAll("circle")
@@ -276,6 +363,79 @@ export const UMAP: React.FC<UMAPProps> = ({
       .on("mouseout", () => {
         tooltip.style("visibility", "hidden");
       });
+
+    // Add brush
+    const brush = d3
+      .brush()
+      .extent([
+        [0, 0],
+        [width, height],
+      ])
+      .filter((event) => event.ctrlKey && !event.button) // Only brush with Ctrl + Left-click
+      .on("start brush", handleBrush)
+      .on("end", handleBrushEnd);
+
+    mainGroup
+      .append("g")
+      .attr("class", "brush")
+      .attr("aria-label", "Selection brush area")
+      .call(brush);
+
+    // Prevent context menu on right-click to allow for other interactions
+    svg.on("contextmenu", (event) => event.preventDefault());
+
+    if (docState.umap.selectionMode === "polygon") {
+      mainGroup.select(".brush").style("display", "none");
+      svg.on("click", (event) => {
+        const [mx, my] = d3.pointer(event);
+        const newPolygon = [
+          ...polygon,
+          [mx - margin.left, my - margin.top],
+        ] as [number, number][];
+        setPolygon(newPolygon);
+      });
+
+      mainGroup
+        .append("path")
+        .datum(polygon)
+        .attr("class", "selection-polygon")
+        .attr("d", d3.line())
+        .attr("stroke", "black")
+        .attr("stroke-width", 2)
+        .attr("fill", "rgba(0,0,0,0.1)");
+
+      if (polygon.length > 2) {
+        const firstPoint = mainGroup
+          .selectAll<SVGCircleElement, [number, number]>(".polygon-start-point")
+          .data([polygon[0]]);
+
+        firstPoint
+          .enter()
+          .append("circle")
+          .attr("class", "polygon-start-point")
+          .attr("r", 5)
+          .attr("fill", "red")
+          .merge(firstPoint)
+          .attr("cx", (d) => (d ? d[0] : null))
+          .attr("cy", (d) => (d ? d[1] : null))
+          .on("click", () => {
+            const pointsInPolygon = umapData.embedding.filter((d) => {
+              const point = [currentXScale(d.x), currentYScale(d.y)] as [
+                number,
+                number,
+              ];
+              return d3.polygonContains(polygon, point);
+            });
+            const selectedIds = pointsInPolygon.map((d) => d.id);
+            setSelectedPoints(selectedIds);
+            setSelectionActive(true);
+            setPolygon([]);
+          });
+      }
+    } else {
+      mainGroup.select(".brush").style("display", "block");
+      svg.on("click", null);
+    }
 
     // Add zoom behavior
     const zoom = d3
@@ -345,9 +505,13 @@ export const UMAP: React.FC<UMAPProps> = ({
     dimensions,
     loading,
     error,
+    docState.id,
     docState.umap.colorBy,
     docState.umap.selectedMetadataColumn,
+    docState.umap.selectionMode,
     metadataColors.values,
+    selectionActive,
+    polygon,
   ]);
 
   // Update cluster stats panel separately
@@ -426,14 +590,29 @@ export const UMAP: React.FC<UMAPProps> = ({
     points
       .attr("r", docState.umap.pointSize)
       .attr("opacity", docState.umap.opacity);
+
+    // Restore selection state if there are selected points
+    if (selectionActive && selectedPoints.length > 0) {
+      points.classed("selected", (d) => selectedPoints.includes(d.id));
+    }
   }, [
     docState.umap.colorBy,
     docState.umap.colorByCluster,
     docState.umap.pointSize,
     docState.umap.opacity,
-    metadataColors.getColor, // Use specific property instead of whole object
+    metadataColors.getColor,
     umapData,
+    selectionActive,
+    selectedPoints,
   ]);
+
+  // Log selection info whenever it changes
+  useEffect(() => {
+    if (selectionSummary && selectedPoints.length > 0) {
+      console.log(`Selected ${selectedPoints.length} points`);
+      console.log("Metadata summary:", selectionSummary);
+    }
+  }, [selectionSummary, selectedPoints]);
 
   return (
     <>
