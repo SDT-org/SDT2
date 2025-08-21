@@ -51,6 +51,7 @@ export const UMAP: React.FC<UMAPProps> = ({
   const [selectedPoints, setSelectedPoints] = useState<string[]>([]);
   const [selectionActive, setSelectionActive] = useState(false);
   const [polygon, setPolygon] = useState<[number, number][]>([]);
+  const [polygonSelectionActive, setPolygonSelectionActive] = useState(false);
   const loadingRef = useRef(false); // Prevent concurrent API calls
 
   useEffect(() => {
@@ -454,34 +455,38 @@ export const UMAP: React.FC<UMAPProps> = ({
     // Prevent context menu on right-click to allow for other interactions
     svg.on("contextmenu", (event) => event.preventDefault());
 
-    if (docState.umap.selectionMode === "polygon") {
-      mainGroup.select(".brush").style("display", "none");
-      svg.on("mousedown", (event) => {
-        // Only add points with Ctrl+right-click
-        if (event.ctrlKey && event.button === 2) {
-          // Prevent default to avoid triggering other handlers
-          event.preventDefault();
+    // Always enable brush and polygon selection simultaneously
 
-          const [mx, my] = d3.pointer(event);
-          const newPolygon = [
-            ...polygon,
-            [mx - margin.left, my - margin.top],
-          ] as [number, number][];
-          setPolygon(newPolygon);
-        }
-      });
+    // Add polygon selection with Ctrl+right-click
+    svg.on("mousedown", (event) => {
+      // Only add points with Ctrl+right-click
+      if (event.ctrlKey && event.button === 2) {
+        // Prevent default to avoid triggering other handlers
+        event.preventDefault();
+        setPolygonSelectionActive(true);
 
-      // Add help text for polygon selection
-      mainGroup
-        .append("text")
-        .attr("x", 10)
-        .attr("y", -10)
-        .style("font-size", "12px")
-        .style("fill", "#666")
-        .text(
-          "Hold Ctrl + Right-click to draw polygon. Ctrl + Right-click on red start point to complete selection.",
-        );
+        const [mx, my] = d3.pointer(event);
+        const newPolygon = [
+          ...polygon,
+          [mx - margin.left, my - margin.top],
+        ] as [number, number][];
+        setPolygon(newPolygon);
+      }
+    });
 
+    // Add help text for selection methods
+    mainGroup
+      .append("text")
+      .attr("x", 10)
+      .attr("y", -10)
+      .style("font-size", "12px")
+      .style("fill", "#666")
+      .text(
+        "Right-click drag to brush select. Ctrl+Right-click to draw polygon.",
+      );
+
+    // Show polygon path if points exist
+    if (polygon.length > 0) {
       mainGroup
         .append("path")
         .datum(polygon)
@@ -490,74 +495,73 @@ export const UMAP: React.FC<UMAPProps> = ({
         .attr("stroke", "black")
         .attr("stroke-width", 2)
         .attr("fill", "rgba(0,0,0,0.1)");
+    }
 
-      if (polygon.length > 2) {
-        const firstPoint = mainGroup
-          .selectAll<SVGCircleElement, [number, number]>(".polygon-start-point")
-          .data([polygon[0]]);
+    // Show red start point if polygon has at least 3 points
+    if (polygon.length > 2) {
+      const firstPoint = mainGroup
+        .selectAll<SVGCircleElement, [number, number]>(".polygon-start-point")
+        .data([polygon[0]]);
 
-        firstPoint
-          .enter()
-          .append("circle")
-          .attr("class", "polygon-start-point")
-          .attr("r", 5)
-          .attr("fill", "red")
-          .merge(firstPoint)
-          .attr("cx", (d) => (d ? d[0] : null))
-          .attr("cy", (d) => (d ? d[1] : null))
-          .on("mousedown", async (event) => {
-            // Only close polygon with Ctrl+right-click (consistent with adding points)
-            if (event.ctrlKey && event.button === 2) {
-              // Prevent default to avoid unexpected behavior
-              event.preventDefault();
+      firstPoint
+        .enter()
+        .append("circle")
+        .attr("class", "polygon-start-point")
+        .attr("r", 5)
+        .attr("fill", "red")
+        .merge(firstPoint)
+        .attr("cx", (d) => (d ? d[0] : null))
+        .attr("cy", (d) => (d ? d[1] : null))
+        .on("mousedown", async (event) => {
+          // Only close polygon with Ctrl+right-click (consistent with adding points)
+          if (event.ctrlKey && event.button === 2) {
+            // Prevent default to avoid unexpected behavior
+            event.preventDefault();
 
-              const pointsInPolygon = umapData.embedding.filter((d) => {
-                const point = [currentXScale(d.x), currentYScale(d.y)] as [
-                  number,
-                  number,
-                ];
-                return d3.polygonContains(polygon, point);
-              });
-              const selectedIds = pointsInPolygon.map((d) => d.id);
+            const pointsInPolygon = umapData.embedding.filter((d) => {
+              const point = [currentXScale(d.x), currentYScale(d.y)] as [
+                number,
+                number,
+              ];
+              return d3.polygonContains(polygon, point);
+            });
+            const selectedIds = pointsInPolygon.map((d) => d.id);
 
-              if (selectedIds.length > 0) {
-                setSelectedPoints(selectedIds);
-                setSelectionActive(true);
+            if (selectedIds.length > 0) {
+              setSelectedPoints(selectedIds);
+              setSelectionActive(true);
 
-                // Get cluster summary
-                const clusterCounts: Record<string, number> = {};
-                for (const point of pointsInPolygon) {
-                  const cluster = point.cluster ?? 0;
-                  clusterCounts[cluster] = (clusterCounts[cluster] || 0) + 1;
-                }
-
-                // For metadata if available - always fetch summary regardless of current coloring mode
-                if (docState.umap.selectedMetadataColumn) {
-                  try {
-                    const summary =
-                      await window.pywebview.api.data.get_metadata_summary_for_selection(
-                        docState.id,
-                        selectedIds,
-                        docState.umap.selectedMetadataColumn,
-                      );
-                    setSelectionSummary(summary);
-                    console.log("Metadata summary for selection:", summary);
-                  } catch (err) {
-                    console.error("Error fetching selection summary:", err);
-                  }
-                }
-
-                console.log(`Selected ${selectedIds.length} points`);
-                console.log("Cluster distribution:", clusterCounts);
+              // Get cluster summary
+              const clusterCounts: Record<string, number> = {};
+              for (const point of pointsInPolygon) {
+                const cluster = point.cluster ?? 0;
+                clusterCounts[cluster] = (clusterCounts[cluster] || 0) + 1;
               }
 
-              setPolygon([]);
+              // For metadata if available - always fetch summary regardless of current coloring mode
+              if (docState.umap.selectedMetadataColumn) {
+                try {
+                  const summary =
+                    await window.pywebview.api.data.get_metadata_summary_for_selection(
+                      docState.id,
+                      selectedIds,
+                      docState.umap.selectedMetadataColumn,
+                    );
+                  setSelectionSummary(summary);
+                  console.log("Metadata summary for selection:", summary);
+                } catch (err) {
+                  console.error("Error fetching selection summary:", err);
+                }
+              }
+
+              console.log(`Selected ${selectedIds.length} points`);
+              console.log("Cluster distribution:", clusterCounts);
             }
-          });
-      }
-    } else {
-      mainGroup.select(".brush").style("display", "block");
-      svg.on("click", null);
+
+            setPolygon([]);
+            setPolygonSelectionActive(false);
+          }
+        });
     }
 
     // Add zoom behavior
@@ -631,7 +635,6 @@ export const UMAP: React.FC<UMAPProps> = ({
     docState.id,
     docState.umap.colorBy,
     docState.umap.selectedMetadataColumn,
-    docState.umap.selectionMode,
     metadataColors.values,
     selectionActive,
     polygon,
@@ -736,6 +739,42 @@ export const UMAP: React.FC<UMAPProps> = ({
       console.log("Metadata summary:", selectionSummary);
     }
   }, [selectionSummary, selectedPoints]);
+
+  // Update selection summary when metadata column changes
+  useEffect(() => {
+    // Only fetch new summary if we have selected points and a metadata column is selected
+    if (
+      selectedPoints.length > 0 &&
+      docState.umap.selectedMetadataColumn &&
+      selectionActive
+    ) {
+      const fetchSummary = async () => {
+        try {
+          // Ensure the column name is not undefined before passing to API
+          const columnName = docState.umap.selectedMetadataColumn;
+          if (!columnName) return;
+
+          const summary =
+            await window.pywebview.api.data.get_metadata_summary_for_selection(
+              docState.id,
+              selectedPoints,
+              columnName,
+            );
+          setSelectionSummary(summary);
+          console.log("Updated metadata summary for selection:", summary);
+        } catch (err) {
+          console.error("Error fetching updated selection summary:", err);
+        }
+      };
+
+      fetchSummary();
+    }
+  }, [
+    docState.id,
+    docState.umap.selectedMetadataColumn,
+    selectedPoints,
+    selectionActive,
+  ]);
 
   // Generate cluster distribution stats from selected points
   const getClusterDistribution = () => {
@@ -1040,56 +1079,6 @@ export const UMAP: React.FC<UMAPProps> = ({
                 UMAP Controls
               </h3>
 
-              {/* Selection Mode Controls */}
-              <div style={{ marginBottom: "15px" }}>
-                <h4 style={{ margin: "10px 0 5px 0", fontSize: "14px" }}>
-                  Selection Mode
-                </h4>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "8px",
-                  }}
-                >
-                  <label
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <input
-                      type="radio"
-                      name="selectionMode"
-                      checked={docState.umap.selectionMode === "brush"}
-                      onChange={() =>
-                        updateSettings({ selectionMode: "brush" })
-                      }
-                      style={{ marginRight: "8px" }}
-                    />
-                    Brush Selection (Right-click)
-                  </label>
-                  <label
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <input
-                      type="radio"
-                      name="selectionMode"
-                      checked={docState.umap.selectionMode === "polygon"}
-                      onChange={() =>
-                        updateSettings({ selectionMode: "polygon" })
-                      }
-                      style={{ marginRight: "8px" }}
-                    />
-                    Polygon Selection (Ctrl+Right-click)
-                  </label>
-                </div>
-              </div>
 
               {/* Color Settings */}
               <div style={{ marginBottom: "15px" }}>
@@ -1340,8 +1329,12 @@ export const UMAP: React.FC<UMAPProps> = ({
                   </p>
                   <p>
                     <strong>Polygon Selection:</strong> Hold Ctrl + right-click
-                    to place polygon vertices, then click on the red starting
-                    point to complete
+                    to place polygon vertices, then Ctrl + right-click on the
+                    red starting point to complete selection
+                  </p>
+                  <p>
+                    <strong>Note:</strong> Both selection methods are always
+                    available
                   </p>
                 </div>
               </button>
