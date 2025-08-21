@@ -51,7 +51,6 @@ export const UMAP: React.FC<UMAPProps> = ({
   const [selectedPoints, setSelectedPoints] = useState<string[]>([]);
   const [selectionActive, setSelectionActive] = useState(false);
   const [polygon, setPolygon] = useState<[number, number][]>([]);
-  const [polygonSelectionActive, setPolygonSelectionActive] = useState(false);
   const loadingRef = useRef(false); // Prevent concurrent API calls
 
   useEffect(() => {
@@ -463,7 +462,6 @@ export const UMAP: React.FC<UMAPProps> = ({
       if (event.ctrlKey && event.button === 2) {
         // Prevent default to avoid triggering other handlers
         event.preventDefault();
-        setPolygonSelectionActive(true);
 
         const [mx, my] = d3.pointer(event);
         const newPolygon = [
@@ -559,7 +557,6 @@ export const UMAP: React.FC<UMAPProps> = ({
             }
 
             setPolygon([]);
-            setPolygonSelectionActive(false);
           }
         });
     }
@@ -1078,7 +1075,6 @@ export const UMAP: React.FC<UMAPProps> = ({
               <h3 style={{ margin: "0 0 10px 0", fontSize: "16px" }}>
                 UMAP Controls
               </h3>
-
 
               {/* Color Settings */}
               <div style={{ marginBottom: "15px" }}>
