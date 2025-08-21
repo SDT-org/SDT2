@@ -38,9 +38,12 @@ export const UMAP: React.FC<UMAPProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const umapData = docState.umap.data;
   const exportSVG = useExportSvg("umap", svgRef);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
   const [error, setError] = useState<string | null>(null);
   const [selectionSummary, setSelectionSummary] =
@@ -73,6 +76,64 @@ export const UMAP: React.FC<UMAPProps> = ({
       })),
     [setDocState],
   );
+
+  // Handle color by selection change
+  const handleColorByChange = (value: string) => {
+    updateSettings({
+      colorBy: value as "cluster" | "metadata",
+      colorByCluster: value === "cluster", // Keep backward compatibility
+    });
+  };
+
+  // Handle metadata column selection
+  const handleMetadataColumnChange = (value: string) => {
+    updateSettings({ selectedMetadataColumn: value });
+  };
+
+  // Handle file upload for metadata
+  const handleFileUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setUploadError(null);
+
+    try {
+      const content = await file.text();
+      const response = await window.pywebview.api.data.upload_metadata(
+        docState.id,
+        content,
+      );
+
+      updateSettings({
+        uploadedMetadata: {
+          columns: response.columns,
+          columnTypes: response.column_types,
+          matchStats: {
+            totalMetadataIds: response.match_stats.total_metadata_ids,
+            totalSequenceIds: response.match_stats.total_sequence_ids,
+            exactMatches: response.match_stats.exact_matches,
+            versionMatches: response.match_stats.version_matches,
+            unmatched: response.match_stats.unmatched,
+            matchPercentage: response.match_stats.match_percentage,
+          },
+        },
+        colorBy: "metadata",
+        ...(response.columns.length > 0 && {
+          selectedMetadataColumn: response.columns[0],
+        }),
+      });
+    } catch (error) {
+      setUploadError(error instanceof Error ? error.message : "Upload failed");
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
 
   // Fetch UMAP data when parameters change (with debounce)
   useEffect(() => {
@@ -713,161 +774,86 @@ export const UMAP: React.FC<UMAPProps> = ({
             {error}
           </div>
         )}
-        {selectionActive && selectedPoints.length > 0 && (
-          <div
-            className="selection-info-panel"
-            style={{
-              position: "absolute",
-              top: 10,
-              right: 10,
-              background: "rgba(255, 255, 255, 0.9)",
-              padding: "10px",
-              borderRadius: "4px",
-              boxShadow:
-                "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)",
-              zIndex: 100,
-              maxWidth: "300px",
-            }}
-          >
-            <h3 style={{ margin: "0 0 10px 0", fontSize: "16px" }}>
-              Selection Summary
-            </h3>
-            <p style={{ margin: "5px 0" }}>
-              <strong>Points selected:</strong> {selectedPoints.length}
-            </p>
+        {/* Selection Info Panel - Always visible */}
+        <div
+          className="selection-info-panel"
+          style={{
+            position: "absolute",
+            top: 10,
+            right: 10,
+            background: "rgba(255, 255, 255, 0.9)",
+            padding: "15px",
+            borderRadius: "4px",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)",
+            zIndex: 100,
+            width: "300px",
+          }}
+        >
+          {selectionActive && selectedPoints.length > 0 ? (
+            <>
+              <h3 style={{ margin: "0 0 10px 0", fontSize: "16px" }}>
+                Selection Summary
+              </h3>
+              <p style={{ margin: "5px 0" }}>
+                <strong>Points selected:</strong> {selectedPoints.length}
+              </p>
 
-            <div style={{ marginBottom: "15px" }}>
-              <select
-                style={{
-                  width: "100%",
-                  padding: "5px",
-                  marginBottom: "10px",
-                  borderRadius: "4px",
-                  border: "1px solid #ccc",
-                }}
-                value={
-                  docState.umap.colorBy === "metadata"
-                    ? docState.umap.selectedMetadataColumn || ""
-                    : "cluster"
-                }
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === "cluster") {
-                    updateSettings({
-                      colorBy: "cluster",
-                      colorByCluster: true,
-                    });
-                  } else {
-                    updateSettings({
-                      colorBy: "metadata",
-                      colorByCluster: false,
-                      selectedMetadataColumn: value,
-                    });
+              <div style={{ marginBottom: "15px" }}>
+                <select
+                  style={{
+                    width: "100%",
+                    padding: "5px",
+                    marginBottom: "10px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                  }}
+                  value={
+                    docState.umap.colorBy === "metadata"
+                      ? docState.umap.selectedMetadataColumn || ""
+                      : "cluster"
                   }
-                }}
-              >
-                <option value="cluster">Cluster</option>
-                {docState.umap.uploadedMetadata?.columns.map((col) => (
-                  <option key={col} value={col}>
-                    {col} ({docState.umap.uploadedMetadata?.columnTypes[col]})
-                  </option>
-                ))}
-              </select>
-            </div>
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === "cluster") {
+                      updateSettings({
+                        colorBy: "cluster",
+                        colorByCluster: true,
+                      });
+                    } else {
+                      updateSettings({
+                        colorBy: "metadata",
+                        colorByCluster: false,
+                        selectedMetadataColumn: value,
+                      });
+                    }
+                  }}
+                >
+                  <option value="cluster">Cluster</option>
+                  {docState.umap.uploadedMetadata?.columns.map((col) => (
+                    <option key={col} value={col}>
+                      {col} ({docState.umap.uploadedMetadata?.columnTypes[col]})
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Distribution visualization for current coloring method */}
-            <div>
-              <h4 style={{ margin: "10px 0 5px 0", fontSize: "14px" }}>
-                Distribution:
-              </h4>
-              <div style={{ margin: "10px 0" }}>
-                {docState.umap.colorBy === "cluster" &&
-                  clusterDistribution &&
-                  Object.entries(clusterDistribution).map(
-                    ([cluster, count]) => {
-                      const percentage = Math.round(
-                        (count / selectedPoints.length) * 100,
-                      );
-                      const barWidth = `${percentage}%`;
-                      return (
-                        <div
-                          key={cluster}
-                          style={{
-                            margin: "6px 0",
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          <div
-                            style={{
-                              width: "20px",
-                              marginRight: "8px",
-                              display: "flex",
-                              alignItems: "center",
-                            }}
-                          >
-                            <span
-                              style={{
-                                display: "inline-block",
-                                width: "12px",
-                                height: "12px",
-                                backgroundColor:
-                                  cluster === "0"
-                                    ? "#cccccc"
-                                    : distinctColor(Number.parseInt(cluster)),
-                                marginRight: "5px",
-                              }}
-                            />
-                          </div>
-                          <div style={{ minWidth: "70px" }}>
-                            Cluster {cluster === "0" ? "Noise" : cluster}:
-                          </div>
-                          <div
-                            style={{
-                              flex: 1,
-                              display: "flex",
-                              alignItems: "center",
-                              height: "16px",
-                            }}
-                          >
-                            <div
-                              style={{
-                                height: "100%",
-                                width: barWidth,
-                                backgroundColor:
-                                  cluster === "0"
-                                    ? "#cccccc"
-                                    : distinctColor(Number.parseInt(cluster)),
-                                opacity: 0.7,
-                                borderRadius: "2px",
-                              }}
-                            />
-                            <div
-                              style={{
-                                marginLeft: "8px",
-                                whiteSpace: "nowrap",
-                              }}
-                            >
-                              {count} ({percentage}%)
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    },
-                  )}
-
-                {docState.umap.colorBy === "metadata" &&
-                  selectionSummary &&
-                  (selectionSummary.column_type === "categorical" ? (
-                    Object.entries(selectionSummary.summary).map(
-                      ([value, count]) => {
+              {/* Distribution visualization for current coloring method */}
+              <div>
+                <h4 style={{ margin: "10px 0 5px 0", fontSize: "14px" }}>
+                  Distribution:
+                </h4>
+                <div style={{ margin: "10px 0" }}>
+                  {docState.umap.colorBy === "cluster" &&
+                    clusterDistribution &&
+                    Object.entries(clusterDistribution).map(
+                      ([cluster, count]) => {
                         const percentage = Math.round(
-                          ((count as number) / selectedPoints.length) * 100,
+                          (count / selectedPoints.length) * 100,
                         );
                         const barWidth = `${percentage}%`;
                         return (
                           <div
-                            key={value}
+                            key={cluster}
                             style={{
                               margin: "6px 0",
                               display: "flex",
@@ -876,13 +862,27 @@ export const UMAP: React.FC<UMAPProps> = ({
                           >
                             <div
                               style={{
-                                minWidth: "100px",
-                                overflow: "hidden",
-                                textOverflow: "ellipsis",
-                                whiteSpace: "nowrap",
+                                width: "20px",
+                                marginRight: "8px",
+                                display: "flex",
+                                alignItems: "center",
                               }}
                             >
-                              {value}:
+                              <span
+                                style={{
+                                  display: "inline-block",
+                                  width: "12px",
+                                  height: "12px",
+                                  backgroundColor:
+                                    cluster === "0"
+                                      ? "#cccccc"
+                                      : distinctColor(Number.parseInt(cluster)),
+                                  marginRight: "5px",
+                                }}
+                              />
+                            </div>
+                            <div style={{ minWidth: "70px" }}>
+                              Cluster {cluster === "0" ? "Noise" : cluster}:
                             </div>
                             <div
                               style={{
@@ -897,7 +897,9 @@ export const UMAP: React.FC<UMAPProps> = ({
                                   height: "100%",
                                   width: barWidth,
                                   backgroundColor:
-                                    metadataColors.getColor(value),
+                                    cluster === "0"
+                                      ? "#cccccc"
+                                      : distinctColor(Number.parseInt(cluster)),
                                   opacity: 0.7,
                                   borderRadius: "2px",
                                 }}
@@ -908,112 +910,425 @@ export const UMAP: React.FC<UMAPProps> = ({
                                   whiteSpace: "nowrap",
                                 }}
                               >
-                                {count as number} ({percentage}%)
+                                {count} ({percentage}%)
                               </div>
                             </div>
                           </div>
                         );
                       },
-                    )
-                  ) : (
-                    <div>
-                      <p>Numeric data summary:</p>
-                      <ul style={{ paddingLeft: "20px", margin: "5px 0" }}>
-                        <li>
-                          Mean:{" "}
-                          {(
-                            selectionSummary.summary as NumericSummary
-                          ).mean.toFixed(2)}
-                        </li>
-                        <li>
-                          Median:{" "}
-                          {(
-                            selectionSummary.summary as NumericSummary
-                          ).median.toFixed(2)}
-                        </li>
-                        <li>
-                          Min:{" "}
-                          {(
-                            selectionSummary.summary as NumericSummary
-                          ).min.toFixed(2)}
-                        </li>
-                        <li>
-                          Max:{" "}
-                          {(
-                            selectionSummary.summary as NumericSummary
-                          ).max.toFixed(2)}
-                        </li>
-                      </ul>
-                    </div>
-                  ))}
+                    )}
+
+                  {docState.umap.colorBy === "metadata" &&
+                    selectionSummary &&
+                    (selectionSummary.column_type === "categorical" ? (
+                      Object.entries(selectionSummary.summary).map(
+                        ([value, count]) => {
+                          const percentage = Math.round(
+                            ((count as number) / selectedPoints.length) * 100,
+                          );
+                          const barWidth = `${percentage}%`;
+                          return (
+                            <div
+                              key={value}
+                              style={{
+                                margin: "6px 0",
+                                display: "flex",
+                                alignItems: "center",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  minWidth: "100px",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {value}:
+                              </div>
+                              <div
+                                style={{
+                                  flex: 1,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  height: "16px",
+                                }}
+                              >
+                                <div
+                                  style={{
+                                    height: "100%",
+                                    width: barWidth,
+                                    backgroundColor:
+                                      metadataColors.getColor(value),
+                                    opacity: 0.7,
+                                    borderRadius: "2px",
+                                  }}
+                                />
+                                <div
+                                  style={{
+                                    marginLeft: "8px",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  {count as number} ({percentage}%)
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        },
+                      )
+                    ) : (
+                      <div>
+                        <p>Numeric data summary:</p>
+                        <ul style={{ paddingLeft: "20px", margin: "5px 0" }}>
+                          <li>
+                            Mean:{" "}
+                            {(
+                              selectionSummary.summary as NumericSummary
+                            ).mean.toFixed(2)}
+                          </li>
+                          <li>
+                            Median:{" "}
+                            {(
+                              selectionSummary.summary as NumericSummary
+                            ).median.toFixed(2)}
+                          </li>
+                          <li>
+                            Min:{" "}
+                            {(
+                              selectionSummary.summary as NumericSummary
+                            ).min.toFixed(2)}
+                          </li>
+                          <li>
+                            Max:{" "}
+                            {(
+                              selectionSummary.summary as NumericSummary
+                            ).max.toFixed(2)}
+                          </li>
+                        </ul>
+                      </div>
+                    ))}
+                </div>
               </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setSelectionActive(false);
-                setSelectionSummary(null);
-                setSelectedPoints([]);
-                d3.select(svgRef.current)
-                  .selectAll(".umap-point")
-                  .classed("selected", false);
-              }}
-              style={{
-                padding: "5px 10px",
-                background: "#f44336",
-                color: "white",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                marginTop: "10px",
-              }}
-            >
-              Clear Selection
-            </button>
-          </div>
-        )}
-        <svg
-          ref={svgRef}
-          width={dimensions.width}
-          height={dimensions.height}
-          style={{ display: loading ? "none" : "block" }}
-        />
-        <div className="umap-controls" style={{ marginTop: "10px" }}>
-          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <div>
-              <label>
-                <input
-                  type="radio"
-                  name="selectionMode"
-                  checked={docState.umap.selectionMode === "brush"}
-                  onChange={() => updateSettings({ selectionMode: "brush" })}
-                />
-                Brush Selection (Right-click)
-              </label>
-            </div>
-            <div>
-              <label>
-                <input
-                  type="radio"
-                  name="selectionMode"
-                  checked={docState.umap.selectionMode === "polygon"}
-                  onChange={() => updateSettings({ selectionMode: "polygon" })}
-                />
-                Polygon Selection (Ctrl+Right-click)
-              </label>
-            </div>
-            <div style={{ marginLeft: "auto" }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectionActive(false);
+                  setSelectionSummary(null);
+                  setSelectedPoints([]);
+                  d3.select(svgRef.current)
+                    .selectAll(".umap-point")
+                    .classed("selected", false);
+                }}
+                style={{
+                  padding: "5px 10px",
+                  background: "#f44336",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  marginTop: "10px",
+                }}
+              >
+                Clear Selection
+              </button>
+            </>
+          ) : (
+            <>
+              {/* Section for metadata upload and selection controls */}
+              <h3 style={{ margin: "0 0 10px 0", fontSize: "16px" }}>
+                UMAP Controls
+              </h3>
+
+              {/* Selection Mode Controls */}
+              <div style={{ marginBottom: "15px" }}>
+                <h4 style={{ margin: "10px 0 5px 0", fontSize: "14px" }}>
+                  Selection Mode
+                </h4>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
+                  }}
+                >
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="selectionMode"
+                      checked={docState.umap.selectionMode === "brush"}
+                      onChange={() =>
+                        updateSettings({ selectionMode: "brush" })
+                      }
+                      style={{ marginRight: "8px" }}
+                    />
+                    Brush Selection (Right-click)
+                  </label>
+                  <label
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="selectionMode"
+                      checked={docState.umap.selectionMode === "polygon"}
+                      onChange={() =>
+                        updateSettings({ selectionMode: "polygon" })
+                      }
+                      style={{ marginRight: "8px" }}
+                    />
+                    Polygon Selection (Ctrl+Right-click)
+                  </label>
+                </div>
+              </div>
+
+              {/* Color Settings */}
+              <div style={{ marginBottom: "15px" }}>
+                <h4 style={{ margin: "10px 0 5px 0", fontSize: "14px" }}>
+                  Color Settings
+                </h4>
+                <label
+                  htmlFor="colorBySelect"
+                  style={{ display: "block", marginBottom: "5px" }}
+                >
+                  Color Points By
+                </label>
+                <select
+                  id="colorBySelect"
+                  style={{
+                    width: "100%",
+                    padding: "5px",
+                    marginBottom: "10px",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                  }}
+                  value={docState.umap.colorBy}
+                  onChange={(e) => {
+                    const value = e.target.value as "cluster" | "metadata";
+                    handleColorByChange(value);
+                  }}
+                >
+                  <option value="cluster">Cluster</option>
+                  <option value="metadata">Metadata</option>
+                </select>
+
+                {docState.umap.colorBy === "metadata" && (
+                  <>
+                    <div style={{ marginTop: "10px" }}>
+                      <label
+                        htmlFor="metadata-upload"
+                        style={{ display: "block", marginBottom: "5px" }}
+                      >
+                        Upload Metadata CSV
+                      </label>
+                      <input
+                        id="metadata-upload"
+                        ref={fileInputRef}
+                        type="file"
+                        accept=".csv"
+                        onChange={handleFileUpload}
+                        disabled={uploading}
+                        style={{ width: "100%" }}
+                      />
+                      {uploading && (
+                        <p className="upload-status">Uploading...</p>
+                      )}
+                      {uploadError && (
+                        <p className="upload-error">{uploadError}</p>
+                      )}
+                    </div>
+
+                    {docState.umap.uploadedMetadata && (
+                      <>
+                        <div style={{ marginTop: "10px" }}>
+                          <label
+                            htmlFor="metadataColumnSelect"
+                            style={{ display: "block", marginBottom: "5px" }}
+                          >
+                            Metadata Column
+                          </label>
+                          <select
+                            id="metadataColumnSelect"
+                            style={{
+                              width: "100%",
+                              padding: "5px",
+                              borderRadius: "4px",
+                              border: "1px solid #ccc",
+                            }}
+                            value={docState.umap.selectedMetadataColumn || ""}
+                            onChange={(e) =>
+                              handleMetadataColumnChange(e.target.value)
+                            }
+                          >
+                            {docState.umap.uploadedMetadata.columns.map(
+                              (col) => (
+                                <option key={col} value={col}>
+                                  {col} (
+                                  {
+                                    docState.umap.uploadedMetadata?.columnTypes[
+                                      col
+                                    ]
+                                  }
+                                  )
+                                </option>
+                              ),
+                            )}
+                          </select>
+                        </div>
+
+                        <div
+                          className="metadata-stats"
+                          style={{ marginTop: "10px", fontSize: "12px" }}
+                        >
+                          <h5 style={{ margin: "8px 0", fontSize: "13px" }}>
+                            Match Statistics
+                          </h5>
+                          <p style={{ margin: "4px 0" }}>
+                            Matched:{" "}
+                            {docState.umap.uploadedMetadata.matchStats
+                              .exactMatches +
+                              docState.umap.uploadedMetadata.matchStats
+                                .versionMatches}{" "}
+                            /{" "}
+                            {
+                              docState.umap.uploadedMetadata.matchStats
+                                .totalSequenceIds
+                            }{" "}
+                            (
+                            {
+                              docState.umap.uploadedMetadata.matchStats
+                                .matchPercentage
+                            }
+                            %)
+                          </p>
+                          <p
+                            style={{
+                              margin: "2px 0",
+                              marginLeft: "10px",
+                              color: "#666",
+                            }}
+                          >
+                            Exact:{" "}
+                            {
+                              docState.umap.uploadedMetadata.matchStats
+                                .exactMatches
+                            }
+                          </p>
+                          <p
+                            style={{
+                              margin: "2px 0",
+                              marginLeft: "10px",
+                              color: "#666",
+                            }}
+                          >
+                            Version:{" "}
+                            {
+                              docState.umap.uploadedMetadata.matchStats
+                                .versionMatches
+                            }
+                          </p>
+                          <p
+                            style={{
+                              margin: "2px 0",
+                              marginLeft: "10px",
+                              color: "#666",
+                            }}
+                          >
+                            Unmatched:{" "}
+                            {
+                              docState.umap.uploadedMetadata.matchStats
+                                .unmatched
+                            }
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {/* Visual Settings */}
+              <div style={{ marginBottom: "15px" }}>
+                <h4 style={{ margin: "10px 0 5px 0", fontSize: "14px" }}>
+                  Visual Settings
+                </h4>
+
+                <div style={{ marginBottom: "10px" }}>
+                  <label
+                    htmlFor="pointSize"
+                    style={{ display: "block", marginBottom: "5px" }}
+                  >
+                    Point Size: {docState.umap.pointSize}
+                  </label>
+                  <input
+                    type="range"
+                    id="pointSize"
+                    min="1"
+                    max="20"
+                    step="0.5"
+                    value={docState.umap.pointSize}
+                    onChange={(e) =>
+                      updateSettings({
+                        pointSize: Number.parseFloat(e.target.value),
+                      })
+                    }
+                    style={{ width: "100%" }}
+                  />
+                </div>
+
+                <div>
+                  <label
+                    htmlFor="opacity"
+                    style={{ display: "block", marginBottom: "5px" }}
+                  >
+                    Opacity: {docState.umap.opacity.toFixed(2)}
+                  </label>
+                  <input
+                    type="range"
+                    id="opacity"
+                    min="0.1"
+                    max="1"
+                    step="0.05"
+                    value={docState.umap.opacity}
+                    onChange={(e) =>
+                      updateSettings({
+                        opacity: Number.parseFloat(e.target.value),
+                      })
+                    }
+                    style={{ width: "100%" }}
+                  />
+                </div>
+              </div>
+
+              {/* Help Button */}
               <button
                 type="button"
                 className="tooltip-container"
                 style={{
                   background: "none",
-                  border: "none",
+                  border: "1px solid #ccc",
+                  borderRadius: "4px",
+                  padding: "5px 10px",
                   cursor: "pointer",
                   color: "#666",
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginTop: "10px",
                 }}
               >
-                <span style={{ fontSize: "16px" }}>ⓘ</span>
+                <span style={{ fontSize: "16px", marginRight: "5px" }}>ⓘ</span>
+                <span>Usage Instructions</span>
                 <div className="tooltip-content">
                   <p>
                     <strong>Navigation:</strong> Left-click drag to pan, scroll
@@ -1030,9 +1345,16 @@ export const UMAP: React.FC<UMAPProps> = ({
                   </p>
                 </div>
               </button>
-            </div>
-          </div>
+            </>
+          )}
         </div>
+        <svg
+          ref={svgRef}
+          width={dimensions.width}
+          height={dimensions.height}
+          style={{ display: loading ? "none" : "block" }}
+        />
+        {/* Removed the old controls, they're now in the side panel */}
       </div>
       <UMAPSidebar
         settings={docState.umap}
