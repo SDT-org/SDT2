@@ -1,0 +1,266 @@
+/* UMAP Main Container */
+.umap-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Loading & Error States */
+.app-loader-status {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 16px;
+  color: #666;
+  text-align: center;
+}
+
+.error-message {
+  padding: 20px;
+  color: red;
+  font-weight: bold;
+}
+
+/* D3 UMAP Visualization */
+.umap-point {
+  cursor: pointer;
+}
+
+.umap-point.selected {
+  stroke: #ff9900;
+  stroke-width: 2px;
+}
+
+.selection-polygon {
+  pointer-events: none;
+}
+
+.polygon-start-point {
+  cursor: pointer;
+}
+
+.x-axis path,
+.x-axis line,
+.y-axis path,
+.y-axis line {
+  stroke: #ccc;
+}
+
+.x-axis text,
+.y-axis text {
+  fill: #666;
+  font-size: 12px;
+}
+
+/* Tooltip */
+.umap-tooltip {
+  position: absolute;
+  visibility: hidden;
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+/* Selection Summary Panel */
+.selection-info-panel {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 15px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  z-index: 100;
+  width: 300px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.selection-info-panel h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+}
+
+.selection-info-panel h4 {
+  margin: 10px 0 5px 0;
+  font-size: 14px;
+}
+
+.selection-info-panel h5 {
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+.settings-section {
+  margin-bottom: 15px;
+}
+
+/* Distribution visualization */
+.distribution-item {
+  margin: 6px 0;
+  display: flex;
+  align-items: center;
+}
+
+.color-indicator {
+  width: 20px;
+  margin-right: 8px;
+  display: flex;
+  align-items: center;
+}
+
+.color-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 5px;
+}
+
+.item-label {
+  min-width: 70px;
+}
+
+.item-name {
+  min-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bar-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  height: 16px;
+}
+
+.bar {
+  height: 100%;
+  opacity: 0.7;
+  border-radius: 2px;
+}
+
+.bar-label {
+  margin-left: 8px;
+  white-space: nowrap;
+}
+
+.summary-list {
+  padding-left: 20px;
+  margin: 5px 0;
+}
+
+/* Form controls */
+select,
+input[type="range"] {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.value-display {
+  font-size: 12px;
+  color: #666;
+}
+
+.metadata-stats {
+  margin-top: 10px;
+  font-size: 12px;
+}
+
+.match-details {
+  margin: 2px 0;
+  margin-left: 10px;
+  color: #666;
+}
+
+.upload-status {
+  color: #2196f3;
+  font-style: italic;
+}
+
+.upload-error {
+  color: #f44336;
+}
+
+/* Buttons */
+.clear-selection-button {
+  padding: 5px 10px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.help-button {
+  background: none;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  color: #666;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.help-icon {
+  font-size: 16px;
+  margin-right: 5px;
+}
+
+/* Tooltip content */
+.tooltip-container {
+  position: relative;
+}
+
+.tooltip-content {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 10px;
+  border-radius: 4px;
+  width: 250px;
+  z-index: 10;
+}
+
+.tooltip-container:hover .tooltip-content {
+  display: block;
+}
+
+/* UMAPSidebar specific styles */
+.umap-sidebar .sidebar-section {
+  margin-bottom: 20px;
+}
+
+.umap-sidebar .sidebar-description {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.umap-sidebar .sidebar-item {
+  margin-bottom: 15px;
+}
+
+.umap-sidebar .param-description {
+  font-size: 12px;
+  color: #777;
+  margin: 5px 0;
+}
