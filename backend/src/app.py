@@ -110,4 +110,4 @@ if __name__ == "__main__":
         on_update=lambda _: push_backend_state(app_window),
     )
     webview.settings['OPEN_DEVTOOLS_IN_DEBUG'] = False
-    webview.start(debug=get_state().debug, private_mode=False, gui="qt")
+    webview.start(debug=get_state().debug, private_mode=False)
