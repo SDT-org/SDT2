@@ -21,6 +21,7 @@ from app_globals import (
 )
 import platform
 import psutil
+os.environ['QTWEBENGINE_REMOTE_DEBUGGING'] = '8228'
 import webview
 import json
 from config import default_window_title, cpu_count
@@ -108,5 +109,5 @@ if __name__ == "__main__":
         ),
         on_update=lambda _: push_backend_state(app_window),
     )
-
-    webview.start(debug=get_state().debug, private_mode=False)
+    webview.settings['OPEN_DEVTOOLS_IN_DEBUG'] = False
+    webview.start(debug=get_state().debug, private_mode=False, gui="qt")
