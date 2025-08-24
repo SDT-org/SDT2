@@ -207,9 +207,6 @@ export interface UMAPSettings {
   min_dist: number;
   pointSize: number;
   opacity: number;
-  minClusterSize: number;
-  clusterEpsilon: number;
-  showClusterBoundaries: boolean;
   colorByCluster: boolean;
   colorBy: "cluster" | "metadata";
   selectionMode: "brush" | "polygon";
@@ -218,8 +215,6 @@ export interface UMAPSettings {
   params?: {
     n_neighbors: number;
     min_dist: number;
-    minClusterSize: number;
-    clusterEpsilon: number;
   };
   uploadedMetadata?: {
     columns: string[];
@@ -240,9 +235,6 @@ export const UMAPSettingsSchema = z.object({
   min_dist: z.number().min(0).max(1),
   pointSize: z.number().min(1).max(20),
   opacity: z.number().min(0.1).max(1),
-  minClusterSize: z.number().min(2).max(50),
-  clusterEpsilon: z.number().min(0).max(50),
-  showClusterBoundaries: z.boolean(),
   colorByCluster: z.boolean(),
   colorBy: z.enum(["cluster", "metadata"]),
   selectionMode: z.enum(["brush", "polygon"]),
@@ -252,8 +244,6 @@ export const UMAPSettingsSchema = z.object({
     .object({
       n_neighbors: z.number(),
       min_dist: z.number(),
-      minClusterSize: z.number(),
-      clusterEpsilon: z.number(),
     })
     .optional(),
   uploadedMetadata: z

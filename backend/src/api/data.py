@@ -235,7 +235,6 @@ class Data:
 
     def get_umap_data(self, doc_id: str, params: dict):
         from workflow.umap import run_umap, run_umap_from_lzani_tsv, UMAPConfig
-        from workflow.cluster_hdbscan import run_hdbscan_clustering, get_cluster_stats
         
         doc = get_document(doc_id)
         doc_paths = build_document_paths(doc.tempdir_path)
@@ -266,18 +265,6 @@ class Data:
             )
             
             sequence_ids = umap_result.sequence_ids
-            
-            # For HDBSCAN, we need the distance matrix
-            if doc_id not in self._umap_cache:
-                print(f"Building distance matrix for HDBSCAN clustering")
-                distance_matrix, _ = self._load_lzani_tsv_for_umap(
-                    doc_paths.lzani_results,
-                    doc_paths.lzani_results_ids,
-                    score_type
-                )
-                self._umap_cache[doc_id] = (distance_matrix, sequence_ids)
-            else:
-                distance_matrix, _ = self._umap_cache[doc_id]
         else:
             # Non-LZ-ANI uses regular matrix
             if doc_id in self._umap_cache:
@@ -294,44 +281,15 @@ class Data:
                 sequence_ids=sequence_ids,
                 config=config
             )
-        
-        # HDBSCAN clustering
-        min_cluster_size = params.get("min_cluster_size", params.get("threshold", 5))
-        cluster_epsilon = params.get("cluster_epsilon", 0.0)
-        
-        methods = params.get("methods", [])
-        if methods and len(methods) > 0 and methods[0].startswith("hdbscan-"):
-            try:
-                similarity_epsilon = float(methods[0].split("-")[1])
-                cluster_epsilon = 100 - similarity_epsilon
-            except:
-                pass
-        
-        if doc_id in self._umap_cache:
-            distance_matrix, _ = self._umap_cache[doc_id]
-        
-        cluster_assignments = run_hdbscan_clustering(
-            distance_matrix=distance_matrix,
-            sequence_ids=sequence_ids,
-            min_cluster_size=min_cluster_size,
-            cluster_selection_epsilon=cluster_epsilon
-        )
-        
-        cluster_stats = get_cluster_stats(cluster_assignments)
-        
-        print(f"HDBSCAN clustering: min_cluster_size={min_cluster_size}, epsilon={cluster_epsilon}")
-        print(f"Total sequences: {cluster_stats['total_sequences']}")
-        print(f"Total clusters: {cluster_stats['total_clusters']}")
-        print(f"Noise points: {cluster_stats['noise_points']}")
+            
+            sequence_ids = umap_result.sequence_ids
         
         embedding_data = []
         for i, seq_id in enumerate(sequence_ids):
             embedding_data.append({
                 "id": seq_id,
                 "x": float(umap_result.embedding[i, 0]),
-                "y": float(umap_result.embedding[i, 1]),
-                "cluster": int(cluster_assignments.get(seq_id, 0)),
-                "clusters": {"hdbscan": int(cluster_assignments.get(seq_id, 0))}
+                "y": float(umap_result.embedding[i, 1])
             })
         
         x_coords = umap_result.embedding[:, 0]
@@ -346,18 +304,12 @@ class Data:
                 "bounds": {
                     "x": [float(x_coords.min() - x_range * padding), float(x_coords.max() + x_range * padding)],
                     "y": [float(y_coords.min() - y_range * padding), float(y_coords.max() + y_range * padding)]
-                },
-                "clusterStats": cluster_stats,
-                "min_cluster_size": int(min_cluster_size),
-                "cluster_epsilon": float(cluster_epsilon)
+                }
             },
             "metadata": {
                 "n_neighbors": int(config.n_neighbors),
                 "min_dist": float(config.min_dist),
-                "sequences_count": int(len(sequence_ids)),
-                "cluster_method": "hdbscan",
-                "min_cluster_size": int(min_cluster_size),
-                "cluster_epsilon": float(cluster_epsilon)
+                "sequences_count": int(len(sequence_ids))
             }
         }
 

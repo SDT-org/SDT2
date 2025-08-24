@@ -124,22 +124,13 @@ export const UMAP: React.FC<UMAPProps> = ({
   useEffect(() => {
     if (!docState.id) return;
 
-    const {
-      n_neighbors,
-      min_dist,
-      minClusterSize,
-      clusterEpsilon,
-      params,
-      data,
-    } = docState.umap;
+    const { n_neighbors, min_dist, params, data } = docState.umap;
 
     // Check if parameters have changed
     const hasChanged =
       !params ||
       params.n_neighbors !== n_neighbors ||
-      params.min_dist !== min_dist ||
-      params.minClusterSize !== minClusterSize ||
-      params.clusterEpsilon !== clusterEpsilon;
+      params.min_dist !== min_dist;
 
     // If data exists and parameters haven't changed, do nothing
     if (data && !hasChanged) {
@@ -162,8 +153,6 @@ export const UMAP: React.FC<UMAPProps> = ({
         const currentParams = {
           n_neighbors,
           min_dist,
-          minClusterSize,
-          clusterEpsilon,
         };
 
         const response = await window.pywebview.api.data.get_umap_data(
@@ -171,8 +160,6 @@ export const UMAP: React.FC<UMAPProps> = ({
           {
             n_neighbors,
             min_dist,
-            threshold: minClusterSize,
-            methods: [`hdbscan-${clusterEpsilon}`],
           },
         );
 

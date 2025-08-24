@@ -91,12 +91,7 @@ export const D3SvgUMAP: React.FC<D3SvgUMAPProps> = ({
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Title with cluster stats
-    const clusterStats = umapData.clusterStats;
-    const title = clusterStats
-      ? `UMAP Projection - HDBSCAN (${clusterStats.total_clusters} clusters, ${clusterStats.noise_points} noise points)`
-      : "UMAP Projection";
-
+    // Title
     mainGroup
       .append("text")
       .attr("x", width / 2)
@@ -104,7 +99,7 @@ export const D3SvgUMAP: React.FC<D3SvgUMAPProps> = ({
       .attr("text-anchor", "middle")
       .style("font-size", "18px")
       .style("font-weight", "bold")
-      .text(title);
+      .text("UMAP Projection");
 
     // Create scales with copies for zoom
     const xScale = d3.scaleLinear().domain(umapData.bounds.x).range([0, width]);

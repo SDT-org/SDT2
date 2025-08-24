@@ -139,22 +139,13 @@ export const UMAP: React.FC<UMAPProps> = ({
   useEffect(() => {
     if (!docState.id) return;
 
-    const {
-      n_neighbors,
-      min_dist,
-      minClusterSize,
-      clusterEpsilon,
-      params,
-      data,
-    } = docState.umap;
+    const { n_neighbors, min_dist, params, data } = docState.umap;
 
     // Check if parameters have changed
     const hasChanged =
       !params ||
       params.n_neighbors !== n_neighbors ||
-      params.min_dist !== min_dist ||
-      params.minClusterSize !== minClusterSize ||
-      params.clusterEpsilon !== clusterEpsilon;
+      params.min_dist !== min_dist;
 
     // If data exists and parameters haven't changed, do nothing
     if (data && !hasChanged) {
@@ -177,8 +168,6 @@ export const UMAP: React.FC<UMAPProps> = ({
         const currentParams = {
           n_neighbors,
           min_dist,
-          minClusterSize,
-          clusterEpsilon,
         };
 
         const response = await window.pywebview.api.data.get_umap_data(
@@ -186,8 +175,6 @@ export const UMAP: React.FC<UMAPProps> = ({
           {
             n_neighbors,
             min_dist,
-            threshold: minClusterSize,
-            methods: [`hdbscan-${clusterEpsilon}`],
           },
         );
 
@@ -247,12 +234,7 @@ export const UMAP: React.FC<UMAPProps> = ({
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Title with cluster stats
-    const clusterStats = umapData.clusterStats;
-    const title = clusterStats
-      ? `UMAP Projection - HDBSCAN (${clusterStats.total_clusters} clusters, ${clusterStats.noise_points} noise points)`
-      : "UMAP Projection";
-
+    // Title
     mainGroup
       .append("text")
       .attr("x", width / 2)
@@ -260,7 +242,7 @@ export const UMAP: React.FC<UMAPProps> = ({
       .attr("text-anchor", "middle")
       .style("font-size", "18px")
       .style("font-weight", "bold")
-      .text(title);
+      .text("UMAP Projection");
 
     // Create scales with copies for zoom
     const xScale = d3.scaleLinear().domain(umapData.bounds.x).range([0, width]);

@@ -66,57 +66,6 @@ export const UMAPSidebar: React.FC<UMAPSidebarProps> = ({
             </span>
           </div>
         </div>
-
-        <div className="sidebar-section">
-          <h3>HDBSCAN Clustering</h3>
-          <p className="sidebar-description">
-            HDBSCAN finds clusters of varying densities in the data. Points not
-            belonging to any cluster are marked as noise.
-          </p>
-
-          <div className="sidebar-item">
-            <label htmlFor="minClusterSize">Min Cluster Size</label>
-            <p className="param-description">
-              Minimum number of points required to form a cluster. Smaller
-              values find more clusters.
-            </p>
-            <Slider
-              id="minClusterSize"
-              value={settings.minClusterSize}
-              onChangeEnd={(value: number) =>
-                handleParameterChange("minClusterSize", value)
-              }
-              minValue={2}
-              maxValue={50}
-              step={1}
-            />
-            <span className="value-display">{settings.minClusterSize}</span>
-          </div>
-
-          <div className="sidebar-item">
-            <label htmlFor="clusterEpsilon">
-              Cluster Selection Epsilon (%)
-            </label>
-            <p className="param-description">
-              Minimum similarity percentage for clustering. Points must be at
-              least this similar to belong to the same cluster. 0 uses the full
-              hierarchy.
-            </p>
-            <Slider
-              id="clusterEpsilon"
-              value={settings.clusterEpsilon}
-              onChangeEnd={(value: number) =>
-                handleParameterChange("clusterEpsilon", value)
-              }
-              minValue={0}
-              maxValue={100}
-              step={0.5}
-            />
-            <span className="value-display">
-              {settings.clusterEpsilon.toFixed(1)}
-            </span>
-          </div>
-        </div>
       </div>
     </div>
   );

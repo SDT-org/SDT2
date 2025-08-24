@@ -83,8 +83,6 @@ declare global {
             params: {
               n_neighbors: number;
               min_dist: number;
-              threshold: number;
-              methods: string[];
             },
           ) => Promise<GetUMAPDataResponse>;
           upload_metadata: (
